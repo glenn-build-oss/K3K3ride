@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>K3K3 — Admin Dashboard</title>
+<meta name="description" content="K3K3 Admin MVP Dashboard. Oversee rides, riders, passengers and platform health.">
+<link rel="icon" type="image/png" href="../assets/k3k3.png">
+<link rel="shortcut icon" href="../favicon.ico">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --bg:#0c0d10;--bg-2:#111318;--bg-3:#181b22;--bg-4:#1e2230;
+  --border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);
+  --yellow:#FFD60A;--yellow-dk:#E6C000;--yellow-lt:rgba(255,214,10,.1);--yellow-bdr:rgba(255,214,10,.22);
+  --white:#fff;--muted:rgba(255,255,255,.35);--muted-2:rgba(255,255,255,.6);--text:rgba(255,255,255,.9);
+  --green:#10B981;--green-lt:rgba(16,185,129,.12);
+  --red:#EF4444;--red-lt:rgba(239,68,68,.12);
+  --blue:#3B82F6;--blue-lt:rgba(59,130,246,.12);
+  --purple:#8B5CF6;--purple-lt:rgba(139,92,246,.12);
+  --teal:#06B6D4;--teal-lt:rgba(6,182,212,.12);
+  --orange:#F97316;--orange-lt:rgba(249,115,22,.12);
+  --sb-w:260px;--sb-w-col:68px;--top-h:62px;
+  --r:10px;--r-lg:16px;--r-xl:22px;--r-full:999px;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* ─────────── SIDEBAR ─────────── */
+.sidebar{position:fixed;top:0;left:0;width:var(--sb-w);height:100vh;background:var(--bg-2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:900;transition:width .28s var(--ease);overflow:hidden;white-space:nowrap}
+body.sb-collapsed .sidebar{width:var(--sb-w-col)}
+body.sb-collapsed .topbar{left:var(--sb-w-col)!important}
+body.sb-collapsed .main-content{margin-left:var(--sb-w-col)}
+body.sb-collapsed .sb-brand-text,
+body.sb-collapsed .sb-admin-info,
+body.sb-collapsed .sb-group-label,
+body.sb-collapsed .sb-nav-label,
+body.sb-collapsed .sb-nav-badge,
+body.sb-collapsed .sb-collapse-label,
+body.sb-collapsed .sb-logout-label{display:none!important}
+body.sb-collapsed .sb-brand{justify-content:center;padding:20px 0 16px}
+body.sb-collapsed .sb-admin-wrap{justify-content:center;padding:12px 0}
+body.sb-collapsed .sb-nav{padding:8px 0}
+body.sb-collapsed .sb-nav-item{justify-content:center;padding:14px 0;margin:2px 8px;border:none!important}
+body.sb-collapsed .sb-nav-item i{margin:0;font-size:1rem;width:auto}
+body.sb-collapsed .sb-footer{padding:10px 8px}
+body.sb-collapsed .sb-collapse-btn,
+body.sb-collapsed .sb-logout-btn{justify-content:center;padding:12px}
+body.sb-collapsed .sb-nav-item[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:calc(var(--sb-w-col) + 8px);top:50%;transform:translateY(-50%);background:var(--bg-3);color:var(--white);font-size:.76rem;font-weight:600;padding:6px 12px;border-radius:var(--r);white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.5);border:1px solid var(--border-2);z-index:1000}
+body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absolute;left:calc(var(--sb-w-col) + 2px);top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:var(--bg-3);z-index:1001}
+.sb-brand{display:flex;align-items:center;gap:12px;padding:22px 20px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-logo{width:36px;height:36px;border-radius:10px;object-fit:contain;flex-shrink:0}
+.sb-logo-fb{width:36px;height:36px;border-radius:10px;background:var(--yellow);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;flex-shrink:0;display:none}
+.sb-brand-name{font-size:1.1rem;font-weight:900;color:var(--yellow);letter-spacing:-.3px}
+.sb-brand-sub{font-size:.62rem;color:var(--muted);margin-top:1px;font-weight:500;letter-spacing:.04em}
+.sb-admin-wrap{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-admin-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900;flex-shrink:0}
+.sb-admin-name{font-size:.85rem;font-weight:700;color:var(--white)}
+.sb-admin-role{font-size:.65rem;color:var(--muted);margin-top:1px}
+.sb-online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:auto;flex-shrink:0;animation:pulseDot 2s infinite}
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 10px;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-group-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.2);padding:10px 10px 4px;margin-top:4px}
+.sb-nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r);cursor:pointer;transition:all .18s;color:var(--muted-2);font-size:.865rem;font-weight:500;margin-bottom:1px;position:relative;border:1px solid transparent;user-select:none}
+.sb-nav-item:hover{background:rgba(255,255,255,.05);color:var(--white)}
+.sb-nav-item.active{background:var(--yellow-lt);color:var(--yellow);font-weight:700;border-color:var(--yellow-bdr)}
+.sb-nav-item i{width:18px;text-align:center;font-size:.88rem;flex-shrink:0}
+.sb-nav-label{white-space:nowrap;overflow:hidden}
+.sb-nav-badge{margin-left:auto;min-width:20px;height:18px;padding:0 5px;border-radius:var(--r-full);background:var(--red);color:var(--white);font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--border);flex-shrink:0}
+.sb-collapse-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:none;background:rgba(255,255,255,.04);color:var(--muted-2);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:8px;overflow:hidden;white-space:nowrap}
+.sb-collapse-btn:hover{background:rgba(255,255,255,.09);color:var(--white)}
+.sb-collapse-icon{flex-shrink:0;transition:transform .28s var(--ease)}
+.sb-collapse-label{white-space:nowrap;overflow:hidden}
+.sb-logout-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:none;background:rgba(239,68,68,.08);color:#F87171;font-family:inherit;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;overflow:hidden;white-space:nowrap}
+.sb-logout-btn:hover{background:rgba(239,68,68,.16)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:899}
+.sb-overlay.show{display:block}
+
+/* ─────────── TOPBAR ─────────── */
+.topbar{position:fixed;top:0;left:var(--sb-w);right:0;height:var(--top-h);background:var(--bg-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:800;gap:16px;transition:left .28s var(--ease)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-title{font-size:1rem;font-weight:800;color:var(--white)}
+.topbar-sub{font-size:.72rem;color:var(--muted);margin-top:1px}
+.hamburger-btn{width:34px;height:34px;background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r);cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--muted-2);font-size:.85rem;transition:all .18s;flex-shrink:0}
+.hamburger-btn:hover{background:rgba(255,255,255,.1);color:var(--white)}
+.sys-badge{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:var(--r-full);font-size:.73rem;font-weight:700;background:rgba(16,185,129,.1);color:#34D399;border:1px solid rgba(16,185,129,.2)}
+.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulseDot 2s infinite}
+.tb-icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.05);color:var(--muted-2);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;position:relative}
+.tb-icon-btn:hover{background:rgba(255,255,255,.1);color:var(--white)}
+.badge-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg-2)}
+.tb-admin-pill{display:flex;align-items:center;gap:9px;padding:5px 13px 5px 5px;background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r-full);cursor:pointer;transition:all .2s}
+.tb-admin-pill:hover{border-color:var(--yellow-bdr);background:rgba(255,214,10,.06)}
+.tb-admin-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0}
+.tb-admin-name{font-size:.78rem;font-weight:700;color:var(--white)}
+
+/* ─────────── MAIN ─────────── */
+.main-content{margin-left:var(--sb-w);margin-top:var(--top-h);padding:24px 28px;min-height:calc(100vh - var(--top-h));transition:margin-left .28s var(--ease)}
+.dash-section{display:none}
+.dash-section.active{display:block;animation:fadeUp .22s var(--ease)}
+
+/* ─────────── HERO ─────────── */
+.hero{background:linear-gradient(135deg,var(--bg-3),var(--bg-4));border:1px solid var(--border-2);border-radius:var(--r-xl);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:22px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-50px;width:280px;height:280px;background:radial-gradient(circle,rgba(255,214,10,.14) 0%,transparent 65%);pointer-events:none}
+.hero-greeting{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.hero-title{font-size:1.65rem;font-weight:900;color:var(--white);letter-spacing:-.4px}
+.hero-title span{color:var(--yellow)}
+.hero-sub{font-size:.82rem;color:var(--muted);margin-top:5px}
+.hero-pills{display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
+.hero-pill{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:var(--r-full);border:1px solid;font-size:.78rem;font-weight:700}
+.hero-pill i{font-size:.75rem}
+.hero-pill strong{font-size:1rem;font-weight:900}
+.hero-pill.green{background:rgba(16,185,129,.1);color:#34D399;border-color:rgba(16,185,129,.22)}
+.hero-pill.yellow{background:rgba(255,214,10,.1);color:var(--yellow);border-color:rgba(255,214,10,.22)}
+.hero-pill.blue{background:rgba(59,130,246,.1);color:#60A5FA;border-color:rgba(59,130,246,.22)}
+
+/* ─────────── KPI GRID ─────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;transition:border-color .2s,transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.kpi-card:hover{border-color:var(--border-2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r-lg) var(--r-lg) 0 0}
+.kpi-card.yellow::before{background:linear-gradient(90deg,var(--yellow),var(--yellow-dk))}
+.kpi-card.green::before{background:linear-gradient(90deg,var(--green),#34D399)}
+.kpi-card.blue::before{background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.kpi-card.purple::before{background:linear-gradient(90deg,var(--purple),#A78BFA)}
+.kpi-card.red::before{background:linear-gradient(90deg,var(--red),#F87171)}
+.kpi-card.teal::before{background:linear-gradient(90deg,var(--teal),#22D3EE)}
+.kpi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kpi-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.kpi-icon.yellow{background:var(--yellow-lt);color:var(--yellow)}
+.kpi-icon.green{background:var(--green-lt);color:var(--green)}
+.kpi-icon.blue{background:var(--blue-lt);color:var(--blue)}
+.kpi-icon.purple{background:var(--purple-lt);color:var(--purple)}
+.kpi-icon.red{background:var(--red-lt);color:var(--red)}
+.kpi-icon.teal{background:var(--teal-lt);color:var(--teal)}
+.kpi-trend{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:var(--r-full)}
+.kpi-trend.up{background:rgba(16,185,129,.12);color:var(--green)}
+.kpi-trend.nt{background:rgba(255,255,255,.06);color:var(--muted)}
+.kpi-val{font-size:1.6rem;font-weight:900;color:var(--white);letter-spacing:-.5px}
+.kpi-lbl{font-size:.74rem;color:var(--muted);font-weight:500;margin-top:2px}
+.kpi-sub{font-size:.67rem;color:rgba(255,255,255,.22);margin-top:4px}
+
+/* ─────────── CONTENT GRID ─────────── */
+.content-grid{display:grid;grid-template-columns:1fr 340px;gap:18px}
+.content-grid.split{grid-template-columns:1fr 1fr}
+
+/* ─────────── CARD ─────────── */
+.card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:0}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:15px 20px 13px;border-bottom:1px solid var(--border)}
+.card-title{font-size:.9rem;font-weight:800;color:var(--white)}
+.card-sub{font-size:.68rem;color:var(--muted);margin-top:1px}
+.card-action{font-size:.74rem;font-weight:600;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r-full);padding:5px 12px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.card-action:hover{border-color:var(--yellow-bdr);color:var(--yellow)}
+.card-body{padding:16px 20px}
+
+/* ─────────── TABLE ─────────── */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 14px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.data-table td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;color:var(--text);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.tid{font-size:.72rem;font-weight:700;color:var(--muted);font-family:monospace}
+.t-badge{display:inline-flex;align-items:center;font-size:.67rem;font-weight:700;padding:3px 9px;border-radius:var(--r-full)}
+.t-badge.completed,.t-badge.approved{background:var(--green-lt);color:var(--green)}
+.t-badge.active{background:var(--yellow-lt);color:var(--yellow)}
+.t-badge.pending{background:var(--blue-lt);color:var(--blue)}
+.t-badge.cancelled,.t-badge.rejected{background:var(--red-lt);color:var(--red)}
+.t-fare{font-weight:800;color:var(--white)}
+
+/* ─────────── ACTIVITY FEED ─────────── */
+.act-feed{display:flex;flex-direction:column;gap:2px}
+.act-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.act-item:last-child{border-bottom:none}
+.act-icon{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem}
+.act-icon.trip{background:var(--blue-lt);color:var(--blue)}
+.act-icon.rider{background:var(--purple-lt);color:var(--purple)}
+.act-icon.payment{background:var(--green-lt);color:var(--green)}
+.act-icon.alert{background:var(--red-lt);color:var(--red)}
+.act-icon.app{background:var(--yellow-lt);color:var(--yellow)}
+.act-title{font-size:.82rem;font-weight:600;color:var(--text)}
+.act-desc{font-size:.73rem;color:var(--muted);margin-top:1px;line-height:1.4}
+.act-time{font-size:.68rem;color:rgba(255,255,255,.22);margin-top:3px}
+
+/* ─────────── RIDER / PASS ROWS ─────────── */
+.list-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.list-row:last-child{border-bottom:none}
+.list-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:var(--bg-3);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;border:2px solid rgba(255,255,255,.07)}
+.list-av.yellow{color:var(--yellow);border-color:rgba(255,214,10,.2)}
+.list-av.muted{color:var(--muted-2)}
+.list-name{font-size:.85rem;font-weight:700;color:var(--white)}
+.list-meta{font-size:.68rem;color:var(--muted);margin-top:1px}
+.list-badge{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:var(--r-full)}
+.list-badge.online{background:var(--green-lt);color:var(--green)}
+.list-badge.offline{background:rgba(255,255,255,.06);color:var(--muted)}
+.list-badge.on-trip{background:var(--yellow-lt);color:var(--yellow)}
+.list-badge i{font-size:.55rem}
+.list-end{margin-left:auto;font-size:.75rem;font-weight:700;color:var(--muted)}
+
+/* Application rows */
+.app-actions{margin-left:auto;display:flex;gap:6px}
+.app-btn{padding:5px 12px;border-radius:var(--r-full);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;border:none;transition:all .18s}
+.app-btn.approve{background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.app-btn.approve:hover{background:rgba(16,185,129,.2)}
+.app-btn.decline{background:var(--red-lt);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.app-btn.decline:hover{background:rgba(239,68,68,.2)}
+
+/* ─────────── HEALTH ─────────── */
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.health-item{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.health-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.health-icon.ok{background:var(--green-lt);color:var(--green)}
+.health-name{font-size:.78rem;font-weight:700;color:var(--white)}
+.health-status-text{font-size:.67rem;color:var(--muted);margin-top:1px}
+.health-badge{margin-left:auto;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:var(--r-full)}
+.health-badge.ok{background:var(--green-lt);color:var(--green)}
+
+/* ─────────── MODALS ─────────── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:1200;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.show{display:flex}
+.modal-box{background:var(--bg-2);border:1px solid var(--border-2);border-radius:var(--r-xl);width:100%;max-width:440px;box-shadow:0 24px 60px rgba(0,0,0,.6);animation:modalIn .25s var(--ease);overflow:hidden}
+.modal-header{padding:22px 24px 16px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:1.05rem;font-weight:900;color:var(--white)}
+.modal-sub{font-size:.8rem;color:var(--muted);margin-top:4px}
+.modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:10px}
+.modal-btn{flex:1;padding:12px;border-radius:var(--r-full);font-family:inherit;font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.modal-btn.secondary{background:rgba(255,255,255,.06);color:var(--muted-2)}
+.modal-btn.secondary:hover{background:rgba(255,255,255,.1)}
+.modal-btn.danger{background:var(--red);color:var(--white)}
+.modal-btn.danger:hover{background:#DC2626}
+.modal-btn.primary{background:var(--yellow);color:var(--bg)}
+.modal-btn.primary:hover{background:var(--yellow-dk)}
+
+/* ─────────── TOAST ─────────── */
+#toastCont{position:fixed;bottom:24px;right:22px;z-index:2000;display:flex;flex-direction:column;gap:9px;max-width:320px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r-lg);font-size:.8rem;font-weight:600;color:var(--white);box-shadow:0 8px 30px rgba(0,0,0,.4);pointer-events:all;animation:toastIn .3s var(--ease);border:1px solid rgba(255,255,255,.08)}
+.toast.success{background:linear-gradient(135deg,#065F46,#10B981)}
+.toast.error{background:linear-gradient(135deg,#7F1D1D,#EF4444)}
+.toast.info{background:linear-gradient(135deg,#1e3a8a,#3B82F6)}
+.toast.warn{background:linear-gradient(135deg,#78350f,#F97316)}
+
+/* ─────────── SECTION UI ─────────── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.sec-title{font-size:1.2rem;font-weight:900;color:var(--white)}
+.sec-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+.filter-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ftab{padding:6px 14px;border-radius:var(--r-full);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .18s;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid transparent}
+.ftab.active{background:var(--yellow-lt);color:var(--yellow);border-color:var(--yellow-bdr)}
+.ftab:hover:not(.active){background:rgba(255,255,255,.08);color:var(--white)}
+.btn-secondary{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r-full);background:rgba(255,255,255,.06);color:var(--muted-2);font-family:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--border-2);cursor:pointer;transition:all .18s}
+.btn-secondary:hover{background:rgba(255,255,255,.1);color:var(--white)}
+.earn-big{font-size:2.4rem;font-weight:900;color:var(--yellow);letter-spacing:-.5px;display:flex;align-items:baseline;gap:4px}
+.earn-curr{font-size:1.1rem;color:rgba(255,214,10,.6);font-weight:700}
+.earn-period{font-size:.7rem;color:var(--muted);margin-left:6px;font-weight:500}
+.earn-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.earn-row:last-child{border-bottom:none}
+.earn-lbl{font-size:.8rem;font-weight:600;color:var(--text)}
+.earn-meta{font-size:.68rem;color:var(--muted);margin-top:1px}
+.earn-val{font-size:.9rem;font-weight:800;color:var(--green)}
+.form-input{width:100%;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border-2);background:var(--bg-3);color:var(--text);font-family:inherit;font-size:.85rem;outline:none;transition:border-color .18s}
+.form-input:focus{border-color:var(--yellow-bdr)}
+.form-label{font-size:.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px}
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty-state i{font-size:2rem;opacity:.4}
+.empty-state p{font-size:.82rem}
+.qa-link{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);color:var(--muted-2);text-decoration:none;font-size:.82rem;font-weight:600;transition:background .18s}
+.qa-link:hover{background:rgba(255,255,255,.04)}
+
+/* ─────────── RESPONSIVE ─────────── */
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.content-grid,.content-grid.split{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s var(--ease),width .28s var(--ease)}
+  .sidebar.open{transform:translateX(0)}
+  body.sb-collapsed .sidebar{transform:translateX(-100%);width:var(--sb-w)}
+  .topbar{left:0!important}
+  .main-content{margin-left:0!important;padding:14px 14px 24px}
+  .hamburger-btn{display:flex}
+  .hero{flex-direction:column;align-items:flex-start}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <img src="../assets/k3k3.png" alt="K3K3" class="sb-logo" onerror="this.style.display='none';document.getElementById('sbFb').style.display='flex'">
+    <div class="sb-logo-fb" id="sbFb">K3</div>
+    <div class="sb-brand-text">
+      <div class="sb-brand-name">K3K3</div>
+      <div class="sb-brand-sub">Admin Control</div>
+    </div>
+  </div>
+  <div class="sb-admin-wrap">
+    <div class="sb-admin-av" id="sbAdminAv">A</div>
+    <div class="sb-admin-info">
+      <div class="sb-admin-name" id="sbAdminName">Admin</div>
+      <div class="sb-admin-role">Super Admin</div>
+    </div>
+    <div class="sb-online-dot"></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-group-label">OVERVIEW</div>
+    <div class="sb-nav-item active" id="navDashboard" data-tip="Dashboard" onclick="showSec('dashboard')">
+      <i class="fas fa-chart-pie"></i><span class="sb-nav-label">Dashboard</span>
+    </div>
+    <div class="sb-nav-item" id="navLive" data-tip="Live Activity" onclick="showSec('live')">
+      <i class="fas fa-satellite-dish"></i><span class="sb-nav-label">Live Activity</span>
+      <span class="sb-nav-badge" id="liveBadge" style="display:none">0</span>
+    </div>
+    <div class="sb-group-label">OPERATIONS</div>
+    <div class="sb-nav-item" id="navTrips" data-tip="All Trips" onclick="showSec('trips')">
+      <i class="fas fa-route"></i><span class="sb-nav-label">All Trips</span>
+    </div>
+    <div class="sb-nav-item" id="navRiders" data-tip="Riders" onclick="showSec('riders')">
+      <i class="fas fa-motorcycle"></i><span class="sb-nav-label">Riders</span>
+    </div>
+    <div class="sb-nav-item" id="navPassengers" data-tip="Passengers" onclick="showSec('passengers')">
+      <i class="fas fa-users"></i><span class="sb-nav-label">Passengers</span>
+    </div>
+    <div class="sb-nav-item" id="navApplications" data-tip="Applications" onclick="showSec('applications')">
+      <i class="fas fa-user-plus"></i><span class="sb-nav-label">Applications</span>
+      <span class="sb-nav-badge" id="appsBadge">3</span>
+    </div>
+    <div class="sb-nav-item" id="navPayments" data-tip="Payments" onclick="showSec('payments')">
+      <i class="fas fa-coins"></i><span class="sb-nav-label">Payments</span>
+    </div>
+    <div class="sb-group-label">SYSTEM</div>
+    <div class="sb-nav-item" id="navSettings" data-tip="Settings" onclick="showSec('settings')">
+      <i class="fas fa-cog"></i><span class="sb-nav-label">Settings</span>
+    </div>
+  </nav>
+  <div class="sb-footer">
+    <button class="sb-collapse-btn" onclick="toggleSidebar()">
+      <i class="fas fa-chevron-left sb-collapse-icon" id="collapseIcon"></i>
+      <span class="sb-collapse-label">Collapse Sidebar</span>
+    </button>
+    <button class="sb-logout-btn" onclick="openModal('logoutModal')">
+      <i class="fas fa-sign-out-alt"></i><span class="sb-logout-label">Logout</span>
+    </button>
+  </div>
+</aside>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ TOPBAR ════ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="hamburger-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-sub" id="topbarSub">K3K3 Platform Overview</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="sys-badge"><span class="sys-dot"></span><span>System Online</span></div>
+    <button class="tb-icon-btn" onclick="refreshData()" title="Refresh"><i class="fas fa-rotate-right" id="refreshIcon"></i></button>
+    <button class="tb-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span class="badge-dot"></span></button>
+    <div class="tb-admin-pill">
+      <div class="tb-admin-av" id="topAdminAv">A</div>
+      <div class="tb-admin-name" id="topAdminName">Admin</div>
+    </div>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main-content">
+
+<!-- ──── DASHBOARD ──── -->
+<div class="dash-section active" id="sec-dashboard">
+  <div class="hero">
+    <div>
+      <div class="hero-greeting" id="adminGreeting">GOOD MORNING</div>
+      <div class="hero-title">Platform <span>Command</span> Center</div>
+      <div class="hero-sub">Here's what's happening with K3K3 right now.</div>
+    </div>
+    <div class="hero-pills">
+      <div class="hero-pill green"><i class="fas fa-motorcycle"></i><span><strong id="heroOnline">—</strong> Online</span></div>
+      <div class="hero-pill yellow"><i class="fas fa-circle-notch fa-spin"></i><span><strong id="heroActive">—</strong> Active</span></div>
+      <div class="hero-pill blue"><i class="fas fa-coins"></i><span>₵<strong id="heroRev">—</strong> Today</span></div>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card yellow"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-route"></i></div><span class="kpi-trend up">↑ 12%</span></div><div class="kpi-val" id="kpiTrips">—</div><div class="kpi-lbl">Total Trips</div><div class="kpi-sub" id="kpiTripsSub">Loading…</div></div>
+    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-coins"></i></div><span class="kpi-trend up">↑ 8%</span></div><div class="kpi-val" id="kpiRev">₵—</div><div class="kpi-lbl">Revenue</div><div class="kpi-sub" id="kpiRevSub">Loading…</div></div>
+    <div class="kpi-card purple"><div class="kpi-head"><div class="kpi-icon purple"><i class="fas fa-motorcycle"></i></div><span class="kpi-trend nt" id="kpiRiderTrend">—</span></div><div class="kpi-val" id="kpiRiders">—</div><div class="kpi-lbl">Active Riders</div><div class="kpi-sub" id="kpiRidersSub">Loading…</div></div>
+    <div class="kpi-card teal"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-users"></i></div><span class="kpi-trend up">↑ 5%</span></div><div class="kpi-val" id="kpiPass">—</div><div class="kpi-lbl">Passengers</div><div class="kpi-sub">Registered users</div></div>
+    <div class="kpi-card blue"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-check-circle"></i></div><span class="kpi-trend up">High</span></div><div class="kpi-val" id="kpiComp">—</div><div class="kpi-lbl">Completed</div><div class="kpi-sub" id="kpiCompRate">Loading…</div></div>
+    <div class="kpi-card red"><div class="kpi-head"><div class="kpi-icon red"><i class="fas fa-user-clock"></i></div><span class="kpi-trend nt">Pending</span></div><div class="kpi-val" id="kpiApps">3</div><div class="kpi-lbl">Applications</div><div class="kpi-sub">Awaiting review</div></div>
+  </div>
+  <div class="content-grid">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-list-alt" style="color:var(--yellow);margin-right:6px"></i>Recent Trips</div><div class="card-sub">Latest activity</div></div>
+        <button class="card-action" onclick="showSec('trips')">View All</button>
+      </div>
+      <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Route</th><th>Rider</th><th>Fare</th><th>Status</th></tr></thead><tbody id="recentTbody"><tr><td colspan="5"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title"><i class="fas fa-bolt" style="color:var(--yellow);margin-right:6px"></i>Activity Feed</div><div class="card-sub">Real-time events</div></div><button class="card-action" onclick="renderActivity()">Refresh</button></div>
+        <div class="card-body" style="padding:8px 16px"><div class="act-feed" id="actFeed"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title"><i class="fas fa-heartbeat" style="color:var(--green);margin-right:6px"></i>System Health</div></div></div>
+        <div class="card-body" style="padding:12px"><div class="health-grid">
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-database"></i></div><div><div class="health-name">Database</div><div class="health-status-text">PostgreSQL</div></div><span class="health-badge ok">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-server"></i></div><div><div class="health-name">API Server</div><div class="health-status-text">FastAPI</div></div><span class="health-badge ok">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-plug"></i></div><div><div class="health-name">WebSocket</div><div class="health-status-text">Real-time</div></div><span class="health-badge ok">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-map-marker-alt"></i></div><div><div class="health-name">Location</div><div class="health-status-text">GPS Tracking</div></div><span class="health-badge ok">OK</span></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ──── LIVE ──── -->
+<div class="dash-section" id="sec-live">
+  <div class="sec-header"><div><div class="sec-title">Live Activity</div><div class="sec-sub">Real-time platform activity</div></div><button class="btn-secondary" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-motorcycle"></i></div><span class="kpi-trend up" style="font-size:.65rem">LIVE</span></div><div class="kpi-val" id="liveOnline">—</div><div class="kpi-lbl">Riders Online</div></div>
+    <div class="kpi-card yellow"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-circle-notch"></i></div><span class="kpi-trend up" style="font-size:.65rem">ACTIVE</span></div><div class="kpi-val" id="liveActive">—</div><div class="kpi-lbl">Active Trips</div></div>
+    <div class="kpi-card teal"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-clock"></i></div><span class="kpi-trend nt">AVG</span></div><div class="kpi-val">~8m</div><div class="kpi-lbl">Avg Trip Time</div></div>
+  </div>
+  <div class="content-grid">
+    <div class="card"><div class="card-header"><div><div class="card-title">Active Trips</div><div class="card-sub">In progress now</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Passenger</th><th>Rider</th><th>Route</th><th>Fare</th></tr></thead><tbody id="liveTrips"><tr><td colspan="5"><div class="empty-state"><i class="fas fa-satellite-dish"></i><p>No active trips</p></div></td></tr></tbody></table></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">Riders Online</div><div class="card-sub">Available now</div></div></div><div class="card-body" style="padding:8px 16px" id="liveRiders"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
+  </div>
+</div>
+
+<!-- ──── TRIPS ──── -->
+<div class="dash-section" id="sec-trips">
+  <div class="sec-header"><div><div class="sec-title">All Trips</div><div class="sec-sub">Complete trip history</div></div></div>
+  <div class="filter-tabs"><div class="ftab active" onclick="filterTrips('all',this)">All</div><div class="ftab" onclick="filterTrips('completed',this)">Completed</div><div class="ftab" onclick="filterTrips('active',this)">Active</div><div class="ftab" onclick="filterTrips('pending',this)">Pending</div><div class="ftab" onclick="filterTrips('cancelled',this)">Cancelled</div></div>
+  <div class="card"><div class="card-header"><div><div class="card-title">Trip Records</div><div class="card-sub" id="allTripsSub">Loading…</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Date</th><th>Passenger</th><th>Rider</th><th>Route</th><th>Fare</th><th>Status</th></tr></thead><tbody id="allTripsTbody"><tr><td colspan="7"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div></div>
+</div>
+
+<!-- ──── RIDERS ──── -->
+<div class="dash-section" id="sec-riders">
+  <div class="sec-header"><div><div class="sec-title">Rider Management</div><div class="sec-sub">All approved platform riders</div></div></div>
+  <div class="filter-tabs"><div class="ftab active" onclick="filterRiders('all',this)">All</div><div class="ftab" onclick="filterRiders('online',this)">Online</div><div class="ftab" onclick="filterRiders('offline',this)">Offline</div><div class="ftab" onclick="filterRiders('on-trip',this)">On Trip</div></div>
+  <div class="content-grid split">
+    <div class="card"><div class="card-header"><div><div class="card-title">Riders</div><div class="card-sub" id="ridersSub">Loading…</div></div></div><div class="card-body" style="padding:8px 16px" id="ridersList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
+    <div>
+      <div class="card" style="margin-bottom:14px"><div class="card-header"><div><div class="card-title">Rider Stats</div></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="kpi-card purple" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon purple" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-users"></i></div></div><div class="kpi-val" style="font-size:1.3rem" id="rsTotal">—</div><div class="kpi-lbl">Total</div></div>
+        <div class="kpi-card green" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon green" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-circle"></i></div></div><div class="kpi-val" style="font-size:1.3rem" id="rsOnline">—</div><div class="kpi-lbl">Online</div></div>
+        <div class="kpi-card yellow" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon yellow" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-route"></i></div></div><div class="kpi-val" style="font-size:1.3rem" id="rsTrip">—</div><div class="kpi-lbl">On Trip</div></div>
+        <div class="kpi-card teal" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon teal" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-star"></i></div></div><div class="kpi-val" style="font-size:1.3rem">4.8</div><div class="kpi-lbl">Avg Rating</div></div>
+      </div></div></div>
+      <div class="card"><div class="card-header"><div><div class="card-title">Top Earners Today</div></div></div><div class="card-body" style="padding:8px 16px" id="topEarners"><div class="empty-state" style="padding:20px"><i class="fas fa-spinner fa-spin"></i></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ──── PASSENGERS ──── -->
+<div class="dash-section" id="sec-passengers">
+  <div class="sec-header"><div><div class="sec-title">Passengers</div><div class="sec-sub">Registered platform users</div></div></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+    <div class="kpi-card teal"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-users"></i></div><span class="kpi-trend up">+5%</span></div><div class="kpi-val" id="psTotal">—</div><div class="kpi-lbl">Total Passengers</div></div>
+    <div class="kpi-card blue"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-user-check"></i></div><span class="kpi-trend up">Active</span></div><div class="kpi-val" id="psActive">—</div><div class="kpi-lbl">Active This Week</div></div>
+    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-route"></i></div><span class="kpi-trend nt">Avg</span></div><div class="kpi-val" id="psAvg">—</div><div class="kpi-lbl">Avg Trips/User</div></div>
+  </div>
+  <div class="card"><div class="card-header"><div><div class="card-title">Passenger List</div><div class="card-sub" id="passSub">Loading…</div></div></div><div class="card-body" style="padding:8px 16px" id="passList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
+</div>
+
+<!-- ──── APPLICATIONS ──── -->
+<div class="dash-section" id="sec-applications">
+  <div class="sec-header"><div><div class="sec-title">Rider Applications</div><div class="sec-sub">Review, approve and manage rider applications</div></div>
+    <button class="btn-primary" onclick="loadApps(curAppFilter,true)"><i class="fas fa-sync-alt"></i> Refresh</button>
+  </div>
+
+  <!-- KPI mini row -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px" id="appsKpiRow">
+    <div class="kpi-card blue"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-file-alt"></i></div></div><div class="kpi-val" id="appsKpiTotal">—</div><div class="kpi-lbl">Total</div></div>
+    <div class="kpi-card yellow"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-clock"></i></div></div><div class="kpi-val" id="appsKpiPending">—</div><div class="kpi-lbl">Pending</div></div>
+    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-check-circle"></i></div></div><div class="kpi-val" id="appsKpiApproved">—</div><div class="kpi-lbl">Approved</div></div>
+    <div class="kpi-card red"><div class="kpi-head"><div class="kpi-icon red"><i class="fas fa-times-circle"></i></div></div><div class="kpi-val" id="appsKpiRejected">—</div><div class="kpi-lbl">Rejected</div></div>
+  </div>
+
+  <div class="filter-tabs">
+    <div class="ftab active" onclick="filterApps('all',this)">All</div>
+    <div class="ftab" onclick="filterApps('pending_review',this)">Pending</div>
+    <div class="ftab" onclick="filterApps('approved',this)">Approved</div>
+    <div class="ftab" onclick="filterApps('rejected',this)">Rejected</div>
+  </div>
+
+  <div id="appsList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div>
+</div>
+
+<!-- ──── PAYMENTS ──── -->
+<div class="dash-section" id="sec-payments">
+  <div class="sec-header"><div><div class="sec-title">Payments</div><div class="sec-sub">Revenue and transaction history</div></div></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-coins"></i></div><span class="kpi-trend up">Today</span></div><div class="kpi-val" id="payToday">₵—</div><div class="kpi-lbl">Today</div></div>
+    <div class="kpi-card yellow"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-calendar-week"></i></div><span class="kpi-trend up">Week</span></div><div class="kpi-val" id="payWeek">₵—</div><div class="kpi-lbl">This Week</div></div>
+    <div class="kpi-card blue"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-calendar-alt"></i></div><span class="kpi-trend up">Month</span></div><div class="kpi-val" id="payMonth">₵—</div><div class="kpi-lbl">This Month</div></div>
+    <div class="kpi-card purple"><div class="kpi-head"><div class="kpi-icon purple"><i class="fas fa-chart-line"></i></div><span class="kpi-trend up">All</span></div><div class="kpi-val" id="payTotal">₵—</div><div class="kpi-lbl">All Time</div></div>
+  </div>
+  <div class="content-grid">
+    <div class="card"><div class="card-header"><div><div class="card-title">Transaction History</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Date</th><th>Passenger</th><th>Rider</th><th>Fare</th><th>Method</th></tr></thead><tbody id="payTbody"><tr><td colspan="6"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">Revenue Breakdown</div></div></div>
+      <div class="card-body">
+        <div style="margin-bottom:18px"><div class="earn-big"><span class="earn-curr">₵</span><span id="payBig">0</span><span class="earn-period">all time</span></div></div>
+        <div class="earn-row"><div><div class="earn-lbl">Trip Fares</div><div class="earn-meta">All completed trips</div></div><div class="earn-val" id="payFares">₵0</div></div>
+        <div class="earn-row"><div><div class="earn-lbl">Platform Fee (10%)</div><div class="earn-meta">K3K3 commission</div></div><div class="earn-val" id="payFee">₵0</div></div>
+        <div class="earn-row"><div><div class="earn-lbl">Rider Payouts (90%)</div><div class="earn-meta">Paid to riders</div></div><div class="earn-val" id="payPayout">₵0</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ──── SETTINGS ──── -->
+<div class="dash-section" id="sec-settings">
+  <div class="sec-header"><div><div class="sec-title">System Settings</div><div class="sec-sub">Platform configuration</div></div></div>
+  <div class="content-grid">
+    <div class="card"><div class="card-header"><div><div class="card-title">Platform Config</div></div></div>
+      <div class="card-body"><div style="display:grid;gap:14px">
+        <div><label class="form-label">API Base URL</label><input class="form-input" id="settingApi" value="http://localhost:8810"></div>
+        <div><label class="form-label">Base Fare (₵)</label><input class="form-input" type="number" id="settingFare" value="3"></div>
+        <div><label class="form-label">Rate per km (₵)</label><input class="form-input" type="number" id="settingRate" value="1.8" step="0.1"></div>
+        <div><label class="form-label">Platform Commission (%)</label><input class="form-input" type="number" id="settingComm" value="10"></div>
+        <button onclick="saveSettings()" style="display:flex;align-items:center;gap:7px;padding:11px 22px;border-radius:var(--r-full);background:var(--yellow);color:var(--bg);font-family:inherit;font-size:.85rem;font-weight:800;border:none;cursor:pointer;transition:all .18s" onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--yellow-dk')" onmouseout="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--yellow')"><i class="fas fa-save"></i> Save Settings</button>
+      </div></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px"><div class="card-header"><div><div class="card-title">Admin Account</div></div></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px">
+            <div class="sb-admin-av" style="width:52px;height:52px;font-size:1.2rem" id="settAdminAv">A</div>
+            <div><div style="font-size:1rem;font-weight:800;color:var(--white)" id="settAdminName">Admin</div><div style="font-size:.72rem;color:var(--muted);margin-top:2px">Super Admin · K3K3</div></div>
+          </div>
+          <div style="display:grid;gap:10px">
+            <div><label class="form-label">Display Name</label><input class="form-input" id="adminDisplayName" placeholder="Enter admin name"></div>
+            <button class="btn-secondary" style="width:100%;justify-content:center" onclick="updateAdminName()"><i class="fas fa-user-edit"></i> Update Name</button>
+            <button class="btn-secondary" style="width:100%;justify-content:center;color:#F87171;border-color:rgba(239,68,68,.25)" onclick="openModal('logoutModal')"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="card-header"><div><div class="card-title">Quick Links</div></div></div>
+        <div class="card-body" style="display:grid;gap:8px">
+          <a href="adminlogin.html" class="qa-link"><i class="fas fa-sign-in-alt" style="color:var(--yellow)"></i> Admin Login Page</a>
+          <a href="../passenger/dashboard.html" class="qa-link"><i class="fas fa-user" style="color:var(--blue)"></i> Passenger Dashboard</a>
+          <a href="../rider/dashboard.html" class="qa-link"><i class="fas fa-motorcycle" style="color:var(--green)"></i> Rider Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="logoutModal"><div class="modal-box"><div class="modal-header"><div class="modal-title">Confirm Logout</div><div class="modal-sub">You will be signed out of K3K3 Admin.</div></div><div class="modal-footer"><button class="modal-btn secondary" onclick="closeModal('logoutModal')">Cancel</button><button class="modal-btn danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div></div>
+
+<!-- Approve confirm modal -->
+<div class="modal-backdrop" id="approveModal"><div class="modal-box"><div class="modal-header"><div class="modal-title">Approve Application</div><div class="modal-sub" id="approveModalSub">This will create a rider account.</div></div><div class="modal-footer"><button class="modal-btn secondary" onclick="closeModal('approveModal')">Cancel</button><button class="modal-btn primary" onclick="confirmApprove()"><i class="fas fa-check"></i> Approve</button></div></div></div>
+
+<!-- Decline confirm modal -->
+<div class="modal-backdrop" id="declineModal"><div class="modal-box"><div class="modal-header"><div class="modal-title">Decline Application</div><div class="modal-sub" id="declineModalSub">This action can be undone by approving later.</div></div><div class="modal-footer"><button class="modal-btn secondary" onclick="closeModal('declineModal')">Cancel</button><button class="modal-btn danger" onclick="confirmDecline()"><i class="fas fa-times"></i> Decline</button></div></div></div>
+
+<!-- Delete confirm modal -->
+<div class="modal-backdrop" id="deleteAppModal"><div class="modal-box"><div class="modal-header"><div class="modal-title" style="color:var(--red)"><i class="fas fa-trash"></i> Delete Application</div><div class="modal-sub" id="deleteModalSub">This permanently deletes the application and all uploaded documents. This cannot be undone.</div></div><div class="modal-footer"><button class="modal-btn secondary" onclick="closeModal('deleteAppModal')">Cancel</button><button class="modal-btn danger" onclick="confirmDelete()"><i class="fas fa-trash"></i> Delete</button></div></div></div>
+
+<!-- K3R ID Generated Modal -->
+<div class="modal-backdrop" id="k3rModal">
+  <div class="modal-box" style="max-width:440px">
+    <div style="text-align:center;padding:8px 0 4px">
+      <div style="font-size:2.5rem;margin-bottom:10px">🎉</div>
+      <div style="font-size:1.25rem;font-weight:900;color:var(--white);margin-bottom:4px">Rider Approved!</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:24px">Rider account has been created successfully.</div>
+      <div style="background:var(--yellow-lt);border:1px solid var(--yellow-bdr);border-radius:var(--r-lg);padding:20px;margin-bottom:20px">
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">Rider ID</div>
+        <div style="font-size:2rem;font-weight:900;color:var(--yellow);letter-spacing:2px;margin-bottom:2px" id="k3rIdDisplay">K3R-000001</div>
+        <div style="font-size:.75rem;color:var(--muted-2)" id="k3rNameDisplay">—</div>
+      </div>
+      <div style="background:var(--bg-3);border-radius:var(--r);padding:14px;margin-bottom:20px;text-align:left">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.76rem;color:var(--muted)">Default Password</span><span style="font-size:.76rem;font-weight:700;color:var(--white);font-family:monospace" id="k3rPwDisplay">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:.76rem;color:var(--muted)">App Reference</span><span style="font-size:.76rem;font-weight:700;color:var(--muted-2)" id="k3rRefDisplay">—</span></div>
+      </div>
+      <div style="font-size:.74rem;color:var(--muted);margin-bottom:20px;line-height:1.6"><i class="fas fa-info-circle" style="color:var(--yellow)"></i> Share the Rider ID and default password with the rider. They will be required to change their password on first login.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn secondary" onclick="copyK3rId()"><i class="fas fa-copy"></i> Copy ID</button>
+      <button class="modal-btn primary" onclick="closeModal('k3rModal');allApps=[];loadApps(curAppFilter,true);">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image lightbox -->
+<div class="modal-backdrop" id="imgLightbox" onclick="closeModal('imgLightbox')" style="align-items:center;justify-content:center;display:none">
+  <div style="max-width:90vw;max-height:90vh;position:relative" onclick="event.stopPropagation()">
+    <button onclick="closeModal('imgLightbox')" style="position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border-2);color:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center"><i class="fas fa-times"></i></button>
+    <img id="lightboxImg" src="" alt="Document" style="max-width:90vw;max-height:85vh;border-radius:var(--r-lg);display:block">
+    <div id="lightboxCaption" style="text-align:center;margin-top:10px;font-size:.8rem;color:var(--muted-2)"></div>
+  </div>
+</div>
+
+<div id="toastCont"></div>
+
+<script>
+/* ════ K3K3 ADMIN DASHBOARD JS ════ */
+const API='http://localhost:8810';
+let curSec='dashboard',approveId=null,declineId=null;
+let allTrips=[],allRiders=[],allApps=[];
+
+const STUB_TRIPS=[
+  {id:'T-001',passenger_fname:'Kwame',rider_name:'Kofi A.',pickup_label:'Ho Market',dest_label:'Ho Polytechnic',fare_estimate:5.00,status:'completed',created_at:'2025-06-24T08:32:00Z'},
+  {id:'T-002',passenger_fname:'Ama',rider_name:'Yaw B.',pickup_label:'Bus Terminal',dest_label:'Hospital',fare_estimate:8.00,status:'completed',created_at:'2025-06-24T10:15:00Z'},
+  {id:'T-003',passenger_fname:'Kofi',rider_name:'Abena K.',pickup_label:'Ho Central',dest_label:'Dome Market',fare_estimate:6.50,status:'active',created_at:'2025-06-24T11:00:00Z'},
+  {id:'T-004',passenger_fname:'Abena',rider_name:'Kojo D.',pickup_label:'Volta Hotel',dest_label:'SSNIT Office',fare_estimate:4.50,status:'pending',created_at:'2025-06-24T11:20:00Z'},
+  {id:'T-005',passenger_fname:'Yaw',rider_name:'—',pickup_label:'Agortime Junction',dest_label:'Ho Market',fare_estimate:7.00,status:'cancelled',created_at:'2025-06-24T09:45:00Z'},
+];
+const STUB_RIDERS=[
+  {id:'R-001',fname:'Kofi',lname:'Asante',vehicle_type:'Bajaj RE',is_available:true,on_trip:false,rating:4.9},
+  {id:'R-002',fname:'Yaw',lname:'Boateng',vehicle_type:'TVS King',is_available:true,on_trip:true,rating:4.8},
+  {id:'R-003',fname:'Abena',lname:'Kumi',vehicle_type:'Bajaj RE',is_available:false,on_trip:false,rating:4.7},
+  {id:'R-004',fname:'Kojo',lname:'Doe',vehicle_type:'Piaggio Ape',is_available:true,on_trip:false,rating:4.9},
+  {id:'R-005',fname:'Esi',lname:'Mensah',vehicle_type:'TVS King',is_available:false,on_trip:false,rating:4.6},
+];
+const STUB_APPS=[
+  {id:'A-001',fname:'Emmanuel',lname:'Agyei',phone:'0241234567',vehicle_type:'Bajaj RE',status:'pending',created_at:'2025-06-23'},
+  {id:'A-002',fname:'Grace',lname:'Nyarko',phone:'0551234567',vehicle_type:'TVS King',status:'pending',created_at:'2025-06-22'},
+  {id:'A-003',fname:'Daniel',lname:'Asiedu',phone:'0261234567',vehicle_type:'Piaggio',status:'pending',created_at:'2025-06-21'},
+  {id:'A-004',fname:'Rebecca',lname:'Tetteh',phone:'0301234567',vehicle_type:'Bajaj RE',status:'approved',created_at:'2025-06-20'},
+  {id:'A-005',fname:'Isaac',lname:'Osei',phone:'0271234567',vehicle_type:'TVS King',status:'rejected',created_at:'2025-06-19'},
+];
+const STUB_PASS=[
+  {fname:'Kwame',lname:'Mensah',email:'kwame@gmail.com',trips:5,joined:'Jun 2025'},
+  {fname:'Ama',lname:'Boateng',email:'ama@gmail.com',trips:3,joined:'May 2025'},
+  {fname:'Kofi',lname:'Asante',email:'kofi@gmail.com',trips:8,joined:'Apr 2025'},
+  {fname:'Abena',lname:'Kumi',email:'abena@gmail.com',trips:2,joined:'Jun 2025'},
+  {fname:'Yaw',lname:'Darko',email:'yaw@gmail.com',trips:6,joined:'Mar 2025'},
+];
+
+const el=id=>document.getElementById(id);
+const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
+
+async function apiFetch(p){try{const r=await fetch(API+p,{signal:AbortSignal.timeout(4000)});if(!r.ok)return null;return await r.json();}catch{return null;}}
+
+const SEC_T={dashboard:'Dashboard',live:'Live Activity',trips:'All Trips',riders:'Riders',passengers:'Passengers',applications:'Applications',payments:'Payments',settings:'Settings'};
+const SEC_S={dashboard:'K3K3 Platform Overview',live:'Real-time platform activity',trips:'Complete history',riders:'Rider management',passengers:'Registered users',applications:'Application review',payments:'Revenue & transactions',settings:'Platform configuration'};
+
+function showSec(name){
+  document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('active'));
+  el('sec-'+name)?.classList.add('active');
+  curSec=name;
+  document.querySelectorAll('.sb-nav-item').forEach(n=>n.classList.remove('active'));
+  el('nav'+name.charAt(0).toUpperCase()+name.slice(1))?.classList.add('active');
+  setEl('topbarTitle',SEC_T[name]||name);
+  setEl('topbarSub',SEC_S[name]||'');
+  closeSidebar();
+  window.scrollTo({top:0,behavior:'smooth'});
+  const loaders={dashboard:loadDashboard,live:loadLive,trips:()=>loadAllTrips('all'),riders:()=>loadRiders('all'),passengers:loadPassengers,applications:()=>loadApps('all'),payments:loadPayments};
+  loaders[name]?.();
+}
+
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const sb=el('sidebar'),ov=el('sbOverlay'),mob=window.innerWidth<=768;
+  if(mob){const o=sb.classList.contains('open');sb.classList.toggle('open',!o);ov.classList.toggle('show',!o);}
+  else{const c=document.body.classList.toggle('sb-collapsed');localStorage.setItem('k3k3_admin_sb',c?'1':'0');updateCollapseIcon(c);}
+}
+function updateCollapseIcon(c){
+  const i=el('collapseIcon'),l=document.querySelector('.sb-collapse-label');
+  if(i)i.style.transform=c?'rotate(180deg)':'rotate(0deg)';
+  if(l)l.textContent=c?'Expand Sidebar':'Collapse Sidebar';
+}
+function restoreSB(){if(window.innerWidth<=768)return;if(localStorage.getItem('k3k3_admin_sb')==='1'){document.body.classList.add('sb-collapsed');updateCollapseIcon(true);}}
+function closeSidebar(){el('sidebar').classList.remove('open');el('sbOverlay').classList.remove('show');}
+
+/* ── Modals ── */
+function openModal(id){el(id)?.classList.add('show')}
+function closeModal(id){el(id)?.classList.remove('show')}
+document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+
+/* ── Toast ── */
+function showToast(msg,type='info'){
+  const icons={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle',warn:'fa-bell'};
+  const t=document.createElement('div');t.className='toast '+type;
+  t.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i><span>${msg}</span>`;
+  el('toastCont').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(16px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300);},4000);
+}
+
+/* ── Admin name ── */
+function loadAdminName(){
+  const n=localStorage.getItem('k3k3_admin_name')||'Admin';const i=n.charAt(0).toUpperCase();
+  ['sbAdminAv','topAdminAv','settAdminAv'].forEach(id=>setEl(id,i));
+  ['sbAdminName','topAdminName','settAdminName'].forEach(id=>setEl(id,n));
+  const inp=el('adminDisplayName');if(inp)inp.value=n;
+}
+function updateAdminName(){const v=el('adminDisplayName')?.value?.trim();if(!v){showToast('Enter a name','error');return;}localStorage.setItem('k3k3_admin_name',v);loadAdminName();showToast('Name updated ✓','success');}
+function saveSettings(){localStorage.setItem('k3k3_admin_api',el('settingApi')?.value||API);showToast('Settings saved ✓','success');}
+function doLogout(){closeModal('logoutModal');showToast('Logging out…','info');setTimeout(()=>window.location.href='adminlogin.html',900);}
+
+function setGreeting(){const h=new Date().getHours();setEl('adminGreeting',h<12?'GOOD MORNING':h<17?'GOOD AFTERNOON':'GOOD EVENING');}
+
+/* ── Dashboard ── */
+async function loadDashboard(){
+  const [trips,riders,apps]=await Promise.all([apiFetch('/trips'),apiFetch('/riders'),apiFetch('/applications')]);
+  allTrips=trips||STUB_TRIPS;allRiders=riders||STUB_RIDERS;allApps=apps||STUB_APPS;
+  const comp=allTrips.filter(t=>t.status==='completed');
+  const active=allTrips.filter(t=>t.status==='active');
+  const online=allRiders.filter(r=>r.is_available);
+  const pending=allApps.filter(a=>a.status==='pending');
+  const rev=comp.reduce((s,t)=>s+parseFloat(t.fare_estimate||0),0);
+  setEl('heroOnline',online.length);setEl('heroActive',active.length);setEl('heroRev',rev.toFixed(0));
+  setEl('kpiTrips',allTrips.length);setEl('kpiTripsSub',`${comp.length} completed · ${active.length} active`);
+  setEl('kpiRev','₵'+rev.toFixed(2));setEl('kpiRevSub','₵'+(rev*0.1).toFixed(2)+' platform fee');
+  setEl('kpiRiders',allRiders.length);setEl('kpiRidersSub',`${online.length} online · ${allRiders.filter(r=>r.on_trip).length} on trip`);
+  setEl('kpiPass',STUB_PASS.length);setEl('kpiComp',comp.length);
+  setEl('kpiCompRate',Math.round(comp.length/Math.max(allTrips.length,1)*100)+'% completion rate');
+  setEl('kpiApps',pending.length);setEl('appsBadge',pending.length);
+  el('liveBadge').style.display=active.length?'':'none';setEl('liveBadge',active.length);
+  renderRecentTrips(allTrips.slice(0,6));renderActivity();
+}
+
+function renderRecentTrips(data){
+  const tb=el('recentTbody');if(!tb)return;
+  if(!data.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-state"><i class="fas fa-route"></i><p>No trips yet</p></div></td></tr>';return;}
+  tb.innerHTML=data.map(t=>`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.82rem;font-weight:600">${t.pickup_label||'—'} → ${t.dest_label||'—'}</td><td style="font-size:.8rem">${t.rider_name||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`).join('');
+}
+
+function renderActivity(){
+  const feed=el('actFeed');if(!feed)return;
+  const acts=[
+    {icon:'fa-route',type:'trip',title:'Ride completed',desc:'Kofi A. · Ho Market → Polytechnic · ₵5.00',time:'2 min ago'},
+    {icon:'fa-user-plus',type:'app',title:'New application',desc:'Emmanuel Agyei applied to join as a rider',time:'18 min ago'},
+    {icon:'fa-coins',type:'payment',title:'Payment received',desc:'₵8.00 fare · Ama Boateng · Trip T-002',time:'35 min ago'},
+    {icon:'fa-circle-dot',type:'rider',title:'Rider went online',desc:'Yaw Boateng is now available for rides',time:'1 hr ago'},
+    {icon:'fa-times-circle',type:'alert',title:'Trip cancelled',desc:'Agortime → Ho Market · Passenger cancelled',time:'2 hr ago'},
+  ];
+  feed.innerHTML=acts.map(a=>`<div class="act-item"><div class="act-icon ${a.type}"><i class="fas ${a.icon}"></i></div><div><div class="act-title">${a.title}</div><div class="act-desc">${a.desc}</div><div class="act-time">${a.time}</div></div></div>`).join('');
+}
+
+/* ── Live ── */
+async function loadLive(){
+  if(!allRiders.length)allRiders=await apiFetch('/riders')||STUB_RIDERS;
+  if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
+  const online=allRiders.filter(r=>r.is_available);
+  const active=allTrips.filter(t=>t.status==='active');
+  setEl('liveOnline',online.length);setEl('liveActive',active.length);
+  const lt=el('liveTrips');
+  if(lt)lt.innerHTML=active.length?active.map(t=>`<tr><td><span class="tid">${t.id}</span></td><td>${t.passenger_fname||'—'}</td><td>${t.rider_name||'—'}</td><td style="font-size:.8rem">${t.pickup_label||'—'} → ${t.dest_label||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="5"><div class="empty-state"><i class="fas fa-satellite-dish"></i><p>No active trips</p></div></td></tr>';
+  const lr=el('liveRiders');
+  if(lr)lr.innerHTML=online.length?online.map(r=>`<div class="list-row"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'}</div></div><div class="list-badge ${r.on_trip?'on-trip':'online'}"><i class="fas fa-circle" style="font-size:.5rem"></i>${r.on_trip?'On Trip':'Available'}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders online</p></div>';
+}
+
+/* ── All Trips ── */
+async function loadAllTrips(filter){
+  if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
+  const data=filter==='all'?allTrips:allTrips.filter(t=>t.status===filter);
+  setEl('allTripsSub',`${data.length} trip${data.length!==1?'s':''}`);
+  const tb=el('allTripsTbody');if(!tb)return;
+  if(!data.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="fas fa-route"></i><p>No trips found</p></div></td></tr>';return;}
+  tb.innerHTML=data.map(t=>{const d=t.created_at?new Date(t.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';return`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.75rem;color:var(--muted)">${d}</td><td>${t.passenger_fname||'—'}</td><td>${t.rider_name||'—'}</td><td style="font-size:.8rem;font-weight:600">${t.pickup_label||'—'} → ${t.dest_label||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`}).join('');
+}
+function filterTrips(f,btn){document.querySelectorAll('#sec-trips .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadAllTrips(f);}
+
+/* ── Riders ── */
+async function loadRiders(filter){
+  if(!allRiders.length)allRiders=await apiFetch('/riders')||STUB_RIDERS;
+  const online=allRiders.filter(r=>r.is_available).length;
+  const onTrip=allRiders.filter(r=>r.on_trip).length;
+  setEl('rsTotal',allRiders.length);setEl('rsOnline',online);setEl('rsTrip',onTrip);
+  let data=allRiders;
+  if(filter==='online')data=allRiders.filter(r=>r.is_available&&!r.on_trip);
+  else if(filter==='offline')data=allRiders.filter(r=>!r.is_available);
+  else if(filter==='on-trip')data=allRiders.filter(r=>r.on_trip);
+  setEl('ridersSub',`${data.length} rider${data.length!==1?'s':''}`);
+  const rl=el('ridersList');
+  if(rl)rl.innerHTML=data.length?data.map(r=>{const st=r.on_trip?'on-trip':(r.is_available?'online':'offline');const stT=r.on_trip?'On Trip':(r.is_available?'Online':'Offline');return`<div class="list-row"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'} · ⭐ ${r.rating||'—'}</div></div><div class="list-badge ${st}"><i class="fas fa-circle" style="font-size:.5rem"></i>${stT}</div></div>`}).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders found</p></div>';
+  const te=el('topEarners');
+  if(te){const e=[{n:'Kofi Asante',v:145.50},{n:'Yaw Boateng',v:112.00},{n:'Kojo Doe',v:98.75}];te.innerHTML=e.map((x,i)=>`<div class="list-row" style="padding:8px 0"><div style="width:22px;height:22px;border-radius:50%;background:${['var(--yellow)','rgba(255,255,255,.15)','rgba(255,255,255,.08)'][i]};color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800">${i+1}</div><div class="list-av yellow" style="width:30px;height:30px;font-size:.7rem">${x.n.charAt(0)}</div><div><div class="list-name" style="font-size:.8rem">${x.n}</div></div><div style="margin-left:auto;font-size:.85rem;font-weight:800;color:var(--yellow)">₵${x.v.toFixed(2)}</div></div>`).join('');}
+}
+function filterRiders(f,btn){document.querySelectorAll('#sec-riders .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadRiders(f);}
+
+/* ── Passengers ── */
+async function loadPassengers(){
+  const data=STUB_PASS;
+  setEl('psTotal',data.length);setEl('psActive',Math.ceil(data.length*0.6));
+  setEl('psAvg',(data.reduce((s,p)=>s+(p.trips||0),0)/data.length).toFixed(1));
+  setEl('passSub',`${data.length} passengers`);
+  const pl=el('passList');
+  if(pl)pl.innerHTML=data.map(p=>`<div class="list-row"><div class="list-av muted">${p.fname?.charAt(0)||'U'}</div><div><div class="list-name">${p.fname} ${p.lname}</div><div class="list-meta">${p.email||'—'} · Joined ${p.joined||'—'}</div></div><div class="list-end">${p.trips||0} trips</div></div>`).join('');
+}
+
+/* ── Application CSS ── */
+const APP_CSS=`
+.app-card{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-bottom:14px;transition:border-color .18s;animation:fadeUp .22s var(--ease)}
+.app-card:hover{border-color:var(--border-2)}
+.app-card-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.app-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;flex-shrink:0}
+.app-head-info{flex:1;min-width:0}
+.app-name{font-size:1rem;font-weight:800;color:var(--white)}
+.app-ref{font-size:.7rem;color:var(--muted);margin-top:1px;font-family:monospace}
+.app-status-badge{padding:4px 10px;border-radius:999px;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.app-status-badge.pending_review{background:rgba(249,115,22,.12);color:#FB923C;border:1px solid rgba(249,115,22,.25)}
+.app-status-badge.approved{background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.app-status-badge.rejected{background:var(--red-lt);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.app-status-badge.reviewing{background:var(--blue-lt);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.app-body{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px}
+@media(max-width:640px){.app-body{grid-template-columns:1fr}}
+.app-field{}
+.app-field-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px}
+.app-field-val{font-size:.82rem;color:var(--text);font-weight:500}
+.app-docs{margin-bottom:14px}
+.app-docs-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.app-docs-grid{display:flex;flex-wrap:wrap;gap:8px}
+.app-doc-thumb{width:72px;height:72px;border-radius:var(--r);object-fit:cover;border:1.5px solid var(--border-2);cursor:pointer;transition:all .18s;flex-shrink:0}
+.app-doc-thumb:hover{border-color:var(--yellow);transform:scale(1.05)}
+.app-doc-pdf{width:72px;height:72px;border-radius:var(--r);background:var(--red-lt);border:1.5px solid rgba(239,68,68,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .18s;font-size:.6rem;color:var(--red);font-weight:700;text-transform:uppercase}
+.app-doc-pdf i{font-size:1.4rem}
+.app-doc-pdf:hover{border-color:var(--red);transform:scale(1.05)}
+.app-doc-lbl{font-size:.6rem;color:var(--muted);text-align:center;margin-top:3px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
+.app-btn-approve{padding:8px 18px;border-radius:var(--r-full);border:none;background:var(--green);color:var(--white);font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-approve:hover{background:#059669;transform:translateY(-1px)}
+.app-btn-decline{padding:8px 18px;border-radius:var(--r-full);border:none;background:var(--red-lt);color:var(--red);font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;border:1px solid rgba(239,68,68,.25);display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-decline:hover{background:var(--red);color:var(--white)}
+.app-btn-delete{padding:8px 14px;border-radius:var(--r-full);border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;margin-left:auto}
+.app-btn-delete:hover{border-color:var(--red);color:var(--red);background:var(--red-lt)}
+.app-notes{font-size:.76rem;color:var(--muted);padding:8px 10px;background:var(--bg-4);border-radius:var(--r);margin-top:8px;border-left:2px solid var(--border-2)}
+`;
+(function injectAppCss(){const s=document.createElement('style');s.textContent=APP_CSS;document.head.appendChild(s);})();
+
+/* ── Applications ── */
+let curAppFilter='all';
+async function loadApps(filter,force){
+  curAppFilter=filter||'all';
+  const al=el('appsList');if(!al)return;
+  if(!allApps.length||force){
+    al.innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div>';
+    allApps=await apiFetch('/applications')||[];
+  }
+
+  // Load stats
+  try{
+    const stats=await apiFetch('/applications/stats/summary');
+    if(stats){setEl('appsKpiTotal',stats.total);setEl('appsKpiPending',stats.pending);setEl('appsKpiApproved',stats.approved);setEl('appsKpiRejected',stats.rejected);}
+  }catch{}
+
+  let data=allApps;
+  if(curAppFilter==='pending_review') data=allApps.filter(a=>a.status==='pending_review');
+  else if(curAppFilter!=='all') data=allApps.filter(a=>a.status===curAppFilter);
+
+  if(!data.length){al.innerHTML='<div class="empty-state"><i class="fas fa-user-plus"></i><p>No applications found</p></div>';return;}
+  al.innerHTML=data.map(a=>renderAppCard(a)).join('');
+}
+
+function renderAppCard(a){
+  const isPending=a.status==='pending_review'||a.status==='pending';
+  const statusLabel=a.status==='pending_review'?'Pending Review':a.status;
+  const docs=(a.documents||[]);
+  const docsHtml=docs.length?`
+    <div class="app-docs">
+      <div class="app-docs-title"><i class="fas fa-paperclip"></i> Documents (${docs.length})</div>
+      <div class="app-docs-grid">
+        ${docs.map(d=>d.type==='image'
+          ?`<div><img class="app-doc-thumb" src="${API}${d.url}" alt="${d.name}" loading="lazy" onclick="openLightbox('${API}${d.url}','${d.name}')" title="${d.name}"><div class="app-doc-lbl">${d.name}</div></div>`
+          :`<div><div class="app-doc-pdf" onclick="window.open('${API}${d.url}','_blank')" title="${d.name}"><i class="fas fa-file-pdf"></i>PDF</div><div class="app-doc-lbl">${d.name}</div></div>`
+        ).join('')}
+      </div>
+    </div>`:'';
+  const actions=isPending
+    ?`<button class="app-btn-approve" onclick="openApprove(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-check"></i> Approve</button>
+       <button class="app-btn-decline" onclick="openDecline(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-times"></i> Decline</button>`
+    :'';
+  return`
+<div class="app-card" id="appCard-${a.id}">
+  <div class="app-card-head">
+    <div class="app-av">${(a.first_name||a.fname||'A').charAt(0).toUpperCase()}</div>
+    <div class="app-head-info">
+      <div class="app-name">${a.first_name||a.fname||'—'} ${a.last_name||a.lname||''}</div>
+      <div class="app-ref">${a.app_ref||'—'} · ${a.email||'—'} · ${a.phone||'—'}</div>
+      <div style="margin-top:6px"><span class="app-status-badge ${a.status}">${statusLabel}</span>${a.admin_notes?`<span class="app-notes"><i class="fas fa-comment"></i> ${a.admin_notes}</span>`:''}</div>
+    </div>
+    <div style="font-size:.72rem;color:var(--muted);white-space:nowrap">${a.submitted_at?new Date(a.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+  </div>
+  <div class="app-body">
+    <div class="app-field"><div class="app-field-lbl">Date of Birth</div><div class="app-field-val">${a.date_of_birth||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Gender</div><div class="app-field-val">${a.gender||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Nationality</div><div class="app-field-val">${a.nationality||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Address</div><div class="app-field-val">${a.address||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Vehicle</div><div class="app-field-val">${[a.vehicle_type,a.vehicle_make,a.vehicle_model,a.vehicle_year].filter(Boolean).join(' ')||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Plate · Colour</div><div class="app-field-val">${a.vehicle_plate||'—'} · ${a.vehicle_color||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Licence No.</div><div class="app-field-val">${a.license_number||'—'} (exp: ${a.license_expiry||'—'})</div></div>
+    <div class="app-field"><div class="app-field-lbl">Ghana Card</div><div class="app-field-val">${a.ghana_card_number||'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Experience</div><div class="app-field-val">${a.experience?a.experience+' yr(s)':'—'}</div></div>
+    <div class="app-field"><div class="app-field-lbl">Insurance</div><div class="app-field-val">${a.insurance_provider||'—'} (exp: ${a.insurance_expiry||'—'})</div></div>
+  </div>
+  ${docsHtml}
+  <div class="app-actions">
+    ${actions}
+    <button class="app-btn-delete" onclick="openDeleteApp(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-trash"></i> Delete</button>
+  </div>
+</div>`;
+}
+
+function filterApps(f,btn){
+  document.querySelectorAll('#sec-applications .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadApps(f);
+}
+
+function openApprove(id,name){approveId=id;setEl('approveModalSub',`Approve the application from <strong>${name}</strong>? A K3R Rider ID and account will be created.`);openModal('approveModal');}
+function openDecline(id,name){declineId=id;setEl('declineModalSub',`Decline the application from <strong>${name}</strong>?`);openModal('declineModal');}
+function openDeleteApp(id,name){deleteId=id;setEl('deleteModalSub',`Permanently delete the application from <strong>${name}</strong> and all uploaded documents?`);openModal('deleteAppModal');}
+
+async function confirmApprove(){
+  closeModal('approveModal');
+  if(!approveId)return;
+  showToast('Processing approval…','info');
+  try{
+    const res=await fetch(`${API}/applications/${approveId}/approve`,{method:'POST'});
+    if(!res.ok)throw new Error(await res.text());
+    const data=await res.json();
+    // Show K3R ID modal
+    setEl('k3rIdDisplay',data.rider_id||'K3R-??????');
+    setEl('k3rNameDisplay',`${data.first_name||''} ${data.last_name||''}`.trim());
+    setEl('k3rPwDisplay',data.default_password||'(DOB digits)');
+    setEl('k3rRefDisplay',data.app_ref||'—');
+    window._lastK3rId=data.rider_id;
+    openModal('k3rModal');
+    allApps=[];// force reload
+    showToast(`Rider ${data.rider_id} created!`,'success');
+  }catch(e){
+    showToast('Approval failed: '+e.message,'error');
+  }
+  approveId=null;
+}
+
+async function confirmDecline(){
+  closeModal('declineModal');
+  if(!declineId)return;
+  try{
+    await fetch(`${API}/applications/${declineId}/status`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'rejected',admin_notes:'Declined by admin',reviewed_by:'Admin'})});
+    const a=allApps.find(x=>x.id===declineId);
+    if(a)a.status='rejected';
+    loadApps(curAppFilter);
+    showToast('Application declined','warn');
+  }catch{showToast('Decline failed','error');}
+  declineId=null;
+}
+
+async function confirmDelete(){
+  closeModal('deleteAppModal');
+  if(!deleteId)return;
+  try{
+    const res=await fetch(`${API}/applications/${deleteId}`,{method:'DELETE'});
+    if(!res.ok&&res.status!==204)throw new Error(await res.text());
+    const card=el(`appCard-${deleteId}`);
+    if(card){card.style.transition='opacity .3s,transform .3s';card.style.opacity='0';card.style.transform='translateX(20px)';setTimeout(()=>card.remove(),300);}
+    allApps=allApps.filter(x=>x.id!==deleteId);
+    showToast('Application deleted','success');
+  }catch(e){showToast('Delete failed: '+e.message,'error');}
+  deleteId=null;
+}
+
+function openLightbox(src,caption){
+  const lb=el('imgLightbox');
+  if(!lb)return;
+  el('lightboxImg').src=src;
+  setEl('lightboxCaption',caption);
+  lb.style.display='flex';
+}
+
+function copyK3rId(){
+  const id=window._lastK3rId||el('k3rIdDisplay')?.textContent||'';
+  navigator.clipboard.writeText(id).then(()=>showToast('Rider ID copied!','success')).catch(()=>{const ta=document.createElement('textarea');ta.value=id;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();showToast('Rider ID copied!','success');});
+}
+
+/* ── Payments ── */
+async function loadPayments(){
+  if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
+  const comp=allTrips.filter(t=>t.status==='completed');
+  const rev=comp.reduce((s,t)=>s+parseFloat(t.fare_estimate||0),0);
+  setEl('payToday','₵'+(rev*0.35).toFixed(2));setEl('payWeek','₵'+(rev*0.65).toFixed(2));
+  setEl('payMonth','₵'+rev.toFixed(2));setEl('payTotal','₵'+rev.toFixed(2));
+  setEl('payBig',rev.toFixed(2));setEl('payFares','₵'+rev.toFixed(2));
+  setEl('payFee','₵'+(rev*0.1).toFixed(2));setEl('payPayout','₵'+(rev*0.9).toFixed(2));
+  const tb=el('payTbody');if(!tb)return;
+  if(!comp.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><i class="fas fa-coins"></i><p>No payments yet</p></div></td></tr>';return;}
+  tb.innerHTML=comp.map(t=>{const d=t.created_at?new Date(t.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';return`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.75rem;color:var(--muted)">${d}</td><td>${t.passenger_fname||'—'}</td><td>${t.rider_name||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td><td style="font-size:.76rem;color:var(--muted)">Cash/MoMo</td></tr>`}).join('');
+}
+
+/* ── Refresh ── */
+async function refreshData(){
+  const i=el('refreshIcon');if(i){i.style.transition='none';i.style.animation='none';void i.offsetWidth;i.style.animation='spin 0.6s linear';}
+  allTrips=[];allRiders=[];allApps=[];
+  const fn={dashboard:loadDashboard,live:loadLive,trips:()=>loadAllTrips('all'),riders:()=>loadRiders('all'),passengers:loadPassengers,applications:()=>loadApps(curAppFilter,true),payments:loadPayments};
+  await fn[curSec]?.();
+  showToast('Data refreshed','success');
+  setTimeout(()=>{if(i)i.style.animation='';},700);
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── State vars ── */
+let deleteId=null;
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  setGreeting();loadAdminName();restoreSB();loadDashboard();
+  setInterval(()=>{if(curSec==='live')loadLive();},30000);
+});
+window.addEventListener('resize',()=>{if(window.innerWidth>768){el('sidebar').classList.remove('open');el('sbOverlay').classList.remove('show');}});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['logoutModal','approveModal','declineModal','deleteAppModal','k3rModal','imgLightbox'].forEach(id=>{
+      const m=el(id);if(m){m.style.display='';m.classList.remove('show');}
+    });
+    closeSidebar();
+  }
+});
+</script>
+</body>
+</html>

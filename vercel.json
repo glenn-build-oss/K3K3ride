@@ -1,0 +1,38 @@
+{
+  "builds": [
+    {
+      "src": "K3k3-frontend-main/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/css/(.*)",
+      "dest": "/K3k3-frontend-main/css/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/K3k3-frontend-main/assets/$1"
+    },
+    {
+      "src": "/passenger/(.*)",
+      "dest": "/K3k3-frontend-main/passenger/$1"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/K3k3-frontend-main/admin/$1"
+    },
+    {
+      "src": "/rider/(.*)",
+      "dest": "/K3k3-frontend-main/rider/$1"
+    },
+    {
+      "src": "/legal/(.*)",
+      "dest": "/K3k3-frontend-main/legal/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/K3k3-frontend-main/$1"
+    }
+  ]
+}

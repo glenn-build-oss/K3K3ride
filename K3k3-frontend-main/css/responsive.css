@@ -1,0 +1,596 @@
+/* K3K3 MVP Responsive Design */
+
+/* Modern Mobile-First Approach */
+:root {
+  --mobile-breakpoint: 768px;
+  --tablet-breakpoint: 1024px;
+  --small-mobile: 480px;
+}
+
+/* Large Tablets and Small Desktops */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-visual {
+    order: -1;
+  }
+  
+  .hero-graphic {
+    width: 200px;
+    height: 200px;
+    font-size: 5rem;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 15px;
+  }
+  
+  .nav-menu {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: var(--k3k3-white);
+    flex-direction: column;
+    padding: 1rem;
+    box-shadow: var(--shadow-lg);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  }
+  
+  .nav-menu.active {
+    display: flex;
+  }
+  
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .hero-section {
+    padding: 100px 0 60px;
+  }
+  
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .btn-large {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .feature-card {
+    padding: 1.5rem;
+  }
+  
+  .stats-section {
+    padding: 60px 0;
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+  }
+  
+  .cta-section {
+    padding: 60px 0;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .cta-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .cta-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .main-footer {
+    padding: 40px 0 20px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+}
+
+/* Mobile Phones */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .nav-container {
+    padding: 0 10px;
+  }
+  
+  .brand-text {
+    font-size: 1.2rem;
+  }
+  
+  .brand-logo {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .hero-section {
+    padding: 80px 0 40px;
+  }
+  
+  .hero-content h1 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hero-actions {
+    gap: 0.75rem;
+  }
+  
+  .btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .features-section {
+    padding: 60px 0;
+  }
+  
+  .feature-card {
+    padding: 1.25rem;
+  }
+  
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .feature-title {
+    font-size: 1.25rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .stat-item {
+    padding: 1.5rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .cta-title {
+    font-size: 1.75rem;
+  }
+  
+  .cta-subtitle {
+    font-size: 1rem;
+  }
+  
+  .main-footer {
+    padding: 30px 0 15px;
+  }
+  
+  .footer-logo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .footer-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 320px) {
+  .hero-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .brand-highlight {
+    display: block;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .feature-title {
+    font-size: 1.1rem;
+  }
+  
+  .stat-number {
+    font-size: 1.75rem;
+  }
+}
+
+/* Landscape Orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-section {
+    padding: 60px 0 30px;
+  }
+  
+  .hero-content h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-graphic {
+    width: 150px;
+    height: 150px;
+    font-size: 3rem;
+  }
+  
+  .features-section {
+    padding: 40px 0;
+  }
+  
+  .stats-section {
+    padding: 40px 0;
+  }
+  
+  .cta-section {
+    padding: 40px 0;
+  }
+}
+
+/* High Resolution Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .brand-logo,
+  .footer-logo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .main-header,
+  .hero-actions,
+  .nav-actions,
+  .theme-toggle {
+    display: none;
+  }
+  
+  .hero-section {
+    padding: 40px 0;
+    background: none;
+  }
+  
+  .hero-graphic {
+    display: none;
+  }
+  
+  .features-section,
+  .stats-section,
+  .cta-section {
+    page-break-inside: avoid;
+  }
+  
+  .main-footer {
+    background: var(--k3k3-gray-100);
+    color: var(--k3k3-gray-700);
+  }
+  
+  body {
+    color: var(--k3k3-gray-700);
+  }
+}
+
+/* Additional Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Smooth scrolling for mobile */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent text selection on mobile */
+  .btn, .cta-btn, .header a {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  /* Better touch targets */
+  .header a {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  /* Safe area for notched devices */
+  .header, .footer {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Mobile hover-like feedback for all interactive elements */
+  .btn, .cta-btn, button, .header a, .about-text button {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Ripple effect on touch */
+  .btn::before, .cta-btn::before, button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  
+  .btn:active::before, .cta-btn:active::before, button:active::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  /* Enhanced touch feedback */
+  .btn:active, .cta-btn:active, button:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+  
+  /* Card interactions */
+  .value-card, .feature-card, .stat-card {
+    transition: all 0.3s ease;
+  }
+  
+  .value-card:active, .feature-card:active, .stat-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  /* Optimize for small screens */
+  .about-modern .hero-icon {
+    font-size: 3rem;
+  }
+  
+  .about-modern .about-text h2 {
+    font-size: 1.8rem;
+  }
+  
+  /* Better spacing */
+  .values-grid {
+    gap: 1.5rem;
+  }
+  
+  .cta-buttons {
+    gap: 0.75rem;
+  }
+  
+  /* Full width buttons on mobile */
+  .hero-buttons .btn-primary,
+  .hero-buttons .btn-secondary {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--k3k3-primary);
+  transition: all 0.3s ease;
+}
+
+/* Mobile-specific micro-interactions */
+@media (hover: none) {
+  /* Haptic feedback simulation for buttons */
+  .btn, .cta-btn, button, .header a {
+    transition: all 0.15s ease;
+  }
+  
+  /* Press and hold feedback */
+  .btn:active, .cta-btn:active, button:active {
+    transition: all 0.1s ease;
+    transform: scale(0.96);
+  }
+  
+  /* Enhanced card feedback */
+  .value-card, .feature-card, .stat-card {
+    transition: all 0.2s ease;
+  }
+  
+  .value-card:active, .feature-card:active, .stat-card:active {
+    transition: all 0.1s ease;
+    transform: scale(0.97);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Link feedback */
+  a {
+    transition: all 0.2s ease;
+  }
+  
+  a:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  
+  /* Form input feedback */
+  input, textarea, select {
+    transition: all 0.2s ease;
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.3);
+  }
+  
+  /* Image feedback */
+  img {
+    transition: all 0.2s ease;
+  }
+  
+  img:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+  
+  /* Scroll animations for mobile */
+  .fade-in-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+  
+  .fade-in-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Touch feedback for navigation */
+  .header a {
+    position: relative;
+  }
+  
+  .header a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+  
+  .header a:active::after {
+    width: 100%;
+  }
+}
+
+.mobile-menu-toggle i {
+  font-size: 1.5rem;
+}
+
+/* Show mobile menu toggle on smaller screens */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+}
+
+/* Touch-friendly targets */
+@media (pointer: coarse) {
+  .btn,
+  .nav-link,
+  .theme-toggle {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .feature-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .stat-item {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-graphic {
+    animation: none;
+  }
+  
+  .feature-card:hover,
+  .btn:hover {
+    transform: none;
+  }
+}
