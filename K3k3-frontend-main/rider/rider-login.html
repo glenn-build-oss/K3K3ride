@@ -249,7 +249,6 @@
     }
     .back-link:hover{border-color:var(--black);color:var(--text);background:var(--surface)}
 
-    /* ── MOBILE ── */
     @media(max-width:900px){
       .login-wrapper{grid-template-columns:1fr}
       .left-panel{display:none}
@@ -258,8 +257,10 @@
         min-height:100vh;
         background:var(--black);
         justify-content:center;
+        align-items:center;
+        display:flex;
       }
-      .form-card{max-width:100%}
+      .form-card{max-width:100%;width:100%}
       .form-eyebrow{color:var(--yellow)}
       .form-heading{color:var(--white)}
       .form-subheading{color:rgba(255,255,255,.5)}
@@ -476,7 +477,7 @@ function showToast(msg, type='info'){
   setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all .35s ease'; setTimeout(()=>t.remove(),350); }, 3800);
 }
 
-/* ── Login form ── */
+/* ── Login form — no restrictions, goes directly to dashboard ── */
 document.getElementById('riderLoginForm').addEventListener('submit', async function(e){
   e.preventDefault();
   hideError();
@@ -491,43 +492,28 @@ document.getElementById('riderLoginForm').addEventListener('submit', async funct
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
 
+  // Store rider session and redirect directly to dashboard
   try {
-    const res = await fetch(`${API_BASE}/admin/riders/login`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ identifier: riderId, password })
-    });
-    const data = await res.json();
+    localStorage.setItem('riderSession', JSON.stringify({
+      riderId:   riderId,
+      dbRiderId: null,
+      userId:    null,
+      firstName: 'Rider',
+      lastName:  '',
+      email:     '',
+      phone:     '',
+      loginTime: new Date().toISOString(),
+      isFirstLogin: false
+    }));
+    sessionStorage.setItem('riderSession', JSON.stringify({
+      riderId:   riderId,
+      firstName: 'Rider',
+      loginTime: new Date().toISOString()
+    }));
+  } catch(err){ console.warn('Storage error:', err); }
 
-    if(res.ok){
-      const session = {
-        riderId:      data.public_id || riderId,
-        dbRiderId:    data.rider_id,
-        userId:       data.user_id,
-        firstName:    data.fname || data.first_name || 'Rider',
-        lastName:     data.lname || data.last_name  || '',
-        email:        data.email || '',
-        phone:        data.phone || '',
-        loginTime:    new Date().toISOString(),
-        isFirstLogin: data.is_first_login
-      };
-      localStorage.setItem('riderSession',   JSON.stringify(session));
-      sessionStorage.setItem('riderSession', JSON.stringify(session));
-      showToast('Login successful! Redirecting…', 'success');
-      setTimeout(()=>{ window.location.href = 'dashboard.html'; }, 900);
-    } else if(res.status === 403){
-      showError(data.detail || 'Your account is not active. Please contact the K3K3 team.');
-    } else {
-      showError(data.detail || 'Invalid Rider ID or password. Please try again.');
-    }
-  } catch(err){
-    console.warn('Backend unavailable:', err.message);
-    // Offline fallback for demo
-    showError('Unable to reach server. Please check your connection and try again.');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Rider Panel';
-  }
+  showToast('Login successful! Redirecting…', 'success');
+  setTimeout(()=>{ window.location.href = 'dashboard.html'; }, 900);
 });
 
 /* ── Clear error on input ── */

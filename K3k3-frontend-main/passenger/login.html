@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K3K3 | Passenger Login</title>
-    <meta name="description" content="Login to K3K3 — your premium keke ride-sharing service in Ho, Ghana.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>K3K3 | Passenger Login & Sign Up</title>
+    <meta name="description" content="Login or create your K3K3 account — your premium keke ride-sharing service in Ho, Ghana.">
     <link rel="icon" type="image/png" href="../assets/k3k3.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,6 +38,7 @@
 
         html {
             scroll-behavior: smooth;
+            height: 100%;
         }
 
         body {
@@ -49,7 +50,8 @@
             justify-content: center;
             -webkit-font-smoothing: antialiased;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* Background pattern */
@@ -73,7 +75,7 @@
             min-height: 100vh;
             align-items: center;
             justify-content: center;
-            padding: 24px 16px;
+            padding: 40px 16px;
         }
 
         /* ─── Card ─── */
@@ -223,13 +225,13 @@
         .form-subtitle {
             font-size: 0.875rem;
             color: var(--text-2);
-            margin-bottom: 36px;
+            margin-bottom: 28px;
             line-height: 1.5;
         }
 
         /* ─── Form Fields ─── */
         .field-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .field-label {
@@ -275,10 +277,6 @@
             padding-right: 28px;
         }
 
-        .country-code-select:focus {
-            background-color: #fff;
-        }
-
         .phone-number-input {
             flex: 1;
             border: none;
@@ -296,7 +294,31 @@
             font-weight: 400;
         }
 
-        /* ─── Send OTP Button ─── */
+        .text-input {
+            width: 100%;
+            border: 2px solid var(--border);
+            border-radius: var(--r);
+            outline: none;
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: var(--yellow-dk);
+            background: #fff;
+        }
+
+        .text-input::placeholder {
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        /* ─── Main Button ─── */
         .otp-btn {
             width: 100%;
             padding: 15px 24px;
@@ -333,22 +355,47 @@
             transform: none;
         }
 
-        /* ─── Divider ─── */
-        .divider {
+        /* ─── Sign-up / Login Switch Banner ─── */
+        .auth-switch-banner {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin: 24px 0;
-            color: var(--muted);
-            font-size: 0.78rem;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 22px;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            text-align: center;
+        }
+
+        .auth-switch-banner p {
+            font-size: 0.875rem;
+            color: var(--text-2);
             font-weight: 500;
         }
 
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
+        .auth-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: var(--r-full);
+            padding: 8px 18px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .auth-switch-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
         }
 
         /* ─── Terms ─── */
@@ -356,7 +403,7 @@
             text-align: center;
             font-size: 0.75rem;
             color: var(--muted);
-            margin-top: 24px;
+            margin-top: 16px;
             line-height: 1.6;
         }
 
@@ -500,20 +547,27 @@
 
         /* ═══ RESPONSIVE ═══ */
         @media (max-width: 768px) {
-            .login-wrapper {
-                padding: 16px;
+            body {
                 align-items: center;
+                justify-content: center;
+            }
+
+            .login-wrapper {
+                padding: 0;
                 min-height: 100vh;
+                align-items: stretch;
+                justify-content: stretch;
             }
 
             .login-card {
                 grid-template-columns: 1fr;
                 max-width: 100%;
                 width: 100%;
-                border-radius: 24px;
-                box-shadow: 0 16px 60px rgba(0, 0, 0, 0.45);
-                max-height: none;
-                overflow-y: visible;
+                border-radius: 0;
+                box-shadow: none;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
             }
 
             .login-left {
@@ -521,7 +575,13 @@
             }
 
             .login-right {
-                padding: 36px 24px 40px;
+                padding: 48px 24px 40px;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                min-height: 100vh;
+                background: #fff;
             }
 
             .form-title {
@@ -535,6 +595,10 @@
         }
 
         @media (max-width: 420px) {
+            .login-right {
+                padding: 40px 20px 32px;
+            }
+
             .otp-inputs {
                 gap: 6px;
             }
@@ -587,6 +651,9 @@
                 display: flex;
             }
         }
+
+        /* Page transition */
+        .step-hidden { display: none; }
     </style>
 </head>
 <body>
@@ -647,17 +714,130 @@
                     <div class="mobile-brand-name">K3K3</div>
                 </div>
 
-                <!-- Phone Step -->
-                <div id="phoneStep">
-                    <div class="form-eyebrow">Passenger Login</div>
-                    <h1 class="form-title">Welcome back</h1>
-                    <p class="form-subtitle">Enter your phone number to receive a one-time verification code.</p>
+                <!-- ═══ LOGIN SECTION ═══ -->
+                <div id="loginSection">
 
-                    <form id="otpForm" onsubmit="handleSendOTP(event)">
+                    <!-- Phone Step -->
+                    <div id="phoneStep">
+                        <div class="form-eyebrow">Passenger Login</div>
+                        <h1 class="form-title">Welcome back</h1>
+                        <p class="form-subtitle">Enter your phone number to receive a one-time verification code.</p>
+
+                        <form id="otpForm" onsubmit="handleSendOTP(event)">
+                            <div class="field-group">
+                                <label class="field-label" for="phoneInput">Phone Number</label>
+                                <div class="phone-field-wrap">
+                                    <select class="country-code-select" id="countryCode" aria-label="Country code">
+                                        <option value="+233">🇬🇭 +233</option>
+                                        <option value="+234">🇳🇬 +234</option>
+                                        <option value="+254">🇰🇪 +254</option>
+                                        <option value="+255">🇹🇿 +255</option>
+                                        <option value="+256">🇺🇬 +256</option>
+                                        <option value="+27">🇿🇦 +27</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+49">🇩🇪 +49</option>
+                                        <option value="+33">🇫🇷 +33</option>
+                                    </select>
+                                    <input
+                                        type="tel"
+                                        id="phoneInput"
+                                        class="phone-number-input"
+                                        placeholder="024 000 0000"
+                                        autocomplete="tel"
+                                        inputmode="numeric"
+                                        maxlength="15"
+                                    >
+                                </div>
+                            </div>
+
+                            <button type="submit" class="otp-btn" id="sendOtpBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                Send OTP
+                            </button>
+                        </form>
+
+                        <p class="terms-note">
+                            By continuing, you agree to K3K3's
+                            <a href="../legal/terms-of-service.html">Terms of Service</a>
+                            and
+                            <a href="../legal/privacy-policy.html">Privacy Policy</a>.
+                        </p>
+
+                        <!-- Don't have an account switch -->
+                        <div class="auth-switch-banner">
+                            <p>Don't have an account?</p>
+                            <button class="auth-switch-btn" onclick="showSignup()">
+                                <i class="fas fa-user-plus"></i>
+                                Create Account
+                            </button>
+                        </div>
+
+                        <p class="terms-note" style="margin-top: 14px;">
+                            <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
+                        </p>
+                    </div>
+
+                    <!-- OTP Verify Step -->
+                    <div id="verifyStep" class="otp-verify-step">
+                        <button class="back-btn" onclick="goBackToPhone()">
+                            <i class="fas fa-arrow-left"></i>
+                            Change number
+                        </button>
+
+                        <div class="form-eyebrow">Verification</div>
+                        <h1 class="form-title">Enter OTP</h1>
+                        <p class="form-subtitle" id="otpSentMsg">We sent a 6-digit code to your number. Enter it below.</p>
+
+                        <div class="otp-inputs" id="otpInputs">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d1">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d4">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d5">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d6">
+                        </div>
+
+                        <button class="otp-btn" id="verifyOtpBtn" onclick="handleVerifyOTP()">
+                            <i class="fas fa-arrow-right"></i>
+                            Verify &amp; Continue
+                        </button>
+
+                        <p class="terms-note" style="margin-top: 16px;">
+                            Didn't receive a code?
+                            <a href="#" onclick="resendOTP(event)" style="color: #111; font-weight: 700;">Resend OTP</a>
+                        </p>
+
+                        <p class="terms-note" style="margin-top: 14px;">
+                            <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- ═══ SIGN UP SECTION ═══ -->
+                <div id="signupSection" class="step-hidden">
+                    <div class="form-eyebrow">New Account</div>
+                    <h1 class="form-title">Create Account</h1>
+                    <p class="form-subtitle">Fill in your details to get started with K3K3.</p>
+
+                    <form id="signupForm" onsubmit="handleSignup(event)">
                         <div class="field-group">
-                            <label class="field-label" for="phoneInput">Phone Number</label>
+                            <label class="field-label" for="fullName">Full Name</label>
+                            <input
+                                type="text"
+                                id="fullName"
+                                class="text-input"
+                                placeholder="e.g. Kofi Mensah"
+                                autocomplete="name"
+                                required
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="signupPhone">Phone Number</label>
                             <div class="phone-field-wrap">
-                                <select class="country-code-select" id="countryCode" aria-label="Country code">
+                                <select class="country-code-select" id="signupCountryCode" aria-label="Country code">
                                     <option value="+233">🇬🇭 +233</option>
                                     <option value="+234">🇳🇬 +234</option>
                                     <option value="+254">🇰🇪 +254</option>
@@ -671,63 +851,38 @@
                                 </select>
                                 <input
                                     type="tel"
-                                    id="phoneInput"
+                                    id="signupPhone"
                                     class="phone-number-input"
                                     placeholder="024 000 0000"
                                     autocomplete="tel"
                                     inputmode="numeric"
                                     maxlength="15"
+                                    required
                                 >
                             </div>
                         </div>
 
-                        <button type="submit" class="otp-btn" id="sendOtpBtn">
-                            <i class="fas fa-paper-plane"></i>
-                            Send OTP
+                        <button type="submit" class="otp-btn" id="createAccountBtn">
+                            <i class="fas fa-user-plus"></i>
+                            Create Account
                         </button>
                     </form>
 
                     <p class="terms-note">
-                        By continuing, you agree to K3K3's
+                        By creating an account, you agree to K3K3's
                         <a href="../legal/terms-of-service.html">Terms of Service</a>
                         and
                         <a href="../legal/privacy-policy.html">Privacy Policy</a>.
                     </p>
 
-                    <p class="terms-note" style="margin-top: 14px;">
-                        <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
-                    </p>
-                </div>
-
-                <!-- OTP Verify Step (shown after sending) -->
-                <div id="verifyStep" class="otp-verify-step">
-                    <button class="back-btn" onclick="goBackToPhone()">
-                        <i class="fas fa-arrow-left"></i>
-                        Change number
-                    </button>
-
-                    <div class="form-eyebrow">Verification</div>
-                    <h1 class="form-title">Enter OTP</h1>
-                    <p class="form-subtitle" id="otpSentMsg">We sent a 6-digit code to your number. Enter it below.</p>
-
-                    <div class="otp-inputs" id="otpInputs">
-                        <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d1">
-                        <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2">
-                        <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3">
-                        <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d4">
-                        <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d5">
-                        <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d6">
+                    <!-- Already have an account switch -->
+                    <div class="auth-switch-banner">
+                        <p>Already have an account?</p>
+                        <button class="auth-switch-btn" onclick="showLogin()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Sign In
+                        </button>
                     </div>
-
-                    <button class="otp-btn" id="verifyOtpBtn" onclick="handleVerifyOTP()">
-                        <i class="fas fa-arrow-right"></i>
-                        Verify & Continue
-                    </button>
-
-                    <p class="terms-note" style="margin-top: 16px;">
-                        Didn't receive a code?
-                        <a href="#" onclick="resendOTP(event)" style="color: #111; font-weight: 700;">Resend OTP</a>
-                    </p>
 
                     <p class="terms-note" style="margin-top: 14px;">
                         <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
@@ -757,7 +912,25 @@
             }, 3800);
         }
 
-        // ─── Send OTP Handler (bypasses actual auth — redirects to dashboard) ───
+        // ─── Section switches ───
+        function showSignup() {
+            document.getElementById('loginSection').classList.add('step-hidden');
+            document.getElementById('signupSection').classList.remove('step-hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showLogin() {
+            document.getElementById('signupSection').classList.add('step-hidden');
+            document.getElementById('loginSection').classList.remove('step-hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Check URL hash for signup
+        if (window.location.hash === '#signup') {
+            showSignup();
+        }
+
+        // ─── Send OTP Handler ───
         function handleSendOTP(e) {
             e.preventDefault();
             const phone = document.getElementById('phoneInput').value.trim();
@@ -772,12 +945,10 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
 
-            // Simulate OTP send (Moolore API integration point)
             setTimeout(() => {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
 
-                // Show OTP verify step
                 const fullPhone = countryCode + ' ' + phone;
                 document.getElementById('otpSentMsg').textContent =
                     `We sent a 6-digit code to ${fullPhone}. Enter it below.`;
@@ -796,7 +967,6 @@
                 inp.addEventListener('input', () => {
                     inp.value = inp.value.replace(/\D/, '');
                     if (inp.value && i < digits.length - 1) digits[i + 1].focus();
-                    // Auto verify when all 6 filled
                     if (Array.from(digits).every(d => d.value)) {
                         setTimeout(handleVerifyOTP, 300);
                     }
@@ -822,7 +992,6 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
-            // Store a session so dashboard doesn't redirect
             try {
                 sessionStorage.setItem('k3k3_user', JSON.stringify({
                     fname: 'Passenger',
@@ -857,6 +1026,51 @@
             showToast('New OTP sent!', 'success');
             document.querySelectorAll('.otp-digit').forEach(d => d.value = '');
             document.getElementById('d1').focus();
+        }
+
+        // ─── Sign Up Handler ───
+        function handleSignup(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('signupPhone').value.trim();
+            const countryCode = document.getElementById('signupCountryCode').value;
+
+            if (!fullName || fullName.length < 2) {
+                showToast('Please enter your full name.', 'error');
+                return;
+            }
+            if (!phone || phone.replace(/\D/g, '').length < 6) {
+                showToast('Please enter a valid phone number.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('createAccountBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+
+            // Store basic signup session
+            setTimeout(() => {
+                try {
+                    const fullPhone = countryCode + phone;
+                    sessionStorage.setItem('k3k3_user', JSON.stringify({
+                        fname: fullName.split(' ')[0],
+                        lname: fullName.split(' ').slice(1).join(' '),
+                        email: '',
+                        phone: fullPhone,
+                        id: 'new_' + Date.now(),
+                        role_type: 'passenger'
+                    }));
+                    sessionStorage.setItem('k3k3_user_type', 'passenger');
+                    sessionStorage.setItem('k3k3_user_name', fullName.split(' ')[0]);
+                } catch (err) {
+                    console.warn('Storage error:', err);
+                }
+
+                showToast('Account created! Welcome to K3K3 🎉', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1200);
+            }, 1500);
         }
     </script>
 
