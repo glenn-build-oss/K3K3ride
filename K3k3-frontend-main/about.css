@@ -988,26 +988,40 @@ footer p {
 @media (max-width: 768px) {
   .header {
     padding: 15px 20px;
-    flex-direction: column;
+    flex-direction: row;
     gap: 15px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .header nav {
+    order: 2;
   }
   
   .header ul {
-    gap: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .logo {
     font-size: 1.5rem;
+    order: 1;
   }
   
   .logo-img {
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 50px;
   }
   
   .logo-text {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     left: 100%;
+  }
+  
+  .header a {
+    font-size: 0.85rem;
+    padding: 8px 14px;
   }
   
   .about-modern .about-content {
@@ -1055,20 +1069,28 @@ footer p {
 @media (max-width: 480px) {
   .header {
     padding: 10px 15px;
-  }
-  
-  .header ul {
+    flex-direction: column;
     gap: 10px;
   }
   
+  .header nav {
+    width: 100%;
+  }
+  
+  .header ul {
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+  
   .header a {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     padding: 6px 12px;
   }
   
   .logo-img {
-    height: 50px;
-    width: 50px;
+    height: 45px;
+    width: 45px;
   }
   
   .logo-text {
@@ -1086,6 +1108,7 @@ footer p {
   .hero-buttons {
     flex-direction: column;
     gap: 0.75rem;
+    align-items: center;
   }
   
   .hero-buttons .btn-primary,
