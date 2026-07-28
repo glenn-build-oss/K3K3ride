@@ -40,6 +40,9 @@
    <span class="logo-text">...Ride With Us !</span>
 
   </div>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
     <nav>
       <ul>
         
@@ -352,6 +355,37 @@
       }
     });
 
+  </script>
+  <script>
+    // Mobile menu toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const navMenu = document.querySelector('.header nav');
+      
+      if (mobileMenuToggle && navMenu) {
+        mobileMenuToggle.addEventListener('click', function() {
+          navMenu.classList.toggle('active');
+          const icon = mobileMenuToggle.querySelector('i');
+          if (navMenu.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+          } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+          }
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!navMenu.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+            navMenu.classList.remove('active');
+            const icon = mobileMenuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+          }
+        });
+      }
+    });
   </script>
   <script src="about.js"></script>
   
