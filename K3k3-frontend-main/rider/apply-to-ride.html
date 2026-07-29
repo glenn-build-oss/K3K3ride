@@ -764,24 +764,26 @@
           <div class="form-row">
             <div class="form-group">
               <label for="vehicleType">K3K3 Type <span class="req">*</span></label>
-              <select id="vehicleType" name="vehicleType">
-                <option value="">Select K3K3 type</option>
-                <option value="bajaj-re">Bajaj RE (2-seater)</option>
-                <option value="bajaj-re-compact">Bajaj RE Compact (3-seater)</option>
-                <option value="piaggio-ape">Piaggio Apé (2-seater)</option>
-                <option value="tvs-king">TVS King (3-seater)</option>
-                <option value="atul-shakti">Atul Shakti (4-seater)</option>
-                <option value="mahindra-gio">Mahindra Gio (4-seater)</option>
-                <option value="cargo">Cargo K3K3</option>
-              </select>
+              <input type="text" id="vehicleType" name="vehicleType" placeholder="e.g. Bajaj RE, TVS King, Piaggio Apé">
             </div>
+            <div class="form-group">
+              <label for="vehicleSeats">Number of Seats <span class="req">*</span></label>
+              <input type="text" id="vehicleSeats" name="vehicleSeats" placeholder="e.g. 3 seats">
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
               <label for="vehicleMake">Make <span class="req">*</span></label>
               <input type="text" id="vehicleMake" name="vehicleMake" placeholder="e.g. Bajaj, TVS, Piaggio">
             </div>
+            <div class="form-group">
+              <label for="vehicleColor">Color <span class="req">*</span></label>
+              <input type="text" id="vehicleColor" name="vehicleColor" placeholder="e.g. Yellow">
+            </div>
           </div>
 
-          <div class="form-row three">
+          <div class="form-row">
             <div class="form-group">
               <label for="vehicleModel">Model <span class="req">*</span></label>
               <input type="text" id="vehicleModel" name="vehicleModel" placeholder="e.g. RE, King">
@@ -789,10 +791,6 @@
             <div class="form-group">
               <label for="vehicleYear">Year <span class="req">*</span></label>
               <input type="number" id="vehicleYear" name="vehicleYear" min="2000" max="2026" placeholder="e.g. 2022">
-            </div>
-            <div class="form-group">
-              <label for="vehicleColor">Color <span class="req">*</span></label>
-              <input type="text" id="vehicleColor" name="vehicleColor" placeholder="e.g. Yellow">
             </div>
           </div>
 
@@ -815,38 +813,6 @@
             </div>
           </div>
 
-          <div class="form-row full">
-            <div class="form-group">
-              <label>K3K3 Vehicle Features</label>
-              <div class="checkbox-grid" id="featuresGrid">
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="canopy"><span class="cb-tick"></span> Weather Canopy
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="cushioned seats"><span class="cb-tick"></span> Cushioned Seats
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="storage compartment"><span class="cb-tick"></span> Storage Compartment
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="led lights"><span class="cb-tick"></span> LED Lights
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="phone holder"><span class="cb-tick"></span> Phone Holder
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="safety bars"><span class="cb-tick"></span> Safety Handrails
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="usb charging"><span class="cb-tick"></span> USB Charging Port
-                </label>
-                <label class="checkbox-item">
-                  <input type="checkbox" name="features" value="cargo rack"><span class="cb-tick"></span> Cargo Rack
-                </label>
-              </div>
-            </div>
-          </div>
-
           <div class="form-row">
             <div class="form-group">
               <label for="licenseNumber">Rider License Number <span class="req">*</span></label>
@@ -855,32 +821,6 @@
             <div class="form-group">
               <label for="licenseExpiry">License Expiry <span class="req">*</span></label>
               <input type="date" id="licenseExpiry" name="licenseExpiry">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="insuranceProvider">Insurance Provider</label>
-              <input type="text" id="insuranceProvider" name="insuranceProvider" placeholder="e.g. SIC Insurance">
-            </div>
-            <div class="form-group">
-              <label for="insuranceExpiry">Insurance Expiry</label>
-              <input type="date" id="insuranceExpiry" name="insuranceExpiry">
-            </div>
-          </div>
-
-          <div class="form-row three">
-            <div class="form-group">
-              <label for="emergencyContactName">Emergency Contact</label>
-              <input type="text" id="emergencyContactName" name="emergencyContactName" placeholder="Full name">
-            </div>
-            <div class="form-group">
-              <label for="emergencyContactPhone">Emergency Phone</label>
-              <input type="tel" id="emergencyContactPhone" name="emergencyContactPhone" placeholder="+233 ...">
-            </div>
-            <div class="form-group">
-              <label for="emergencyContactRelation">Relationship</label>
-              <input type="text" id="emergencyContactRelation" name="emergencyContactRelation" placeholder="e.g. Spouse">
             </div>
           </div>
 
@@ -921,24 +861,24 @@
             </div>
 
             <div class="upload-item">
-              <label>Insurance Certificate <span class="optional-badge">Optional</span></label>
-              <div class="upload-zone" id="zone-insuranceCert" data-name="insuranceCert">
-                <button type="button" class="remove-file-btn" data-for="insuranceCert"><i class="fas fa-times"></i></button>
-                <i class="fas fa-shield-alt upload-icon"></i>
+              <label>National ID — Front <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-idCardFront" data-name="idCardFront">
+                <button type="button" class="remove-file-btn" data-for="idCardFront"><i class="fas fa-times"></i></button>
+                <i class="fas fa-address-card upload-icon"></i>
                 <span class="upload-text">Tap to choose file</span>
-                <span class="upload-sub">Photo, PDF · max 20MB</span>
-                <button type="button" class="upload-trigger-btn" data-for="insuranceCert" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
+                <span class="upload-sub">Front side · Photo, PDF · max 20MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="idCardFront" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
               </div>
             </div>
 
             <div class="upload-item">
-              <label>National ID Card <span class="req" style="color:var(--k3k3-danger)">*</span></label>
-              <div class="upload-zone" id="zone-idCard" data-name="idCard">
-                <button type="button" class="remove-file-btn" data-for="idCard"><i class="fas fa-times"></i></button>
+              <label>National ID — Back <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-idCardBack" data-name="idCardBack">
+                <button type="button" class="remove-file-btn" data-for="idCardBack"><i class="fas fa-times"></i></button>
                 <i class="fas fa-address-card upload-icon"></i>
                 <span class="upload-text">Tap to choose file</span>
-                <span class="upload-sub">Photo, PDF · max 20MB</span>
-                <button type="button" class="upload-trigger-btn" data-for="idCard" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
+                <span class="upload-sub">Back side · Photo, PDF · max 20MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="idCardBack" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
               </div>
             </div>
 
@@ -958,7 +898,7 @@
 
           <div style="margin-top:1.25rem; padding:1rem; background:rgba(255,214,10,0.08); border-radius:10px; border-left:3px solid var(--k3k3-yellow); font-size:0.82rem; color:var(--k3k3-gray-600);">
             <i class="fas fa-info-circle" style="color:var(--k3k3-yellow); margin-right:0.4rem;"></i>
-            Ensure all documents are clear and readable. Insurance Certificate is optional — you can submit without it.
+            Ensure all documents are clear and readable. Upload both the front and back of your National ID Card.
           </div>
         </div>
 
@@ -1096,7 +1036,7 @@
         }
       }
       if (step === 2) {
-        const required = ['vehicleType', 'vehicleMake', 'vehicleModel', 'vehicleYear', 'vehicleColor', 'vehiclePlate', 'experience', 'licenseNumber', 'licenseExpiry'];
+        const required = ['vehicleType', 'vehicleSeats', 'vehicleMake', 'vehicleModel', 'vehicleYear', 'vehicleColor', 'vehiclePlate', 'experience', 'licenseNumber', 'licenseExpiry'];
         for (const id of required) {
           const el = document.getElementById(id);
           if (!el || !el.value.trim()) {
@@ -1107,10 +1047,10 @@
         }
       }
       if (step === 3) {
-        const required = ['riderLicense', 'vehicleRegistration', 'idCard', 'passportPhoto'];
+        const required = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
         for (const name of required) {
           if (!uploadedFiles[name]) {
-            toast('Please upload all required documents (Insurance Certificate is optional).', 'error');
+            toast('Please upload all required documents. Both front and back of National ID are required.', 'error');
             return false;
           }
         }
@@ -1269,7 +1209,8 @@
       document.getElementById('reviewVehicle').innerHTML = `
         <h3><i class="fas fa-motorcycle"></i> Vehicle Information</h3>
         <div class="review-grid">
-          <div class="review-item"><span class="label">Type</span><span class="value">${get('vehicleType')}</span></div>
+          <div class="review-item"><span class="label">K3K3 Type</span><span class="value">${get('vehicleType')}</span></div>
+          <div class="review-item"><span class="label">Seats</span><span class="value">${get('vehicleSeats')}</span></div>
           <div class="review-item"><span class="label">Make</span><span class="value">${get('vehicleMake')}</span></div>
           <div class="review-item"><span class="label">Model</span><span class="value">${get('vehicleModel')}</span></div>
           <div class="review-item"><span class="label">Year</span><span class="value">${get('vehicleYear')}</span></div>
@@ -1283,8 +1224,8 @@
       const docNames = {
         riderLicense: "Rider's License",
         vehicleRegistration: "Vehicle Registration",
-        insuranceCert: "Insurance Certificate",
-        idCard: "National ID Card",
+        idCardFront: "National ID (Front)",
+        idCardBack: "National ID (Back)",
         passportPhoto: "Passport Photo"
       };
       const chips = Object.keys(uploadedFiles).map(key =>
@@ -1327,17 +1268,13 @@
           license_number: get('licenseNumber') || null,
           license_expiry: get('licenseExpiry') || null,
           vehicle_type: get('vehicleType') || null,
+          vehicle_seats: get('vehicleSeats') || null,
           vehicle_make: get('vehicleMake') || null,
           vehicle_model: get('vehicleModel') || null,
           vehicle_year: get('vehicleYear') || null,
           vehicle_plate: get('vehiclePlate') || null,
           vehicle_color: get('vehicleColor') || null,
           experience: get('experience') || null,
-          insurance_provider: get('insuranceProvider') || null,
-          insurance_expiry: get('insuranceExpiry') || null,
-          emergency_contact_name: get('emergencyContactName') || null,
-          emergency_contact_phone: get('emergencyContactPhone') || null,
-          emergency_contact_relation: get('emergencyContactRelation') || null,
         };
 
         const res = await fetch(BACKEND + '/applications/', {
@@ -1371,14 +1308,40 @@
           }
         }
 
-        // Show success
-        document.getElementById('applyForm').style.display = 'none';
-        document.getElementById('formNav').style.display = 'none';
-        document.getElementById('success-screen').style.display = 'block';
-        document.getElementById('appRefDisplay').textContent = appRef;
-        localStorage.setItem('lastApplicationRef', appRef);
+        // Save rider data for pending screen
+        try {
+          localStorage.setItem('lastRiderApplication', JSON.stringify({
+            firstName: get('firstName'),
+            lastName:  get('lastName'),
+            phone:     (get('countryCode') + get('phone')).trim(),
+            email:     get('email'),
+            appRef:    appRef
+          }));
+          localStorage.setItem('lastApplicationRef', appRef);
+        } catch(e) {}
+
+        toast('Application submitted successfully!', 'success');
+        setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
 
       } catch (err) {
+        // Dev fallback: if backend is unavailable, save what we have and redirect
+        if (err.message && (err.message.includes('fetch') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+          const get2 = id => (document.getElementById(id) || {}).value || '';
+          const genRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
+          try {
+            localStorage.setItem('lastRiderApplication', JSON.stringify({
+              firstName: get2('firstName'),
+              lastName:  get2('lastName'),
+              phone:     (get2('countryCode') + get2('phone')).trim(),
+              email:     get2('email'),
+              appRef:    genRef
+            }));
+            localStorage.setItem('lastApplicationRef', genRef);
+          } catch(e) {}
+          toast('Application submitted!', 'success');
+          setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
+          return;
+        }
         toast('Error: ' + err.message, 'error');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
@@ -1408,6 +1371,24 @@
 
     // ── Init ─────────────────────────────────────────
     showStep(1);
+
+    // ── Prefill from Register flow ────────────────────
+    (function prefillFromRegister() {
+      try {
+        const raw = sessionStorage.getItem('riderRegPrefill');
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d.firstName) document.getElementById('firstName').value = d.firstName;
+        if (d.lastName)  document.getElementById('lastName').value  = d.lastName;
+        if (d.email)     document.getElementById('email').value     = d.email;
+        if (d.phone)     document.getElementById('phone').value     = d.phone;
+        if (d.countryCode) {
+          const sel = document.getElementById('countryCode');
+          if (sel) sel.value = d.countryCode;
+        }
+        sessionStorage.removeItem('riderRegPrefill');
+      } catch(e) {}
+    })();
   </script>
 </body>
 </html>

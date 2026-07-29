@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>K3K3 | Application Submitted</title>
+  <meta name="description" content="Your K3K3 Rider application has been submitted and is awaiting admin approval.">
+  <link rel="icon" type="image/png" href="../assets/k3k3.png">
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:    #111111;
+      --yellow:   #FFD60A;
+      --yellow-dk:#E6C000;
+      --yellow-lt:rgba(255,214,10,0.1);
+      --white:    #ffffff;
+      --surface:  #F7F8FA;
+      --border:   #E5E7EB;
+      --text:     #111827;
+      --text-2:   #6B7280;
+      --muted:    #9CA3AF;
+      --green:    #10B981;
+      --r:        12px;
+      --r-xl:     24px;
+      --r-full:   999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0d1117 0%, #1a2332 45%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(255,214,10,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(255,214,10,0.04) 0%, transparent 50%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── Top Bar ─── */
+    .top-bar {
+      width: 100%;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative; z-index: 10;
+      background: rgba(13,17,23,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,214,10,0.08);
+    }
+    .logo-wrap {
+      display: flex; align-items: center; gap: 0.75rem;
+      text-decoration: none;
+    }
+    .logo-img {
+      width: 38px; height: 38px; border-radius: 10px;
+      object-fit: contain; background: var(--yellow); padding: 3px;
+    }
+    .logo-name { font-size: 1.2rem; font-weight: 900; color: var(--yellow); letter-spacing: -0.5px; }
+
+    .home-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.82rem; font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      text-decoration: none; padding: 0.4rem 1rem;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-full);
+      transition: all 0.2s ease;
+    }
+    .home-link:hover { color: var(--yellow); border-color: rgba(255,214,10,0.3); background: rgba(255,214,10,0.05); }
+
+    /* ─── Main Content ─── */
+    .main-content {
+      flex: 1;
+      width: 100%;
+      max-width: 680px;
+      padding: 3rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative; z-index: 1;
+    }
+
+    /* ─── Welcome Header ─── */
+    .welcome-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .welcome-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1.1rem; border-radius: var(--r-full);
+      background: rgba(255,214,10,0.1); border: 1px solid rgba(255,214,10,0.25);
+      font-size: 0.72rem; font-weight: 700; color: var(--yellow);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .welcome-greeting {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 900;
+      color: var(--white);
+      letter-spacing: -0.6px;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+    .welcome-greeting span { color: var(--yellow); }
+    .welcome-sub {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
+    }
+
+    /* ─── Logo Circle ─── */
+    .logo-circle {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 2rem;
+      box-shadow: 0 0 0 12px rgba(255,214,10,0.1), 0 0 0 24px rgba(255,214,10,0.05);
+      animation: pulseLogo 2.5s ease-in-out infinite;
+    }
+    .logo-circle img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+    @keyframes pulseLogo {
+      0%, 100% { box-shadow: 0 0 0 12px rgba(255,214,10,0.1), 0 0 0 24px rgba(255,214,10,0.05); }
+      50% { box-shadow: 0 0 0 16px rgba(255,214,10,0.14), 0 0 0 32px rgba(255,214,10,0.06); }
+    }
+
+    /* ─── Status Card ─── */
+    .status-card {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      margin-bottom: 1.5rem;
+    }
+
+    .status-card-header {
+      background: linear-gradient(135deg, rgba(255,214,10,0.12), rgba(255,214,10,0.06));
+      border-bottom: 1px solid rgba(255,214,10,0.15);
+      padding: 1.75rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .status-icon-wrap {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: rgba(255,214,10,0.15);
+      border: 1px solid rgba(255,214,10,0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      animation: spinnerBounce 3s ease-in-out infinite;
+    }
+    .status-icon-wrap i { font-size: 1.4rem; color: var(--yellow); }
+    @keyframes spinnerBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .status-card-title { font-size: 1.2rem; font-weight: 800; color: var(--white); letter-spacing: -0.3px; margin-bottom: 0.2rem; }
+    .status-card-sub { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+    /* ─── Status Steps ─── */
+    .status-steps {
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .status-step {
+      display: flex; align-items: flex-start; gap: 1rem;
+      position: relative;
+    }
+    .status-step:not(:last-child) { padding-bottom: 1.4rem; }
+    .status-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 17px; top: 34px;
+      width: 2px;
+      bottom: 0;
+      background: rgba(255,255,255,0.08);
+    }
+    .status-step.done:not(:last-child)::after { background: var(--green); }
+    .status-step.active:not(:last-child)::after { background: linear-gradient(to bottom, var(--yellow), rgba(255,255,255,0.08)); }
+
+    .step-dot {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .step-dot.done { background: var(--green); color: white; }
+    .step-dot.active {
+      background: var(--yellow); color: var(--black);
+      box-shadow: 0 0 0 5px rgba(255,214,10,0.2);
+      animation: pulseStep 1.8s ease-in-out infinite;
+    }
+    .step-dot.pending { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.1); }
+    @keyframes pulseStep {
+      0%, 100% { box-shadow: 0 0 0 5px rgba(255,214,10,0.2); }
+      50% { box-shadow: 0 0 0 8px rgba(255,214,10,0.08); }
+    }
+
+    .step-content { padding-top: 0.45rem; }
+    .step-title { font-size: 0.88rem; font-weight: 700; color: var(--white); margin-bottom: 0.15rem; }
+    .step-title.muted { color: rgba(255,255,255,0.3); }
+    .step-desc { font-size: 0.78rem; color: rgba(255,255,255,0.4); line-height: 1.5; }
+    .step-desc.active-text { color: rgba(255,214,10,0.75); }
+
+    /* ─── Registration Details Card ─── */
+    .details-card {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .details-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.72rem; font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .details-header i { color: var(--yellow); font-size: 0.7rem; }
+    .details-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .detail-item {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .detail-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.05); }
+    .detail-item:nth-last-child(-n+2) { border-bottom: none; }
+    .detail-label {
+      font-size: 0.65rem; font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 0.35rem;
+    }
+    .detail-value {
+      font-size: 0.9rem; font-weight: 700;
+      color: rgba(255,255,255,0.85);
+    }
+    .detail-value.ref {
+      font-family: 'Courier New', monospace;
+      color: var(--yellow);
+      font-size: 0.82rem;
+    }
+
+    /* ─── Info Note ─── */
+    .info-note {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: rgba(16,185,129,0.07);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: var(--r);
+      display: flex; align-items: flex-start; gap: 0.75rem;
+    }
+    .info-note i { color: var(--green); font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+    .info-note p { font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.6; }
+    .info-note p strong { color: rgba(255,255,255,0.8); }
+
+    /* ─── Bottom Button ─── */
+    .bottom-actions {
+      width: 100%;
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-home {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.9rem 2.5rem;
+      background: var(--yellow); color: var(--black);
+      border: none; border-radius: var(--r);
+      font-family: inherit; font-size: 0.95rem; font-weight: 800;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.2s ease;
+      letter-spacing: -0.2px;
+    }
+    .btn-home:hover { background: var(--yellow-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,214,10,0.4); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 640px) {
+      .top-bar { padding: 1rem; }
+      .logo-name { font-size: 1.1rem; }
+      .main-content { padding: 2rem 1rem 3rem; }
+      .status-card-header { padding: 1.25rem 1.25rem; gap: 0.9rem; }
+      .status-steps { padding: 1.25rem 1.25rem; }
+      .details-row { grid-template-columns: 1fr; }
+      .detail-item:nth-child(odd) { border-right: none; }
+      .detail-item:nth-last-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .detail-item:last-child { border-bottom: none; }
+    }
+    @media (max-width: 400px) {
+      .welcome-greeting { font-size: 1.45rem; }
+      .logo-circle { width: 72px; height: 72px; }
+      .logo-circle img { width: 48px; height: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="../index.html" class="logo-wrap">
+      <img src="../assets/k3k3.png" alt="K3K3" class="logo-img" onerror="this.style.display='none'">
+      <span class="logo-name">K3K3</span>
+    </a>
+    <a href="../index.html" class="home-link">
+      <i class="fas fa-home"></i> Home
+    </a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- K3K3 Logo -->
+    <div class="logo-circle">
+      <img src="../assets/k3k3.png" alt="K3K3" onerror="this.style.background='var(--yellow)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.outerHTML='<div style=\'width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;color:#111;\'>K3</div>'">
+    </div>
+
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <div class="welcome-badge"><i class="fas fa-check-circle"></i> Application Received</div>
+      <h1 class="welcome-greeting">Welcome, <span id="riderName">Rider</span>!</h1>
+      <p class="welcome-sub">Your application has been submitted successfully.</p>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card">
+      <div class="status-card-header">
+        <div class="status-icon-wrap">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div>
+          <div class="status-card-title">Awaiting Approval</div>
+          <div class="status-card-sub">Your account activation is pending. K3K3 Ride administration will approve your account shortly.</div>
+        </div>
+      </div>
+
+      <div class="status-steps">
+        <!-- Step 1: Done -->
+        <div class="status-step done">
+          <div class="step-dot done"><i class="fas fa-check" style="font-size:0.75rem;"></i></div>
+          <div class="step-content">
+            <div class="step-title">Application Submitted</div>
+            <div class="step-desc">Your rider application and documents have been received.</div>
+          </div>
+        </div>
+
+        <!-- Step 2: Active -->
+        <div class="status-step active">
+          <div class="step-dot active"><i class="fas fa-search" style="font-size:0.75rem;"></i></div>
+          <div class="step-content">
+            <div class="step-title">Under Review</div>
+            <div class="step-desc active-text">The K3K3 administration team is reviewing your application. This typically takes 1–3 business days.</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Pending -->
+        <div class="status-step">
+          <div class="step-dot pending">3</div>
+          <div class="step-content">
+            <div class="step-title muted">Account Activation</div>
+            <div class="step-desc">Once approved, your rider account will be activated and you can start accepting trips.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Details -->
+    <div class="details-card">
+      <div class="details-header">
+        <i class="fas fa-id-card"></i> Your Registration Details
+      </div>
+      <div class="details-row">
+        <div class="detail-item">
+          <div class="detail-label">First Name</div>
+          <div class="detail-value" id="detailFirstName">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Last Name</div>
+          <div class="detail-value" id="detailLastName">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Phone Number</div>
+          <div class="detail-value" id="detailPhone">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Application Ref</div>
+          <div class="detail-value ref" id="detailRef">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Note -->
+    <div class="info-note">
+      <i class="fas fa-bell"></i>
+      <p>You will receive a <strong>notification on your phone</strong> once your account has been approved or if any further information is required. Keep an eye on your messages.</p>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="bottom-actions">
+      <a href="../index.html" class="btn-home">
+        <i class="fas fa-home"></i> Back to Home
+      </a>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <script>
+    // Load rider details from sessionStorage / localStorage
+    (function loadRiderDetails() {
+      let firstName = '', lastName = '', phone = '', appRef = '';
+
+      // Try apply-to-ride submission data
+      try {
+        const raw = localStorage.getItem('lastRiderApplication');
+        if (raw) {
+          const d = JSON.parse(raw);
+          firstName = d.firstName || '';
+          lastName  = d.lastName  || '';
+          phone     = d.phone     || '';
+          appRef    = d.appRef    || '';
+        }
+      } catch(e) {}
+
+      // Fallback: prefill from registration flow
+      if (!firstName) {
+        try {
+          const raw = sessionStorage.getItem('riderRegPrefill');
+          if (raw) {
+            const d = JSON.parse(raw);
+            firstName = d.firstName || '';
+            lastName  = d.lastName  || '';
+            phone     = d.fullPhone || (d.countryCode + d.phone) || '';
+          }
+        } catch(e) {}
+      }
+
+      // Fallback: lastApplicationRef
+      if (!appRef) {
+        try { appRef = localStorage.getItem('lastApplicationRef') || ''; } catch(e) {}
+      }
+
+      // Render
+      const name = [firstName, lastName].filter(Boolean).join(' ') || 'Rider';
+      document.getElementById('riderName').textContent = firstName || 'Rider';
+      document.getElementById('detailFirstName').textContent = firstName || '—';
+      document.getElementById('detailLastName').textContent  = lastName  || '—';
+      document.getElementById('detailPhone').textContent     = phone      || '—';
+      document.getElementById('detailRef').textContent       = appRef     || ('K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase());
+    })();
+  </script>
+</body>
+</html>

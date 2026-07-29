@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>K3K3 | Premium Ride Service</title>
   <!-- Force unregister old service workers to fix cache issues -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
           registration.unregister();
           console.log('Old Service Worker unregistered');
         }
@@ -22,7 +23,8 @@
   <link rel="apple-touch-icon" href="assets/k3k3.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <link rel="stylesheet" href="about.css">
   <link rel="stylesheet" href="css/responsive.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -32,23 +34,24 @@
   <meta name="apple-mobile-web-app-title" content="K3K3">
   <meta name="application-name" content="K3K3">
 </head>
+
 <body>
   <!-- Header -->
   <header class="header">
-  <div class="logo">
-   <img src="assets/k3k3 - wobbly.png" alt="K3K3 Logo" class="logo-img">
-   <span class="logo-text">...Ride With Us !</span>
+    <div class="logo">
+      <img src="assets/k3k3 - wobbly.png" alt="K3K3 Logo" class="logo-img">
+      <span class="logo-text">...Ride With Us !</span>
 
-  </div>
+    </div>
     <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
       <i class="fas fa-bars"></i>
     </button>
     <nav>
       <ul>
-        
+
         <li><a href="passenger/login.html#login" class="btn">Login</a></li>
         <li><a href="passenger/login.html#signup" class="signup">Sign Up</a></li>
-        
+
       </ul>
     </nav>
   </header>
@@ -64,7 +67,9 @@
           mobility experience.
         </p>
         <div class="hero-buttons">
-          <a href="passenger/login.html#signup" class="btn-primary" id="installBtn" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;"><i class="fas fa-sign-in-alt"></i> Get Started</a>
+          <a href="passenger/login.html#signup" class="btn-primary" id="installBtn"
+            style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;"><i
+              class="fas fa-sign-in-alt"></i> Get Started</a>
         </div>
       </div>
       <div class="hero-image">
@@ -86,21 +91,24 @@
           <i class="fas fa-shield-alt"></i>
         </div>
         <h3 id="safety-title">Safety First</h3>
-        <p id="safety-text">Your safety is our top priority. We implement rigorous driver verification, real-time tracking, and emergency features to ensure every journey is secure.</p>
+        <p id="safety-text">Your safety is our top priority. We implement rigorous driver verification, real-time
+          tracking, and emergency features to ensure every journey is secure.</p>
       </div>
       <div class="value-card animate-in">
         <div class="value-icon">
           <i class="fas fa-bolt"></i>
         </div>
         <h3 id="speed-title">Speed & Reliability</h3>
-        <p id="speed-text">Quick pickups and efficient routes. Our smart matching algorithm ensures you get the fastest ride to your destination.</p>
+        <p id="speed-text">Quick pickups and efficient routes. Our smart matching algorithm ensures you get the fastest
+          ride to your destination.</p>
       </div>
       <div class="value-card animate-in">
         <div class="value-icon">
           <i class="fas fa-users"></i>
         </div>
         <h3 id="community-title">Community Focus</h3>
-        <p id="community-text">We're building more than just a ride service. We're creating a community of riders and drivers who support each other.</p>
+        <p id="community-text">We're building more than just a ride service. We're creating a community of riders and
+          drivers who support each other.</p>
       </div>
     </div>
   </section>
@@ -109,12 +117,13 @@
   <section class="cta">
     <div class="cta-content">
       <h2 id="apply-title">Ready to Join the Movement?</h2>
-      <p id="apply-text">Whether you're looking to ride or drive, K3K3 offers opportunities for everyone. Be part of Ghana's transportation revolution.</p>
+      <p id="apply-text">Whether you're looking to ride or drive, K3K3 offers opportunities for everyone. Be part of
+        Ghana's transportation revolution.</p>
       <div class="cta-buttons">
-        <a href="rider/apply-to-ride.html" class="cta-btn">
+        <a href="rider/rider-auth.html" class="cta-btn">
           <i class="fas fa-motorcycle"></i>
           <div>
-            <div id="start-earning-label">Apply to Drive</div>
+            <div id="start-earning-label">Ride & Earn</div>
           </div>
         </a>
       </div>
@@ -177,7 +186,7 @@
         "apply-text": "Whether you're looking to ride or drive, K3K3 offers opportunities for everyone. Be part of Ghana's transportation revolution.",
         "start-riding-label": "Start Riding",
         "download-app-label": "Download App",
-        "start-earning-label": "Start Earning Ride",
+        "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Drive with K3K3",
         "admin-title": "Administrator Access",
         "admin-text": "Secure login for K3K3 administrators to manage operations and monitor the transportation network.",
@@ -218,7 +227,7 @@
         "apply-text": "Que vous cherchiez à faire du vélo ou à conduire, K3K3 offre des opportunités pour tous. Faites partie de la révolution des transports au Ghana.",
         "start-riding-label": "Commencer à Rouler",
         "download-app-label": "Télécharger l'App",
-        "start-earning-label": "Commencer à Gagner",
+        "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Conduire avec K3K3",
         "admin-title": "Accès Administrateur",
         "admin-text": "Connexion sécurisée pour les administrateurs K3K3 afin de gérer les opérations et de surveiller le réseau de transport.",
@@ -259,7 +268,7 @@
         "apply-text": "Sɛ wo rehwehwɛ sɛ wo bɛkɔ anaasɛ wo bɛdi akwan, K3K3 ma wo ho kwan wɔ nkorɔfo biara ho. Fa wo ho ka Ghana transport mu nsakrae no ho.",
         "start-riding-label": "Hyɛ ase Kɔ",
         "download-app-label": "Twe App",
-        "start-earning-label": "Hyɛ ase Sika Kɔ",
+        "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Di K3K3 Akwan",
         "admin-title": "Admin Kwan",
         "admin-text": "Safe login ma K3K3 admin sɛ wɔbɛyɛ adwuma na wɔhwɛ transport network no.",
@@ -300,7 +309,7 @@
         "apply-text": "Sɔŋɔ le wo ɖoɖo nu le ɖoɖo ɖeɖeŋu ɖo, K3K3 ma wo ɖoɖo nu le ame bubuwo ƒe ŋkeke ɖoɖo. Fa wo ho kpe ɖe Ghana ƒe akpa ɖeɖeŋu ɖo.",
         "start-riding-label": "Ɖe ɖoɖo Nu",
         "download-app-label": "Twe App",
-        "start-earning-label": "Ɖe Sika ƒe Gblɔmɔ̃",
+        "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Ɖe Akple K3K3",
         "admin-title": "Admin ƒe Ɩɖo",
         "admin-text": "Safe login ma K3K3 admin sɛ wɔbɛyɛ dɔwɔna kple wɔhwɛ akpa ɖeɖeŋu ɖo.",
@@ -330,9 +339,9 @@
     };
 
     // Language change functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const langSelect = document.getElementById('languageSelect');
-      
+
       langSelect.addEventListener('change', (e) => {
         const selectedLang = e.target.value;
         const texts = translations[selectedLang];
@@ -358,12 +367,12 @@
   </script>
   <script>
     // Mobile menu toggle functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const mobileMenuToggle = document.getElementById('mobileMenuToggle');
       const navMenu = document.querySelector('.header nav');
-      
+
       if (mobileMenuToggle && navMenu) {
-        mobileMenuToggle.addEventListener('click', function() {
+        mobileMenuToggle.addEventListener('click', function () {
           navMenu.classList.toggle('active');
           const icon = mobileMenuToggle.querySelector('i');
           if (navMenu.classList.contains('active')) {
@@ -374,9 +383,9 @@
             icon.classList.add('fa-bars');
           }
         });
-        
+
         // Close menu when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
           if (!navMenu.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
             navMenu.classList.remove('active');
             const icon = mobileMenuToggle.querySelector('i');
@@ -388,6 +397,7 @@
     });
   </script>
   <script src="about.js"></script>
-  
+
 </body>
+
 </html>

@@ -684,31 +684,24 @@
             document.getElementById('errorMessage').classList.remove('show');
         }
 
-        // ── Admin login — no restrictions, goes directly to dashboard ──
+        // ── Admin login — bypass credentials, goes directly to dashboard ──
         document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             hideError();
 
-            const email    = (document.getElementById('username').value || '').trim();
-            const password = (document.getElementById('password').value || '').trim();
-            const btn      = document.getElementById('loginSubmitBtn');
-
-            if (!email || !password) {
-                showError('Please enter your email and password.');
-                return;
-            }
-
+            const btn = document.getElementById('loginSubmitBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
 
-            // Store admin session and redirect directly to dashboard
+            // Store admin session and redirect directly to dashboard (no credentials required)
             setTimeout(function() {
+                const email = (document.getElementById('username').value || 'admin@k3k3.com').trim();
                 try {
                     localStorage.setItem('k3k3_admin_token', 'admin_' + Date.now());
                     localStorage.setItem('current_admin', JSON.stringify({
                         id: 1,
-                        name: email.split('@')[0],
-                        email: email,
+                        name: email.includes('@') ? email.split('@')[0] : 'Admin',
+                        email: email || 'admin@k3k3.com',
                         role: 'admin',
                         loginTime: new Date().toISOString()
                     }));
@@ -718,7 +711,7 @@
                 setTimeout(function() {
                     window.location.href = 'admin-dashboard.html';
                 }, 1000);
-            }, 1000);
+            }, 800);
         });
 
         // ── Clear error on input ──
