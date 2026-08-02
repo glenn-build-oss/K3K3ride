@@ -1320,6 +1320,44 @@
           localStorage.setItem('lastApplicationRef', appRef);
         } catch(e) {}
 
+        // Save application to localStorage for admin dashboard
+        try {
+          const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+          const newApp = {
+            id: appId || Date.now(),
+            app_ref: appRef || genRef,
+            first_name: get('firstName'),
+            last_name: get('lastName'),
+            email: get('email'),
+            phone: fullPhone,
+            date_of_birth: get('dateOfBirth') || null,
+            gender: get('gender') || null,
+            nationality: get('nationality') || null,
+            address: get('address') || null,
+            city: get('city') || null,
+            about: get('about') || null,
+            ghana_card_number: get('ghanaCardNumber') || null,
+            license_number: get('licenseNumber') || null,
+            license_expiry: get('licenseExpiry') || null,
+            vehicle_type: get('vehicleType') || null,
+            vehicle_seats: get('vehicleSeats') || null,
+            vehicle_make: get('vehicleMake') || null,
+            vehicle_model: get('vehicleModel') || null,
+            vehicle_year: get('vehicleYear') || null,
+            vehicle_plate: get('vehiclePlate') || null,
+            vehicle_color: get('vehicleColor') || null,
+            experience: get('experience') || null,
+            status: 'pending_review',
+            created_at: new Date().toISOString().split('T')[0],
+            documents: Object.keys(uploadedFiles).map(key => ({
+              type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
+              name: uploadedFiles[key].name
+            }))
+          };
+          existingApps.push(newApp);
+          localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
+        } catch(e) {}
+
         toast('Application submitted successfully!', 'success');
         setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
 
@@ -1337,6 +1375,42 @@
               appRef:    genRef
             }));
             localStorage.setItem('lastApplicationRef', genRef);
+
+            // Save application to localStorage for admin dashboard (fallback)
+            const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+            const newApp = {
+              id: Date.now(),
+              app_ref: genRef,
+              first_name: get2('firstName'),
+              last_name: get2('lastName'),
+              email: get2('email'),
+              phone: (get2('countryCode') + get2('phone')).trim(),
+              date_of_birth: get2('dateOfBirth') || null,
+              gender: get2('gender') || null,
+              nationality: get2('nationality') || null,
+              address: get2('address') || null,
+              city: get2('city') || null,
+              about: get2('about') || null,
+              ghana_card_number: get2('ghanaCardNumber') || null,
+              license_number: get2('licenseNumber') || null,
+              license_expiry: get2('licenseExpiry') || null,
+              vehicle_type: get2('vehicleType') || null,
+              vehicle_seats: get2('vehicleSeats') || null,
+              vehicle_make: get2('vehicleMake') || null,
+              vehicle_model: get2('vehicleModel') || null,
+              vehicle_year: get2('vehicleYear') || null,
+              vehicle_plate: get2('vehiclePlate') || null,
+              vehicle_color: get2('vehicleColor') || null,
+              experience: get2('experience') || null,
+              status: 'pending_review',
+              created_at: new Date().toISOString().split('T')[0],
+              documents: Object.keys(uploadedFiles).map(key => ({
+                type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
+                name: uploadedFiles[key].name
+              }))
+            };
+            existingApps.push(newApp);
+            localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
           } catch(e) {}
           toast('Application submitted!', 'success');
           setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);

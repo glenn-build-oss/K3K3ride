@@ -35,64 +35,39 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 @keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
 
-/* ─────────── SIDEBAR ─────────── */
-.sidebar{position:fixed;top:0;left:0;width:var(--sb-w);height:100vh;background:var(--bg-2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:900;transition:width .28s var(--ease);overflow:hidden;white-space:nowrap}
-body.sb-collapsed .sidebar{width:var(--sb-w-col)}
-body.sb-collapsed .topbar{left:var(--sb-w-col)!important}
-body.sb-collapsed .main-content{margin-left:var(--sb-w-col)}
-body.sb-collapsed .sb-brand-text,
-body.sb-collapsed .sb-admin-info,
-body.sb-collapsed .sb-group-label,
-body.sb-collapsed .sb-nav-label,
-body.sb-collapsed .sb-nav-badge,
-body.sb-collapsed .sb-collapse-label,
-body.sb-collapsed .sb-logout-label{display:none!important}
-body.sb-collapsed .sb-brand{justify-content:center;padding:20px 0 16px}
-body.sb-collapsed .sb-admin-wrap{justify-content:center;padding:12px 0}
-body.sb-collapsed .sb-nav{padding:8px 0}
-body.sb-collapsed .sb-nav-item{justify-content:center;padding:14px 0;margin:2px 8px;border:none!important}
-body.sb-collapsed .sb-nav-item i{margin:0;font-size:1rem;width:auto}
-body.sb-collapsed .sb-footer{padding:10px 8px}
-body.sb-collapsed .sb-collapse-btn,
-body.sb-collapsed .sb-logout-btn{justify-content:center;padding:12px}
-body.sb-collapsed .sb-nav-item[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:calc(var(--sb-w-col) + 8px);top:50%;transform:translateY(-50%);background:var(--bg-3);color:var(--white);font-size:.76rem;font-weight:600;padding:6px 12px;border-radius:var(--r);white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.5);border:1px solid var(--border-2);z-index:1000}
-body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absolute;left:calc(var(--sb-w-col) + 2px);top:50%;transform:translateY(-50%);border:6px solid transparent;border-right-color:var(--bg-3);z-index:1001}
-.sb-brand{display:flex;align-items:center;gap:12px;padding:22px 20px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
-.sb-logo{width:36px;height:36px;border-radius:10px;object-fit:contain;flex-shrink:0}
-.sb-logo-fb{width:36px;height:36px;border-radius:10px;background:var(--yellow);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;flex-shrink:0;display:none}
-.sb-brand-name{font-size:1.1rem;font-weight:900;color:var(--yellow);letter-spacing:-.3px}
-.sb-brand-sub{font-size:.62rem;color:var(--muted);margin-top:1px;font-weight:500;letter-spacing:.04em}
-.sb-admin-wrap{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
-.sb-admin-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900;flex-shrink:0}
-.sb-admin-name{font-size:.85rem;font-weight:700;color:var(--white)}
-.sb-admin-role{font-size:.65rem;color:var(--muted);margin-top:1px}
-.sb-online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:auto;flex-shrink:0;animation:pulseDot 2s infinite}
-.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 10px;scrollbar-width:none}
-.sb-nav::-webkit-scrollbar{display:none}
-.sb-group-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.2);padding:10px 10px 4px;margin-top:4px}
-.sb-nav-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--r);cursor:pointer;transition:all .18s;color:var(--muted-2);font-size:.865rem;font-weight:500;margin-bottom:1px;position:relative;border:1px solid transparent;user-select:none}
-.sb-nav-item:hover{background:rgba(255,255,255,.05);color:var(--white)}
-.sb-nav-item.active{background:var(--yellow-lt);color:var(--yellow);font-weight:700;border-color:var(--yellow-bdr)}
-.sb-nav-item i{width:18px;text-align:center;font-size:.88rem;flex-shrink:0}
-.sb-nav-label{white-space:nowrap;overflow:hidden}
-.sb-nav-badge{margin-left:auto;min-width:20px;height:18px;padding:0 5px;border-radius:var(--r-full);background:var(--red);color:var(--white);font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center}
-.sb-footer{padding:12px 10px;border-top:1px solid var(--border);flex-shrink:0}
-.sb-collapse-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:none;background:rgba(255,255,255,.04);color:var(--muted-2);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:8px;overflow:hidden;white-space:nowrap}
-.sb-collapse-btn:hover{background:rgba(255,255,255,.09);color:var(--white)}
-.sb-collapse-icon{flex-shrink:0;transition:transform .28s var(--ease)}
-.sb-collapse-label{white-space:nowrap;overflow:hidden}
-.sb-logout-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:none;background:rgba(239,68,68,.08);color:#F87171;font-family:inherit;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;overflow:hidden;white-space:nowrap}
-.sb-logout-btn:hover{background:rgba(239,68,68,.16)}
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:899}
-.sb-overlay.show{display:block}
+/* ─────────── DROPDOWN MENU ─────────── */
+.hamburger-menu{width:32px;height:24px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:all .3s ease;padding:4px}
+.hamburger-menu:hover{transform:scale(1.05)}
+.hamburger-line{width:100%;height:3px;background:var(--white);border-radius:2px;transition:all .3s ease}
+.hamburger-menu.active .hamburger-line:nth-child(1){transform:rotate(45deg) translate(8px,8px)}
+.hamburger-menu.active .hamburger-line:nth-child(2){opacity:0}
+.hamburger-menu.active .hamburger-line:nth-child(3){transform:rotate(-45deg) translate(8px,-8px)}
+.main-dropdown-menu{position:fixed;top:-100%;left:0;width:320px;max-height:80vh;background:var(--bg-2);border-radius:0 0 16px 16px;box-shadow:0 10px 40px rgba(0,0,0,.3);opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;z-index:999;border:1px solid var(--border-2)}
+.main-dropdown-menu.active{top:62px;opacity:1;visibility:visible}
+.menu-header{background:linear-gradient(135deg,var(--bg-3),var(--bg-4));padding:1.5rem;border-bottom:1px solid var(--border)}
+.menu-user-info{display:flex;align-items:center;gap:1rem}
+.menu-avatar{width:50px;height:50px;border-radius:50%;overflow:hidden;border:2px solid var(--yellow);background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900}
+.menu-user-details{flex:1}
+.menu-user-name{font-size:1.1rem;font-weight:600;color:var(--white);margin-bottom:.25rem}
+.menu-user-role{font-size:.875rem;color:var(--muted)}
+.menu-section{padding:1rem 0;border-bottom:1px solid var(--border)}
+.menu-section:last-child{border-bottom:none}
+.menu-section-title{font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:0 1.5rem;margin-bottom:.5rem}
+.menu-item{display:flex;align-items:center;gap:1rem;padding:.875rem 1.5rem;cursor:pointer;transition:all .2s ease;color:var(--muted-2);font-weight:500}
+.menu-item:hover{background:rgba(255,255,255,.05);color:var(--white)}
+.menu-item.active{background:var(--yellow-lt);color:var(--yellow);border-left:3px solid var(--yellow)}
+.menu-item i{width:20px;text-align:center;font-size:1rem}
+.menu-badge{margin-left:auto;min-width:20px;height:18px;padding:0 5px;border-radius:var(--r-full);background:var(--red);color:var(--white);font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.logout-item{color:#F87171;margin-top:.5rem}
+.logout-item:hover{background:rgba(239,68,68,.08);color:#F87171}
 
 /* ─────────── TOPBAR ─────────── */
-.topbar{position:fixed;top:0;left:var(--sb-w);right:0;height:var(--top-h);background:var(--bg-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:800;gap:16px;transition:left .28s var(--ease)}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--top-h);background:var(--bg-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:800;gap:16px}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .topbar-title{font-size:1rem;font-weight:800;color:var(--white)}
 .topbar-sub{font-size:.72rem;color:var(--muted);margin-top:1px}
-.hamburger-btn{width:34px;height:34px;background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r);cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--muted-2);font-size:.85rem;transition:all .18s;flex-shrink:0}
+.hamburger-btn{width:34px;height:34px;background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:.85rem;transition:all .18s;flex-shrink:0}
 .hamburger-btn:hover{background:rgba(255,255,255,.1);color:var(--white)}
 .sys-badge{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:var(--r-full);font-size:.73rem;font-weight:700;background:rgba(16,185,129,.1);color:#34D399;border:1px solid rgba(16,185,129,.2)}
 .sys-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulseDot 2s infinite}
@@ -105,7 +80,7 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
 .tb-admin-name{font-size:.78rem;font-weight:700;color:var(--white)}
 
 /* ─────────── MAIN ─────────── */
-.main-content{margin-left:var(--sb-w);margin-top:var(--top-h);padding:24px 28px;min-height:calc(100vh - var(--top-h));transition:margin-left .28s var(--ease)}
+.main-content{margin-left:0;margin-top:var(--top-h);padding:24px 28px;min-height:calc(100vh - var(--top-h))}
 .dash-section{display:none}
 .dash-section.active{display:block;animation:fadeUp .22s var(--ease)}
 
@@ -176,6 +151,77 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
 .t-badge.pending{background:var(--blue-lt);color:var(--blue)}
 .t-badge.cancelled,.t-badge.rejected{background:var(--red-lt);color:var(--red)}
 .t-fare{font-weight:800;color:var(--white)}
+.date-row td{padding:0;border:none}
+.date-group-header{background:var(--bg-3);padding:10px 14px;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-radius:var(--r);display:flex;align-items:center;gap:8px;margin:8px 0}
+
+/* Responsive table */
+@media(max-width:768px){
+  .data-table{display:block;overflow-x:auto;white-space:nowrap}
+  .data-table th,.data-table td{padding:8px 10px;font-size:.75rem}
+  .date-group-header{padding:8px 10px;font-size:.7rem}
+  .tid{font-size:.65rem}
+  .t-badge{font-size:.6rem;padding:2px 6px}
+  
+  /* Responsive rider list */
+  .list-row{padding:12px 10px}
+  .list-av{width:40px;height:40px;font-size:.9rem}
+  .list-name{font-size:.9rem}
+  .list-meta{font-size:.7rem}
+  .list-badge{font-size:.65rem;padding:4px 8px}
+  
+  /* Responsive rider detail modal */
+  .modal-box{max-width:95vw;margin:20px}
+  #riderDetailContent{font-size:.9rem}
+  
+  /* Responsive application detail modal */
+  #appDetailModal .modal-box{max-width:95vw;max-height:90vh;overflow-y:auto}
+  #appDetailContent{font-size:.85rem}
+  #appDetailContent>div>div{grid-template-columns:1fr !important}
+  
+  /* Responsive lightbox */
+  #imgLightbox button{width:32px;height:32px;top:-5px}
+  #lightboxImg{max-height:85vh}
+  
+  /* Responsive dashboard KPI cards */
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .kpi-card{padding:16px}
+  .kpi-val{font-size:1.6rem}
+  .kpi-sub{font-size:.7rem}
+  
+  /* Responsive modal general */
+  .modal-box{margin:10px;max-width:calc(100vw - 20px)}
+  .modal-title{font-size:1.1rem}
+  .modal-sub{font-size:.8rem}
+  .modal-btn{padding:10px 16px;font-size:.85rem}
+  
+  /* Responsive top bar */
+  .topbar{padding:12px 16px}
+  .topbar-title{font-size:1rem}
+  .topbar-sub{font-size:.75rem}
+  
+  /* Responsive sections */
+  .sec-header{padding:16px}
+  .sec-title{font-size:1.1rem}
+  .sec-sub{font-size:.75rem}
+  
+  /* Responsive filter tabs */
+  .ftab{padding:8px 14px;font-size:.75rem}
+  
+  /* Responsive hero section */
+  .hero-grid{grid-template-columns:1fr;gap:16px}
+  .hero-card{padding:20px}
+  .hero-val{font-size:2rem}
+}
+
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr}
+  .data-table th,.data-table td{padding:6px 8px;font-size:.7rem}
+  .list-row{padding:10px 8px}
+  .list-av{width:36px;height:36px;font-size:.85rem}
+  .list-name{font-size:.85rem}
+  .list-meta{font-size:.65rem}
+  .modal-box{margin:8px;max-width:calc(100vw - 16px)}
+}
 
 /* ─────────── ACTIVITY FEED ─────────── */
 .act-feed{display:flex;flex-direction:column;gap:2px}
@@ -242,11 +288,11 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
 
 /* ─────────── TOAST ─────────── */
 #toastCont{position:fixed;bottom:24px;right:22px;z-index:2000;display:flex;flex-direction:column;gap:9px;max-width:320px;pointer-events:none}
-.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r-lg);font-size:.8rem;font-weight:600;color:var(--white);box-shadow:0 8px 30px rgba(0,0,0,.4);pointer-events:all;animation:toastIn .3s var(--ease);border:1px solid rgba(255,255,255,.08)}
-.toast.success{background:linear-gradient(135deg,#065F46,#10B981)}
-.toast.error{background:linear-gradient(135deg,#7F1D1D,#EF4444)}
-.toast.info{background:linear-gradient(135deg,#1e3a8a,#3B82F6)}
-.toast.warn{background:linear-gradient(135deg,#78350f,#F97316)}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r-lg);font-size:.8rem;font-weight:600;color:#000;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(0,0,0,.4);pointer-events:all;animation:toastIn .3s var(--ease);border:1px solid rgba(255,255,255,.3)}
+.toast.success{border-left:4px solid #10B981}
+.toast.error{border-left:4px solid #EF4444}
+.toast.info{border-left:4px solid #3B82F6}
+.toast.warn{border-left:4px solid #F97316}
 
 /* ─────────── SECTION UI ─────────── */
 .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
@@ -279,87 +325,72 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
 @media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.content-grid,.content-grid.split{grid-template-columns:1fr}}
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform .3s var(--ease),width .28s var(--ease);position:fixed;top:0;left:0;width:260px;height:100vh;z-index:1000}
-  .sidebar.open{transform:translateX(0)}
-  body.sb-collapsed .sidebar{transform:translateX(-100%);width:var(--sb-w)}
-  .topbar{left:0!important}
-  .main-content{margin-left:0!important;padding:14px 14px 24px}
-  .hamburger-btn{display:flex}
+  .topbar{padding:0 1rem}
+  .main-content{padding:14px 14px 24px}
   .hero{flex-direction:column;align-items:flex-start}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .sb-footer{padding:12px 10px;position:absolute;bottom:0;left:0;right:0;background:var(--bg-2);border-top:1px solid var(--border)}
-  .sb-nav{padding-bottom:80px}
+  .main-dropdown-menu{width:100%;max-height:70vh;border-radius:0 0 0 0}
+  #appsKpiRow{grid-template-columns:repeat(2,1fr)!important}
 }
-@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr}
+  #appsKpiRow{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
 
-<!-- ════ SIDEBAR ════ -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-brand">
-    <img src="../assets/k3k3.png" alt="K3K3" class="sb-logo" onerror="this.style.display='none';document.getElementById('sbFb').style.display='flex'">
-    <div class="sb-logo-fb" id="sbFb">K3</div>
-    <div class="sb-brand-text">
-      <div class="sb-brand-name">K3K3</div>
-      <div class="sb-brand-sub">Admin Control</div>
+<!-- ════ DROPDOWN MENU ════ -->
+<div class="main-dropdown-menu" id="dropdownMenu">
+  <div class="menu-header">
+    <div class="menu-user-info">
+      <div class="menu-avatar" id="menuAvatar">A</div>
+      <div class="menu-user-details">
+        <div class="menu-user-name" id="menuUserName">Admin</div>
+        <div class="menu-user-role">Super Admin</div>
+      </div>
     </div>
   </div>
-  <div class="sb-admin-wrap">
-    <div class="sb-admin-av" id="sbAdminAv">A</div>
-    <div class="sb-admin-info">
-      <div class="sb-admin-name" id="sbAdminName">Admin</div>
-      <div class="sb-admin-role">Super Admin</div>
+  <div class="menu-section">
+    <div class="menu-section-title">OVERVIEW</div>
+    <div class="menu-item active" id="navDashboard" onclick="showSec('dashboard')">
+      <i class="fas fa-chart-pie"></i><span>Dashboard</span>
     </div>
-    <div class="sb-online-dot"></div>
   </div>
-  <nav class="sb-nav">
-    <div class="sb-group-label">OVERVIEW</div>
-    <div class="sb-nav-item active" id="navDashboard" data-tip="Dashboard" onclick="showSec('dashboard')">
-      <i class="fas fa-chart-pie"></i><span class="sb-nav-label">Dashboard</span>
+  <div class="menu-section">
+    <div class="menu-section-title">OPERATIONS</div>
+    <div class="menu-item" id="navTrips" onclick="showSec('trips')">
+      <i class="fas fa-route"></i><span>All Trips</span>
     </div>
-    <div class="sb-nav-item" id="navLive" data-tip="Live Activity" onclick="showSec('live')">
-      <i class="fas fa-satellite-dish"></i><span class="sb-nav-label">Live Activity</span>
-      <span class="sb-nav-badge" id="liveBadge" style="display:none">0</span>
+    <div class="menu-item" id="navRiders" onclick="showSec('riders')">
+      <i class="fas fa-motorcycle"></i><span>Riders</span>
     </div>
-    <div class="sb-group-label">OPERATIONS</div>
-    <div class="sb-nav-item" id="navTrips" data-tip="All Trips" onclick="showSec('trips')">
-      <i class="fas fa-route"></i><span class="sb-nav-label">All Trips</span>
+    <div class="menu-item" id="navPassengers" onclick="showSec('passengers')">
+      <i class="fas fa-users"></i><span>Passengers</span>
     </div>
-    <div class="sb-nav-item" id="navRiders" data-tip="Riders" onclick="showSec('riders')">
-      <i class="fas fa-motorcycle"></i><span class="sb-nav-label">Riders</span>
+    <div class="menu-item" id="navApplications" onclick="showSec('applications')">
+      <i class="fas fa-user-plus"></i><span>Applications</span>
+      <span class="menu-badge" id="appsBadge">3</span>
     </div>
-    <div class="sb-nav-item" id="navPassengers" data-tip="Passengers" onclick="showSec('passengers')">
-      <i class="fas fa-users"></i><span class="sb-nav-label">Passengers</span>
+    <div class="menu-item" id="navPayments" onclick="showSec('payments')">
+      <i class="fas fa-coins"></i><span>Payments</span>
     </div>
-    <div class="sb-nav-item" id="navApplications" data-tip="Applications" onclick="showSec('applications')">
-      <i class="fas fa-user-plus"></i><span class="sb-nav-label">Applications</span>
-      <span class="sb-nav-badge" id="appsBadge">3</span>
-    </div>
-    <div class="sb-nav-item" id="navPayments" data-tip="Payments" onclick="showSec('payments')">
-      <i class="fas fa-coins"></i><span class="sb-nav-label">Payments</span>
-    </div>
-    <div class="sb-group-label">SYSTEM</div>
-    <div class="sb-nav-item" id="navSettings" data-tip="Settings" onclick="showSec('settings')">
-      <i class="fas fa-cog"></i><span class="sb-nav-label">Settings</span>
-    </div>
-  </nav>
-  <div class="sb-footer">
-    <button class="sb-collapse-btn" onclick="toggleSidebar()">
-      <i class="fas fa-chevron-left sb-collapse-icon" id="collapseIcon"></i>
-      <span class="sb-collapse-label">Collapse Sidebar</span>
-    </button>
-    <button class="sb-logout-btn" onclick="openModal('logoutModal')">
-      <i class="fas fa-sign-out-alt"></i><span class="sb-logout-label">Logout</span>
-    </button>
   </div>
-</aside>
-<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+  <div class="menu-section">
+    <div class="menu-item logout-item" onclick="openModal('logoutModal')">
+      <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+    </div>
+  </div>
+</div>
 
 <!-- ════ TOPBAR ════ -->
 <header class="topbar">
   <div class="topbar-left">
-    <button class="hamburger-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="hamburger-menu" id="hamburgerMenu" onclick="toggleMenu()">
+      <div class="hamburger-line"></div>
+      <div class="hamburger-line"></div>
+      <div class="hamburger-line"></div>
+    </div>
     <div>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <div class="topbar-sub" id="topbarSub">K3K3 Platform Overview</div>
@@ -383,7 +414,6 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
 <div class="dash-section active" id="sec-dashboard">
   <div class="hero">
     <div>
-      <div class="hero-greeting" id="adminGreeting">GOOD MORNING</div>
       <div class="hero-title">Platform <span>Command</span> Center</div>
       <div class="hero-sub">Here's what's happening with K3K3 right now.</div>
     </div>
@@ -427,19 +457,6 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
   </div>
 </div>
 
-<!-- ──── LIVE ──── -->
-<div class="dash-section" id="sec-live">
-  <div class="sec-header"><div><div class="sec-title">Live Activity</div><div class="sec-sub">Real-time platform activity</div></div><button class="btn-secondary" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
-  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
-    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-motorcycle"></i></div><span class="kpi-trend up" style="font-size:.65rem">LIVE</span></div><div class="kpi-val" id="liveOnline">—</div><div class="kpi-lbl">Riders Online</div></div>
-    <div class="kpi-card yellow"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-circle-notch"></i></div><span class="kpi-trend up" style="font-size:.65rem">ACTIVE</span></div><div class="kpi-val" id="liveActive">—</div><div class="kpi-lbl">Active Trips</div></div>
-    <div class="kpi-card teal"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-clock"></i></div><span class="kpi-trend nt">AVG</span></div><div class="kpi-val">~8m</div><div class="kpi-lbl">Avg Trip Time</div></div>
-  </div>
-  <div class="content-grid">
-    <div class="card"><div class="card-header"><div><div class="card-title">Active Trips</div><div class="card-sub">In progress now</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Passenger</th><th>Rider</th><th>Route</th><th>Fare</th></tr></thead><tbody id="liveTrips"><tr><td colspan="5"><div class="empty-state"><i class="fas fa-satellite-dish"></i><p>No active trips</p></div></td></tr></tbody></table></div></div>
-    <div class="card"><div class="card-header"><div><div class="card-title">Riders Online</div><div class="card-sub">Available now</div></div></div><div class="card-body" style="padding:8px 16px" id="liveRiders"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
-  </div>
-</div>
 
 <!-- ──── TRIPS ──── -->
 <div class="dash-section" id="sec-trips">
@@ -523,43 +540,6 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
   </div>
 </div>
 
-<!-- ──── SETTINGS ──── -->
-<div class="dash-section" id="sec-settings">
-  <div class="sec-header"><div><div class="sec-title">System Settings</div><div class="sec-sub">Platform configuration</div></div></div>
-  <div class="content-grid">
-    <div class="card"><div class="card-header"><div><div class="card-title">Platform Config</div></div></div>
-      <div class="card-body"><div style="display:grid;gap:14px">
-        <div><label class="form-label">API Base URL</label><input class="form-input" id="settingApi" value="http://localhost:8810"></div>
-        <div><label class="form-label">Base Fare (₵)</label><input class="form-input" type="number" id="settingFare" value="3"></div>
-        <div><label class="form-label">Rate per km (₵)</label><input class="form-input" type="number" id="settingRate" value="1.8" step="0.1"></div>
-        <div><label class="form-label">Platform Commission (%)</label><input class="form-input" type="number" id="settingComm" value="10"></div>
-        <button onclick="saveSettings()" style="display:flex;align-items:center;gap:7px;padding:11px 22px;border-radius:var(--r-full);background:var(--yellow);color:var(--bg);font-family:inherit;font-size:.85rem;font-weight:800;border:none;cursor:pointer;transition:all .18s" onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--yellow-dk')" onmouseout="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--yellow')"><i class="fas fa-save"></i> Save Settings</button>
-      </div></div>
-    </div>
-    <div>
-      <div class="card" style="margin-bottom:14px"><div class="card-header"><div><div class="card-title">Admin Account</div></div></div>
-        <div class="card-body">
-          <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px">
-            <div class="sb-admin-av" style="width:52px;height:52px;font-size:1.2rem" id="settAdminAv">A</div>
-            <div><div style="font-size:1rem;font-weight:800;color:var(--white)" id="settAdminName">Admin</div><div style="font-size:.72rem;color:var(--muted);margin-top:2px">Super Admin · K3K3</div></div>
-          </div>
-          <div style="display:grid;gap:10px">
-            <div><label class="form-label">Display Name</label><input class="form-input" id="adminDisplayName" placeholder="Enter admin name"></div>
-            <button class="btn-secondary" style="width:100%;justify-content:center" onclick="updateAdminName()"><i class="fas fa-user-edit"></i> Update Name</button>
-            <button class="btn-secondary" style="width:100%;justify-content:center;color:#F87171;border-color:rgba(239,68,68,.25)" onclick="openModal('logoutModal')"><i class="fas fa-sign-out-alt"></i> Logout</button>
-          </div>
-        </div>
-      </div>
-      <div class="card"><div class="card-header"><div><div class="card-title">Quick Links</div></div></div>
-        <div class="card-body" style="display:grid;gap:8px">
-          <a href="adminlogin.html" class="qa-link"><i class="fas fa-sign-in-alt" style="color:var(--yellow)"></i> Admin Login Page</a>
-          <a href="../passenger/dashboard.html" class="qa-link"><i class="fas fa-user" style="color:var(--blue)"></i> Passenger Dashboard</a>
-          <a href="../rider/dashboard.html" class="qa-link"><i class="fas fa-motorcycle" style="color:var(--green)"></i> Rider Dashboard</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 </main>
 
@@ -600,12 +580,41 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
   </div>
 </div>
 
+<!-- Rider Detail Modal -->
+<div class="modal-backdrop" id="riderDetailModal">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">Rider Details</div>
+      <div class="modal-sub">View rider information and statistics</div>
+    </div>
+    <div id="riderDetailContent"></div>
+    <div class="modal-footer">
+      <button class="modal-btn primary" onclick="closeModal('riderDetailModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Application Detail Modal -->
+<div class="modal-backdrop" id="appDetailModal">
+  <div class="modal-box" style="max-width:600px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header">
+      <div class="modal-title">Application Details</div>
+      <div class="modal-sub">View full application information and documents</div>
+    </div>
+    <div id="appDetailContent"></div>
+    <div class="modal-footer">
+      <button class="modal-btn primary" onclick="closeModal('appDetailModal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Image lightbox -->
-<div class="modal-backdrop" id="imgLightbox" onclick="closeModal('imgLightbox')" style="align-items:center;justify-content:center;display:none">
-  <div style="max-width:90vw;max-height:90vh;position:relative" onclick="event.stopPropagation()">
-    <button onclick="closeModal('imgLightbox')" style="position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border-2);color:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center"><i class="fas fa-times"></i></button>
-    <img id="lightboxImg" src="" alt="Document" style="max-width:90vw;max-height:85vh;border-radius:var(--r-lg);display:block">
-    <div id="lightboxCaption" style="text-align:center;margin-top:10px;font-size:.8rem;color:var(--muted-2)"></div>
+<div class="modal-backdrop" id="imgLightbox" onclick="closeLightbox()" style="align-items:center;justify-content:center;display:none">
+  <div style="max-width:95vw;max-height:95vh;position:relative;padding:20px" onclick="event.stopPropagation()">
+    <button onclick="closeLightbox()" style="position:absolute;top:-10px;right:-10px;width:36px;height:36px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border-2);color:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:10"><i class="fas fa-times"></i></button>
+    <button onclick="closeLightbox()" style="position:absolute;top:-10px;left:-10px;width:36px;height:36px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border-2);color:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:10"><i class="fas fa-arrow-left"></i></button>
+    <img id="lightboxImg" src="" alt="Document" style="max-width:100%;max-height:90vh;border-radius:var(--r-lg);display:block;object-fit:contain">
+    <div id="lightboxCaption" style="text-align:center;margin-top:12px;font-size:.85rem;color:var(--muted-2);word-break:break-word"></div>
   </div>
 </div>
 
@@ -614,29 +623,35 @@ body.sb-collapsed .sb-nav-item[data-tip]:hover::before{content:'';position:absol
 <script>
 /* ════ K3K3 ADMIN DASHBOARD JS ════ */
 const API='http://localhost:8810';
-let curSec='dashboard',approveId=null,declineId=null;
+let curSec='dashboard',approveId=null,declineId=null,deleteId=null;
 let allTrips=[],allRiders=[],allApps=[];
 
 const STUB_TRIPS=[
-  {id:'T-001',passenger_fname:'Kwame',rider_name:'Kofi A.',pickup_label:'Ho Market',dest_label:'Ho Polytechnic',fare_estimate:5.00,status:'completed',created_at:'2025-06-24T08:32:00Z'},
-  {id:'T-002',passenger_fname:'Ama',rider_name:'Yaw B.',pickup_label:'Bus Terminal',dest_label:'Hospital',fare_estimate:8.00,status:'completed',created_at:'2025-06-24T10:15:00Z'},
-  {id:'T-003',passenger_fname:'Kofi',rider_name:'Abena K.',pickup_label:'Ho Central',dest_label:'Dome Market',fare_estimate:6.50,status:'active',created_at:'2025-06-24T11:00:00Z'},
-  {id:'T-004',passenger_fname:'Abena',rider_name:'Kojo D.',pickup_label:'Volta Hotel',dest_label:'SSNIT Office',fare_estimate:4.50,status:'pending',created_at:'2025-06-24T11:20:00Z'},
-  {id:'T-005',passenger_fname:'Yaw',rider_name:'—',pickup_label:'Agortime Junction',dest_label:'Ho Market',fare_estimate:7.00,status:'cancelled',created_at:'2025-06-24T09:45:00Z'},
+  {id:'K3T-001',passenger_fname:'Kwame',passenger_lname:'Mensah',rider_fname:'Kofi',rider_lname:'Asante',rider_name:'Kofi A.',vehicle_type:'Bajaj RE',pickup_label:'Ho Market',dest_label:'Ho Polytechnic',fare_estimate:5.00,status:'completed',created_at:'2025-08-01T08:32:00Z'},
+  {id:'K3T-002',passenger_fname:'Ama',passenger_lname:'Boateng',rider_fname:'Yaw',rider_lname:'Boateng',rider_name:'Yaw B.',vehicle_type:'TVS King',pickup_label:'Bus Terminal',dest_label:'Hospital',fare_estimate:8.00,status:'completed',created_at:'2025-08-01T10:15:00Z'},
+  {id:'K3T-003',passenger_fname:'Kofi',passenger_lname:'Osei',rider_fname:'Abena',rider_lname:'Kumi',rider_name:'Abena K.',vehicle_type:'Bajaj RE',pickup_label:'Ho Central',dest_label:'Dome Market',fare_estimate:6.50,status:'active',created_at:'2025-08-02T11:00:00Z'},
+  {id:'K3T-004',passenger_fname:'Abena',passenger_lname:'Tetteh',rider_fname:'Kojo',rider_lname:'Doe',rider_name:'Kojo D.',vehicle_type:'Piaggio Ape',pickup_label:'Volta Hotel',dest_label:'SSNIT Office',fare_estimate:4.50,status:'pending',created_at:'2025-08-02T11:20:00Z'},
+  {id:'K3T-005',passenger_fname:'Yaw',passenger_lname:'Darko',rider_fname:'Esi',rider_lname:'Mensah',rider_name:'Esi M.',vehicle_type:'TVS King',pickup_label:'Agortime Junction',dest_label:'Ho Market',fare_estimate:7.00,status:'cancelled',created_at:'2025-08-02T09:45:00Z'},
+  {id:'K3T-006',passenger_fname:'Grace',passenger_lname:'Nyarko',rider_fname:'Kofi',rider_lname:'Asante',rider_name:'Kofi A.',vehicle_type:'Bajaj RE',pickup_label:'Kpetoe',dest_label:'Ho Main Station',fare_estimate:12.00,status:'completed',created_at:'2025-07-31T14:30:00Z'},
+  {id:'K3T-007',passenger_fname:'Daniel',passenger_lname:'Asiedu',rider_fname:'Yaw',rider_lname:'Boateng',rider_name:'Yaw B.',vehicle_type:'TVS King',pickup_label:'Ho Teaching Hospital',dest_label:'Ho Airport',fare_estimate:9.50,status:'completed',created_at:'2025-07-31T16:45:00Z'},
+  {id:'K3T-008',passenger_fname:'Rebecca',passenger_lname:'Owusu',rider_fname:'Abena',rider_lname:'Kumi',rider_name:'Abena K.',vehicle_type:'Bajaj RE',pickup_label:'Ho Sports Stadium',dest_label:'Ho Mall',fare_estimate:3.50,status:'completed',created_at:'2025-07-30T09:20:00Z'},
 ];
 const STUB_RIDERS=[
-  {id:'R-001',fname:'Kofi',lname:'Asante',vehicle_type:'Bajaj RE',is_available:true,on_trip:false,rating:4.9},
-  {id:'R-002',fname:'Yaw',lname:'Boateng',vehicle_type:'TVS King',is_available:true,on_trip:true,rating:4.8},
-  {id:'R-003',fname:'Abena',lname:'Kumi',vehicle_type:'Bajaj RE',is_available:false,on_trip:false,rating:4.7},
-  {id:'R-004',fname:'Kojo',lname:'Doe',vehicle_type:'Piaggio Ape',is_available:true,on_trip:false,rating:4.9},
-  {id:'R-005',fname:'Esi',lname:'Mensah',vehicle_type:'TVS King',is_available:false,on_trip:false,rating:4.6},
+  {id:'K3R-001',fname:'Kofi',lname:'Asante',email:'kofi.asante@email.com',phone:'0241234567',vehicle_type:'Bajaj RE',vehicle_plate:'GR-1234',is_available:true,on_trip:false,rating:4.9,trips_completed:156,total_earnings:145.50,joined:'2025-04-15'},
+  {id:'K3R-002',fname:'Yaw',lname:'Boateng',email:'yaw.boateng@email.com',phone:'0242345678',vehicle_type:'TVS King',vehicle_plate:'GR-5678',is_available:true,on_trip:true,rating:4.8,trips_completed:134,total_earnings:112.00,joined:'2025-03-20'},
+  {id:'K3R-003',fname:'Abena',lname:'Kumi',email:'abena.kumi@email.com',phone:'0243456789',vehicle_type:'Bajaj RE',vehicle_plate:'GR-9012',is_available:false,on_trip:false,rating:4.7,trips_completed:98,total_earnings:87.25,joined:'2025-05-10'},
+  {id:'K3R-004',fname:'Kojo',lname:'Doe',email:'kojo.doe@email.com',phone:'0244567890',vehicle_type:'Piaggio Ape',vehicle_plate:'GR-3456',is_available:true,on_trip:false,rating:4.9,trips_completed:142,total_earnings:98.75,joined:'2025-02-28'},
+  {id:'K3R-005',fname:'Esi',lname:'Mensah',email:'esi.mensah@email.com',phone:'0245678901',vehicle_type:'TVS King',vehicle_plate:'GR-7890',is_available:false,on_trip:false,rating:4.6,trips_completed:76,total_earnings:65.50,joined:'2025-06-01'},
+  {id:'K3R-006',fname:'Daniel',lname:'Owusu',email:'daniel.owusu@email.com',phone:'0246789012',vehicle_type:'Bajaj RE',vehicle_plate:'GR-1122',is_available:true,on_trip:false,rating:4.8,trips_completed:189,total_earnings:167.00,joined:'2025-01-15'},
+  {id:'K3R-007',fname:'Grace',lname:'Nyarko',email:'grace.nyarko@email.com',phone:'0247890123',vehicle_type:'TVS King',vehicle_plate:'GR-3344',is_available:false,on_trip:false,rating:4.7,trips_completed:112,total_earnings:95.25,joined:'2025-04-01'},
+  {id:'K3R-008',fname:'Samuel',lname:'Adjei',email:'samuel.adjei@email.com',phone:'0248901234',vehicle_type:'Piaggio Ape',vehicle_plate:'GR-5566',is_available:true,on_trip:false,rating:4.9,trips_completed:201,total_earnings:178.50,joined:'2025-01-01'},
 ];
 const STUB_APPS=[
-  {id:'A-001',fname:'Emmanuel',lname:'Agyei',phone:'0241234567',vehicle_type:'Bajaj RE',status:'pending',created_at:'2025-06-23'},
-  {id:'A-002',fname:'Grace',lname:'Nyarko',phone:'0551234567',vehicle_type:'TVS King',status:'pending',created_at:'2025-06-22'},
-  {id:'A-003',fname:'Daniel',lname:'Asiedu',phone:'0261234567',vehicle_type:'Piaggio',status:'pending',created_at:'2025-06-21'},
-  {id:'A-004',fname:'Rebecca',lname:'Tetteh',phone:'0301234567',vehicle_type:'Bajaj RE',status:'approved',created_at:'2025-06-20'},
-  {id:'A-005',fname:'Isaac',lname:'Osei',phone:'0271234567',vehicle_type:'TVS King',status:'rejected',created_at:'2025-06-19'},
+  {id:1,app_ref:'APP-2025-001',first_name:'Emmanuel',last_name:'Agyei',email:'emmanuel.agyei@email.com',phone:'0241234567',date_of_birth:'1990-05-15',gender:'Male',nationality:'Ghanaian',address:'Ho Main Street',city:'Ho',about:'Experienced rider with 3 years',ghana_card_number:'GHA-123456789-0',license_number:'DL-2020-12345',license_expiry:'2026-12-31',vehicle_type:'Bajaj RE',vehicle_seats:3,vehicle_make:'Bajaj',vehicle_model:'RE 4-Stroke',vehicle_year:2022,vehicle_plate:'GR-9999',vehicle_color:'Yellow',experience:'3 years',status:'pending_review',created_at:'2025-08-01',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card.jpg'},{type:'image',name:'license.jpg',url:'/docs/license.jpg'},{type:'pdf',name:'insurance.pdf',url:'/docs/insurance.pdf'}]},
+  {id:2,app_ref:'APP-2025-002',first_name:'Beatrice',last_name:'Owusu',email:'beatrice.owusu@email.com',phone:'0242345678',date_of_birth:'1992-08-20',gender:'Female',nationality:'Ghanaian',address:'Kpetoe Road',city:'Ho',about:'Reliable and punctual rider',ghana_card_number:'GHA-987654321-1',license_number:'DL-2021-67890',license_expiry:'2027-06-30',vehicle_type:'TVS King',vehicle_seats:4,vehicle_make:'TVS',vehicle_model:'King 4-Stroke',vehicle_year:2023,vehicle_plate:'GR-8888',vehicle_color:'Red',experience:'2 years',status:'pending_review',created_at:'2025-08-02',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card2.jpg'},{type:'pdf',name:'license.pdf',url:'/docs/license2.pdf'}]},
+  {id:3,app_ref:'APP-2025-003',first_name:'Caleb',last_name:'Mensa',email:'caleb.mensa@email.com',phone:'0243456789',date_of_birth:'1988-03-10',gender:'Male',nationality:'Ghanaian',address:'Ho Polytechnic Area',city:'Ho',about:'Former taxi driver transitioning to tricycle',ghana_card_number:'GHA-456789123-2',license_number:'DL-2019-54321',license_expiry:'2025-09-15',vehicle_type:'Piaggio Ape',vehicle_seats:3,vehicle_make:'Piaggio',vehicle_model:'Ape City',vehicle_year:2021,vehicle_plate:'GR-7777',vehicle_color:'Blue',experience:'5 years',status:'approved',created_at:'2025-07-28',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card3.jpg'},{type:'image',name:'license.jpg',url:'/docs/license3.jpg'}]},
+  {id:4,app_ref:'APP-2025-004',first_name:'Dorothy',last_name:'Adjei',email:'dorothy.adjei@email.com',phone:'0244567890',date_of_birth:'1995-11-25',gender:'Female',nationality:'Ghanaian',address:'Volta Hotel Area',city:'Ho',about:'New rider looking to start career',ghana_card_number:'GHA-789123456-3',license_number:'DL-2024-11111',license_expiry:'2029-01-20',vehicle_type:'Bajaj RE',vehicle_seats:3,vehicle_make:'Bajaj',vehicle_model:'RE 4-Stroke',vehicle_year:2024,vehicle_plate:'GR-6666',vehicle_color:'Green',experience:'0 years',status:'rejected',created_at:'2025-07-25',admin_notes:'Insufficient experience',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card4.jpg'}]},
+  {id:5,app_ref:'APP-2025-005',first_name:'Ernest',last_name:'Kofi',email:'ernest.kofi@email.com',phone:'0245678901',date_of_birth:'1985-07-08',gender:'Male',nationality:'Ghanaian',address:'Ho Market Area',city:'Ho',about:'Experienced delivery rider',ghana_card_number:'GHA-321654987-4',license_number:'DL-2018-22222',license_expiry:'2026-03-31',vehicle_type:'TVS King',vehicle_seats:4,vehicle_make:'TVS',vehicle_model:'King 4-Stroke',vehicle_year:2020,vehicle_plate:'GR-5555',vehicle_color:'White',experience:'4 years',status:'pending_review',created_at:'2025-08-02',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card5.jpg'},{type:'image',name:'license.jpg',url:'/docs/license5.jpg'},{type:'pdf',name:'insurance.pdf',url:'/docs/insurance5.pdf'}]},
 ];
 const STUB_PASS=[
   {fname:'Kwame',lname:'Mensah',email:'kwame@gmail.com',trips:5,joined:'Jun 2025'},
@@ -651,36 +666,51 @@ const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
 
 async function apiFetch(p){try{const r=await fetch(API+p,{signal:AbortSignal.timeout(4000)});if(!r.ok)return null;return await r.json();}catch{return null;}}
 
-const SEC_T={dashboard:'Dashboard',live:'Live Activity',trips:'All Trips',riders:'Riders',passengers:'Passengers',applications:'Applications',payments:'Payments',settings:'Settings'};
-const SEC_S={dashboard:'K3K3 Platform Overview',live:'Real-time platform activity',trips:'Complete history',riders:'Rider management',passengers:'Registered users',applications:'Application review',payments:'Revenue & transactions',settings:'Platform configuration'};
+const SEC_T={dashboard:'Dashboard',trips:'All Trips',riders:'Riders',passengers:'Passengers',applications:'Applications',payments:'Payments'};
+const SEC_S={dashboard:'K3K3 Platform Overview',trips:'Complete history',riders:'Rider management',passengers:'Registered users',applications:'Application review',payments:'Revenue & transactions'};
 
 function showSec(name){
   document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('active'));
   el('sec-'+name)?.classList.add('active');
   curSec=name;
-  document.querySelectorAll('.sb-nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.menu-item').forEach(n=>n.classList.remove('active'));
   el('nav'+name.charAt(0).toUpperCase()+name.slice(1))?.classList.add('active');
   setEl('topbarTitle',SEC_T[name]||name);
   setEl('topbarSub',SEC_S[name]||'');
-  closeSidebar();
+  closeMenu();
   window.scrollTo({top:0,behavior:'smooth'});
-  const loaders={dashboard:loadDashboard,live:loadLive,trips:()=>loadAllTrips('all'),riders:()=>loadRiders('all'),passengers:loadPassengers,applications:()=>loadApps('all'),payments:loadPayments};
+  
+  // Stop all polling
+  stopDashboardPolling();
+  stopLivePolling();
+  
+  // Start appropriate polling based on section
+  if(name==='dashboard'){
+    startDashboardPolling();
+  }else if(name==='live'){
+    startLivePolling();
+  }
+  
+  const loaders={dashboard:loadDashboard,trips:()=>loadAllTrips('all'),riders:()=>loadRiders('all'),passengers:loadPassengers,applications:()=>loadApps('all'),payments:loadPayments};
   loaders[name]?.();
 }
 
-/* ── Sidebar ── */
-function toggleSidebar(){
-  const sb=el('sidebar'),ov=el('sbOverlay'),mob=window.innerWidth<=768;
-  if(mob){const o=sb.classList.contains('open');sb.classList.toggle('open',!o);ov.classList.toggle('show',!o);}
-  else{const c=document.body.classList.toggle('sb-collapsed');localStorage.setItem('k3k3_admin_sb',c?'1':'0');updateCollapseIcon(c);}
+/* ── Dropdown Menu ── */
+function toggleMenu(){
+  const menu=el('dropdownMenu'),hamb=el('hamburgerMenu');
+  menu.classList.toggle('active');
+  hamb.classList.toggle('active');
 }
-function updateCollapseIcon(c){
-  const i=el('collapseIcon'),l=document.querySelector('.sb-collapse-label');
-  if(i)i.style.transform=c?'rotate(180deg)':'rotate(0deg)';
-  if(l)l.textContent=c?'Expand Sidebar':'Collapse Sidebar';
+function closeMenu(){
+  el('dropdownMenu')?.classList.remove('active');
+  el('hamburgerMenu')?.classList.remove('active');
 }
-function restoreSB(){if(window.innerWidth<=768)return;if(localStorage.getItem('k3k3_admin_sb')==='1'){document.body.classList.add('sb-collapsed');updateCollapseIcon(true);}}
-function closeSidebar(){el('sidebar').classList.remove('open');el('sbOverlay').classList.remove('show');}
+document.addEventListener('click',e=>{
+  const menu=el('dropdownMenu'),hamb=el('hamburgerMenu');
+  if(menu&&hamb&&!menu.contains(e.target)&&!hamb.contains(e.target)){
+    closeMenu();
+  }
+});
 
 /* ── Modals ── */
 function openModal(id){el(id)?.classList.add('show')}
@@ -699,34 +729,55 @@ function showToast(msg,type='info'){
 /* ── Admin name ── */
 function loadAdminName(){
   const n=localStorage.getItem('k3k3_admin_name')||'Admin';const i=n.charAt(0).toUpperCase();
-  ['sbAdminAv','topAdminAv','settAdminAv'].forEach(id=>setEl(id,i));
-  ['sbAdminName','topAdminName','settAdminName'].forEach(id=>setEl(id,n));
+  ['menuAvatar','topAdminAv'].forEach(id=>setEl(id,i));
+  ['menuUserName','topAdminName'].forEach(id=>setEl(id,n));
   const inp=el('adminDisplayName');if(inp)inp.value=n;
 }
 function updateAdminName(){const v=el('adminDisplayName')?.value?.trim();if(!v){showToast('Enter a name','error');return;}localStorage.setItem('k3k3_admin_name',v);loadAdminName();showToast('Name updated ✓','success');}
-function saveSettings(){localStorage.setItem('k3k3_admin_api',el('settingApi')?.value||API);showToast('Settings saved ✓','success');}
 function doLogout(){closeModal('logoutModal');showToast('Logging out…','info');setTimeout(()=>window.location.href='adminlogin.html',900);}
 
-function setGreeting(){const h=new Date().getHours();setEl('adminGreeting',h<12?'GOOD MORNING':h<17?'GOOD AFTERNOON':'GOOD EVENING');}
 
 /* ── Dashboard ── */
+let dashboardPollingInterval=null;
 async function loadDashboard(){
   const [trips,riders,apps]=await Promise.all([apiFetch('/trips'),apiFetch('/riders'),apiFetch('/applications')]);
   allTrips=trips||STUB_TRIPS;allRiders=riders||STUB_RIDERS;allApps=apps||STUB_APPS;
+  
+  // Fallback to localStorage for applications only (rider form integration)
+  if(!allApps.length){
+    try{
+      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
+      if(localApps.length)allApps=localApps;
+    }catch(e){}
+  }
+  
   const comp=allTrips.filter(t=>t.status==='completed');
   const active=allTrips.filter(t=>t.status==='active');
   const online=allRiders.filter(r=>r.is_available);
-  const pending=allApps.filter(a=>a.status==='pending');
+  const pending=allApps.filter(a=>a.status==='pending'||a.status==='pending_review');
   const rev=comp.reduce((s,t)=>s+parseFloat(t.fare_estimate||0),0);
   setEl('heroOnline',online.length);setEl('heroActive',active.length);setEl('heroRev',rev.toFixed(0));
   setEl('kpiTrips',allTrips.length);setEl('kpiTripsSub',`${comp.length} completed · ${active.length} active`);
   setEl('kpiRev','₵'+rev.toFixed(2));setEl('kpiRevSub','₵'+(rev*0.1).toFixed(2)+' platform fee');
   setEl('kpiRiders',allRiders.length);setEl('kpiRidersSub',`${online.length} online · ${allRiders.filter(r=>r.on_trip).length} on trip`);
   setEl('kpiPass',STUB_PASS.length);setEl('kpiComp',comp.length);
-  setEl('kpiCompRate',Math.round(comp.length/Math.max(allTrips.length,1)*100)+'% completion rate');
+  setEl('kpiCompRate',allTrips.length?Math.round(comp.length/allTrips.length*100)+'% completion rate':'0%');
   setEl('kpiApps',pending.length);setEl('appsBadge',pending.length);
   el('liveBadge').style.display=active.length?'':'none';setEl('liveBadge',active.length);
   renderRecentTrips(allTrips.slice(0,6));renderActivity();
+}
+
+function startDashboardPolling(){
+  stopDashboardPolling();
+  loadDashboard();
+  dashboardPollingInterval=setInterval(()=>loadDashboard(),30000); // Poll every 30 seconds
+}
+
+function stopDashboardPolling(){
+  if(dashboardPollingInterval){
+    clearInterval(dashboardPollingInterval);
+    dashboardPollingInterval=null;
+  }
 }
 
 function renderRecentTrips(data){
@@ -748,6 +799,7 @@ function renderActivity(){
 }
 
 /* ── Live ── */
+let livePollingInterval=null;
 async function loadLive(){
   if(!allRiders.length)allRiders=await apiFetch('/riders')||STUB_RIDERS;
   if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
@@ -760,6 +812,19 @@ async function loadLive(){
   if(lr)lr.innerHTML=online.length?online.map(r=>`<div class="list-row"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'}</div></div><div class="list-badge ${r.on_trip?'on-trip':'online'}"><i class="fas fa-circle" style="font-size:.5rem"></i>${r.on_trip?'On Trip':'Available'}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders online</p></div>';
 }
 
+function startLivePolling(){
+  stopLivePolling();
+  loadLive();
+  livePollingInterval=setInterval(()=>loadLive(),15000); // Poll every 15 seconds for live section
+}
+
+function stopLivePolling(){
+  if(livePollingInterval){
+    clearInterval(livePollingInterval);
+    livePollingInterval=null;
+  }
+}
+
 /* ── All Trips ── */
 async function loadAllTrips(filter){
   if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
@@ -767,7 +832,42 @@ async function loadAllTrips(filter){
   setEl('allTripsSub',`${data.length} trip${data.length!==1?'s':''}`);
   const tb=el('allTripsTbody');if(!tb)return;
   if(!data.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="fas fa-route"></i><p>No trips found</p></div></td></tr>';return;}
-  tb.innerHTML=data.map(t=>{const d=t.created_at?new Date(t.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';return`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.75rem;color:var(--muted)">${d}</td><td>${t.passenger_fname||'—'}</td><td>${t.rider_name||'—'}</td><td style="font-size:.8rem;font-weight:600">${t.pickup_label||'—'} → ${t.dest_label||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`}).join('');
+  
+  // Group trips by date
+  const groupedByDate={};
+  data.forEach(t=>{
+    const dateKey=t.created_at?new Date(t.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Unknown Date';
+    if(!groupedByDate[dateKey])groupedByDate[dateKey]=[];
+    groupedByDate[dateKey].push(t);
+  });
+  
+  // Render grouped trips
+  let html='';
+  Object.keys(groupedByDate).sort((a,b)=>new Date(b)-new Date(a)).forEach(date=>{
+    html+=`<tr class="date-row"><td colspan="7"><div class="date-group-header"><i class="fas fa-calendar-day"></i> ${date}</div></td></tr>`;
+    groupedByDate[date].forEach(t=>{
+      const time=t.created_at?new Date(t.created_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—';
+      html+=`<tr>
+        <td><span class="tid">${t.id||'—'}</span></td>
+        <td style="font-size:.75rem;color:var(--muted)">${time}</td>
+        <td>
+          <div style="font-weight:600">${t.passenger_fname||'—'} ${t.passenger_lname||''}</div>
+          <div style="font-size:.7rem;color:var(--muted)">Passenger</div>
+        </td>
+        <td>
+          <div style="font-weight:600">${t.rider_fname||t.rider_name||'—'} ${t.rider_lname||''}</div>
+          <div style="font-size:.7rem;color:var(--muted)">${t.vehicle_type||'Rider'}</div>
+        </td>
+        <td style="font-size:.8rem;font-weight:600">
+          <div style="color:var(--green)"><i class="fas fa-map-marker-alt"></i> ${t.pickup_label||'—'}</div>
+          <div style="color:var(--red);margin-top:2px"><i class="fas fa-flag-checkered"></i> ${t.dest_label||'—'}</div>
+        </td>
+        <td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td>
+        <td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td>
+      </tr>`;
+    });
+  });
+  tb.innerHTML=html;
 }
 function filterTrips(f,btn){document.querySelectorAll('#sec-trips .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadAllTrips(f);}
 
@@ -783,9 +883,59 @@ async function loadRiders(filter){
   else if(filter==='on-trip')data=allRiders.filter(r=>r.on_trip);
   setEl('ridersSub',`${data.length} rider${data.length!==1?'s':''}`);
   const rl=el('ridersList');
-  if(rl)rl.innerHTML=data.length?data.map(r=>{const st=r.on_trip?'on-trip':(r.is_available?'online':'offline');const stT=r.on_trip?'On Trip':(r.is_available?'Online':'Offline');return`<div class="list-row"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'} · ⭐ ${r.rating||'—'}</div></div><div class="list-badge ${st}"><i class="fas fa-circle" style="font-size:.5rem"></i>${stT}</div></div>`}).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders found</p></div>';
+  if(rl)rl.innerHTML=data.length?data.map(r=>{const st=r.on_trip?'on-trip':(r.is_available?'online':'offline');const stT=r.on_trip?'On Trip':(r.is_available?'Online':'Offline');return`<div class="list-row" onclick="showRiderDetail('${r.id}')"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div style="flex:1;min-width:0"><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'} · ${r.vehicle_plate||'—'} · ⭐ ${r.rating||'—'}</div></div><div class="list-badge ${st}"><i class="fas fa-circle" style="font-size:.5rem"></i>${stT}</div></div>`}).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders found</p></div>';
   const te=el('topEarners');
-  if(te){const e=[{n:'Kofi Asante',v:145.50},{n:'Yaw Boateng',v:112.00},{n:'Kojo Doe',v:98.75}];te.innerHTML=e.map((x,i)=>`<div class="list-row" style="padding:8px 0"><div style="width:22px;height:22px;border-radius:50%;background:${['var(--yellow)','rgba(255,255,255,.15)','rgba(255,255,255,.08)'][i]};color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800">${i+1}</div><div class="list-av yellow" style="width:30px;height:30px;font-size:.7rem">${x.n.charAt(0)}</div><div><div class="list-name" style="font-size:.8rem">${x.n}</div></div><div style="margin-left:auto;font-size:.85rem;font-weight:800;color:var(--yellow)">₵${x.v.toFixed(2)}</div></div>`).join('');}
+  if(te){const e=[...allRiders].sort((a,b)=>(b.total_earnings||0)-(a.total_earnings||0)).slice(0,3);te.innerHTML=e.map((x,i)=>`<div class="list-row" style="padding:8px 0"><div style="width:22px;height:22px;border-radius:50%;background:${['var(--yellow)','rgba(255,255,255,.15)','rgba(255,255,255,.08)'][i]};color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800">${i+1}</div><div class="list-av yellow" style="width:30px;height:30px;font-size:.7rem">${x.fname?.charAt(0)||'R'}</div><div><div class="list-name" style="font-size:.8rem">${x.fname} ${x.lname}</div></div><div style="margin-left:auto;font-size:.85rem;font-weight:800;color:var(--yellow)">₵${(x.total_earnings||0).toFixed(2)}</div></div>`).join('');}
+}
+
+function showRiderDetail(riderId){
+  const rider=allRiders.find(r=>r.id===riderId);
+  if(!rider)return;
+  const detailHtml=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--yellow);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800">${rider.fname?.charAt(0)||'R'}</div>
+      <div>
+        <div style="font-size:1.2rem;font-weight:800">${rider.fname} ${rider.lname}</div>
+        <div style="font-size:.85rem;color:var(--muted)">ID: ${rider.id}</div>
+        <div style="margin-top:4px"><span class="list-badge ${rider.on_trip?'on-trip':(rider.is_available?'online':'offline')}"><i class="fas fa-circle" style="font-size:.5rem"></i>${rider.on_trip?'On Trip':(rider.is_available?'Online':'Offline')}</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Phone</div>
+        <div style="font-size:.95rem;font-weight:600">${rider.phone||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Email</div>
+        <div style="font-size:.95rem;font-weight:600">${rider.email||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Vehicle</div>
+        <div style="font-size:.95rem;font-weight:600">${rider.vehicle_type||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Plate Number</div>
+        <div style="font-size:.95rem;font-weight:600">${rider.vehicle_plate||'—'}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="text-align:center;padding:12px;background:var(--bg-3);border-radius:var(--r)">
+        <div style="font-size:1.3rem;font-weight:800;color:var(--yellow)">${rider.trips_completed||0}</div>
+        <div style="font-size:.7rem;color:var(--muted)">Trips</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:var(--bg-3);border-radius:var(--r)">
+        <div style="font-size:1.3rem;font-weight:800;color:var(--green)">⭐ ${rider.rating||'—'}</div>
+        <div style="font-size:.7rem;color:var(--muted)">Rating</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:var(--bg-3);border-radius:var(--r)">
+        <div style="font-size:1.3rem;font-weight:800;color:var(--blue)">₵${(rider.total_earnings||0).toFixed(2)}</div>
+        <div style="font-size:.7rem;color:var(--muted)">Earnings</div>
+      </div>
+    </div>
+    <div style="font-size:.8rem;color:var(--muted)">Joined: ${rider.joined||'—'}</div>
+  `;
+  setEl('riderDetailContent',detailHtml);
+  openModal('riderDetailModal');
 }
 function filterRiders(f,btn){document.querySelectorAll('#sec-riders .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadRiders(f);}
 
@@ -801,40 +951,37 @@ async function loadPassengers(){
 
 /* ── Application CSS ── */
 const APP_CSS=`
-.app-card{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-bottom:14px;transition:border-color .18s;animation:fadeUp .22s var(--ease)}
+.app-card{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;transition:border-color .18s;animation:fadeUp .22s var(--ease)}
 .app-card:hover{border-color:var(--border-2)}
-.app-card-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;flex-wrap:wrap}
-.app-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;flex-shrink:0}
+.app-card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.app-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;flex-shrink:0}
 .app-head-info{flex:1;min-width:0}
-.app-name{font-size:1rem;font-weight:800;color:var(--white)}
-.app-ref{font-size:.7rem;color:var(--muted);margin-top:1px;font-family:monospace}
-.app-status-badge{padding:4px 10px;border-radius:999px;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.app-name{font-size:.95rem;font-weight:800;color:var(--white)}
+.app-ref{font-size:.68rem;color:var(--muted);margin-top:1px;font-family:monospace}
+.app-status-badge{padding:4px 10px;border-radius:999px;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
 .app-status-badge.pending_review{background:rgba(249,115,22,.12);color:#FB923C;border:1px solid rgba(249,115,22,.25)}
 .app-status-badge.approved{background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)}
 .app-status-badge.rejected{background:var(--red-lt);color:var(--red);border:1px solid rgba(239,68,68,.25)}
 .app-status-badge.reviewing{background:var(--blue-lt);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
-.app-body{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px}
-@media(max-width:640px){.app-body{grid-template-columns:1fr}}
-.app-field{}
-.app-field-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px}
-.app-field-val{font-size:.82rem;color:var(--text);font-weight:500}
-.app-docs{margin-bottom:14px}
-.app-docs-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
-.app-docs-grid{display:flex;flex-wrap:wrap;gap:8px}
-.app-doc-thumb{width:72px;height:72px;border-radius:var(--r);object-fit:cover;border:1.5px solid var(--border-2);cursor:pointer;transition:all .18s;flex-shrink:0}
-.app-doc-thumb:hover{border-color:var(--yellow);transform:scale(1.05)}
-.app-doc-pdf{width:72px;height:72px;border-radius:var(--r);background:var(--red-lt);border:1.5px solid rgba(239,68,68,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .18s;font-size:.6rem;color:var(--red);font-weight:700;text-transform:uppercase}
-.app-doc-pdf i{font-size:1.4rem}
-.app-doc-pdf:hover{border-color:var(--red);transform:scale(1.05)}
-.app-doc-lbl{font-size:.6rem;color:var(--muted);text-align:center;margin-top:3px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.app-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
-.app-btn-approve{padding:8px 18px;border-radius:var(--r-full);border:none;background:var(--green);color:var(--white);font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-summary{display:flex;gap:16px;margin-bottom:12px;font-size:.78rem;color:var(--muted)}
+.app-summary-item{display:flex;align-items:center;gap:4px}
+.app-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)}
+.app-btn-view{padding:6px 14px;border-radius:var(--r-full);border:1px solid var(--border-2);background:transparent;color:var(--white);font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-view:hover{border-color:var(--yellow);color:var(--yellow)}
+.app-btn-approve{padding:6px 16px;border-radius:var(--r-full);border:none;background:var(--green);color:var(--white);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
 .app-btn-approve:hover{background:#059669;transform:translateY(-1px)}
-.app-btn-decline{padding:8px 18px;border-radius:var(--r-full);border:none;background:var(--red-lt);color:var(--red);font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;border:1px solid rgba(239,68,68,.25);display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-decline{padding:6px 16px;border-radius:var(--r-full);border:none;background:var(--red-lt);color:var(--red);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid rgba(239,68,68,.25);display:flex;align-items:center;gap:6px;transition:all .18s}
 .app-btn-decline:hover{background:var(--red);color:var(--white)}
-.app-btn-delete{padding:8px 14px;border-radius:var(--r-full);border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;margin-left:auto}
+.app-btn-delete{padding:6px 12px;border-radius:var(--r-full);border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;margin-left:auto}
 .app-btn-delete:hover{border-color:var(--red);color:var(--red);background:var(--red-lt)}
-.app-notes{font-size:.76rem;color:var(--muted);padding:8px 10px;background:var(--bg-4);border-radius:var(--r);margin-top:8px;border-left:2px solid var(--border-2)}
+.app-notes{font-size:.72rem;color:var(--muted);padding:6px 10px;background:var(--bg-4);border-radius:var(--r);margin-top:8px;border-left:2px solid var(--border-2)}
+@media(max-width:480px){
+  .app-card{padding:12px}
+  .app-actions{flex-direction:column}
+  .app-actions .app-btn{width:100%;justify-content:center}
+  .app-btn-delete{margin-left:0}
+  .app-summary{flex-wrap:wrap;gap:12px}
+}
 `;
 (function injectAppCss(){const s=document.createElement('style');s.textContent=APP_CSS;document.head.appendChild(s);})();
 
@@ -846,16 +993,27 @@ async function loadApps(filter,force){
   if(!allApps.length||force){
     al.innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div>';
     allApps=await apiFetch('/applications')||[];
+    
+    // Fallback to localStorage for rider form submissions only
+    if(!allApps.length){
+      try{
+        const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
+        if(localApps.length)allApps=localApps;
+      }catch(e){}
+    }
   }
 
-  // Load stats
-  try{
-    const stats=await apiFetch('/applications/stats/summary');
-    if(stats){setEl('appsKpiTotal',stats.total);setEl('appsKpiPending',stats.pending);setEl('appsKpiApproved',stats.approved);setEl('appsKpiRejected',stats.rejected);}
-  }catch{}
+  // Load stats - always calculate from current data
+  if(allApps.length){
+    const total=allApps.length;
+    const pending=allApps.filter(a=>a.status==='pending_review'||a.status==='pending').length;
+    const approved=allApps.filter(a=>a.status==='approved').length;
+    const rejected=allApps.filter(a=>a.status==='rejected').length;
+    setEl('appsKpiTotal',total);setEl('appsKpiPending',pending);setEl('appsKpiApproved',approved);setEl('appsKpiRejected',rejected);
+  }
 
   let data=allApps;
-  if(curAppFilter==='pending_review') data=allApps.filter(a=>a.status==='pending_review');
+  if(curAppFilter==='pending_review') data=allApps.filter(a=>a.status==='pending_review'||a.status==='pending');
   else if(curAppFilter!=='all') data=allApps.filter(a=>a.status===curAppFilter);
 
   if(!data.length){al.innerHTML='<div class="empty-state"><i class="fas fa-user-plus"></i><p>No applications found</p></div>';return;}
@@ -865,45 +1023,31 @@ async function loadApps(filter,force){
 function renderAppCard(a){
   const isPending=a.status==='pending_review'||a.status==='pending';
   const statusLabel=a.status==='pending_review'?'Pending Review':a.status;
-  const docs=(a.documents||[]);
-  const docsHtml=docs.length?`
-    <div class="app-docs">
-      <div class="app-docs-title"><i class="fas fa-paperclip"></i> Documents (${docs.length})</div>
-      <div class="app-docs-grid">
-        ${docs.map(d=>d.type==='image'
-          ?`<div><img class="app-doc-thumb" src="${API}${d.url}" alt="${d.name}" loading="lazy" onclick="openLightbox('${API}${d.url}','${d.name}')" title="${d.name}"><div class="app-doc-lbl">${d.name}</div></div>`
-          :`<div><div class="app-doc-pdf" onclick="window.open('${API}${d.url}','_blank')" title="${d.name}"><i class="fas fa-file-pdf"></i>PDF</div><div class="app-doc-lbl">${d.name}</div></div>`
-        ).join('')}
-      </div>
-    </div>`:'';
+  const docsCount=(a.documents||[]).length;
   const actions=isPending
-    ?`<button class="app-btn-approve" onclick="openApprove(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-check"></i> Approve</button>
+    ?`<button class="app-btn-view" onclick="showAppDetail(${a.id})"><i class="fas fa-eye"></i> View Details</button>
+       <button class="app-btn-approve" onclick="openApprove(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-check"></i> Approve</button>
        <button class="app-btn-decline" onclick="openDecline(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-times"></i> Decline</button>`
-    :'';
+    :`<button class="app-btn-view" onclick="showAppDetail(${a.id})"><i class="fas fa-eye"></i> View Details</button>`;
   return`
 <div class="app-card" id="appCard-${a.id}">
   <div class="app-card-head">
     <div class="app-av">${(a.first_name||a.fname||'A').charAt(0).toUpperCase()}</div>
     <div class="app-head-info">
       <div class="app-name">${a.first_name||a.fname||'—'} ${a.last_name||a.lname||''}</div>
-      <div class="app-ref">${a.app_ref||'—'} · ${a.email||'—'} · ${a.phone||'—'}</div>
-      <div style="margin-top:6px"><span class="app-status-badge ${a.status}">${statusLabel}</span>${a.admin_notes?`<span class="app-notes"><i class="fas fa-comment"></i> ${a.admin_notes}</span>`:''}</div>
+      <div class="app-ref">${a.app_ref||'—'} · ${a.email||'—'}</div>
+      <div style="margin-top:4px"><span class="app-status-badge ${a.status}">${statusLabel}</span>${a.admin_notes?`<span class="app-notes"><i class="fas fa-comment"></i> ${a.admin_notes}</span>`:''}</div>
     </div>
-    <div style="font-size:.72rem;color:var(--muted);white-space:nowrap">${a.submitted_at?new Date(a.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+    <div style="text-align:right">
+      <div style="font-size:.72rem;color:var(--muted)">${a.submitted_at?new Date(a.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
+      ${docsCount?`<div style="font-size:.68rem;color:var(--muted);margin-top:2px"><i class="fas fa-paperclip"></i> ${docsCount} doc${docsCount!==1?'s':''}</div>`:''}
+    </div>
   </div>
-  <div class="app-body">
-    <div class="app-field"><div class="app-field-lbl">Date of Birth</div><div class="app-field-val">${a.date_of_birth||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Gender</div><div class="app-field-val">${a.gender||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Nationality</div><div class="app-field-val">${a.nationality||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Address</div><div class="app-field-val">${a.address||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Vehicle</div><div class="app-field-val">${[a.vehicle_type,a.vehicle_make,a.vehicle_model,a.vehicle_year].filter(Boolean).join(' ')||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Plate · Colour</div><div class="app-field-val">${a.vehicle_plate||'—'} · ${a.vehicle_color||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Licence No.</div><div class="app-field-val">${a.license_number||'—'} (exp: ${a.license_expiry||'—'})</div></div>
-    <div class="app-field"><div class="app-field-lbl">Ghana Card</div><div class="app-field-val">${a.ghana_card_number||'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Experience</div><div class="app-field-val">${a.experience?a.experience+' yr(s)':'—'}</div></div>
-    <div class="app-field"><div class="app-field-lbl">Insurance</div><div class="app-field-val">${a.insurance_provider||'—'} (exp: ${a.insurance_expiry||'—'})</div></div>
+  <div class="app-summary">
+    <div class="app-summary-item"><i class="fas fa-phone"></i> ${a.phone||'—'}</div>
+    <div class="app-summary-item"><i class="fas fa-motorcycle"></i> ${a.vehicle_type||'—'}</div>
+    <div class="app-summary-item"><i class="fas fa-star"></i> ${a.experience||'0'} exp</div>
   </div>
-  ${docsHtml}
   <div class="app-actions">
     ${actions}
     <button class="app-btn-delete" onclick="openDeleteApp(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-trash"></i> Delete</button>
@@ -915,6 +1059,97 @@ function filterApps(f,btn){
   document.querySelectorAll('#sec-applications .ftab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   loadApps(f);
+}
+
+function showAppDetail(appId){
+  const app=allApps.find(a=>a.id===appId);
+  if(!app)return;
+  const docs=(app.documents||[]);
+  const docsHtml=docs.length?`
+    <div style="margin-bottom:20px">
+      <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px"><i class="fas fa-paperclip"></i> Documents (${docs.length})</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px">
+        ${docs.map(d=>d.url
+          ? (d.type==='image'
+            ?`<div style="cursor:pointer" onclick="openLightbox('${API}${d.url}','${d.name}')"><img src="${API}${d.url}" alt="${d.name}" style="width:100%;height:100px;object-fit:cover;border-radius:var(--r);border:1.5px solid var(--border-2);transition:all .18s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border-2)'"><div style="font-size:.65rem;color:var(--muted);text-align:center;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</div></div>`
+            :`<div style="cursor:pointer" onclick="window.open('${API}${d.url}','_blank')" style="width:100%;height:100px;border-radius:var(--r);background:var(--red-lt);border:1.5px solid rgba(239,68,68,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:all .18s" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='rgba(239,68,68,.2)'"><i class="fas fa-file-pdf" style="font-size:1.8rem;color:var(--red)"></i><div style="font-size:.6rem;color:var(--red);font-weight:700;text-transform:uppercase">PDF</div><div style="font-size:.6rem;color:var(--muted);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</div></div>`)
+          : (d.type==='image'
+            ?`<div style="width:100%;height:100px;border-radius:var(--r);background:var(--bg-4);display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:var(--muted);font-size:1.5rem"></i><div style="font-size:.6rem;color:var(--muted);text-align:center;margin-top:4px">${d.name}</div></div>`
+            :`<div style="width:100%;height:100px;border-radius:var(--r);background:var(--bg-4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><i class="fas fa-file-pdf" style="color:var(--muted);font-size:1.5rem"></i><div style="font-size:.6rem;color:var(--muted);font-weight:700;text-transform:uppercase">PDF</div><div style="font-size:.6rem;color:var(--muted);text-align:center;margin-top:2px">${d.name}</div></div>`)
+        ).join('')}
+      </div>
+    </div>`:'';
+  
+  const detailHtml = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800">${(app.first_name||app.fname||'A').charAt(0).toUpperCase()}</div>
+      <div>
+        <div style="font-size:1.2rem;font-weight:800">${app.first_name||app.fname||'—'} ${app.last_name||app.lname||''}</div>
+        <div style="font-size:.85rem;color:var(--muted)">ID: ${app.app_ref||'—'}</div>
+        <div style="margin-top:4px"><span class="app-status-badge ${app.status}">${app.status==='pending_review'?'Pending Review':app.status}</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Email</div>
+        <div style="font-size:.9rem;font-weight:600">${app.email||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Phone</div>
+        <div style="font-size:.9rem;font-weight:600">${app.phone||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Date of Birth</div>
+        <div style="font-size:.9rem;font-weight:600">${app.date_of_birth||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Gender</div>
+        <div style="font-size:.9rem;font-weight:600">${app.gender||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Nationality</div>
+        <div style="font-size:.9rem;font-weight:600">${app.nationality||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Experience</div>
+        <div style="font-size:.9rem;font-weight:600">${app.experience||'—'}</div>
+      </div>
+    </div>
+    <div style="background:var(--bg-3);padding:14px;border-radius:var(--r);margin-bottom:20px">
+      <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Address</div>
+      <div style="font-size:.9rem;font-weight:600">${app.address||'—'}, ${app.city||'—'}</div>
+      ${app.about?`<div style="font-size:.8rem;color:var(--muted);margin-top:6px">${app.about}</div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Ghana Card</div>
+        <div style="font-size:.9rem;font-weight:600">${app.ghana_card_number||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">License No.</div>
+        <div style="font-size:.9rem;font-weight:600">${app.license_number||'—'}</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px">Exp: ${app.license_expiry||'—'}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Vehicle</div>
+        <div style="font-size:.9rem;font-weight:600">${app.vehicle_make||'—'} ${app.vehicle_model||'—'} ${app.vehicle_year||'—'}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Plate · Colour</div>
+        <div style="font-size:.9rem;font-weight:600">${app.vehicle_plate||'—'} · ${app.vehicle_color||'—'}</div>
+      </div>
+    </div>
+    ${docsHtml}
+    <div style="font-size:.75rem;color:var(--muted)">Submitted: ${app.created_at?new Date(app.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—'}</div>
+  `;
+  
+  const contentEl = document.getElementById('appDetailContent');
+  if(contentEl) {
+    contentEl.innerHTML = detailHtml;
+  }
+  openModal('appDetailModal');
 }
 
 function openApprove(id,name){approveId=id;setEl('approveModalSub',`Approve the application from <strong>${name}</strong>? A K3R Rider ID and account will be created.`);openModal('approveModal');}
@@ -966,8 +1201,29 @@ async function confirmDelete(){
     const card=el(`appCard-${deleteId}`);
     if(card){card.style.transition='opacity .3s,transform .3s';card.style.opacity='0';card.style.transform='translateX(20px)';setTimeout(()=>card.remove(),300);}
     allApps=allApps.filter(x=>x.id!==deleteId);
+    
+    // Also remove from localStorage
+    try{
+      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
+      const updatedApps=localApps.filter(x=>x.id!==deleteId);
+      localStorage.setItem('k3k3_applications',JSON.stringify(updatedApps));
+    }catch(e){}
+    
     showToast('Application deleted','success');
-  }catch(e){showToast('Delete failed: '+e.message,'error');}
+    loadApps(curAppFilter,true);
+  }catch(e){
+    // Fallback: delete from localStorage if API fails
+    try{
+      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
+      const updatedApps=localApps.filter(x=>x.id!==deleteId);
+      localStorage.setItem('k3k3_applications',JSON.stringify(updatedApps));
+      allApps=allApps.filter(x=>x.id!==deleteId);
+      const card=el(`appCard-${deleteId}`);
+      if(card){card.style.transition='opacity .3s,transform .3s';card.style.opacity='0';card.style.transform='translateX(20px)';setTimeout(()=>card.remove(),300);}
+      showToast('Application deleted','success');
+      loadApps(curAppFilter,true);
+    }catch(e2){showToast('Delete failed: '+e.message,'error');}
+  }
   deleteId=null;
 }
 
@@ -977,6 +1233,14 @@ function openLightbox(src,caption){
   el('lightboxImg').src=src;
   setEl('lightboxCaption',caption);
   lb.style.display='flex';
+}
+
+function closeLightbox(){
+  const lb=el('imgLightbox');
+  if(!lb)return;
+  lb.style.display='none';
+  el('lightboxImg').src='';
+  setEl('lightboxCaption','');
 }
 
 function copyK3rId(){
@@ -1008,23 +1272,19 @@ async function refreshData(){
   setTimeout(()=>{if(i)i.style.animation='';},700);
 }
 
-@keyframes spin{to{transform:rotate(360deg)}}
-
 /* ── State vars ── */
-let deleteId=null;
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded',()=>{
-  setGreeting();loadAdminName();restoreSB();loadDashboard();
-  setInterval(()=>{if(curSec==='live')loadLive();},30000);
+  loadAdminName();
+  startDashboardPolling(); // Start with dashboard polling
 });
-window.addEventListener('resize',()=>{if(window.innerWidth>768){el('sidebar').classList.remove('open');el('sbOverlay').classList.remove('show');}});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     ['logoutModal','approveModal','declineModal','deleteAppModal','k3rModal','imgLightbox'].forEach(id=>{
       const m=el(id);if(m){m.style.display='';m.classList.remove('show');}
     });
-    closeSidebar();
+    closeMenu();
   }
 });
 </script>
