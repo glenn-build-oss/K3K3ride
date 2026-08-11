@@ -88,7 +88,10 @@
     /* Centre everything */
     body.sidebar-collapsed .sidebar-brand         { justify-content:center; padding:20px 0 16px }
     body.sidebar-collapsed .sidebar-rider         { justify-content:center; padding:12px 0 }
-    body.sidebar-collapsed .online-pill           { padding:7px; border-radius:50%; margin-left:0 }
+    body.sidebar-collapsed .online-pill           { padding:4px; border-radius:12px; margin-left:0; border:none; background:transparent; }
+    body.sidebar-collapsed .online-pill .status-switch { width:28px; height:16px; border-radius:8px; }
+    body.sidebar-collapsed .online-pill .status-switch-knob { width:12px; height:12px; top:2px; left:2px; }
+    body.sidebar-collapsed .online-pill.online .status-switch-knob { left:14px; }
     body.sidebar-collapsed .sidebar-nav           { padding:8px 0 }
     body.sidebar-collapsed .nav-item              { justify-content:center; padding:14px 0; margin:2px 8px; position:relative; border-left:none !important; border-radius:var(--r) }
     body.sidebar-collapsed .nav-item i            { margin:0; font-size:1.1rem; width:auto }
@@ -151,22 +154,33 @@
     .rider-id-label { font-size:.7rem;color:rgba(255,255,255,.35);margin-top:2px }
 
     .online-pill {
-      display:flex;align-items:center;gap:10px;
-      padding:6px 12px;border-radius:var(--r-full);
-      font-size:.75rem;font-weight:700;
+      display:flex;align-items:center;gap:8px;
+      padding:4px 8px;border-radius:12px;
+      font-size:.7rem;font-weight:600;
       cursor:pointer;transition:all .3s var(--ease);margin-left:auto;
       flex-shrink:0;
       background:var(--white);
-      border:2px solid var(--border);
+      border:1px solid var(--border);
     }
-    .online-pill.offline { 
+    .online-pill.offline {
       color:var(--text-2);
       border-color:var(--border);
     }
-    .online-pill.online  { 
-      background:linear-gradient(135deg,rgba(16,185,129,.08) 0%,rgba(16,185,129,.12) 100%);
-      color:#059669;
-      border-color:rgba(16,185,129,.35);
+    .online-pill.online  {
+      background:var(--green);
+      color:var(--white);
+      border-color:var(--green);
+    }
+    .online-pill .status-switch {
+      width:32px;height:18px;
+      border-radius:9px;
+    }
+    .online-pill .status-switch-knob {
+      width:14px;height:14px;
+      top:2px;left:2px;
+    }
+    .online-pill.online .status-switch-knob {
+      left:16px;
     }
     @keyframes pulseDot { 0%,100%{opacity:1}50%{opacity:.4} }
 
@@ -220,12 +234,12 @@
     .sidebar-collapse-btn {
       display:flex;align-items:center;gap:10px;
       width:100%;padding:10px 16px;
-      border:1px solid rgba(255,255,255,.1);border-radius:var(--r);
+      border:1px solid rgba(255,255,255,.1);border-radius:20px;
       background:rgba(255,255,255,.06);color:rgba(255,255,255,.55);
       font-family:inherit;font-size:.82rem;font-weight:600;
-      cursor:pointer;transition:all .18s;margin-bottom:8px;
+      cursor:pointer;transition:all .2s var(--ease);margin-bottom:8px;
     }
-    .sidebar-collapse-btn:hover { background:rgba(255,255,255,.12);color:var(--white) }
+    .sidebar-collapse-btn:hover { background:rgba(255,255,255,.12);color:var(--white);transform:translateX(-2px) }
 
     .sidebar-collapse-icon {
       flex-shrink:0;
@@ -238,13 +252,13 @@
     .sidebar-logout {
       display:flex;align-items:center;gap:12px;
       width:100%;padding:11px 16px;
-      border:1px solid rgba(239,68,68,.22);border-radius:var(--r);
+      border:1px solid rgba(239,68,68,.25);border-radius:20px;
       background:rgba(239,68,68,.1);color:#f87171;
       font-family:inherit;font-size:.875rem;font-weight:600;
-      cursor:pointer;transition:background .18s;
+      cursor:pointer;transition:all .2s var(--ease);
       white-space:nowrap;
     }
-    .sidebar-logout:hover { background:rgba(239,68,68,.18) }
+    .sidebar-logout:hover { background:rgba(239,68,68,.2);transform:translateX(-2px);border-color:rgba(239,68,68,.4) }
     .sidebar-logout-label { white-space:nowrap; overflow:hidden }
 
     /* ════════════════════════════════════════
@@ -279,59 +293,59 @@
 
     .topbar-title { font-size:.875rem;font-weight:600;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
 
-    /* Professional Online/Offline Switch */
+    /* Professional Online/Offline Switch - Uber/Bolt Style */
     .status-toggle {
       display:flex;align-items:center;gap:12px;
-      padding:10px 20px;border-radius:var(--r-full);
-      cursor:pointer;transition:all .3s var(--ease);font-weight:800;font-size:.85rem;
-      border:2px solid;
+      padding:10px 18px;border-radius:24px;
+      cursor:pointer;transition:all .2s var(--ease);font-weight:600;font-size:.85rem;
+      border:1px solid;
       background:var(--white);
-      box-shadow:var(--sh-sm);
+      box-shadow:0 1px 3px rgba(0,0,0,.08);
     }
-    .status-toggle.offline { 
+    .status-toggle.offline {
       color:var(--text-2);
       border-color:var(--border);
     }
     .status-toggle.offline:hover {
       border-color:var(--muted);
-      box-shadow:var(--sh-md);
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
     }
-    .status-toggle.online  { 
-      background:linear-gradient(135deg,rgba(16,185,129,.08) 0%,rgba(16,185,129,.12) 100%);
-      color:#059669;
-      border-color:rgba(16,185,129,.35);
-      box-shadow:0 2px 12px rgba(16,185,129,.15);
+    .status-toggle.online  {
+      background:var(--green);
+      color:var(--white);
+      border-color:var(--green);
+      box-shadow:0 2px 8px rgba(16,185,129,.25);
     }
     .status-toggle.online:hover {
-      box-shadow:0 4px 16px rgba(16,185,129,.25);
-      border-color:rgba(16,185,129,.5);
+      box-shadow:0 4px 12px rgba(16,185,129,.35);
     }
-    
+
     .status-switch {
-      width:48px;height:26px;
-      border-radius:var(--r-full);
+      width:44px;height:24px;
+      border-radius:12px;
       background:var(--surface-2);
-      border:2px solid var(--border);
+      border:1px solid var(--border);
       position:relative;
-      transition:all .3s var(--ease);
+      transition:all .2s var(--ease);
       flex-shrink:0;
     }
     .status-toggle.online .status-switch {
-      background:var(--green);
+      background:var(--white);
       border-color:var(--green);
     }
-    
+
     .status-switch-knob {
-      width:18px;height:18px;
+      width:20px;height:20px;
       border-radius:50%;
-      background:var(--white);
+      background:var(--text-2);
       position:absolute;
       top:2px;left:2px;
-      transition:all .3s var(--ease);
-      box-shadow:0 2px 4px rgba(0,0,0,.15);
+      transition:all .2s var(--ease);
+      box-shadow:0 1px 3px rgba(0,0,0,.15);
     }
     .status-toggle.online .status-switch-knob {
-      left:24px;
+      left:22px;
+      background:var(--green);
     }
     
     .status-label {
@@ -456,12 +470,12 @@
     .card-title { font-size:.93rem;font-weight:800;color:var(--text) }
     .card-sub   { font-size:.7rem;color:var(--text-2);margin-top:1px }
     .card-action {
-      font-size:.76rem;font-weight:600;color:var(--text-2);
-      background:var(--surface);border:1.5px solid var(--border);
-      border-radius:var(--r-full);padding:5px 13px;
-      cursor:pointer;transition:all .18s;white-space:nowrap;
+      font-size:.75rem;font-weight:600;color:var(--text-2);
+      background:var(--white);border:1.5px solid var(--border);
+      border-radius:20px;padding:7px 16px;
+      cursor:pointer;transition:all .2s var(--ease);white-space:nowrap;
     }
-    .card-action:hover { border-color:var(--black);color:var(--text) }
+    .card-action:hover { border-color:var(--black);color:var(--text);background:var(--surface-2);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.1) }
     .card-body { padding:18px 20px }
 
     /* ════════════════════════════════════════
@@ -536,11 +550,12 @@
     .idle-sub   { font-size:.8rem;color:var(--text-2);max-width:210px }
     .go-online-cta {
       display:flex;align-items:center;gap:8px;
-      padding:11px 22px;border-radius:var(--r-full);
-      background:var(--black);color:var(--yellow);
-      font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .22s;
+      padding:12px 22px;border-radius:24px;
+      background:var(--black);color:var(--white);
+      font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .2s var(--ease);
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
     }
-    .go-online-cta:hover { background:var(--black-3);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.25) }
+    .go-online-cta:hover { background:var(--black-2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.25) }
 
     /* ── Request card - Professional Design ── */
     @keyframes slideUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
@@ -627,27 +642,31 @@
     }
     .req-btn {
       display:flex;align-items:center;justify-content:center;gap:8px;
-      padding:14px 16px;border-radius:var(--r-lg);
-      font-family:inherit;font-size:.9rem;font-weight:800;border:none;cursor:pointer;transition:all .3s var(--ease);
+      padding:12px 18px;border-radius:20px;
+      font-family:inherit;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .2s var(--ease);
     }
-    .req-btn.decline { 
-      background:var(--white);color:var(--red);
-      border:2px solid rgba(239,68,68,.3);
+    .req-btn.decline {
+      background:var(--white);color:var(--text-2);
+      border:1.5px solid var(--border);
     }
-    .req-btn.decline:hover { 
-      background:var(--red-lt);
-      border-color:var(--red);
+    .req-btn.decline:hover {
+      background:var(--surface-2);
+      border-color:var(--muted);
+      color:var(--text);
       transform:translateY(-1px);
+      box-shadow:0 2px 8px rgba(0,0,0,.1);
     }
-    .req-btn.accept  { 
-      background:linear-gradient(135deg,var(--black) 0%,var(--black-2) 100%);
-      color:var(--yellow);
-      box-shadow:0 4px 16px rgba(0,0,0,.2);
+    .req-btn.accept  {
+      background:var(--black);
+      color:var(--white);
+      border:1.5px solid var(--black);
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
     }
-    .req-btn.accept:hover { 
-      background:linear-gradient(135deg,var(--black-2) 0%,var(--black-3) 100%);
-      transform:translateY(-2px);
-      box-shadow:0 8px 24px rgba(0,0,0,.3);
+    .req-btn.accept:hover {
+      background:var(--black-2);
+      border-color:var(--black-2);
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(0,0,0,.25);
     }
 
     /* ════════════════════════════════════════
@@ -692,8 +711,8 @@
     .trip-item:last-child { border-bottom:none }
     .trip-item:hover { background:var(--surface) }
     .trip-icon {
-      width:34px;height:34px;border-radius:9px;
-      display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0;
+      width:36px;height:36px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;
     }
     .trip-icon.done   { background:rgba(16,185,129,.1);color:var(--green) }
     .trip-icon.cancel { background:rgba(239,68,68,.08);color:var(--red) }
@@ -752,15 +771,15 @@
       padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;
     }
     .modal-btn {
-      flex:1;padding:12px;border-radius:var(--r-full);
-      font-family:inherit;font-size:.88rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;
+      flex:1;padding:12px 18px;border-radius:20px;
+      font-family:inherit;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .2s var(--ease);
     }
-    .modal-btn.secondary { background:var(--surface);color:var(--text-2);border:1.5px solid var(--border) }
-    .modal-btn.secondary:hover { background:var(--surface-2) }
-    .modal-btn.danger  { background:var(--red);color:var(--white) }
-    .modal-btn.danger:hover  { background:#DC2626 }
-    .modal-btn.primary { background:var(--black);color:var(--yellow) }
-    .modal-btn.primary:hover { background:var(--black-3) }
+    .modal-btn.secondary { background:var(--white);color:var(--text-2);border:1.5px solid var(--border) }
+    .modal-btn.secondary:hover { background:var(--surface-2);border-color:var(--muted);color:var(--text) }
+    .modal-btn.danger  { background:var(--red);color:var(--white);border:1.5px solid var(--red) }
+    .modal-btn.danger:hover  { background:#DC2626;transform:translateY(-1px);box-shadow:0 4px 12px rgba(239,68,68,.3) }
+    .modal-btn.primary { background:var(--black);color:var(--white);border:1.5px solid var(--black) }
+    .modal-btn.primary:hover { background:var(--black-2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.25) }
 
     /* ── Toast ── */
     #toastCont {
@@ -818,7 +837,36 @@
       .hero { flex-direction:column;align-items:flex-start;gap:14px;padding:22px 20px }
       .hero-earn { text-align:left }
       .status-toggle span:not(.status-ring) { display:none }
-      .status-toggle { padding:7px 10px }
+      .status-toggle { padding:6px 10px }
+      .status-switch { width:36px; height:20px; border-radius:10px; }
+      .status-switch-knob { width:16px; height:16px; top:2px; left:2px; }
+      .status-toggle.online .status-switch-knob { left:18px; }
+      .stats-grid { grid-template-columns:1fr }
+      .card { padding:16px }
+      .card-title { font-size:1.1rem }
+      .topbar { padding:0 16px }
+      .topbar-title { font-size:.8rem }
+    }
+    @media(max-width:480px) {
+      .main-content { padding:12px 10px 90px }
+      .hero { padding:18px 16px }
+      .hero h1 { font-size:1.4rem }
+      .hero-earn { font-size:.9rem }
+      .card { padding:14px }
+      .card-title { font-size:1rem }
+      .status-toggle { padding:4px 8px }
+      .status-switch { width:32px; height:18px; border-radius:9px; }
+      .status-switch-knob { width:14px; height:14px; top:2px; left:2px; }
+      .status-toggle.online .status-switch-knob { left:16px; }
+      .topbar-avatar { width:32px;height:32px;font-size:.8rem }
+      .notif-btn { width:32px;height:32px;font-size:.8rem }
+    }
+    @media(max-width:360px) {
+      .hero h1 { font-size:1.2rem }
+      .card { padding:12px }
+      .status-switch { width:28px; height:16px; border-radius:8px; }
+      .status-switch-knob { width:12px; height:12px; top:2px; left:2px; }
+      .status-toggle.online .status-switch-knob { left:14px; }
     }
     @media(max-width:480px) { .main-content { padding:12px 10px 86px } }
   </style>
@@ -986,7 +1034,7 @@
             <div class="idle-icon"><i class="fas fa-motorcycle"></i></div>
             <div class="idle-title">You're Offline</div>
             <div class="idle-sub">Go online to start receiving passenger ride requests</div>
-            <button class="go-online-cta" onclick="toggleOnline()"><i class="fas fa-toggle-on"></i> Go Online Now</button>
+            <button class="go-online-cta" onclick="toggleOnline()"><i class="fas fa-bolt"></i> Go Online Now</button>
           </div>
           <div class="request-list" id="homeReqList" style="display:none"></div>
         </div>
@@ -1063,7 +1111,7 @@
             <div class="idle-icon"><i class="fas fa-satellite-dish"></i></div>
             <div class="idle-title" id="allIdleTitle">You're Offline</div>
             <div class="idle-sub" id="allIdleSub">Switch online to receive passenger requests.</div>
-            <button class="go-online-cta" onclick="toggleOnline()"><i class="fas fa-toggle-on"></i> Go Online</button>
+            <button class="go-online-cta" onclick="toggleOnline()"><i class="fas fa-bolt"></i> Go Online</button>
           </div>
         </div>
       </div>
@@ -1176,7 +1224,7 @@
     <div class="modal-header"><div class="modal-title">Confirm Logout</div><div class="modal-sub">You'll be logged out of the Rider Panel.</div></div>
     <div class="modal-footer">
       <button class="modal-btn secondary" onclick="closeModal('logoutModal')">Cancel</button>
-      <button class="modal-btn danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <button class="modal-btn danger" onclick="doLogout()"><i class="fas fa-power-off"></i> Logout</button>
     </div>
   </div>
 </div>
@@ -1190,7 +1238,7 @@
     </div>
     <div class="modal-footer">
       <button class="modal-btn secondary" onclick="closeModal('offlineModal')">Stay Online</button>
-      <button class="modal-btn danger" onclick="confirmGoOffline()"><i class="fas fa-toggle-off"></i> Yes, Go Offline</button>
+      <button class="modal-btn danger" onclick="confirmGoOffline()"><i class="fas fa-power-off"></i> Yes, Go Offline</button>
     </div>
   </div>
 </div>
@@ -1201,7 +1249,7 @@
     <div class="modal-header"><div class="modal-title">Complete Trip?</div><div class="modal-sub">Confirm you've dropped off the passenger at their destination.</div></div>
     <div class="modal-footer">
       <button class="modal-btn secondary" onclick="closeModal('completeTripModal')">Not Yet</button>
-      <button class="modal-btn primary" onclick="doCompleteTrip()"><i class="fas fa-check-circle"></i> Yes, Complete</button>
+      <button class="modal-btn primary" onclick="doCompleteTrip()"><i class="fas fa-check"></i> Yes, Complete</button>
     </div>
   </div>
 </div>

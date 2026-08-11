@@ -231,6 +231,7 @@ class RiderLoginSystem {
                             <button type="button" id="toggleNewPassword" style="
                                 position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
                                 background: none; border: none; color: #6b7280; cursor: pointer; font-size: 16px;
+                                padding: 8px; border-radius: 50%; transition: all 0.2s;
                             "><i class="fas fa-eye"></i></button>
                         </div>
                     </div>
@@ -245,6 +246,7 @@ class RiderLoginSystem {
                             <button type="button" id="toggleConfirmPassword" style="
                                 position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
                                 background: none; border: none; color: #6b7280; cursor: pointer; font-size: 16px;
+                                padding: 8px; border-radius: 50%; transition: all 0.2s;
                             "><i class="fas fa-eye"></i></button>
                         </div>
                     </div>
@@ -302,12 +304,16 @@ class RiderLoginSystem {
             newPasswordInput.type = t;
             toggleNewBtn.innerHTML = t === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
         });
+        toggleNewBtn.addEventListener('mouseenter', () => toggleNewBtn.style.background = 'rgba(0,0,0,0.05)');
+        toggleNewBtn.addEventListener('mouseleave', () => toggleNewBtn.style.background = 'none');
 
         toggleConfirmBtn.addEventListener('click', () => {
             const t = confirmPasswordInput.type === 'password' ? 'text' : 'password';
             confirmPasswordInput.type = t;
             toggleConfirmBtn.innerHTML = t === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
         });
+        toggleConfirmBtn.addEventListener('mouseenter', () => toggleConfirmBtn.style.background = 'rgba(0,0,0,0.05)');
+        toggleConfirmBtn.addEventListener('mouseleave', () => toggleConfirmBtn.style.background = 'none');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -393,7 +399,13 @@ class RiderLoginSystem {
     // ─── Redirect to Rider Dashboard ──────────────────────────────────────────
     redirectToDashboard(session) {
         localStorage.setItem('riderSession', JSON.stringify(session));
-        window.location.href = 'dashboard.html';
+
+        // Check rider status and redirect accordingly
+        if (session.status === 'approved') {
+            window.location.href = 'dashboard.html';
+        } else {
+            window.location.href = 'rider-pending.html';
+        }
     }
 }
 

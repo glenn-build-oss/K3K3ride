@@ -61,15 +61,17 @@
     <div class="about-content">
       <div class="about-text">
         <h2 id="hero-title">Reimagining Urban Transport</h2>
-        <p id="hero-text">
-          Kɛkɛ is shaping the future of modern transport across Ghana, connecting
-          riders, drivers, and communities through a safe, efficient, and affordable
-          mobility experience.
-        </p>
+        <p id="hero-subtitle" class="hero-subtitle">Move Smarter. Ride Kɛkɛ.</p>
+        <p id="hero-description" class="hero-description">Experience premium ride-hailing services designed for the modern urban commuter. Safe, reliable, and always on time.</p>
         <div class="hero-buttons">
-          <a href="passenger/login.html#signup" class="btn-primary" id="installBtn"
-            style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;"><i
-              class="fas fa-sign-in-alt"></i> Get Started</a>
+          <a href="passenger/login.html#login" class="btn-primary" id="start-riding-btn">
+            <i class="fas fa-car"></i>
+            <span id="start-riding-label">Start Riding</span>
+          </a>
+          <a href="rider/rider-auth.html" class="btn-secondary" id="become-rider-btn">
+            <i class="fas fa-motorcycle"></i>
+            <span id="become-rider-label">Become a Rider</span>
+          </a>
         </div>
       </div>
       <div class="hero-image">
@@ -156,7 +158,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p id="footer-text">© 2025 K3K3 Rides. All Rights Reserved.</p>
+      <p id="footer-text">© 2026 K3K3 Rides. All Rights Reserved.</p>
       <div class="footer-language">
         <label for="languageSelect" id="language-label">Language:</label>
         <select class="language-select" id="languageSelect">
@@ -174,7 +176,9 @@
     const translations = {
       en: {
         "hero-title": "Reimagining Urban Transport",
-        "hero-text": "Kɛkɛ is shaping the future of modern transport across Ghana, connecting riders, drivers, and communities through a safe, efficient, and affordable mobility experience.",
+        "hero-subtitle": "Move Smarter. Ride Kɛkɛ.",
+        "hero-description": "Experience premium ride-hailing services designed for the modern urban commuter. Safe, reliable, and always on time.",
+        "hero-text": "",
         "values-title": "Our Core Values",
         "safety-title": "Safety First",
         "safety-text": "Your safety is our top priority. We implement rigorous driver verification, real-time tracking, and emergency features to ensure every journey is secure.",
@@ -185,6 +189,7 @@
         "apply-title": "Ready to Join the Movement?",
         "apply-text": "Whether you're looking to ride or drive, K3K3 offers opportunities for everyone. Be part of Ghana's transportation revolution.",
         "start-riding-label": "Start Riding",
+        "become-rider-label": "Become a Rider",
         "download-app-label": "Download App",
         "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Drive with K3K3",
@@ -210,12 +215,14 @@
         "footer-terms": "Terms of Service",
         "footer-privacy": "Privacy Policy",
         "footer-cookies": "Cookie Policy",
-        "footer-text": "© 2025 K3K3 Rides. All Rights Reserved.",
+        "footer-text": "© 2026 K3K3 Rides. All Rights Reserved.",
         "language-label": "Language:"
       },
       fr: {
         "hero-title": "Réinventer le transport urbain",
-        "hero-text": "Kɛkɛ façonne l'avenir du transport moderne au Ghana, en connectant les passagers, les conducteurs et les communautés grâce à une expérience de mobilité sûre, efficace et abordable.",
+        "hero-subtitle": "Bougez plus intelligemment. Roulez avec Kɛkɛ.",
+        "hero-description": "Découvrez des services de covoiturage premium conçus pour le navetteur urbain moderne. Sécurisé, fiable et toujours à l'heure.",
+        "hero-text": "",
         "values-title": "Nos Valeurs Fondamentales",
         "safety-title": "Sécurité d'Abord",
         "safety-text": "Votre sécurité est notre priorité absolue. Nous mettons en œuvre une vérification rigoureuse des conducteurs, un suivi en temps réel et des fonctionnalités d'urgence pour garantir que chaque trajet soit sécurisé.",
@@ -226,6 +233,7 @@
         "apply-title": "Prêt à rejoindre le mouvement ?",
         "apply-text": "Que vous cherchiez à faire du vélo ou à conduire, K3K3 offre des opportunités pour tous. Faites partie de la révolution des transports au Ghana.",
         "start-riding-label": "Commencer à Rouler",
+        "become-rider-label": "Devenir un Conducteur",
         "download-app-label": "Télécharger l'App",
         "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Conduire avec K3K3",
@@ -251,12 +259,14 @@
         "footer-terms": "Conditions d'Utilisation",
         "footer-privacy": "Politique de Confidentialité",
         "footer-cookies": "Politique de Cookies",
-        "footer-text": "© 2025 K3K3 Rides. Tous droits réservés.",
+        "footer-text": "© 2026 K3K3 Rides. Tous droits réservés.",
         "language-label": "Langue:"
       },
       tw: {
         "hero-title": "Urban Transport Hoɔden Noɔmu",
-        "hero-text": "Kɛkɛ reyɛ ɔkwan foforɔ ama nkorabɔ mu wɔ Ghana, kɔfa nnipa, akyɛdefo ne nkurɔfo abom wɔ ɔkwan a ɛyɛ bɔkɔɔ, ntɛm ne ɔkwan a ɛyɛ pɛɛ.",
+        "hero-subtitle": "Yɛn Akwan a Ɛyɛ Pa. Kɔ Kɛkɛ.",
+        "hero-description": "Hyɛ aseɛ akwan a ɛyɛ pɛ wɔ nnipa a wɔte kuayɛ mu a nnɛ. Ahobammɔ, yie, ne bere nyinaa.",
+        "hero-text": "",
         "values-title": "Yɛn Nsɛm a Ɛho Hia",
         "safety-title": "Ahobammɔ Di Kan",
         "safety-text": "Wo ahobammɔ yɛ yɛn pɛneɛ a ɛsen biara. Yɛde akyɛdefo ho hwehwɛ a ɛyɛ den, real-time tracking ne ahobammɔ nneɛma di dwuma de hwɛ hu sɛ akwan biara yɛ bɔkɔɔ.",
@@ -267,6 +277,7 @@
         "apply-title": "Wo Bere Te Sɛ Wo Bɛbɔ Ho?",
         "apply-text": "Sɛ wo rehwehwɛ sɛ wo bɛkɔ anaasɛ wo bɛdi akwan, K3K3 ma wo ho kwan wɔ nkorɔfo biara ho. Fa wo ho ka Ghana transport mu nsakrae no ho.",
         "start-riding-label": "Hyɛ ase Kɔ",
+        "become-rider-label": "Yɛ Akyɛdefo",
         "download-app-label": "Twe App",
         "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Di K3K3 Akwan",
@@ -292,12 +303,14 @@
         "footer-terms": "Terms of Service",
         "footer-privacy": "Privacy Policy",
         "footer-cookies": "Cookie Policy",
-        "footer-text": "© 2025 K3K3 Rides. Nsɛm nyinaa wɔ hɔ.",
+        "footer-text": "© 2026 K3K3 Rides. Nsɛm nyinaa wɔ hɔ.",
         "language-label": "Kasa:"
       },
       ee: {
         "hero-title": "Ɖeɖe ŋlɔ̃ ƒe ŋkeke ɖoɖo ƒe gblɔ",
-        "hero-text": "Kɛkɛ le dzɔdzɔ ɖeɖeŋu ɖo amedɔdɔ ɖeɖeŋu ɖo Ghana, to ɖoɖo nu le ame bubuwo, ɖɔkta  kple lãmeɖoƒewo gbɔ na dzɔdzɔenyui ɖeka si me sɔ o.",
+        "hero-subtitle": "Ɖeɖe ŋlɔ̃ ƒe gɔmeɖeɖe. Kɔ Kɛkɛ.",
+        "hero-description": "Trɔ ŋkeke ɖoɖo ƒe gɔmeɖeɖe sia le ame bubuwo ƒe gblɔme. ŋlɔ̃, ɖoɖo nyuie, kple ŋkeke ɖoɖo ƒe gɔmeɖeɖe.",
+        "hero-text": "",
         "values-title": "Yɚa ƒe Nɔnɔmɔ̃wo",
         "safety-title": "ŋlɔ̃ ƒe Dziƒo",
         "safety-text": "ŋlɔ̃ ƒe dziɖuɖu le yɚa dzi ɖe kɛkɛ. Míe lɔ̃ amedɔdɔ ɖeɖeŋu ɖo, míe lɔ̃ akpa ɖeɖeŋu ɖo kple míe lɔ̃ ŋlɔ̃ ƒe nɔnɔmɔ̃wo le ɖoɖo nu.",
@@ -308,6 +321,7 @@
         "apply-title": "Wo ŋlɔ̃ ƒe Ɖeɖe ŋlɔ̃?",
         "apply-text": "Sɔŋɔ le wo ɖoɖo nu le ɖoɖo ɖeɖeŋu ɖo, K3K3 ma wo ɖoɖo nu le ame bubuwo ƒe ŋkeke ɖoɖo. Fa wo ho kpe ɖe Ghana ƒe akpa ɖeɖeŋu ɖo.",
         "start-riding-label": "Ɖe ɖoɖo Nu",
+        "become-rider-label": "Wu ɖɔkta",
         "download-app-label": "Twe App",
         "start-earning-label": "Ride & Earn",
         "drive-with-k3k3-label": "Ɖe Akple K3K3",
@@ -333,7 +347,7 @@
         "footer-terms": "Terms of Service",
         "footer-privacy": "Privacy Policy",
         "footer-cookies": "Cookie Policy",
-        "footer-text": "© 2025 K3K3 Rides. ŋlɔ̃ ƒe Gblɔmɔ̃.",
+        "footer-text": "© 2026 K3K3 Rides. ŋlɔ̃ ƒe Gblɔmɔ̃.",
         "language-label": "Gbɔgbɔ:"
       }
     };

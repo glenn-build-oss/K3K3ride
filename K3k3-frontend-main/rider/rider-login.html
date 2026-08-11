@@ -189,9 +189,11 @@
     .pwd-toggle{
       position:absolute;right:12px;
       background:none;border:none;cursor:pointer;
-      color:var(--muted);font-size:.9rem;padding:4px;
-      transition:color .18s;
+      color:var(--muted);font-size:.9rem;padding:8px;
+      border-radius:50%;
+      transition:all .18s;
     }
+    .pwd-toggle:hover{color:var(--text);background:rgba(255,255,255,.1);}
     .pwd-toggle:hover{color:var(--text)}
 
     .hint{
@@ -203,20 +205,20 @@
     .hint strong{color:var(--text)}
 
     .login-btn{
-      width:100%;height:52px;
+      width:100%;height:50px;
       background:var(--black);color:var(--white);
-      border:none;border-radius:var(--r-full);
-      font-family:inherit;font-size:.95rem;font-weight:700;
+      border:none;border-radius:24px;
+      font-family:inherit;font-size:.95rem;font-weight:600;
       cursor:pointer;
-      display:flex;align-items:center;justify-content:center;gap:9px;
-      transition:all .22s var(--ease);
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .2s var(--ease);
       margin-top:28px;
-      box-shadow:0 6px 20px rgba(17,17,17,.2);
+      box-shadow:0 2px 8px rgba(17,17,17,.15);
     }
     .login-btn:hover{
-      background:var(--black-3);
-      transform:translateY(-2px);
-      box-shadow:0 10px 28px rgba(17,17,17,.28);
+      background:var(--black-2);
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(17,17,17,.25);
     }
     .login-btn:active{transform:none}
     .login-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
@@ -292,12 +294,53 @@
       }
       .mobile-logo{width:40px;height:40px;border-radius:11px;object-fit:contain}
       .mobile-brand-name{font-size:1.2rem;font-weight:900;color:var(--yellow)}
+      
+      /* Enhanced mobile responsiveness */
+      .form-heading{font-size:1.6rem}
+      .form-subheading{font-size:0.85rem}
+      .field label{font-size:0.7rem}
+      .field input{font-size:0.9rem;padding:12px 14px 12px 40px}
+      .login-btn{font-size:0.9rem;padding:12px 20px;height:48px}
+      .back-link{font-size:0.8rem;padding:8px 16px}
     }
     @media(min-width:901px){
       .mobile-brand{display:none}
     }
     @media(max-width:480px){
       .right-panel{padding:32px 20px}
+      .form-heading{font-size:1.4rem}
+      .form-subheading{font-size:0.8rem}
+      .field label{font-size:0.65rem}
+      .field input{font-size:0.85rem;padding:10px 12px 10px 36px}
+      .login-btn{font-size:0.85rem;padding:10px 16px;height:46px}
+      .mobile-logo{width:35px;height:35px}
+      .mobile-brand-name{font-size:1.1rem}
+      .mobile-brand{margin-bottom:32px}
+    }
+    @media(max-width:360px){
+      .right-panel{padding:28px 16px}
+      .form-heading{font-size:1.3rem}
+      .form-subheading{font-size:0.75rem}
+      .field input{font-size:0.8rem;padding:10px 12px 10px 34px}
+      .login-btn{font-size:0.8rem;padding:10px 14px;height:44px}
+    }
+    @media(max-height:500px) and (orientation: landscape){
+      .right-panel{padding:24px 20px;justify-content:center}
+      .mobile-brand{margin-bottom:24px}
+      .form-heading{font-size:1.3rem;margin-bottom:0.5rem}
+      .form-subheading{font-size:0.75rem;margin-bottom:1.5rem}
+      .field{margin-bottom:16px}
+      .login-btn{margin-top:20px;height:44px}
+    }
+    
+    /* Touch-friendly improvements */
+    @media(pointer: coarse){
+      .login-btn,.pwd-toggle,.back-link{
+        min-height:48px;min-width:48px
+      }
+      .field input{
+        min-height:48px
+      }
     }
     @keyframes slideInToast {
       from { opacity: 0; transform: translateX(40px) scale(0.95); }
@@ -427,7 +470,8 @@
 const API_BASE = 'http://localhost:8810';
 
 /* ── Password toggle ── */
-document.getElementById('pwdToggle').addEventListener('click', function(){
+const pwdToggle = document.getElementById('pwdToggle');
+pwdToggle.addEventListener('click', function(){
   const inp = document.getElementById('password');
   const ico = document.getElementById('pwdIcon');
   if(inp.type === 'password'){
@@ -438,6 +482,8 @@ document.getElementById('pwdToggle').addEventListener('click', function(){
     ico.className = 'fas fa-eye';
   }
 });
+pwdToggle.addEventListener('mouseenter', () => pwdToggle.style.background = 'rgba(255,255,255,0.1)');
+pwdToggle.addEventListener('mouseleave', () => pwdToggle.style.background = 'none');
 
 /* ── Error display ── */
 function showError(msg){
@@ -492,28 +538,41 @@ document.getElementById('riderLoginForm').addEventListener('submit', async funct
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
 
-  // Store rider session and redirect directly to dashboard
+  // Store rider session and check status before redirect
   try {
+    // Get existing session to preserve status
+    const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+
     localStorage.setItem('riderSession', JSON.stringify({
       riderId:   riderId,
       dbRiderId: null,
       userId:    null,
-      firstName: 'Rider',
-      lastName:  '',
-      email:     '',
-      phone:     '',
+      firstName: existingSession.firstName || 'Rider',
+      lastName:  existingSession.lastName || '',
+      email:     existingSession.email || '',
+      phone:     existingSession.phone || '',
       loginTime: new Date().toISOString(),
+      status:    existingSession.status || 'pending',
       isFirstLogin: false
     }));
     sessionStorage.setItem('riderSession', JSON.stringify({
       riderId:   riderId,
-      firstName: 'Rider',
+      firstName: existingSession.firstName || 'Rider',
       loginTime: new Date().toISOString()
     }));
   } catch(err){ console.warn('Storage error:', err); }
 
   showToast('Login successful! Redirecting…', 'success');
-  setTimeout(()=>{ window.location.href = 'dashboard.html'; }, 900);
+
+  // Check rider status and redirect accordingly
+  const session = JSON.parse(localStorage.getItem('riderSession') || '{}');
+  setTimeout(() => {
+    if (session.status === 'approved') {
+      window.location.href = 'dashboard.html';
+    } else {
+      window.location.href = 'rider-pending.html';
+    }
+  }, 900);
 });
 
 /* ── Clear error on input ── */

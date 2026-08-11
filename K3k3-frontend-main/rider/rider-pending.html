@@ -292,14 +292,14 @@
     .btn-home {
       display: inline-flex; align-items: center; gap: 0.5rem;
       padding: 0.9rem 2.5rem;
-      background: var(--yellow); color: var(--black);
-      border: none; border-radius: var(--r);
-      font-family: inherit; font-size: 0.95rem; font-weight: 800;
+      background: var(--black); color: var(--white);
+      border: none; border-radius: 24px;
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
       cursor: pointer; text-decoration: none;
-      transition: all 0.2s ease;
-      letter-spacing: -0.2px;
+      transition: all 0.2s var(--ease);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .btn-home:hover { background: var(--yellow-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,214,10,0.4); }
+    .btn-home:hover { background: var(--black-2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
 
     /* ─── Responsive ─── */
     @media (max-width: 640px) {
@@ -313,10 +313,38 @@
       .detail-item:nth-last-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,0.05); }
       .detail-item:last-child { border-bottom: none; }
     }
+    @media (max-width: 480px) {
+      .main-content { padding: 1.5rem 0.75rem 2.5rem; }
+      .welcome-greeting { font-size: 1.3rem; }
+      .welcome-sub { font-size: 0.85rem; }
+      .status-card-header { padding: 1rem 1rem; gap: 0.75rem; }
+      .status-card-title { font-size: 1rem; }
+      .status-card-sub { font-size: 0.75rem; }
+      .status-steps { padding: 1rem 1rem; }
+      .step-title { font-size: 0.8rem; }
+      .step-desc { font-size: 0.7rem; }
+      .details-header { padding: 0.75rem 1rem; }
+      .detail-item { padding: 0.75rem 1rem; }
+      .detail-value { font-size: 0.85rem; }
+      .btn-home { padding: 0.75rem 2rem; font-size: 0.85rem; }
+    }
     @media (max-width: 400px) {
-      .welcome-greeting { font-size: 1.45rem; }
+      .welcome-greeting { font-size: 1.2rem; }
       .logo-circle { width: 72px; height: 72px; }
       .logo-circle img { width: 48px; height: 48px; }
+      .status-icon-wrap { width: 48px; height: 48px; }
+      .status-icon-wrap i { font-size: 1.2rem; }
+      .step-dot { width: 32px; height: 32px; font-size: 0.7rem; }
+    }
+    @media (max-width: 360px) {
+      .top-bar { padding: 0.75rem; }
+      .logo-img { width: 32px; height: 32px; }
+      .logo-name { font-size: 1rem; }
+      .welcome-greeting { font-size: 1.1rem; }
+      .logo-circle { width: 64px; height: 64px; }
+      .logo-circle img { width: 42px; height: 42px; }
+      .status-card { border-radius: 16px; }
+      .details-card { border-radius: 14px; }
     }
   </style>
 </head>
@@ -343,9 +371,9 @@
 
     <!-- Welcome Header -->
     <div class="welcome-header">
-      <div class="welcome-badge"><i class="fas fa-check-circle"></i> Application Received</div>
+      <div class="welcome-badge"><i class="fas fa-clock"></i> Application Submitted</div>
       <h1 class="welcome-greeting">Welcome, <span id="riderName">Rider</span>!</h1>
-      <p class="welcome-sub">Your application has been submitted successfully.</p>
+      <p class="welcome-sub">Your application has been submitted successfully and is pending admin approval.</p>
     </div>
 
     <!-- Status Card -->
@@ -390,10 +418,10 @@
       </div>
     </div>
 
-    <!-- Registration Details -->
+    <!-- Account Details -->
     <div class="details-card">
       <div class="details-header">
-        <i class="fas fa-id-card"></i> Your Registration Details
+        <i class="fas fa-user"></i> Your Account Details
       </div>
       <div class="details-row">
         <div class="detail-item">
@@ -435,17 +463,30 @@
     (function loadRiderDetails() {
       let firstName = '', lastName = '', phone = '', appRef = '';
 
-      // Try apply-to-ride submission data
+      // Try rider session first (for logged-in users)
       try {
-        const raw = localStorage.getItem('lastRiderApplication');
+        const raw = localStorage.getItem('riderSession') || sessionStorage.getItem('riderSession');
         if (raw) {
           const d = JSON.parse(raw);
           firstName = d.firstName || '';
           lastName  = d.lastName  || '';
           phone     = d.phone     || '';
-          appRef    = d.appRef    || '';
         }
       } catch(e) {}
+
+      // Try apply-to-ride submission data
+      if (!firstName) {
+        try {
+          const raw = localStorage.getItem('lastRiderApplication');
+          if (raw) {
+            const d = JSON.parse(raw);
+            firstName = d.firstName || '';
+            lastName  = d.lastName  || '';
+            phone     = d.phone     || '';
+            appRef    = d.appRef    || '';
+          }
+        } catch(e) {}
+      }
 
       // Fallback: prefill from registration flow
       if (!firstName) {

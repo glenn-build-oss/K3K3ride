@@ -431,11 +431,11 @@
     }
     .btn {
       padding: 0.85rem 2rem;
-      border-radius: 10px;
+      border-radius: 24px;
       font-size: 0.9rem;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s var(--ease);
       border: none;
       display: inline-flex;
       align-items: center;
@@ -448,19 +448,19 @@
       color: var(--k3k3-gray-600);
       border: 1.5px solid var(--k3k3-gray-200);
     }
-    .btn-outline:hover { border-color: var(--k3k3-gray-400); color: var(--k3k3-gray-800); }
+    .btn-outline:hover { border-color: var(--k3k3-gray-400); color: var(--k3k3-gray-800); background: var(--k3k3-gray-50); }
     .btn-primary {
       background: #111827;
       color: white;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .btn-primary:hover { background: #1f2937; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    .btn-primary:hover { background: #1f2937; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .btn-yellow {
       background: var(--k3k3-yellow);
       color: #111827;
-      box-shadow: 0 4px 16px rgba(255,214,10,0.35);
+      box-shadow: 0 2px 8px rgba(255,214,10,0.2);
     }
-    .btn-yellow:hover { background: var(--k3k3-yellow-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,214,10,0.45); }
+    .btn-yellow:hover { background: var(--k3k3-yellow-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,214,10,0.35); }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
     /* ─── Toast ─── */
@@ -526,15 +526,63 @@
       #toast-container { right: 0.5rem; left: 0.5rem; max-width: none; }
     }
 
+    @media (max-width: 480px) {
+      .header { padding: 0.75rem 0.85rem; }
+      .header-nav a { padding: 0.35rem 0.6rem; font-size: 0.72rem; }
+      .header-logo-text { font-size: 1rem; }
+      .hero { padding: 2rem 0.85rem 1.75rem; }
+      .hero h1 { font-size: 1.4rem; }
+      .hero p { font-size: 0.9rem; }
+      .form-wrapper { padding: 0 0.6rem; }
+      .form-card { border-radius: 16px; }
+      .progress-header { padding: 1.25rem 0.85rem; }
+      .progress-steps { gap: 0.5rem; }
+      .step-circle { width: 28px; height: 28px; font-size: 0.65rem; }
+      .form-body { padding: 1.25rem 1rem; }
+      .form-nav { padding: 1rem 1.25rem; }
+      .form-group label { font-size: 0.85rem; }
+      .form-group input, .form-group select { font-size: 0.9rem; padding: 0.75rem 0.85rem; }
+      .upload-item { padding: 1rem; }
+      .upload-zone { padding: 1.5rem 1rem; }
+      .upload-text { font-size: 0.85rem; }
+      .upload-sub { font-size: 0.75rem; }
+      .btn { padding: 0.65rem 1.2rem; font-size: 0.8rem; }
+    }
+
     @media (max-width: 420px) {
       .form-row.three { grid-template-columns: 1fr; }
       .step-label { display: none; }
       .checkbox-grid { grid-template-columns: 1fr; }
       .form-nav { flex-direction: column; gap: 0.75rem; }
       .form-nav .btn { width: 100%; justify-content: center; }
+      .hero h1 { font-size: 1.25rem; }
+      .form-body { padding: 1rem 0.85rem; }
+      .upload-zone { padding: 1.25rem 0.85rem; }
+      .upload-icon { font-size: 1.5rem; }
     }
 
-    /* ─── Custom Checkbox Tick ─── */
+    @media (max-width: 360px) {
+      .header { padding: 0.65rem 0.75rem; }
+      .header-logo img { width: 32px; height: 32px; }
+      .header-logo-text { font-size: 0.9rem; }
+      .hero { padding: 1.75rem 0.75rem 1.5rem; }
+      .hero h1 { font-size: 1.15rem; }
+      .hero p { font-size: 0.85rem; }
+      .form-wrapper { padding: 0 0.5rem; }
+      .form-card { border-radius: 14px; }
+      .progress-header { padding: 1rem 0.75rem; }
+      .step-circle { width: 24px; height: 24px; font-size: 0.6rem; }
+      .form-body { padding: 0.85rem 0.75rem; }
+      .form-nav { padding: 0.85rem 1rem; }
+      .form-group label { font-size: 0.8rem; }
+      .btn { padding: 0.6rem 1rem; font-size: 0.75rem; }
+      .upload-zone { padding: 1rem 0.75rem; }
+      .upload-text { font-size: 0.8rem; }
+      .upload-sub { font-size: 0.7rem; }
+    }
+    }
+
+    /* ─── Custom Checkbox Tick - Uber/Bolt Style Circular ─── */
     .checkbox-item input[type="checkbox"] {
       display: none; /* Hide native checkbox, use cb-tick instead */
     }
@@ -542,24 +590,29 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 18px; height: 18px;
+      width: 20px; height: 20px;
       border: 2px solid var(--k3k3-gray-300);
-      border-radius: 5px;
+      border-radius: 50%;
       background: white;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 900;
       color: transparent;
       flex-shrink: 0;
-      transition: all 0.18s ease;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .cb-tick:hover {
+      border-color: var(--k3k3-gray-400);
     }
     .checkbox-item.checked .cb-tick {
-      background: #111827;
-      border-color: #111827;
-      color: var(--k3k3-yellow);
+      background: var(--k3k3-yellow);
+      border-color: var(--k3k3-yellow);
+      color: #111827;
+      transform: scale(1.05);
     }
     .checkbox-item.checked {
-      border-color: #111827;
-      background: rgba(17,24,39,0.05);
+      border-color: var(--k3k3-yellow);
+      background: rgba(255,214,10,0.05);
       font-weight: 600;
     }
 
@@ -1290,7 +1343,12 @@
 
         const result = await res.json();
         const appId = result.id;
-        const appRef = result.app_ref;
+        let appRef = result.app_ref;
+
+        // Generate fallback appRef if backend doesn't provide one
+        if (!appRef) {
+          appRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
+        }
 
         // Step 2: Upload documents if backend supports it
         if (Object.keys(uploadedFiles).length > 0 && appId) {
@@ -1358,6 +1416,16 @@
           localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
         } catch(e) {}
 
+        // Update rider session status to pending
+        try {
+          const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+          if (riderSession.phone) {
+            riderSession.status = 'pending';
+            riderSession.applicationRef = appRef;
+            localStorage.setItem('riderSession', JSON.stringify(riderSession));
+          }
+        } catch(e) {}
+
         toast('Application submitted successfully!', 'success');
         setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
 
@@ -1375,6 +1443,16 @@
               appRef:    genRef
             }));
             localStorage.setItem('lastApplicationRef', genRef);
+
+            // Update rider session status to pending
+            try {
+              const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+              if (riderSession.phone) {
+                riderSession.status = 'pending';
+                riderSession.applicationRef = genRef;
+                localStorage.setItem('riderSession', JSON.stringify(riderSession));
+              }
+            } catch(e) {}
 
             // Save application to localStorage for admin dashboard (fallback)
             const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');

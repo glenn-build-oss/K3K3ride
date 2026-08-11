@@ -530,10 +530,36 @@ body::after {
         font-size: 1.3rem;
     }
     
+    .login-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .form-group label {
+        font-size: 0.8rem;
+    }
+    
+    .form-group input {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+    
+    .login-btn {
+        font-size: 0.9rem;
+        padding: 12px;
+    }
+    
     .form-options {
         flex-direction: column;
         gap: 8px;
         align-items: flex-start;
+    }
+    
+    .checkbox-label {
+        font-size: 0.8rem;
+    }
+    
+    .forgot-link {
+        font-size: 0.8rem;
     }
     
     .feature-list {
@@ -544,6 +570,134 @@ body::after {
     .feature-item {
         font-size: 0.75rem;
         margin-bottom: 8px;
+    }
+    
+    .brand-message h3 {
+        font-size: 1.3rem;
+    }
+    
+    .brand-message p {
+        font-size: 0.85rem;
+    }
+    
+    .security-notice p {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .login-container {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .login-wrapper {
+        border-radius: 0;
+        min-height: 100vh;
+    }
+    
+    .login-form h2 {
+        font-size: 1.2rem;
+    }
+    
+    .form-group input {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+    }
+    
+    .login-btn {
+        font-size: 0.85rem;
+        padding: 10px;
+    }
+    
+    .password-toggle {
+        width: 18px;
+        height: 18px;
+        right: 12px;
+    }
+    
+    .side-design {
+        padding: 15px;
+        min-height: 150px;
+    }
+    
+    .side-logo {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .login-container {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .login-wrapper {
+        border-radius: 0;
+        min-height: 100vh;
+    }
+    
+    .side-design {
+        padding: 15px;
+        min-height: 120px;
+    }
+    
+    .logo-section {
+        padding: 15px;
+    }
+    
+    .login-form-container {
+        padding: 20px 15px;
+    }
+    
+    .login-form h2 {
+        font-size: 1.2rem;
+        margin-bottom: 3px;
+    }
+    
+    .login-subtitle {
+        font-size: 0.75rem;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group input {
+        padding: 8px 10px;
+    }
+    
+    .login-btn {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .brand-message h3 {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+    }
+    
+    .brand-message p {
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+}
+
+/* Touch-friendly targets for mobile */
+@media (pointer: coarse) {
+    .login-btn, .password-toggle, .checkbox-label input[type="checkbox"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .form-group input {
+        min-height: 44px;
+    }
+    
+    .forgot-link {
+        padding: 10px;
     }
 }
 

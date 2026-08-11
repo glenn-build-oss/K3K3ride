@@ -75,6 +75,22 @@ body {
 .logo {
   font-size: 1.8rem;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
 }
 
 .header ul {
@@ -256,6 +272,25 @@ body {
   color: white !important;
 }
 
+.about-modern .hero-subtitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #FFD60A;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 0.5px;
+}
+
+.about-modern .hero-description {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  line-height: 1.6;
+  max-width: 600px;
+}
+
 .about-modern .about-text p {
   font-size: 1.25rem;
   margin-bottom: 2rem;
@@ -289,6 +324,66 @@ body {
   .about-modern .about-text button:active {
     transform: translateY(0);
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+}
+
+/* Hero Buttons Styling */
+.about-modern .hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.about-modern .btn-primary,
+.about-modern .btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: none;
+}
+
+.about-modern .btn-primary {
+  background: linear-gradient(135deg, #FFD60A 0%, #F3D007 100%);
+  color: #1A1A1A;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.about-modern .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+}
+
+.about-modern .btn-secondary {
+  background: transparent;
+  color: #FFD60A;
+  border: 2px solid #FFD60A;
+}
+
+.about-modern .btn-secondary:hover {
+  background: #FFD60A;
+  color: #1A1A1A;
+  transform: translateY(-2px);
+}
+
+/* Mobile touch feedback for hero buttons */
+@media (hover: none) {
+  .about-modern .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+  
+  .about-modern .btn-secondary:active {
+    background: #FFD60A;
+    color: #1A1A1A;
+    transform: translateY(0);
   }
 }
 
@@ -494,6 +589,22 @@ body {
 .values {
   padding: 6rem 2rem;
   background: var(--k3k3-white);
+}
+
+.values-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--k3k3-dark);
+  text-align: center;
+}
+
+.values-header p {
+  font-size: 1.1rem;
+  color: var(--k3k3-gray);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  text-align: center;
 }
 
 .values-header {
@@ -953,12 +1064,11 @@ footer {
   
   .logo-img {
     height: 50px;
-    width: 50px;
+    width: auto;
   }
   
   .logo-text {
-    font-size: 0.7rem;
-    left: 100%;
+    font-size: 0.8rem;
   }
   
   .header a {
@@ -976,6 +1086,15 @@ footer {
     font-size: 2.5rem;
   }
   
+  .about-modern .hero-subtitle {
+    font-size: 1.4rem;
+  }
+  
+  .about-modern .hero-description {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+  
   .about-modern .hero-visual {
     width: 300px;
     height: 300px;
@@ -983,6 +1102,19 @@ footer {
   
   .about-modern .hero-icon {
     font-size: 4rem;
+  }
+  
+  .about-modern .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .about-modern .btn-primary,
+  .about-modern .btn-secondary {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
   }
   
   .values-grid {
@@ -1053,6 +1185,29 @@ footer {
     font-size: 2rem;
   }
   
+  .about-modern .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .about-modern .hero-description {
+    font-size: 0.95rem;
+  }
+  
+  .about-modern .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .about-modern .btn-primary,
+  .about-modern .btn-secondary {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
   .about-modern .about-text p {
     font-size: 1rem;
   }
@@ -1071,6 +1226,14 @@ footer {
   
   .values {
     padding: 3rem 1rem;
+  }
+  
+  .values-header h2 {
+    font-size: 2rem;
+  }
+  
+  .values-header p {
+    font-size: 1rem;
   }
   
   .cta {

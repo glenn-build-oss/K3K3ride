@@ -73,13 +73,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   console.log('[PWA] ✅ Install prompt is ready!');
-  
-  // Update button text to show install is available
-  const installBtn = document.getElementById('installBtn');
-  if (installBtn) {
-    installBtn.textContent = 'Install K3K3 App';
-    installBtn.style.background = 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
-  }
 });
 
 window.addEventListener('appinstalled', () => {
@@ -105,16 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Force update check
         reg.update();
         
-        // Check if PWA install criteria are met after a short delay
-        setTimeout(() => {
-          if (!deferredPrompt) {
-            console.log('[PWA] Install prompt not available yet');
-            const installBtn = document.getElementById('installBtn');
-            if (installBtn) {
-              installBtn.textContent = 'Get App Instructions';
-            }
-          }
-        }, 3000);
+
       })
       .catch(err => console.error('[PWA] ❌ SW failed:', err));
   }
