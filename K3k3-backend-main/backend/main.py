@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from database import connect
-from routes import users, admin, drivers, trips, ws_routes, passanger, vehicles, application
+from routes import users, admin, drivers, trips, ws_routes, passenger, vehicles, application
 import logging_config  # Initialize logging
 
 logger = logging_config.logger
@@ -30,15 +30,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register all route routers
-app.include_router(users.router)
-app.include_router(admin.router)
-app.include_router(drivers.router)
-app.include_router(trips.router)
-app.include_router(passanger.router)
-app.include_router(ws_routes.router)
-app.include_router(vehicles.router)
-app.include_router(application.router)
+# Register all route routers with API v1 prefix
+app.include_router(users.router, prefix="/api/v1")
+app.include_router(admin.router, prefix="/api/v1")
+app.include_router(drivers.router, prefix="/api/v1")
+app.include_router(trips.router, prefix="/api/v1")
+app.include_router(passenger.router, prefix="/api/v1")
+app.include_router(ws_routes.router, prefix="/api/v1")
+app.include_router(vehicles.router, prefix="/api/v1")
+app.include_router(application.router, prefix="/api/v1")
 
 
 logger.info("All routes registered successfully")

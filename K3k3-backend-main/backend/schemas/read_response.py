@@ -1,4 +1,4 @@
-from . import rider, trips, user, passanger
+from . import rider, trips, user, passenger
 from typing import Optional
 from vehicle import VehicleRead
 
@@ -10,7 +10,7 @@ class DriverDetailRead(rider.DriverRead):
 class TripDetailRead(trips.TripRead):
     """Trip with nested driver, passenger, and log."""
     driver: Optional[driver.DriverRead] = None # type: ignore
-    passenger: Optional[passanger.PassengerRead] = None
+    passenger: Optional[passenger.PassengerRead] = None
     log: Optional[log.LogRead] = None # type: ignore
 
 

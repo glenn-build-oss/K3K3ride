@@ -66,3 +66,6 @@ pnpm-lock.yaml
 
 .vercel
 .env*.local
+
+# Internal review report
+system_review_report.md

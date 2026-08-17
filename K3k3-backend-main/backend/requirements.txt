@@ -57,3 +57,6 @@ uvicorn==0.42.0
 websockets==15.0.1
 yarl==1.23.0
 zstandard==0.25.0
+email-validator==2.2.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9

@@ -4,7 +4,7 @@ from database import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from models.models import Passenger, User
-from schemas import passanger
+from schemas import passenger
 from utils.hashcode import hash_password
 import logging
 from typing import List
@@ -12,7 +12,7 @@ from typing import List
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/passengers", tags=["passengers"])
 
-@router.get("/", response_model=List[passanger.PassengerRead])
+@router.get("/", response_model=List[passenger.PassengerRead])
 def get_passengers(db:Session = Depends(get_db)):
     """Retrieve Passengers"""
     try:
@@ -25,8 +25,8 @@ def get_passengers(db:Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
-@router.post("/register/", response_model=passanger.PassengerRead)
-def create_passenger(passenger_data: passanger.PassengerCreate, db: Session = Depends(get_db)):
+@router.post("/register/", response_model=passenger.PassengerRead)
+def create_passenger(passenger_data: passenger.PassengerCreate, db: Session = Depends(get_db)):
     """Register a new passenger with user account."""
     try:
         # Create user first
@@ -89,7 +89,7 @@ def create_passenger(passenger_data: passanger.PassengerCreate, db: Session = De
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
-@router.get("/{passenger_id}", response_model=passanger.PassengerRead)
+@router.get("/{passenger_id}", response_model=passenger.PassengerRead)
 def get_passenger(passenger_id: int, db: Session = Depends(get_db)):
     """Retrieve passenger information by ID."""
     try:
@@ -108,8 +108,8 @@ def get_passenger(passenger_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
-@router.put("/{passenger_id}", response_model=passanger.PassengerRead)
-def update_passenger(passenger_id: int, passenger_data: passanger.PassengerUpdate, db: Session = Depends(get_db)):
+@router.put("/{passenger_id}", response_model=passenger.PassengerRead)
+def update_passenger(passenger_id: int, passenger_data: passenger.PassengerUpdate, db: Session = Depends(get_db)):
     """Update passenger information."""
     try:
         passenger = db.query(Passenger).filter(Passenger.id == passenger_id).first()
