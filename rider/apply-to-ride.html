@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Apply to Ride - K3K3</title>
+  <link rel="icon" type="image/png" href="../assets/k3k3.png">
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --k3k3-primary: #111827;
+      --k3k3-yellow: #FFD60A;
+      --k3k3-yellow-dark: #e6c000;
+      --k3k3-success: #10B981;
+      --k3k3-danger: #EF4444;
+      --k3k3-gray-50: #F9FAFB;
+      --k3k3-gray-100: #F3F4F6;
+      --k3k3-gray-200: #E5E7EB;
+      --k3k3-gray-300: #D1D5DB;
+      --k3k3-gray-400: #9CA3AF;
+      --k3k3-gray-500: #6B7280;
+      --k3k3-gray-600: #4B5563;
+      --k3k3-gray-700: #374151;
+      --k3k3-gray-800: #1F2937;
+      --k3k3-gray-900: #111827;
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0d1117 0%, #1a2332 40%, #0f172a 100%);
+      min-height: 100vh;
+      color: var(--k3k3-gray-700);
+      padding-bottom: 4rem;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      background: rgba(13,17,23,0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,214,10,0.15);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+    .header-logo img { width: 40px; height: 40px; border-radius: 10px; }
+    .header-logo-text { font-size: 1.3rem; font-weight: 800; color: var(--k3k3-yellow); letter-spacing: -0.5px; }
+    .header-nav { display: flex; gap: 0.6rem; }
+    .header-nav a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .header-nav a:hover { color: white; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+
+    /* ─── Hero Banner ─── */
+    .hero {
+      text-align: center;
+      padding: 3.5rem 1.5rem 2.5rem;
+      color: white;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,214,10,0.1);
+      border: 1px solid rgba(255,214,10,0.3);
+      color: var(--k3k3-yellow);
+      padding: 0.4rem 1.1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+    .hero h1 span { color: var(--k3k3-yellow); }
+    .hero p {
+      color: rgba(255,255,255,0.5);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ─── Form Wrapper ─── */
+    .form-wrapper {
+      padding: 0 1.5rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* ─── Form Card ─── */
+    .form-card {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    /* ─── Progress Header ─── */
+    .progress-header {
+      background: linear-gradient(135deg, #0d1117 0%, #1a2332 100%);
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid rgba(255,214,10,0.08);
+    }
+    .progress-steps {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: calc(50% + 20px);
+      right: calc(-50% + 20px);
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      transition: background 0.4s ease;
+      z-index: 0;
+    }
+    .step-item.completed:not(:last-child)::after { background: var(--k3k3-yellow); }
+    .step-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+      color: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.04);
+      transition: all 0.3s ease;
+      margin-bottom: 0.6rem;
+      position: relative;
+      z-index: 1;
+    }
+    .step-item.active .step-circle {
+      border-color: var(--k3k3-yellow);
+      background: var(--k3k3-yellow);
+      color: #0d1117;
+      box-shadow: 0 0 0 5px rgba(255,214,10,0.18), 0 4px 12px rgba(255,214,10,0.3);
+    }
+    .step-item.completed .step-circle {
+      border-color: var(--k3k3-success);
+      background: var(--k3k3-success);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+    .step-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+      transition: color 0.3s ease;
+      white-space: nowrap;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .step-item.active .step-label { color: var(--k3k3-yellow); }
+    .step-item.completed .step-label { color: var(--k3k3-success); }
+
+    /* ─── Form Body ─── */
+    .form-body { padding: 2.5rem; }
+
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: fadeInSlide 0.35s cubic-bezier(0.4,0,0.2,1); }
+
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-heading {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid var(--k3k3-gray-100);
+    }
+    .step-heading-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #111827 0%, #374151 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--k3k3-yellow);
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .step-heading-text h2 { font-size: 1.35rem; font-weight: 800; color: var(--k3k3-gray-900); letter-spacing: -0.4px; }
+    .step-heading-text p { font-size: 0.85rem; color: var(--k3k3-gray-400); margin-top: 0.25rem; }
+
+    /* ─── Form Fields ─── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--k3k3-gray-700);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      letter-spacing: 0.02em;
+    }
+    .form-group label .req { color: var(--k3k3-danger); font-size: 0.9rem; }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.85rem 1rem;
+      border: 1.5px solid var(--k3k3-gray-200);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--k3k3-gray-800);
+      background: var(--k3k3-gray-50);
+      transition: all 0.2s ease;
+      outline: none;
+      width: 100%;
+      -webkit-appearance: none;
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--k3k3-gray-400); }
+    .form-group input:hover,
+    .form-group select:hover,
+    .form-group textarea:hover {
+      border-color: var(--k3k3-gray-300);
+      background: white;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--k3k3-yellow);
+      box-shadow: 0 0 0 3px rgba(255,214,10,0.15);
+      background: white;
+    }
+    .form-group input.invalid { border-color: var(--k3k3-danger); box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+    .form-group textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+    .form-group select { cursor: pointer; }
+    .field-hint { font-size: 0.74rem; color: var(--k3k3-gray-400); margin-top: 0.1rem; }
+
+    /* Phone row */
+    .phone-row { display: flex; gap: 0.5rem; }
+    .phone-row select { width: 150px; flex-shrink: 0; }
+    .phone-row input { flex: 1; }
+
+    /* ─── Checkbox group ─── */
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.6rem;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 1rem;
+      border: 1.5px solid var(--k3k3-gray-200);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      color: var(--k3k3-gray-700);
+      background: var(--k3k3-gray-50);
+      user-select: none;
+    }
+    .checkbox-item:hover { border-color: var(--k3k3-yellow); background: rgba(255,214,10,0.04); }
+    .checkbox-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #111827; cursor: pointer; flex-shrink: 0; }
+    .checkbox-item.checked { border-color: #111827; background: rgba(17,24,39,0.04); font-weight: 600; }
+
+    /* ─── File Upload ─── */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .upload-item { display: flex; flex-direction: column; gap: 0.4rem; }
+    .upload-item label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--k3k3-gray-700);
+      letter-spacing: 0.02em;
+    }
+    .upload-zone {
+      border: 2px dashed var(--k3k3-gray-200);
+      border-radius: 14px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      background: var(--k3k3-gray-50);
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--k3k3-yellow);
+      background: rgba(255,214,10,0.04);
+    }
+    .upload-zone.has-file {
+      border-color: var(--k3k3-success);
+      background: rgba(16,185,129,0.04);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-zone .upload-icon { font-size: 1.75rem; color: var(--k3k3-gray-300); }
+    .upload-zone.has-file .upload-icon { color: var(--k3k3-success); }
+    .upload-zone .upload-text { font-size: 0.78rem; color: var(--k3k3-gray-500); font-weight: 600; }
+    .upload-zone .upload-sub { font-size: 0.7rem; color: var(--k3k3-gray-400); }
+    .upload-zone .file-preview {
+      width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    }
+    .upload-zone .file-preview img { max-height: 70px; max-width: 100%; border-radius: 8px; object-fit: cover; }
+    .upload-zone .file-preview .file-name { font-size: 0.72rem; color: var(--k3k3-gray-600); font-weight: 600; word-break: break-all; }
+    .upload-zone .file-preview .file-size { font-size: 0.68rem; color: var(--k3k3-gray-400); }
+    .remove-file-btn {
+      position: absolute; top: 8px; right: 8px;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--k3k3-danger); color: white; border: none; cursor: pointer;
+      font-size: 0.65rem; display: none; align-items: center; justify-content: center;
+      z-index: 2; box-shadow: 0 2px 8px rgba(239,68,68,0.4);
+    }
+    .upload-zone.has-file .remove-file-btn { display: flex; }
+
+    /* ─── Review section ─── */
+    .review-group {
+      background: var(--k3k3-gray-50);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--k3k3-gray-200);
+    }
+    .review-group h3 {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--k3k3-gray-900);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .review-group h3 i { color: var(--k3k3-yellow-dark); }
+    .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 1.5rem; }
+    .review-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .review-item .label { font-size: 0.68rem; color: var(--k3k3-gray-400); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
+    .review-item .value { font-size: 0.9rem; color: var(--k3k3-gray-800); font-weight: 600; }
+    .review-docs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .doc-chip {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      background: white; border: 1px solid var(--k3k3-gray-200);
+      border-radius: 20px; font-size: 0.75rem; color: var(--k3k3-gray-700); font-weight: 500;
+    }
+    .doc-chip i { color: var(--k3k3-success); }
+
+    /* ─── Terms ─── */
+    .terms-block {
+      background: rgba(255,214,10,0.04);
+      border: 1.5px solid rgba(255,214,10,0.2);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-top: 1.25rem;
+    }
+    .terms-check {
+      display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem;
+    }
+    .terms-check:last-child { margin-bottom: 0; }
+    .terms-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: #111827; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+    .terms-check span { font-size: 0.875rem; color: var(--k3k3-gray-600); line-height: 1.65; }
+    .terms-check a { color: #111827; font-weight: 700; text-decoration: underline; }
+
+    /* ─── Navigation Buttons ─── */
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2.5rem;
+      border-top: 1px solid var(--k3k3-gray-100);
+      background: linear-gradient(to bottom, var(--k3k3-gray-50), white);
+    }
+    .btn {
+      padding: 0.85rem 2rem;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.01em;
+    }
+    .btn-outline {
+      background: white;
+      color: var(--k3k3-gray-600);
+      border: 1.5px solid var(--k3k3-gray-200);
+    }
+    .btn-outline:hover { border-color: var(--k3k3-gray-400); color: var(--k3k3-gray-800); background: var(--k3k3-gray-50); }
+    .btn-primary {
+      background: #111827;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .btn-primary:hover { background: #1f2937; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .btn-yellow {
+      background: var(--k3k3-yellow);
+      color: #111827;
+      box-shadow: 0 2px 8px rgba(255,214,10,0.2);
+    }
+    .btn-yellow:hover { background: var(--k3k3-yellow-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,214,10,0.35); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* ─── Toast ─── */
+    #toast-container {
+      position: fixed; top: 1rem; right: 1rem;
+      z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; max-width: 340px;
+    }
+    .toast {
+      padding: 1rem 1.25rem; border-radius: 12px; font-size: 0.875rem; font-weight: 500;
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.2); animation: slideInToast 0.3s ease; color: white;
+    }
+    @keyframes slideInToast {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .toast.success { background: linear-gradient(135deg, #059669, #10B981); }
+    .toast.error { background: linear-gradient(135deg, #DC2626, #EF4444); }
+    .toast.info { background: linear-gradient(135deg, #1E40AF, #3B82F6); }
+    .toast i { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+    /* ─── Success screen ─── */
+    #success-screen { display: none; text-align: center; padding: 4rem 2.5rem; }
+    .success-icon {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, #059669, #10B981);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 2rem; font-size: 2.25rem; color: white;
+      box-shadow: 0 16px 40px rgba(16,185,129,0.4);
+    }
+    #success-screen h2 { font-size: 1.75rem; font-weight: 800; color: var(--k3k3-gray-900); margin-bottom: 0.75rem; letter-spacing: -0.5px; }
+    #success-screen p { color: var(--k3k3-gray-500); margin-bottom: 0.5rem; line-height: 1.6; }
+    .ref-badge {
+      display: inline-block;
+      background: #111827; color: var(--k3k3-yellow);
+      padding: 0.65rem 1.5rem; border-radius: 10px;
+      font-size: 1rem; font-weight: 800; margin: 1.25rem 0;
+      letter-spacing: 0.08em; font-family: 'Courier New', monospace;
+    }
+
+    /* ─── Mobile Responsive ─── */
+    @media (max-width: 640px) {
+      .header { padding: 0.85rem 1rem; }
+      .header-nav a { padding: 0.4rem 0.65rem; font-size: 0.78rem; }
+      .header-logo-text { font-size: 1.1rem; }
+      .hero { padding: 2.5rem 1rem 2rem; }
+      .hero h1 { font-size: 1.65rem; }
+      .form-wrapper { padding: 0 0.75rem; }
+      .form-card { border-radius: 18px; }
+      .progress-header { padding: 1.5rem 1rem; }
+      .step-label { font-size: 0.55rem; }
+      .step-circle { width: 32px; height: 32px; font-size: 0.72rem; }
+      .form-body { padding: 1.5rem 1.25rem; }
+      .form-nav { padding: 1.25rem 1.5rem; }
+      .form-row { grid-template-columns: 1fr; gap: 1rem; }
+      .form-row.three { grid-template-columns: 1fr 1fr; }
+      .upload-grid { grid-template-columns: 1fr; }
+      .review-grid { grid-template-columns: 1fr; }
+      .phone-row { flex-direction: column; }
+      .phone-row select { width: 100%; }
+      .btn { padding: 0.72rem 1.4rem; font-size: 0.85rem; }
+      .checkbox-grid { grid-template-columns: 1fr 1fr; }
+      #toast-container { right: 0.5rem; left: 0.5rem; max-width: none; }
+    }
+
+    @media (max-width: 480px) {
+      .header { padding: 0.75rem 0.85rem; }
+      .header-nav a { padding: 0.35rem 0.6rem; font-size: 0.72rem; }
+      .header-logo-text { font-size: 1rem; }
+      .hero { padding: 2rem 0.85rem 1.75rem; }
+      .hero h1 { font-size: 1.4rem; }
+      .hero p { font-size: 0.9rem; }
+      .form-wrapper { padding: 0 0.6rem; }
+      .form-card { border-radius: 16px; }
+      .progress-header { padding: 1.25rem 0.85rem; }
+      .progress-steps { gap: 0.5rem; }
+      .step-circle { width: 28px; height: 28px; font-size: 0.65rem; }
+      .form-body { padding: 1.25rem 1rem; }
+      .form-nav { padding: 1rem 1.25rem; }
+      .form-group label { font-size: 0.85rem; }
+      .form-group input, .form-group select { font-size: 0.9rem; padding: 0.75rem 0.85rem; }
+      .upload-item { padding: 1rem; }
+      .upload-zone { padding: 1.5rem 1rem; }
+      .upload-text { font-size: 0.85rem; }
+      .upload-sub { font-size: 0.75rem; }
+      .btn { padding: 0.65rem 1.2rem; font-size: 0.8rem; }
+    }
+
+    @media (max-width: 420px) {
+      .form-row.three { grid-template-columns: 1fr; }
+      .step-label { display: none; }
+      .checkbox-grid { grid-template-columns: 1fr; }
+      .form-nav { flex-direction: column; gap: 0.75rem; }
+      .form-nav .btn { width: 100%; justify-content: center; }
+      .hero h1 { font-size: 1.25rem; }
+      .form-body { padding: 1rem 0.85rem; }
+      .upload-zone { padding: 1.25rem 0.85rem; }
+      .upload-icon { font-size: 1.5rem; }
+    }
+
+    @media (max-width: 360px) {
+      .header { padding: 0.65rem 0.75rem; }
+      .header-logo img { width: 32px; height: 32px; }
+      .header-logo-text { font-size: 0.9rem; }
+      .hero { padding: 1.75rem 0.75rem 1.5rem; }
+      .hero h1 { font-size: 1.15rem; }
+      .hero p { font-size: 0.85rem; }
+      .form-wrapper { padding: 0 0.5rem; }
+      .form-card { border-radius: 14px; }
+      .progress-header { padding: 1rem 0.75rem; }
+      .step-circle { width: 24px; height: 24px; font-size: 0.6rem; }
+      .form-body { padding: 0.85rem 0.75rem; }
+      .form-nav { padding: 0.85rem 1rem; }
+      .form-group label { font-size: 0.8rem; }
+      .btn { padding: 0.6rem 1rem; font-size: 0.75rem; }
+      .upload-zone { padding: 1rem 0.75rem; }
+      .upload-text { font-size: 0.8rem; }
+      .upload-sub { font-size: 0.7rem; }
+    }
+    }
+
+    /* ─── Custom Checkbox Tick - Uber/Bolt Style Circular ─── */
+    .checkbox-item input[type="checkbox"] {
+      display: none; /* Hide native checkbox, use cb-tick instead */
+    }
+    .cb-tick {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      border: 2px solid var(--k3k3-gray-300);
+      border-radius: 50%;
+      background: white;
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: transparent;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .cb-tick:hover {
+      border-color: var(--k3k3-gray-400);
+    }
+    .checkbox-item.checked .cb-tick {
+      background: var(--k3k3-yellow);
+      border-color: var(--k3k3-yellow);
+      color: #111827;
+      transform: scale(1.05);
+    }
+    .checkbox-item.checked {
+      border-color: var(--k3k3-yellow);
+      background: rgba(255,214,10,0.05);
+      font-weight: 600;
+    }
+
+    /* ─── Optional Badge ─── */
+    .optional-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--k3k3-gray-400);
+      background: var(--k3k3-gray-100);
+      border: 1px solid var(--k3k3-gray-200);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-left: 0.3rem;
+      vertical-align: middle;
+    }
+
+    /* ─── Upload Trigger Button ─── */
+    .upload-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1.1rem;
+      background: #111827;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 0.35rem;
+      transition: all 0.2s ease;
+      z-index: 3;
+      position: relative;
+    }
+    .upload-trigger-btn:hover {
+      background: #1f2937;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    .upload-zone.has-file .upload-trigger-btn { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="../index.html" class="header-logo">
+      <img src="../assets/k3k3.png" alt="K3K3">
+      <span class="header-logo-text">K3K3</span>
+    </a>
+    <nav class="header-nav">
+      <a href="rider-login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+      <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge"><i class="fas fa-motorcycle"></i> Rider Application</div>
+    <h1>Join K3K3 as a <span>Rider</span></h1>
+    <p>Complete this form to start earning with K3K3. Our team will review your application within 3–5 business days.</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-wrapper">
+  <div class="form-card" id="formCard">
+    <!-- Progress -->
+    <div class="progress-header">
+      <div class="progress-steps">
+        <div class="step-item active" id="step-nav-1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Personal</span>
+        </div>
+        <div class="step-item" id="step-nav-2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Vehicle</span>
+        </div>
+        <div class="step-item" id="step-nav-3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Documents</span>
+        </div>
+        <div class="step-item" id="step-nav-4">
+          <div class="step-circle">4</div>
+          <span class="step-label">Review</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="applyForm" novalidate>
+      <div class="form-body">
+
+        <!-- ═══ STEP 1: PERSONAL INFO ═══ -->
+        <div class="form-step active" id="formStep1">
+          <div class="step-heading">
+            <div class="step-heading-icon"><i class="fas fa-user"></i></div>
+            <div class="step-heading-text">
+              <h2>Personal Information</h2>
+              <p>Tell us about yourself</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name <span class="req">*</span></label>
+              <input type="text" id="firstName" name="firstName" placeholder="e.g. Kwame" autocomplete="given-name">
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name <span class="req">*</span></label>
+              <input type="text" id="lastName" name="lastName" placeholder="e.g. Mensah" autocomplete="family-name">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email Address <span class="req">*</span></label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label for="gender">Gender <span class="req">*</span></label>
+              <select id="gender" name="gender">
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone Number <span class="req">*</span></label>
+              <div class="phone-row">
+                <div style="display:flex;align-items:center;gap:6px;padding:0 14px;background:#f7f8fa;border:1.5px solid #e5e7eb;border-right:none;border-radius:12px 0 0 12px;font-size:0.92rem;font-weight:600;color:#111827;white-space:nowrap;user-select:none;">🇬🇭 +233</div>
+                <input type="tel" id="phone" name="phone" placeholder="024 123 4567">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="dateOfBirth">Date of Birth <span class="req">*</span></label>
+              <input type="date" id="dateOfBirth" name="dateOfBirth">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nationality">Nationality <span class="req">*</span></label>
+              <input type="text" id="nationality" name="nationality" placeholder="e.g. Ghanaian">
+            </div>
+            <div class="form-group">
+              <label for="city">City / Town <span class="req">*</span></label>
+              <input type="text" id="city" name="city" placeholder="e.g. Accra">
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label for="address">Residential Address <span class="req">*</span></label>
+              <input type="text" id="address" name="address" placeholder="e.g. 12 Ring Road East, Accra">
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label for="ghanaCardNumber">Ghana Card Number</label>
+              <input type="text" id="ghanaCardNumber" name="ghanaCardNumber" placeholder="e.g. GHA-000000000-0">
+              <span class="field-hint">Optional but recommended</span>
+            </div>
+          </div>
+
+          <div class="form-row full">
+            <div class="form-group">
+              <label for="about">About Yourself <span class="req">*</span></label>
+              <textarea id="about" name="about" placeholder="Tell us about your experience and why you want to ride with K3K3..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ STEP 2: VEHICLE INFO ═══ -->
+        <div class="form-step" id="formStep2">
+          <div class="step-heading">
+            <div class="step-heading-icon"><i class="fas fa-motorcycle"></i></div>
+            <div class="step-heading-text">
+              <h2>Vehicle Information</h2>
+              <p>Details about your K3K3 vehicle</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vehicleType">K3K3 Type <span class="req">*</span></label>
+              <input type="text" id="vehicleType" name="vehicleType" placeholder="e.g. Bajaj RE, TVS King, Piaggio Apé">
+            </div>
+            <div class="form-group">
+              <label for="vehicleSeats">Number of Seats <span class="req">*</span></label>
+              <input type="text" id="vehicleSeats" name="vehicleSeats" placeholder="e.g. 3 seats">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vehicleMake">Make <span class="req">*</span></label>
+              <input type="text" id="vehicleMake" name="vehicleMake" placeholder="e.g. Bajaj, TVS, Piaggio">
+            </div>
+            <div class="form-group">
+              <label for="vehicleColor">Color <span class="req">*</span></label>
+              <input type="text" id="vehicleColor" name="vehicleColor" placeholder="e.g. Yellow">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vehicleModel">Model <span class="req">*</span></label>
+              <input type="text" id="vehicleModel" name="vehicleModel" placeholder="e.g. RE, King">
+            </div>
+            <div class="form-group">
+              <label for="vehicleYear">Year <span class="req">*</span></label>
+              <input type="number" id="vehicleYear" name="vehicleYear" min="2000" max="2026" placeholder="e.g. 2022">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vehiclePlate">Plate Number <span class="req">*</span></label>
+              <input type="text" id="vehiclePlate" name="vehiclePlate" placeholder="e.g. GR 1234-25">
+              <span class="field-hint">Format: Region Code + Number + Year</span>
+            </div>
+            <div class="form-group">
+              <label for="experience">Driving Experience <span class="req">*</span></label>
+              <select id="experience" name="experience">
+                <option value="">Select experience</option>
+                <option value="Less than 1 year">Less than 1 year</option>
+                <option value="1-2 years">1–2 years</option>
+                <option value="2-3 years">2–3 years</option>
+                <option value="3-5 years">3–5 years</option>
+                <option value="5+ years">5+ years</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="licenseNumber">Rider License Number <span class="req">*</span></label>
+              <input type="text" id="licenseNumber" name="licenseNumber" placeholder="e.g. KWA-1234567890123">
+            </div>
+            <div class="form-group">
+              <label for="licenseExpiry">License Expiry <span class="req">*</span></label>
+              <input type="date" id="licenseExpiry" name="licenseExpiry">
+            </div>
+          </div>
+
+
+        </div>
+
+        <!-- ═══ STEP 3: DOCUMENTS ═══ -->
+        <div class="form-step" id="formStep3">
+          <div class="step-heading">
+            <div class="step-heading-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="step-heading-text">
+              <h2>Required Documents</h2>
+              <p>Upload clear photos or scans (PNG, JPG, PDF)</p>
+            </div>
+          </div>
+
+          <div class="upload-grid">
+            <div class="upload-item">
+              <label>Rider's License <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-riderLicense" data-name="riderLicense">
+                <button type="button" class="remove-file-btn" data-for="riderLicense"><i class="fas fa-times"></i></button>
+                <i class="fas fa-id-card upload-icon"></i>
+                <span class="upload-text">Tap to choose file</span>
+                <span class="upload-sub">Photo, PDF · max 20MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="riderLicense" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
+              </div>
+            </div>
+
+            <div class="upload-item">
+              <label>Vehicle Registration <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-vehicleRegistration" data-name="vehicleRegistration">
+                <button type="button" class="remove-file-btn" data-for="vehicleRegistration"><i class="fas fa-times"></i></button>
+                <i class="fas fa-car upload-icon"></i>
+                <span class="upload-text">Tap to choose file</span>
+                <span class="upload-sub">Photo, PDF · max 20MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="vehicleRegistration" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
+              </div>
+            </div>
+
+            <div class="upload-item">
+              <label>National ID — Front <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-idCardFront" data-name="idCardFront">
+                <button type="button" class="remove-file-btn" data-for="idCardFront"><i class="fas fa-times"></i></button>
+                <i class="fas fa-address-card upload-icon"></i>
+                <span class="upload-text">Tap to choose file</span>
+                <span class="upload-sub">Front side · Photo, PDF · max 20MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="idCardFront" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
+              </div>
+            </div>
+
+            <div class="upload-item">
+              <label>National ID — Back <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-idCardBack" data-name="idCardBack">
+                <button type="button" class="remove-file-btn" data-for="idCardBack"><i class="fas fa-times"></i></button>
+                <i class="fas fa-address-card upload-icon"></i>
+                <span class="upload-text">Tap to choose file</span>
+                <span class="upload-sub">Back side · Photo, PDF · max 20MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="idCardBack" data-accept="image/*,.pdf"><i class="fas fa-paperclip"></i> Choose File</button>
+              </div>
+            </div>
+
+            <div class="upload-item">
+              <label>Passport Photo <span class="req" style="color:var(--k3k3-danger)">*</span></label>
+              <div class="upload-zone" id="zone-passportPhoto" data-name="passportPhoto">
+                <button type="button" class="remove-file-btn" data-for="passportPhoto"><i class="fas fa-times"></i></button>
+                <i class="fas fa-portrait upload-icon"></i>
+                <span class="upload-text">Tap to choose photo</span>
+                <span class="upload-sub">PNG, JPG · max 10MB</span>
+                <button type="button" class="upload-trigger-btn" data-for="passportPhoto" data-accept="image/*"><i class="fas fa-camera"></i> Choose Photo</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="fileInputContainer" style="display:none;"></div>
+
+          <div style="margin-top:1.25rem; padding:1rem; background:rgba(255,214,10,0.08); border-radius:10px; border-left:3px solid var(--k3k3-yellow); font-size:0.82rem; color:var(--k3k3-gray-600);">
+            <i class="fas fa-info-circle" style="color:var(--k3k3-yellow); margin-right:0.4rem;"></i>
+            Ensure all documents are clear and readable. Upload both the front and back of your National ID Card.
+          </div>
+        </div>
+
+        <!-- ═══ STEP 4: REVIEW ═══ -->
+        <div class="form-step" id="formStep4">
+          <div class="step-heading">
+            <div class="step-heading-icon"><i class="fas fa-check-double"></i></div>
+            <div class="step-heading-text">
+              <h2>Review Your Application</h2>
+              <p>Verify your details before submitting</p>
+            </div>
+          </div>
+
+          <div id="reviewPersonal" class="review-group"></div>
+          <div id="reviewVehicle" class="review-group"></div>
+          <div id="reviewDocuments" class="review-group"></div>
+
+          <div class="terms-block">
+            <div class="terms-check">
+              <input type="checkbox" id="termsAgreement" required>
+              <span>I agree to K3K3's <a href="../legal/terms-of-service.html" target="_blank">Terms of Service</a> and <a href="../legal/privacy-policy.html" target="_blank">Privacy Policy</a>.</span>
+            </div>
+            <div class="terms-check">
+              <input type="checkbox" id="legalConfirmation" required>
+              <span>I confirm that all documents submitted are genuine and I have the legal right to work as a transport provider in Ghana.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SUCCESS SCREEN ═══ -->
+        <div id="success-screen">
+          <div class="success-icon"><i class="fas fa-check"></i></div>
+          <h2>Application Submitted! 🎉</h2>
+          <p>Your application has been received and is under review.</p>
+          <div class="ref-badge" id="appRefDisplay">K3PA-000000</div>
+          <p style="color:var(--k3k3-gray-400); font-size:0.85rem;">You'll receive a response within 3–5 business days.</p>
+          <br>
+          <a href="../index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>
+        </div>
+
+      </div><!-- /form-body -->
+
+      <!-- Navigation -->
+      <div class="form-nav" id="formNav">
+        <button type="button" class="btn btn-outline" id="prevBtn" style="visibility:hidden;">
+          <i class="fas fa-arrow-left"></i> Previous
+        </button>
+        <button type="button" class="btn btn-primary" id="nextBtn">
+          Next <i class="fas fa-arrow-right"></i>
+        </button>
+        <button type="submit" class="btn btn-yellow" id="submitBtn" style="display:none;">
+          <i class="fas fa-paper-plane"></i> Submit Application
+        </button>
+      </div>
+    </form>
+  </div>
+  </div><!-- /form-wrapper -->
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script>
+    const BACKEND = 'http://localhost:8810';
+    const TOTAL_STEPS = 4;
+    let currentStep = 1;
+    const uploadedFiles = {};
+
+    // ── Step Navigation ──────────────────────────────
+    function showStep(step) {
+      document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+      const el = document.getElementById('formStep' + step);
+      if (el) el.classList.add('active');
+
+      // Update progress nav
+      for (let i = 1; i <= TOTAL_STEPS; i++) {
+        const nav = document.getElementById('step-nav-' + i);
+        if (!nav) continue;
+        nav.classList.remove('active', 'completed');
+        if (i < step) nav.classList.add('completed');
+        else if (i === step) nav.classList.add('active');
+        // Update circle icon
+        const circle = nav.querySelector('.step-circle');
+        if (i < step) circle.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem"></i>';
+        else circle.textContent = i;
+      }
+
+      // Populate review on step 4
+      if (step === 4) populateReview();
+
+      // Navigation buttons
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      prevBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+      nextBtn.style.display = step === TOTAL_STEPS ? 'none' : 'inline-flex';
+      submitBtn.style.display = step === TOTAL_STEPS ? 'inline-flex' : 'none';
+    }
+
+    function nextStep() {
+      if (!validateStep(currentStep)) return;
+      if (currentStep < TOTAL_STEPS) {
+        currentStep++;
+        showStep(currentStep);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', nextStep);
+    document.getElementById('prevBtn').addEventListener('click', prevStep);
+
+    // ── Validation ───────────────────────────────────
+    function validateStep(step) {
+      if (step === 1) {
+        const required = ['firstName', 'lastName', 'email', 'gender', 'phone', 'dateOfBirth', 'nationality', 'city', 'address', 'about'];
+        for (const id of required) {
+          const el = document.getElementById(id);
+          if (!el || !el.value.trim()) {
+            toast('Please fill in all required fields.', 'error');
+            el && el.focus();
+            return false;
+          }
+        }
+        const email = document.getElementById('email').value;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          toast('Please enter a valid email address.', 'error');
+          return false;
+        }
+      }
+      if (step === 2) {
+        const required = ['vehicleType', 'vehicleSeats', 'vehicleMake', 'vehicleModel', 'vehicleYear', 'vehicleColor', 'vehiclePlate', 'experience', 'licenseNumber', 'licenseExpiry'];
+        for (const id of required) {
+          const el = document.getElementById(id);
+          if (!el || !el.value.trim()) {
+            toast('Please fill in all required vehicle fields.', 'error');
+            el && el.focus();
+            return false;
+          }
+        }
+      }
+      if (step === 3) {
+        const required = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
+        for (const name of required) {
+          if (!uploadedFiles[name]) {
+            toast('Please upload all required documents. Both front and back of National ID are required.', 'error');
+            return false;
+          }
+        }
+      }
+      if (step === 4) {
+        if (!document.getElementById('termsAgreement').checked || !document.getElementById('legalConfirmation').checked) {
+          toast('Please agree to the terms and conditions.', 'error');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // ── File Uploads (universal: iOS Safari, Android, PC) ──────────────────
+    const fileInputContainer = document.getElementById('fileInputContainer');
+    const uploadedInputs = {};
+
+    function createFileInput(name, accept) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.name = name;
+      input.id = 'file-' + name;
+      input.accept = accept || 'image/*,.pdf';
+      // iOS needs capture attribute removed so it shows gallery+camera choice
+      fileInputContainer.appendChild(input);
+      uploadedInputs[name] = input;
+      input.addEventListener('change', () => {
+        if (input.files && input.files.length > 0) {
+          const zone = document.getElementById('zone-' + name);
+          setFile(zone, name, input.files[0]);
+        }
+      });
+      return input;
+    }
+
+    // Init: create hidden inputs and wire up trigger buttons
+    document.querySelectorAll('.upload-trigger-btn').forEach(btn => {
+      const name = btn.dataset.for;
+      const accept = btn.dataset.accept || 'image/*,.pdf';
+      const input = createFileInput(name, accept);
+      const zone = document.getElementById('zone-' + name);
+      const removeBtn = zone.querySelector('.remove-file-btn');
+
+      // Trigger file picker on button click OR zone tap
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        input.click();
+      });
+      zone.addEventListener('click', e => {
+        if (!e.target.closest('.remove-file-btn') && !e.target.closest('.upload-trigger-btn')) {
+          input.click();
+        }
+      });
+
+      // Drag & drop (desktop)
+      ['dragenter', 'dragover'].forEach(ev => {
+        zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('drag-over'); });
+      });
+      ['dragleave', 'drop'].forEach(ev => {
+        zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('drag-over'); });
+      });
+      zone.addEventListener('drop', e => {
+        const files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0) setFile(zone, name, files[0]);
+      });
+
+      // Remove button
+      removeBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        clearFile(zone, name, input);
+      });
+    });
+
+    function setFile(zone, name, file) {
+      const maxSize = name === 'passportPhoto' ? 10 * 1024 * 1024 : 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast(`File too large. Max ${name === 'passportPhoto' ? '10MB' : '20MB'}.`, 'error');
+        return;
+      }
+      const allowed = name === 'passportPhoto'
+        ? ['image/jpeg', 'image/png', 'image/jpg']
+        : ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (!allowed.includes(file.type)) {
+        toast('Invalid file type. Please use PNG, JPG, or PDF.', 'error');
+        return;
+      }
+      uploadedFiles[name] = file;
+      zone.classList.add('has-file');
+
+      // Show preview
+      const icon = zone.querySelector('.upload-icon');
+      const textEl = zone.querySelector('.upload-text');
+      const subEl = zone.querySelector('.upload-sub');
+      let previewEl = zone.querySelector('.file-preview');
+      if (!previewEl) {
+        previewEl = document.createElement('div');
+        previewEl.className = 'file-preview';
+        zone.appendChild(previewEl);
+      }
+      if (icon) icon.style.display = 'none';
+      if (textEl) textEl.style.display = 'none';
+      if (subEl) subEl.style.display = 'none';
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          previewEl.innerHTML = `
+            <img src="${e.target.result}" alt="Preview">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${(file.size/1024/1024).toFixed(2)} MB</div>
+          `;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewEl.innerHTML = `
+          <i class="fas fa-file-pdf" style="font-size:2rem;color:#DC2626;"></i>
+          <div class="file-name">${file.name}</div>
+          <div class="file-size">${(file.size/1024/1024).toFixed(2)} MB</div>
+        `;
+      }
+      toast(`${file.name} uploaded ✓`, 'success');
+    }
+
+    function clearFile(zone, name, input) {
+      delete uploadedFiles[name];
+      zone.classList.remove('has-file');
+      if (input) input.value = '';
+      const preview = zone.querySelector('.file-preview');
+      if (preview) preview.remove();
+      zone.querySelector('.upload-icon') && (zone.querySelector('.upload-icon').style.display = '');
+      zone.querySelector('.upload-text') && (zone.querySelector('.upload-text').style.display = '');
+      zone.querySelector('.upload-sub') && (zone.querySelector('.upload-sub').style.display = '');
+      zone.querySelector('.upload-trigger-btn') && (zone.querySelector('.upload-trigger-btn').style.display = '');
+    }
+
+    // ── Review Page ──────────────────────────────────
+    function populateReview() {
+      const get = id => (document.getElementById(id) || {}).value || 'N/A';
+      const countryCode = document.getElementById('countryCode').value;
+      const phone = get('phone');
+
+      document.getElementById('reviewPersonal').innerHTML = `
+        <h3><i class="fas fa-user"></i> Personal Information</h3>
+        <div class="review-grid">
+          <div class="review-item"><span class="label">Full Name</span><span class="value">${get('firstName')} ${get('lastName')}</span></div>
+          <div class="review-item"><span class="label">Email</span><span class="value">${get('email')}</span></div>
+          <div class="review-item"><span class="label">Phone</span><span class="value">${countryCode} ${phone}</span></div>
+          <div class="review-item"><span class="label">Gender</span><span class="value">${get('gender')}</span></div>
+          <div class="review-item"><span class="label">Date of Birth</span><span class="value">${get('dateOfBirth')}</span></div>
+          <div class="review-item"><span class="label">Nationality</span><span class="value">${get('nationality')}</span></div>
+          <div class="review-item"><span class="label">City</span><span class="value">${get('city')}</span></div>
+          <div class="review-item"><span class="label">Address</span><span class="value">${get('address')}</span></div>
+        </div>
+      `;
+
+      document.getElementById('reviewVehicle').innerHTML = `
+        <h3><i class="fas fa-motorcycle"></i> Vehicle Information</h3>
+        <div class="review-grid">
+          <div class="review-item"><span class="label">K3K3 Type</span><span class="value">${get('vehicleType')}</span></div>
+          <div class="review-item"><span class="label">Seats</span><span class="value">${get('vehicleSeats')}</span></div>
+          <div class="review-item"><span class="label">Make</span><span class="value">${get('vehicleMake')}</span></div>
+          <div class="review-item"><span class="label">Model</span><span class="value">${get('vehicleModel')}</span></div>
+          <div class="review-item"><span class="label">Year</span><span class="value">${get('vehicleYear')}</span></div>
+          <div class="review-item"><span class="label">Color</span><span class="value">${get('vehicleColor')}</span></div>
+          <div class="review-item"><span class="label">Plate</span><span class="value">${get('vehiclePlate')}</span></div>
+          <div class="review-item"><span class="label">Experience</span><span class="value">${get('experience')}</span></div>
+          <div class="review-item"><span class="label">License #</span><span class="value">${get('licenseNumber')}</span></div>
+        </div>
+      `;
+
+      const docNames = {
+        riderLicense: "Rider's License",
+        vehicleRegistration: "Vehicle Registration",
+        idCardFront: "National ID (Front)",
+        idCardBack: "National ID (Back)",
+        passportPhoto: "Passport Photo"
+      };
+      const chips = Object.keys(uploadedFiles).map(key =>
+        `<div class="doc-chip"><i class="fas fa-check-circle"></i>${docNames[key] || key}</div>`
+      ).join('');
+
+      document.getElementById('reviewDocuments').innerHTML = `
+        <h3><i class="fas fa-file-alt"></i> Uploaded Documents</h3>
+        <div class="review-docs">${chips || '<span style="color:var(--k3k3-gray-400)">No documents uploaded</span>'}</div>
+      `;
+    }
+
+    // ── Form Submit ──────────────────────────────────
+    document.getElementById('applyForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!validateStep(4)) return;
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+      try {
+        const get = id => (document.getElementById(id) || {}).value || '';
+        const countryCode = get('countryCode');
+        const fullPhone = countryCode + get('phone');
+
+        // Step 1: Submit form data as JSON
+        const payload = {
+          first_name: get('firstName'),
+          last_name: get('lastName'),
+          email: get('email'),
+          phone: fullPhone,
+          date_of_birth: get('dateOfBirth') || null,
+          gender: get('gender') || null,
+          nationality: get('nationality') || null,
+          address: get('address') || null,
+          city: get('city') || null,
+          about: get('about') || null,
+          ghana_card_number: get('ghanaCardNumber') || null,
+          license_number: get('licenseNumber') || null,
+          license_expiry: get('licenseExpiry') || null,
+          vehicle_type: get('vehicleType') || null,
+          vehicle_seats: get('vehicleSeats') || null,
+          vehicle_make: get('vehicleMake') || null,
+          vehicle_model: get('vehicleModel') || null,
+          vehicle_year: get('vehicleYear') || null,
+          vehicle_plate: get('vehiclePlate') || null,
+          vehicle_color: get('vehicleColor') || null,
+          experience: get('experience') || null,
+        };
+
+        const res = await fetch(BACKEND + '/applications/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Failed to submit application');
+        }
+
+        const result = await res.json();
+        const appId = result.id;
+        let appRef = result.app_ref;
+
+        // Generate fallback appRef if backend doesn't provide one
+        if (!appRef) {
+          appRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
+        }
+
+        // Step 2: Upload documents if backend supports it
+        if (Object.keys(uploadedFiles).length > 0 && appId) {
+          try {
+            const formData = new FormData();
+            for (const [key, file] of Object.entries(uploadedFiles)) {
+              formData.append(key, file);
+            }
+            await fetch(`${BACKEND}/applications/${appId}/documents`, {
+              method: 'POST',
+              body: formData
+            });
+          } catch(docErr) {
+            console.warn('Document upload failed (non-critical):', docErr.message);
+          }
+        }
+
+        // Save rider data for pending screen
+        try {
+          localStorage.setItem('lastRiderApplication', JSON.stringify({
+            firstName: get('firstName'),
+            lastName:  get('lastName'),
+            phone:     (get('countryCode') + get('phone')).trim(),
+            email:     get('email'),
+            appRef:    appRef
+          }));
+          localStorage.setItem('lastApplicationRef', appRef);
+        } catch(e) {}
+
+        // Save application to localStorage for admin dashboard
+        try {
+          const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+          const newApp = {
+            id: appId || Date.now(),
+            app_ref: appRef || genRef,
+            first_name: get('firstName'),
+            last_name: get('lastName'),
+            email: get('email'),
+            phone: fullPhone,
+            date_of_birth: get('dateOfBirth') || null,
+            gender: get('gender') || null,
+            nationality: get('nationality') || null,
+            address: get('address') || null,
+            city: get('city') || null,
+            about: get('about') || null,
+            ghana_card_number: get('ghanaCardNumber') || null,
+            license_number: get('licenseNumber') || null,
+            license_expiry: get('licenseExpiry') || null,
+            vehicle_type: get('vehicleType') || null,
+            vehicle_seats: get('vehicleSeats') || null,
+            vehicle_make: get('vehicleMake') || null,
+            vehicle_model: get('vehicleModel') || null,
+            vehicle_year: get('vehicleYear') || null,
+            vehicle_plate: get('vehiclePlate') || null,
+            vehicle_color: get('vehicleColor') || null,
+            experience: get('experience') || null,
+            status: 'pending_review',
+            created_at: new Date().toISOString().split('T')[0],
+            documents: Object.keys(uploadedFiles).map(key => ({
+              type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
+              name: uploadedFiles[key].name
+            }))
+          };
+          existingApps.push(newApp);
+          localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
+        } catch(e) {}
+
+        // Update rider session status to pending
+        try {
+          const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+          if (riderSession.phone) {
+            riderSession.status = 'pending';
+            riderSession.applicationRef = appRef;
+            localStorage.setItem('riderSession', JSON.stringify(riderSession));
+          }
+        } catch(e) {}
+
+        toast('Application submitted successfully!', 'success');
+        setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
+
+      } catch (err) {
+        // Dev fallback: if backend is unavailable, save what we have and redirect
+        if (err.message && (err.message.includes('fetch') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+          const get2 = id => (document.getElementById(id) || {}).value || '';
+          const genRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
+          try {
+            localStorage.setItem('lastRiderApplication', JSON.stringify({
+              firstName: get2('firstName'),
+              lastName:  get2('lastName'),
+              phone:     (get2('countryCode') + get2('phone')).trim(),
+              email:     get2('email'),
+              appRef:    genRef
+            }));
+            localStorage.setItem('lastApplicationRef', genRef);
+
+            // Update rider session status to pending
+            try {
+              const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+              if (riderSession.phone) {
+                riderSession.status = 'pending';
+                riderSession.applicationRef = genRef;
+                localStorage.setItem('riderSession', JSON.stringify(riderSession));
+              }
+            } catch(e) {}
+
+            // Save application to localStorage for admin dashboard (fallback)
+            const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+            const newApp = {
+              id: Date.now(),
+              app_ref: genRef,
+              first_name: get2('firstName'),
+              last_name: get2('lastName'),
+              email: get2('email'),
+              phone: (get2('countryCode') + get2('phone')).trim(),
+              date_of_birth: get2('dateOfBirth') || null,
+              gender: get2('gender') || null,
+              nationality: get2('nationality') || null,
+              address: get2('address') || null,
+              city: get2('city') || null,
+              about: get2('about') || null,
+              ghana_card_number: get2('ghanaCardNumber') || null,
+              license_number: get2('licenseNumber') || null,
+              license_expiry: get2('licenseExpiry') || null,
+              vehicle_type: get2('vehicleType') || null,
+              vehicle_seats: get2('vehicleSeats') || null,
+              vehicle_make: get2('vehicleMake') || null,
+              vehicle_model: get2('vehicleModel') || null,
+              vehicle_year: get2('vehicleYear') || null,
+              vehicle_plate: get2('vehiclePlate') || null,
+              vehicle_color: get2('vehicleColor') || null,
+              experience: get2('experience') || null,
+              status: 'pending_review',
+              created_at: new Date().toISOString().split('T')[0],
+              documents: Object.keys(uploadedFiles).map(key => ({
+                type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
+                name: uploadedFiles[key].name
+              }))
+            };
+            existingApps.push(newApp);
+            localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
+          } catch(e) {}
+          toast('Application submitted!', 'success');
+          setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
+          return;
+        }
+        toast('Error: ' + err.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
+      }
+    });
+
+    // ── Toast ────────────────────────────────────────
+    function toast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+      el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    // ── Checkbox styling with tick ────────────────────
+    document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const item = cb.closest('.checkbox-item');
+        item.classList.toggle('checked', cb.checked);
+        const tick = item.querySelector('.cb-tick');
+        if (tick) tick.textContent = cb.checked ? '✓' : '';
+      });
+    });
+
+    // ── Init ─────────────────────────────────────────
+    showStep(1);
+
+    // ── Prefill from Register flow ────────────────────
+    (function prefillFromRegister() {
+      try {
+        const raw = sessionStorage.getItem('riderRegPrefill');
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d.firstName) document.getElementById('firstName').value = d.firstName;
+        if (d.lastName)  document.getElementById('lastName').value  = d.lastName;
+        if (d.email)     document.getElementById('email').value     = d.email;
+        if (d.phone)     document.getElementById('phone').value     = d.phone;
+        if (d.countryCode) {
+          const sel = document.getElementById('countryCode');
+          if (sel) sel.value = d.countryCode;
+        }
+        sessionStorage.removeItem('riderRegPrefill');
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>

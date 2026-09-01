@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>K3K3ride — Moolre Overview | Admin</title>
+  <meta name="description" content="Admin oversight for K3K3ride Moolre integrations — payments, OTP logs, and USSD sessions."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg:          #0a0d12;
+      --surface:     #111620;
+      --surface2:    #1a2030;
+      --border:      rgba(255,255,255,0.07);
+      --accent:      #f59e0b;
+      --accent2:     #10b981;
+      --accent3:     #6366f1;
+      --accent4:     #ef4444;
+      --text:        #f1f5f9;
+      --muted:       #94a3b8;
+      --success:     #22c55e;
+      --warning:     #f59e0b;
+      --danger:      #ef4444;
+      --info:        #38bdf8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .header-logo .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .header-logo span {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+
+    .header-badge {
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      transition: color .2s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* ── Layout ─────────────────────────────────────────────────── */
+    .page-body { padding: 32px; max-width: 1400px; margin: 0 auto; }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    /* ── Tabs ───────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 32px;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .tab-btn:not(.active):hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    /* ── Tab panels ─────────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Stat cards ─────────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.15); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .stat-card.green::before  { background: var(--success); }
+    .stat-card.amber::before  { background: var(--warning); }
+    .stat-card.blue::before   { background: var(--info); }
+    .stat-card.red::before    { background: var(--danger); }
+    .stat-card.purple::before { background: #a78bfa; }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .stat-icon.green  { background: rgba(34,197,94,.15);  color: var(--success); }
+    .stat-icon.amber  { background: rgba(245,158,11,.15); color: var(--warning); }
+    .stat-icon.blue   { background: rgba(56,189,248,.15); color: var(--info); }
+    .stat-icon.red    { background: rgba(239,68,68,.15);  color: var(--danger); }
+    .stat-icon.purple { background: rgba(167,139,250,.15); color: #a78bfa; }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── Card / table wrapper ───────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title i { color: var(--accent); }
+
+    .card-actions { display: flex; gap: 8px; }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-primary  { background: var(--accent);  color: #000; }
+    .btn-primary:hover { background: #d97706; }
+    .btn-ghost    { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover  { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .btn-danger   { background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+
+    /* ── Filter bar ─────────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input, .filter-bar select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .filter-bar input:focus, .filter-bar select:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-bar input { width: 240px; }
+
+    /* ── Table ──────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+    .mono { font-family: 'Courier New', monospace; font-size: 11px; color: var(--muted); }
+
+    /* ── Status badges ──────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-pending    { background: rgba(245,158,11,.15); color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
+    .badge-collected  { background: rgba(56,189,248,.15); color: var(--info);    border: 1px solid rgba(56,189,248,.25); }
+    .badge-disbursed  { background: rgba(34,197,94,.15);  color: var(--success); border: 1px solid rgba(34,197,94,.25); }
+    .badge-failed     { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.25); }
+    .badge-refunded   { background: rgba(167,139,250,.15);color: #a78bfa;        border: 1px solid rgba(167,139,250,.25); }
+    .badge-used       { background: rgba(34,197,94,.15);  color: var(--success); border: 1px solid rgba(34,197,94,.25); }
+    .badge-unused     { background: rgba(245,158,11,.15); color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
+    .badge-expired    { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.25); }
+    .badge-active     { background: rgba(56,189,248,.15); color: var(--info);    border: 1px solid rgba(56,189,248,.25); }
+    .badge-ended      { background: rgba(100,116,139,.15);color: #64748b;        border: 1px solid rgba(100,116,139,.25); }
+
+    /* ── Loading / Empty state ──────────────────────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .empty-state i { font-size: 36px; opacity: .3; }
+    .empty-state p { font-size: 14px; }
+
+    .loading-spinner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Action buttons in table ────────────────────────────────── */
+    .action-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .action-btn:hover { background: var(--surface2); color: var(--text); }
+
+    /* ── Flow diagram ───────────────────────────────────────────── */
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-width: 130px;
+      text-align: center;
+      transition: border-color .2s;
+    }
+
+    .flow-step:hover { border-color: var(--accent); }
+
+    .flow-step i { font-size: 22px; }
+    .flow-step .step-label { font-size: 12px; font-weight: 600; }
+    .flow-step .step-sub   { font-size: 10px; color: var(--muted); }
+
+    .flow-arrow {
+      font-size: 18px;
+      color: var(--accent);
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .page-body   { padding: 16px; }
+      .admin-header { padding: 12px 16px; }
+      .tabs { overflow-x: auto; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header class="admin-header">
+  <a href="admin-dashboard.html" class="header-logo">
+    <div class="logo-icon">🛺</div>
+    <span>K3K3ride Admin</span>
+  </a>
+  <div class="header-actions">
+    <span class="header-badge"><i class="fa fa-plug"></i> Moolre Connected</span>
+    <a href="admin-dashboard.html" class="back-btn">
+      <i class="fa fa-arrow-left"></i> Dashboard
+    </a>
+  </div>
+</header>
+
+<!-- ── Page body ────────────────────────────────────────────────────────── -->
+<main class="page-body">
+
+  <h1 class="page-title">
+    <i class="fa fa-money-bill-wave" style="color:var(--accent);margin-right:10px;"></i>
+    Moolre Overview
+  </h1>
+  <p class="page-subtitle">
+    Live monitoring for SMS, USSD, Collections, and Disbursements powered by Moolre.
+  </p>
+
+  <!-- ── Tabs ─────────────────────────────────────────────────────────── -->
+  <div class="tabs" role="tablist">
+    <button id="tab-payments" class="tab-btn active" onclick="switchTab('payments')">
+      <i class="fa fa-credit-card"></i> Payments
+    </button>
+    <button id="tab-otp" class="tab-btn" onclick="switchTab('otp')">
+      <i class="fa fa-key"></i> OTP Logs
+    </button>
+    <button id="tab-ussd" class="tab-btn" onclick="switchTab('ussd')">
+      <i class="fa fa-mobile-screen-button"></i> USSD Sessions
+    </button>
+    <button id="tab-flow" class="tab-btn" onclick="switchTab('flow')">
+      <i class="fa fa-diagram-project"></i> Payment Flow
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       TAB 1: PAYMENTS
+  ═════════════════════════════════════════════════════════════════════ -->
+  <section id="panel-payments" class="tab-panel active">
+
+    <!-- Stat cards -->
+    <div class="stats-grid" id="payment-stats-grid">
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="fa fa-circle-check"></i></div>
+        <div class="stat-value" id="stat-collected">—</div>
+        <div class="stat-label">Total Collected (GHS)</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="fa fa-paper-plane"></i></div>
+        <div class="stat-value" id="stat-disbursed">—</div>
+        <div class="stat-label">Total Disbursed (GHS)</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon amber"><i class="fa fa-percent"></i></div>
+        <div class="stat-value" id="stat-commission">—</div>
+        <div class="stat-label">K3K3 Commission (GHS)</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon red"><i class="fa fa-clock"></i></div>
+        <div class="stat-value" id="stat-pending">—</div>
+        <div class="stat-label">Pending Payments</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon purple"><i class="fa fa-triangle-exclamation"></i></div>
+        <div class="stat-value" id="stat-failed">—</div>
+        <div class="stat-label">Failed Payments</div>
+      </div>
+    </div>
+
+    <!-- Payments table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa fa-list"></i> All Payment Records
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-ghost" onclick="loadPayments()">
+            <i class="fa fa-rotate"></i> Refresh
+          </button>
+          <button class="btn btn-primary" onclick="exportPayments()">
+            <i class="fa fa-download"></i> Export CSV
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="pay-search" placeholder="Search by trip ID, reference…" oninput="filterPayments()"/>
+        <select id="pay-status-filter" onchange="filterPayments()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="collected">Collected</option>
+          <option value="disbursed">Disbursed</option>
+          <option value="failed">Failed</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Trip ID</th>
+              <th>Status</th>
+              <th>Total Fare</th>
+              <th>Commission (15%)</th>
+              <th>Rider Payout (85%)</th>
+              <th>Payer Phone</th>
+              <th>Collection Ref</th>
+              <th>Disbursement Ref</th>
+              <th>Initiated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="payments-tbody">
+            <tr><td colspan="10"><div class="loading-spinner"><div class="spinner"></div>Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       TAB 2: OTP LOGS
+  ═════════════════════════════════════════════════════════════════════ -->
+  <section id="panel-otp" class="tab-panel">
+
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="fa fa-key"></i></div>
+        <div class="stat-value" id="otp-total">—</div>
+        <div class="stat-label">Total OTPs Generated</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="fa fa-check"></i></div>
+        <div class="stat-value" id="otp-verified">—</div>
+        <div class="stat-label">Successfully Verified</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon red"><i class="fa fa-xmark"></i></div>
+        <div class="stat-value" id="otp-expired">—</div>
+        <div class="stat-label">Expired / Unused</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa fa-key"></i> OTP Activity Log</div>
+        <div class="card-actions">
+          <button class="btn btn-ghost" onclick="loadOTPLogs()">
+            <i class="fa fa-rotate"></i> Refresh
+          </button>
+          <button class="btn btn-danger" onclick="purgeExpiredOTPs()">
+            <i class="fa fa-trash"></i> Purge Expired
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="otp-search" placeholder="Search by phone number…" oninput="filterOTPs()"/>
+        <select id="otp-status-filter" onchange="filterOTPs()">
+          <option value="">All</option>
+          <option value="used">Verified</option>
+          <option value="unused">Pending</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Phone</th>
+              <th>User ID</th>
+              <th>Status</th>
+              <th>Attempts</th>
+              <th>Expires At</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="otp-tbody">
+            <tr><td colspan="7"><div class="loading-spinner"><div class="spinner"></div>Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       TAB 3: USSD SESSIONS
+  ═════════════════════════════════════════════════════════════════════ -->
+  <section id="panel-ussd" class="tab-panel">
+
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="fa fa-mobile-screen-button"></i></div>
+        <div class="stat-value" id="ussd-total">—</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="fa fa-circle-dot"></i></div>
+        <div class="stat-value" id="ussd-active">—</div>
+        <div class="stat-label">Active Sessions</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon amber"><i class="fa fa-users"></i></div>
+        <div class="stat-value" id="ussd-unique">—</div>
+        <div class="stat-label">Unique Callers</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa fa-mobile-screen-button"></i> USSD Session Log</div>
+        <div class="card-actions">
+          <button class="btn btn-ghost" onclick="loadUSSDSessions()">
+            <i class="fa fa-rotate"></i> Refresh
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="ussd-search" placeholder="Search by phone, session ID…" oninput="filterUSSD()"/>
+        <select id="ussd-status-filter" onchange="filterUSSD()">
+          <option value="">All Sessions</option>
+          <option value="active">Active</option>
+          <option value="ended">Ended</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>Phone</th>
+              <th>State</th>
+              <th>Status</th>
+              <th>Data Captured</th>
+              <th>Started</th>
+              <th>Ended</th>
+            </tr>
+          </thead>
+          <tbody id="ussd-tbody">
+            <tr><td colspan="7"><div class="loading-spinner"><div class="spinner"></div>Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       TAB 4: PAYMENT FLOW
+  ═════════════════════════════════════════════════════════════════════ -->
+  <section id="panel-flow" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa fa-diagram-project"></i> K3K3ride × Moolre Payment Flow
+        </div>
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <i class="fa fa-mobile-screen" style="color:var(--info)"></i>
+          <span class="step-label">Student Login</span>
+          <span class="step-sub">Phone + OTP (SMS)</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-map-pin" style="color:var(--accent)"></i>
+          <span class="step-label">Request Ride</span>
+          <span class="step-sub">Web or USSD</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-route" style="color:#a78bfa"></i>
+          <span class="step-label">Route Matching</span>
+          <span class="step-sub">Algorithm pairs rider</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-car" style="color:var(--success)"></i>
+          <span class="step-label">Trip in Progress</span>
+          <span class="step-sub">SMS updates both</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-flag-checkered" style="color:var(--accent)"></i>
+          <span class="step-label">Trip Complete</span>
+          <span class="step-sub">Fare confirmed</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-money-bill" style="color:var(--success)"></i>
+          <span class="step-label">MoMo Collection</span>
+          <span class="step-sub">Passenger pays GHS</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-building-columns" style="color:var(--info)"></i>
+          <span class="step-label">K3K3 Receives</span>
+          <span class="step-sub">Deducts 15% commission</span>
+        </div>
+        <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
+        <div class="flow-step">
+          <i class="fa fa-wallet" style="color:#a78bfa"></i>
+          <span class="step-label">Rider Gets Paid</span>
+          <span class="step-sub">85% via Disbursement</span>
+        </div>
+      </div>
+
+      <!-- API breakdown -->
+      <div style="padding: 24px; border-top: 1px solid var(--border);">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">
+          Moolre API Usage Breakdown
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <i class="fa fa-comment-sms" style="color:var(--info);font-size:20px;"></i>
+              <strong>SMS API</strong>
+            </div>
+            <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
+              <li>✔ OTP delivery on login</li>
+              <li>✔ Booking confirmation (passenger + rider)</li>
+              <li>✔ Trip status updates</li>
+              <li>✔ Payment receipt to passenger</li>
+              <li>✔ Payout confirmation to rider</li>
+              <li>✔ Trip cancellation alerts</li>
+            </ul>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <i class="fa fa-mobile-screen-button" style="color:var(--accent);font-size:20px;"></i>
+              <strong>USSD API</strong>
+            </div>
+            <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
+              <li>✔ Passenger: Request a ride</li>
+              <li>✔ Passenger: Pay for ride</li>
+              <li>✔ Passenger: Check ride status</li>
+              <li>✔ Rider: Go online / offline</li>
+              <li>✔ Rider: Check earnings</li>
+            </ul>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <i class="fa fa-money-bill-wave" style="color:var(--success);font-size:20px;"></i>
+              <strong>Collections API</strong>
+            </div>
+            <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
+              <li>✔ Initiate MoMo prompt (passenger)</li>
+              <li>✔ Receive payment confirmation webhook</li>
+              <li>✔ Poll collection status</li>
+            </ul>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <i class="fa fa-paper-plane" style="color:#a78bfa;font-size:20px;"></i>
+              <strong>Disbursements API</strong>
+            </div>
+            <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
+              <li>✔ Auto-pay rider earnings (85%)</li>
+              <li>✔ Triggered by collection webhook</li>
+              <li>✔ Poll disbursement status</li>
+              <li>✔ Commission: 15% retained by K3K3</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ── Config ────────────────────────────────────────────────────────────────
+  const API = window.location.hostname === 'localhost'
+    ? 'http://localhost:8810'
+    : '';
+
+  let allPayments = [], allOTPs = [], allUSSD = [];
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+
+    if (name === 'payments') loadPayments();
+    if (name === 'otp')      loadOTPLogs();
+    if (name === 'ussd')     loadUSSDSessions();
+  }
+
+  // ── Fetch helpers ─────────────────────────────────────────────────────────
+  async function apiFetch(path) {
+    try {
+      const res = await fetch(API + path);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.error('API error:', e);
+      return null;
+    }
+  }
+
+  // ── Formatters ────────────────────────────────────────────────────────────
+  function fmt(n)  { return n != null ? parseFloat(n).toFixed(2) : '—'; }
+  function fmtDt(s){ if (!s) return '—'; const d = new Date(s); return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+
+  function statusBadge(s) {
+    const map = {
+      pending:   'badge-pending',  collected: 'badge-collected',
+      disbursed: 'badge-disbursed', failed:   'badge-failed',
+      refunded:  'badge-refunded',
+    };
+    return `<span class="badge ${map[s] || ''}">${s}</span>`;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAYMENTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  async function loadPayments() {
+    // Load summary stats
+    const summary = await apiFetch('/payments/summary');
+    if (summary) {
+      document.getElementById('stat-collected').textContent   = 'GHS ' + fmt(summary.total_collected);
+      document.getElementById('stat-disbursed').textContent   = 'GHS ' + fmt(summary.total_disbursed);
+      document.getElementById('stat-commission').textContent  = 'GHS ' + fmt(summary.total_commission);
+      document.getElementById('stat-pending').textContent     = summary.pending_payments;
+      document.getElementById('stat-failed').textContent      = summary.failed_payments;
+    }
+
+    // Load records
+    const data = await apiFetch('/payments/?limit=100');
+    allPayments = data || getMockPayments();
+    renderPayments(allPayments);
+  }
+
+  function renderPayments(data) {
+    const tbody = document.getElementById('payments-tbody');
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><i class="fa fa-inbox"></i><p>No payment records found.</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(p => `
+      <tr>
+        <td><strong>#${p.trip_id}</strong></td>
+        <td>${statusBadge(p.status)}</td>
+        <td><strong>GHS ${fmt(p.total_fare)}</strong></td>
+        <td style="color:var(--warning)">GHS ${fmt(p.commission)}</td>
+        <td style="color:var(--success)">GHS ${fmt(p.rider_payout)}</td>
+        <td class="mono">${p.payer_phone || '—'}</td>
+        <td class="mono">${p.collection_ref ? p.collection_ref.substring(0,20)+'…' : '—'}</td>
+        <td class="mono">${p.disbursement_ref ? p.disbursement_ref.substring(0,20)+'…' : '—'}</td>
+        <td style="color:var(--muted);font-size:12px;">${fmtDt(p.initiated_at)}</td>
+        <td>
+          <button class="action-btn" onclick="viewTrip(${p.trip_id})">View Trip</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterPayments() {
+    const q  = document.getElementById('pay-search').value.toLowerCase();
+    const st = document.getElementById('pay-status-filter').value;
+    renderPayments(allPayments.filter(p =>
+      (!q  || String(p.trip_id).includes(q) || (p.collection_ref||'').toLowerCase().includes(q)) &&
+      (!st || p.status === st)
+    ));
+  }
+
+  function exportPayments() {
+    const headers = ['trip_id','status','total_fare','commission','rider_payout','payer_phone','collection_ref','disbursement_ref','initiated_at'];
+    const csv = [headers.join(','), ...allPayments.map(p => headers.map(h => JSON.stringify(p[h]??'')).join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = `k3k3_payments_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  }
+
+  function viewTrip(id) { window.open(`/admin/admin-dashboard.html#trip-${id}`, '_blank'); }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // OTP LOGS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  async function loadOTPLogs() {
+    const data = await apiFetch('/users/otp-logs?limit=100');
+    allOTPs = data || getMockOTPs();
+
+    const total    = allOTPs.length;
+    const verified = allOTPs.filter(o => o.used).length;
+    const expired  = allOTPs.filter(o => !o.used && new Date(o.expires_at) < new Date()).length;
+
+    document.getElementById('otp-total').textContent    = total;
+    document.getElementById('otp-verified').textContent = verified;
+    document.getElementById('otp-expired').textContent  = expired;
+
+    renderOTPs(allOTPs);
+  }
+
+  function renderOTPs(data) {
+    const tbody = document.getElementById('otp-tbody');
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa fa-key"></i><p>No OTP records found.</p></div></td></tr>`;
+      return;
+    }
+    const now = new Date();
+    tbody.innerHTML = data.map(o => {
+      const isExpired = !o.used && new Date(o.expires_at) < now;
+      const status    = o.used ? 'used' : (isExpired ? 'expired' : 'unused');
+      const badgeCls  = status === 'used' ? 'badge-used' : (status === 'expired' ? 'badge-expired' : 'badge-unused');
+      const label     = status === 'used' ? 'Verified' : (status === 'expired' ? 'Expired' : 'Pending');
+      return `<tr>
+        <td>${o.id}</td>
+        <td class="mono">${o.phone}</td>
+        <td>${o.user_id || '—'}</td>
+        <td><span class="badge ${badgeCls}">${label}</span></td>
+        <td>${o.attempts}/${5}</td>
+        <td style="color:${isExpired?'var(--danger)':'var(--muted)'};font-size:12px;">${fmtDt(o.expires_at)}</td>
+        <td style="color:var(--muted);font-size:12px;">${fmtDt(o.created_at)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterOTPs() {
+    const q  = document.getElementById('otp-search').value.toLowerCase();
+    const st = document.getElementById('otp-status-filter').value;
+    const now = new Date();
+    renderOTPs(allOTPs.filter(o => {
+      const isExpired = !o.used && new Date(o.expires_at) < now;
+      const status    = o.used ? 'used' : (isExpired ? 'expired' : 'unused');
+      return (!q || o.phone.includes(q)) && (!st || status === st);
+    }));
+  }
+
+  async function purgeExpiredOTPs() {
+    if (!confirm('Purge all expired and used OTP records?')) return;
+    const res = await apiFetch('/users/otp-purge');
+    alert(res ? `Purged ${res.deleted} records.` : 'Purge failed or no records deleted.');
+    loadOTPLogs();
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // USSD SESSIONS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  async function loadUSSDSessions() {
+    const [statsData, sessionsData] = await Promise.all([
+      apiFetch('/ussd/stats'),
+      apiFetch('/ussd/sessions?limit=100'),
+    ]);
+
+    if (statsData) {
+      document.getElementById('ussd-total').textContent  = statsData.total_sessions;
+      document.getElementById('ussd-active').textContent = statsData.active_sessions;
+      document.getElementById('ussd-unique').textContent = statsData.unique_callers;
+    }
+
+    allUSSD = sessionsData || getMockUSSD();
+    renderUSSD(allUSSD);
+  }
+
+  function renderUSSD(data) {
+    const tbody = document.getElementById('ussd-tbody');
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa fa-mobile-screen-button"></i><p>No USSD sessions yet.</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(s => {
+      const statusBadge = s.ended
+        ? '<span class="badge badge-ended">Ended</span>'
+        : '<span class="badge badge-active"><i class="fa fa-circle" style="font-size:6px"></i> Active</span>';
+      const dataStr = s.data && Object.keys(s.data).length
+        ? Object.entries(s.data).map(([k,v]) => `${k}: ${v}`).join(', ')
+        : '—';
+      return `<tr>
+        <td class="mono" style="font-size:11px;">${s.session_id}</td>
+        <td class="mono">${s.phone}</td>
+        <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:11px;">${s.state}</code></td>
+        <td>${statusBadge}</td>
+        <td style="font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${dataStr}">${dataStr}</td>
+        <td style="color:var(--muted);font-size:12px;">${fmtDt(s.created_at)}</td>
+        <td style="color:var(--muted);font-size:12px;">${s.ended ? fmtDt(s.ended_at) : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterUSSD() {
+    const q  = document.getElementById('ussd-search').value.toLowerCase();
+    const st = document.getElementById('ussd-status-filter').value;
+    renderUSSD(allUSSD.filter(s =>
+      (!q  || s.phone.includes(q) || s.session_id.includes(q)) &&
+      (!st || (st === 'active' ? !s.ended : s.ended))
+    ));
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MOCK DATA (shown when API unavailable)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  function getMockPayments() {
+    return [
+      { trip_id:101, status:'disbursed', total_fare:25.00, commission:3.75, rider_payout:21.25, payer_phone:'+233244100001', collection_ref:'K3K3-COL-ABC123DEF456', disbursement_ref:'K3K3-DIS-XYZ789GHI012', initiated_at: new Date(Date.now()-3600000).toISOString() },
+      { trip_id:102, status:'collected', total_fare:18.50, commission:2.78, rider_payout:15.73, payer_phone:'+233244100002', collection_ref:'K3K3-COL-BETA456789', disbursement_ref:null, initiated_at: new Date(Date.now()-1800000).toISOString() },
+      { trip_id:103, status:'pending',   total_fare:32.00, commission:4.80, rider_payout:27.20, payer_phone:'+233244100003', collection_ref:'K3K3-COL-GAMMA99988', disbursement_ref:null, initiated_at: new Date(Date.now()-300000).toISOString() },
+      { trip_id:104, status:'failed',    total_fare:15.00, commission:2.25, rider_payout:12.75, payer_phone:'+233244100004', collection_ref:'K3K3-COL-DELTA44321', disbursement_ref:null, initiated_at: new Date(Date.now()-7200000).toISOString() },
+    ];
+  }
+
+  function getMockOTPs() {
+    const now = Date.now();
+    return [
+      { id:1, phone:'+233244100001', user_id:10, used:true,  attempts:0, expires_at: new Date(now-600000).toISOString(), created_at: new Date(now-900000).toISOString() },
+      { id:2, phone:'+233244100002', user_id:11, used:false, attempts:1, expires_at: new Date(now+300000).toISOString(), created_at: new Date(now-120000).toISOString() },
+      { id:3, phone:'+233244100003', user_id:null, used:false, attempts:5, expires_at: new Date(now-300000).toISOString(), created_at: new Date(now-900000).toISOString() },
+    ];
+  }
+
+  function getMockUSSD() {
+    return [
+      { id:1, session_id:'ATid_k3k3_001', phone:'+233244200001', state:'completed', data:{pickup:'LEGON',dest:'ACHIMOTA'}, ended:true, ended_at: new Date(Date.now()-3600000).toISOString(), created_at: new Date(Date.now()-3900000).toISOString() },
+      { id:2, session_id:'ATid_k3k3_002', phone:'+233244200002', state:'pax_pickup', data:{}, ended:false, ended_at:null, created_at: new Date(Date.now()-120000).toISOString() },
+      { id:3, session_id:'ATid_k3k3_003', phone:'+233244200003', state:'rider_online_id', data:{}, ended:false, ended_at:null, created_at: new Date(Date.now()-60000).toISOString() },
+    ];
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    loadPayments();
+    // Auto-refresh every 30 seconds
+    setInterval(loadPayments, 30000);
+  });
+</script>
+</body>
+</html>
