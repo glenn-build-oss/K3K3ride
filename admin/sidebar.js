@@ -11,7 +11,7 @@
 
   /* ── Config ── */
   const LOGOUT_URL = 'adminlogin.html';
-  const API_BASE   = 'http://localhost:8810';
+  const API_BASE   = '';
 
   /* ── Sidebar HTML ── */
   const NAV_LINKS = [

@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────
+#  K3K3 — Vercel Environment Variables (TEMPLATE)
+#  Copy each key into: Vercel → Project Settings → Environment Variables
+#  Replace <YOUR_...> with actual values from your .env file
+# ─────────────────────────────────────────────────────────────────
+
+NODE_ENV=production
+
+# ─── Supabase ───
+SUPABASE_URL=<YOUR_SUPABASE_URL>
+SUPABASE_ANON_KEY=<YOUR_SUPABASE_ANON_KEY>
+SUPABASE_SERVICE_ROLE_KEY=<YOUR_SUPABASE_SERVICE_ROLE_KEY>
+
+# ─── Moolre SMS ───
+MOOLRE_SMS_URL=https://api.moolre.com/open/sms/send
+MOOLRE_SMS_VAS_KEY=<YOUR_MOOLRE_VAS_KEY>
+MOOLRE_SENDER_ID=K3K3ride
+
+# ─── Email (Gmail SMTP) ───
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=k3k3ride@gmail.com
+EMAIL_PASSWORD=<YOUR_GMAIL_APP_PASSWORD>
+EMAIL_FROM=K3K3ride <k3k3ride@gmail.com>
+# Admin OTP is delivered HERE — not to admin@k3k3.com which has no mail server
+ADMIN_NOTIFY_EMAIL=k3k3ride@gmail.com
+
+# ─── JWT ───
+JWT_SECRET=<STRONG_RANDOM_SECRET>
+
+# ─── OTP ───
+OTP_EXPIRY_MINUTES=5
+OTP_LENGTH=6

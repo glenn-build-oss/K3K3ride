@@ -1485,7 +1485,7 @@ class RiderApplicationForm {
     
 
     async submitApplication() {
-        const BACKEND = 'http://localhost:8810';
+        const BACKEND = '';
 
         const payload = {
             first_name:                 this.formData.firstName              || '',

@@ -1,9 +1,9 @@
 /**
  * K3K3 Admin — Dashboard JS  v=20260615c
- * Fetches real data from http://localhost:8810
+ * Fetches real data from 
  */
 
-const API = 'http://localhost:8810';
+const API = '';
 let currentPeriod = 'today';
 
 // ── Helpers ──

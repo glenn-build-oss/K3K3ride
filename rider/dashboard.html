@@ -1261,7 +1261,7 @@
      JAVASCRIPT
 ════════════════════════════════════════ -->
 <script>
-const API  = 'http://localhost:8810';
+const API  = '';
 const GOAL = 300; // daily earnings target in GH₵
 
 /* ── State ─────────────────────────────── */
@@ -1478,7 +1478,7 @@ async function setAvailability(available) {
 function connectWS() {
   if (!session?.dbRiderId) return;
   try {
-    wsConn = new WebSocket(`ws://localhost:8810/ws/drivers/${session.dbRiderId}`);
+    wsConn = new WebSocket(`wss://k3-k3ride.vercel.app/ws/drivers/${session.dbRiderId}`);
     wsConn.onopen    = () => console.log('[WS] Rider channel open');
     wsConn.onmessage = (ev) => {
       try {

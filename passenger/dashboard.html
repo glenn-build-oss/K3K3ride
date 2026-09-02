@@ -5192,7 +5192,7 @@
      JAVASCRIPT
 ═══════════════════════════════════════ -->
   <script>
-    const API = 'http://localhost:8810';
+    const API = '';
 
     /* ─── State ─── */
     let currentSection = 'home';
@@ -6748,7 +6748,7 @@
 </html>
 
 <script>
-  const API = 'http://localhost:8810';
+  const API = '';
 
   /* ─── State ─── */
   let currentSection = 'home';
@@ -7726,7 +7726,7 @@
       const a = Math.sin(dR / 2) ** 2 + Math.cos(plat * Math.PI / 180) * Math.cos(dc.lat * Math.PI / 180) * Math.sin(dG / 2) ** 2;
       const dist = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const fare = Math.max(3, +(dist * 1.8 + 2).toFixed(2));
-      const base = typeof API_BASE !== 'undefined' ? API_BASE : (typeof API !== 'undefined' ? API : 'http://localhost:8810');
+      const base = typeof API_BASE !== 'undefined' ? API_BASE : (typeof API !== 'undefined' ? API : '');
       fetch(base + '/trips/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ passenger_id: pid, pickup_lat: plat, pickup_lng: plng, dest_lat: dc.lat, dest_lng: dc.lng, pickup_label: pickup, dest_label: dest, fare_estimate: fare }) })
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(t => { sessionStorage.setItem('k3k3_active_trip', JSON.stringify(t)); setTimeout(() => showToast('Ride requested! A rider will accept soon.', 'success'), 1500); })

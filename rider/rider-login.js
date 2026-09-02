@@ -1,5 +1,5 @@
 // K3K3 Rider Login System - Real Backend API Integration
-const API_BASE = 'http://localhost:8810';
+const API_BASE = '';
 
 class RiderLoginSystem {
     constructor() {

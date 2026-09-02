@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 // Call register API
-                const response = await fetch('http://localhost:8810/users/register/', {
+                const response = await fetch('/api/auth/passenger/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

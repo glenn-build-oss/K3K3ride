@@ -570,8 +570,12 @@ router.post('/admin/login', async (req, res) => {
     // Send OTP via Moolre SMS
     const smsResult = await moolreSendOTP(admin.phone, otpCode);
 
-    // Send OTP via Email
-    const emailResult = await sendAdminOTP(admin.email, otpCode);
+    // Send OTP via Email — use ADMIN_NOTIFY_EMAIL (the real inbox), NOT admin.email
+    // admin.email is the login username (admin@k3k3.com) which has no mail server.
+    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || process.env.EMAIL_USER || 'k3k3ride@gmail.com';
+    const emailResult = await sendAdminOTP(notifyEmail, otpCode);
+    console.log(`[Auth] Admin OTP sent to ${notifyEmail} (admin login: ${admin.email})`);
+
 
     if (!smsResult.success && !emailResult.success) {
       if (process.env.NODE_ENV === 'development') {

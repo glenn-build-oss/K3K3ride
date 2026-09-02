@@ -1201,7 +1201,7 @@ async function updateRideRequestData() {
         }
 
         // Get available trips from main2.0 backend
-        const response = await fetch('http://localhost:8810/api/v1/trips/');
+        const response = await fetch('/api/v1/trips/');
         if (response.ok) {
             const trips = await response.json();
             
@@ -1235,14 +1235,14 @@ async function loadRealTripData(trips) {
     for (const trip of trips) {
         try {
             // Get passenger info from main2.0 backend
-            const passengersResponse = await fetch('http://localhost:8810/api/v1/passengers/');
+            const passengersResponse = await fetch('/api/v1/passengers/');
             if (passengersResponse.ok) {
                 const passengers = await passengersResponse.json();
                 const passenger = passengers.find(p => p.id === trip.passenger_id);
                 
                 if (passenger) {
                     // Get rider info from main2.0 backend
-                    const ridersResponse = await fetch('http://localhost:8810/api/v1/riders/');
+                    const ridersResponse = await fetch('/api/v1/riders/');
                     if (ridersResponse.ok) {
                         const riders = await ridersResponse.json();
                         const rider = riders.find(r => r.id === trip.rider_id);
