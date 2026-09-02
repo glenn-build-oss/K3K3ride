@@ -2911,72 +2911,23 @@
     #card-alone  .ride-price-amount { color: var(--black) }
     .ride-price-note { font-size: .62rem; color: var(--muted); font-weight: 500 }
 
-    /* ─── Payment Selection ─── */
-    .campus-payment-section {
-      margin-top: 16px;
-    }
-    .campus-payment-label {
-      font-size: .75rem;
+    /* ─── Payment Row ─── */
+    .campus-payment-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(16,185,129,.06);
+      border: 1px solid rgba(16,185,129,.15);
+      border-radius: 10px;
+      font-size: .8rem;
       font-weight: 600;
       color: var(--text-2);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
     }
-    .campus-payment-options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .campus-payment-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      background: var(--white);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all .2s ease;
-    }
-    .campus-payment-option:hover {
-      border-color: var(--yellow);
-      background: rgba(255,214,10,.04);
-    }
-    .campus-payment-option.selected {
-      border-color: var(--yellow);
-      background: rgba(255,214,10,.08);
-    }
-    .campus-payment-icon {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--surface);
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    .campus-payment-info {
-      flex: 1;
-    }
-    .campus-payment-name {
-      font-size: .85rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .campus-payment-desc {
-      font-size: .7rem;
+    .campus-payment-tag {
+      margin-left: auto;
+      font-size: .72rem;
       color: var(--muted);
-      margin-top: 2px;
-    }
-    .campus-payment-check {
-      font-size: 1.1rem;
-      color: var(--border);
-      transition: color .2s ease;
-    }
-    .campus-payment-option.selected .campus-payment-check {
-      color: var(--yellow);
     }
 
     @media(max-width: 380px) {
@@ -5075,35 +5026,11 @@
           </div>
         </div>
 
-        <!-- Payment method selection -->
-        <div class="campus-payment-section">
-          <div class="campus-payment-label">Payment Method</div>
-          <div class="campus-payment-options">
-            <div class="campus-payment-option" id="payment-cash" onclick="selectPaymentMethod('cash')">
-              <div class="campus-payment-icon">
-                <i class="fas fa-money-bill-wave" style="color:var(--green)"></i>
-              </div>
-              <div class="campus-payment-info">
-                <div class="campus-payment-name">Cash</div>
-                <div class="campus-payment-desc">Pay driver after ride</div>
-              </div>
-              <div class="campus-payment-check">
-                <i class="fas fa-check-circle"></i>
-              </div>
-            </div>
-            <div class="campus-payment-option" id="payment-momo" onclick="selectPaymentMethod('momo')">
-              <div class="campus-payment-icon">
-                <i class="fas fa-mobile-alt" style="color:var(--yellow)"></i>
-              </div>
-              <div class="campus-payment-info">
-                <div class="campus-payment-name">MoMo</div>
-                <div class="campus-payment-desc">Pay via mobile money</div>
-              </div>
-              <div class="campus-payment-check">
-                <i class="fas fa-check-circle"></i>
-              </div>
-            </div>
-          </div>
+        <!-- Payment row -->
+        <div class="campus-payment-row">
+          <i class="fas fa-money-bill-wave" style="color:var(--green)"></i>
+          <span>Cash Payment</span>
+          <span class="campus-payment-tag">Pay driver after ride</span>
         </div>
 
         <button class="book-btn" style="width:100%;margin-top:12px" id="confirmRideBtn" onclick="confirmRide()" disabled>
@@ -5952,14 +5879,6 @@
         const c = document.getElementById(id);
         if (c) c.classList.remove('selected');
       });
-
-      // Reset payment method selection
-      paymentMethod = null;
-      ['payment-cash','payment-momo'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('selected');
-      });
-
       const confirmBtn = document.getElementById('confirmRideBtn');
       const confirmLbl = document.getElementById('confirmRideBtnLabel');
       const nextBtn    = document.getElementById('step1NextBtn');
@@ -6135,7 +6054,6 @@
     // ── State ──
     let _campusFare = null;
     let _rideType = null; // 'shared' | 'alone'
-    let paymentMethod = null; // 'cash' | 'momo'
     let _pickupVal = '';
     let _destVal = '';
 
@@ -6202,56 +6120,28 @@
     function backToStep1() {
       document.getElementById('bookStep2').style.display = 'none';
       document.getElementById('bookStep1').style.display = 'block';
-
-      // Reset ride type + payment method when going back so step 2 is fresh
-      _rideType = null;
-      paymentMethod = null;
-      ['card-shared','card-alone'].forEach(id => {
-        const c = document.getElementById(id);
-        if (c) c.classList.remove('selected');
-      });
-      ['payment-cash','payment-momo'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('selected');
-      });
-      const confirmBtn = document.getElementById('confirmRideBtn');
-      const confirmLbl = document.getElementById('confirmRideBtnLabel');
-      if (confirmBtn) confirmBtn.disabled = true;
-      if (confirmLbl) confirmLbl.textContent = 'Select ride & payment';
     }
 
     function selectRideType(type) {
       _rideType = type;
       document.getElementById('card-shared').classList.toggle('selected', type === 'shared');
       document.getElementById('card-alone').classList.toggle('selected',  type === 'alone');
-      updateConfirmButton();
-    }
 
-    function selectPaymentMethod(method) {
-      paymentMethod = method;
-      document.getElementById('payment-cash').classList.toggle('selected', method === 'cash');
-      document.getElementById('payment-momo').classList.toggle('selected', method === 'momo');
-      updateConfirmButton();
-    }
+      const fare = type === 'shared'
+        ? _campusFare.toFixed(2)
+        : (_campusFare * ALONE_MULTIPLIER).toFixed(2);
 
-    function updateConfirmButton() {
       const confirmBtn = document.getElementById('confirmRideBtn');
       const confirmLbl = document.getElementById('confirmRideBtnLabel');
-      
-      if (_rideType && paymentMethod) {
-        confirmBtn.disabled = false;
-        const fare = _rideType === 'shared' ? _campusFare : _campusFare * ALONE_MULTIPLIER;
-        const label = _rideType === 'shared' ? 'Shared Ride' : 'Ride Alone';
-        const paymentLabel = paymentMethod === 'cash' ? 'Cash' : 'MoMo';
-        confirmLbl.textContent = `Book ${label} — ₵${fare.toFixed(2)} (${paymentLabel})`;
-      } else {
-        confirmBtn.disabled = true;
-        confirmLbl.textContent = 'Select ride & payment';
+      if (confirmBtn) confirmBtn.disabled = false;
+      if (confirmLbl) {
+        const label = type === 'shared' ? 'Shared Ride' : 'Ride Alone';
+        confirmLbl.textContent = `Book ${label} — ₵${fare}`;
       }
     }
 
     async function confirmRide() {
-      if (!_rideType || !_campusFare || !paymentMethod) return;
+      if (!_rideType || !_campusFare) return;
 
       const pickup = _pickupVal;
       const dest   = _destVal;
@@ -6283,7 +6173,6 @@
             fare_estimate: fare,
             ride_type:     _rideType,            // 'shared' | 'alone'
             campus_fare:   _campusFare,          // base per-person fixed fare
-            payment_method: paymentMethod,       // 'cash' | 'momo'
           };
           const res = await fetch(`${API}/trips/`, {
             method: 'POST',
@@ -6845,11 +6734,36 @@
 
   function t(key) { return (TRANSLATIONS[currentLang] || TRANSLATIONS.en)[key] || key; }
 
-  /* ─── Live data state (populated from API) ─── */
-  let TRIPS = { completed: [], cancelled: [], all: [] };
-  let PAYMENTS = [];
+  /* ─── Data ─── */
+  const TRIPS = {
+    completed: [
+      { from: 'Ho Market', to: 'Ho Polytechnic', date: '24 Jun 2025', time: '08:32', amount: 'GH₵ 5.00', driver: 'Kofi A.' },
+      { from: 'Bus Terminal', to: 'Ho Teaching Hospital', date: '22 Jun 2025', time: '14:15', amount: 'GH₵ 8.00', driver: 'Yaw B.' },
+      { from: 'Ho Central', to: 'Dome Market', date: '20 Jun 2025', time: '10:00', amount: 'GH₵ 6.50', driver: 'Ama K.' },
+    ],
+    cancelled: [
+      { from: 'Ho Market', to: 'Bus Terminal', date: '21 Jun 2025', time: '09:00', reason: 'Driver did not arrive' },
+      { from: 'Ho Polytechnic', to: 'Ho Central', date: '18 Jun 2025', time: '17:30', reason: 'Cancelled by passenger' },
+    ]
+  };
 
-  const NOTIFS = { rides: [], drivers: [] };
+  const PAYMENTS = [
+    { label: 'Ride — Ho Market → Polytechnic', date: '24 Jun 2025', time: '08:32', amount: 'GH₵ 5.00' },
+    { label: 'Ride — Bus Terminal → Hospital', date: '22 Jun 2025', time: '14:15', amount: 'GH₵ 8.00' },
+    { label: 'Ride — Ho Central → Dome', date: '20 Jun 2025', time: '10:00', amount: 'GH₵ 6.50' },
+  ];
+
+  const NOTIFS = {
+    rides: [
+      { title: 'Ride Confirmed', desc: 'Your ride from Ho Market to Ho Polytechnic is confirmed. Kofi is on the way.', time: '2 min ago', read: false },
+      { title: 'Ride Completed', desc: 'You have successfully completed your ride. Rate your rider!', time: '1 hr ago', read: false },
+      { title: 'Payment Received', desc: 'GH₵ 5.00 payment confirmed for your last ride.', time: '1 hr ago', read: true },
+    ],
+    drivers: [
+      { title: 'Driver Arriving', desc: 'Kofi A. is 3 minutes away from your pickup point.', time: 'Just now', read: false },
+      { title: 'Driver Nearby', desc: 'Your rider Yaw B. is 500m away. Please proceed to pickup.', time: '2 days ago', read: true },
+    ]
+  };
 
   const FAQS = [
     { q: 'How do I book a K3K3 ride?', a: 'Go to Home, tap the "Where to?" bar or a quick destination, enter your pickup and tap Request Ride. A nearby rider will be assigned within minutes.' },
@@ -6859,22 +6773,28 @@
     { q: 'How do I contact my rider?', a: 'Once a rider is assigned, their contact number appears in the active ride panel so you can call them directly.' },
   ];
 
-  const DRIVERS = [];
+  const DRIVERS = [
+    { name: 'Kofi Asante', rating: '4.9', vehicle: 'Bajaj RE · GR-1234', eta: '2 min', km: '0.4 km' },
+    { name: 'Yaw Boateng', rating: '4.8', vehicle: 'TVS King · GR-5678', eta: '4 min', km: '0.9 km' },
+    { name: 'Ama Kumi', rating: '4.9', vehicle: 'Piaggio Apé · ER-9012', eta: '6 min', km: '1.3 km' },
+    { name: 'Kwame Doe', rating: '4.7', vehicle: 'Bajaj RE · GA-3456', eta: '8 min', km: '1.8 km' },
+  ];
 
   /* ─── Init ─── */
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     loadSettings();
     renderDrivers();
-    renderFAQs();
+    renderTrips();
+    renderPayments();
     renderNotifications();
+    renderFAQs();
+    updateStats();
     updateNotifBadge();
     setGreeting();
-    applyLanguage(false);
+    applyLanguage(false);        // apply saved language silently
     initSidebarCollapse();
     initLocationPrompt();
-    // Load real data from API
-    await loadRidesFromAPI();
   });
 
   function setGreeting() {
@@ -6903,16 +6823,15 @@
   /* ─── Load User Info from storage/DB ─── */
   function loadUserInfo() {
     const u = getStoredUser();
-    // Support both DB field names (first_name/last_name) and legacy (fname/lname/name)
-    const fn = (u && (u.first_name || u.fname || u.name)) || localStorage.getItem('k3k3_firstName') || localStorage.getItem('k3k3_user_name') || 'Friend';
-    const ln = (u && (u.last_name  || u.lname)) || localStorage.getItem('k3k3_lastName') || '';
+    const fn = (u && (u.fname || u.name)) || localStorage.getItem('k3k3_firstName') || localStorage.getItem('k3k3_user_name') || 'Friend';
+    const ln = (u && u.lname) || localStorage.getItem('k3k3_lastName') || '';
     const email = (u && u.email) || localStorage.getItem('k3k3_email') || localStorage.getItem('k3k3_user_email') || '';
     const phone = (u && u.phone) || localStorage.getItem('k3k3_phone') || '';
-    const dn = (u && u.full_name) || (fn + (ln ? ' ' + ln : ''));
+    const dn = fn + (ln ? ' ' + ln : '');
 
-    const setEl  = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
-    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v };
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v };
+    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v };
 
     setEl('heroName', fn);
     setEl('drawerName', fn);
@@ -6934,13 +6853,13 @@
     if (ppd) ppd.textContent = phone || 'Not set';
     if (ped) ped.textContent = email || 'Not set';
 
-    setVal('profileFirstName', fn !== 'Friend' ? fn : '');
+    setVal('profileFirstName', fn);
     setVal('profileLastName', ln);
     if (phone) setVal('profilePhone', phone);
     if (email) setVal('profileEmail', email);
 
     // Pre-fill apply form name/phone
-    setVal('applyFName', fn !== 'Friend' ? fn : '');
+    setVal('applyFName', fn);
     setVal('applyLName', ln);
     if (phone) setVal('applyPhone', phone);
 
@@ -6958,63 +6877,52 @@
     const em = document.getElementById('profileEmail').value.trim();
     const en = document.getElementById('emergencyName').value.trim();
     const ep = document.getElementById('emergencyPhone').value.trim();
-    if (!fn) { showToast('Please enter your first name', 'error'); return; }
+    if (!fn) { showToast('Please enter your first name', 'error'); return }
 
     const userId = getUserId();
     const btn = document.querySelector('#sec-profile .form-save-btn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
 
-    let savedToServer = false;
     if (userId) {
       try {
-        const res = await fetch(`${API}/auth/users/${userId}`, {
+        const res = await fetch(`${API}/users/${userId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ first_name: fn, last_name: ln, phone: ph, email: em })
+          body: JSON.stringify({ fname: fn, lname: ln, phone: ph, email: em })
         });
-        if (res.ok) {
-          const data = await res.json();
-          savedToServer = true;
-          // Sync response into stored user
-          const stored = getStoredUser() || {};
-          if (data.user) {
-            stored.first_name = data.user.first_name;
-            stored.last_name  = data.user.last_name;
-            stored.full_name  = data.user.full_name;
-            stored.email      = data.user.email;
-            stored.phone      = data.user.phone;
-            // legacy compat keys
-            stored.fname = data.user.first_name;
-            stored.lname = data.user.last_name;
-          }
-          try { localStorage.setItem('k3k3_user', JSON.stringify(stored)); } catch(e){}
-          try { sessionStorage.setItem('k3k3_user', JSON.stringify(stored)); } catch(e){}
-        } else {
-          const err = await res.json().catch(()=>({}));
-          console.warn('[Profile] Server save failed:', err.error);
-          showToast('Server save failed: ' + (err.error || 'Unknown error'), 'error');
-          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Profile'; }
-          return;
+        if (!res.ok) {
+          // fallback: try PUT
+          const res2 = await fetch(`${API}/users/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fname: fn, lname: ln, phone: ph, email: em })
+          });
+          if (!res2.ok) throw new Error('Save failed');
+        }
+        // Update stored user object
+        const stored = getStoredUser();
+        if (stored) {
+          stored.fname = fn; stored.lname = ln; stored.phone = ph; stored.email = em;
+          const key = localStorage.getItem('k3k3_user') ? 'k3k3_user' : 'k3k3_user';
+          try { localStorage.setItem('k3k3_user', JSON.stringify(stored)) } catch (e) { }
+          try { sessionStorage.setItem('k3k3_user', JSON.stringify(stored)) } catch (e) { }
         }
       } catch (err) {
-        console.warn('[Profile] Network error saving profile:', err);
-        showToast('Network error — profile not saved on server.', 'error');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Profile'; }
-        return;
+        console.warn('API profile save failed, saving locally only:', err);
       }
     }
 
-    // Always update localStorage as fallback cache
+    // Always update localStorage
     localStorage.setItem('k3k3_firstName', fn);
     if (ln) localStorage.setItem('k3k3_lastName', ln);
-    if (ph) localStorage.setItem('k3k3_phone', ph);
+    if (ph) { localStorage.setItem('k3k3_phone', ph); }
     if (em) localStorage.setItem('k3k3_email', em);
     if (en) localStorage.setItem('k3k3_emergencyName', en);
     if (ep) localStorage.setItem('k3k3_emergencyPhone', ep);
 
     // Refresh UI
     loadUserInfo();
-    showToast(savedToServer ? 'Profile saved ✓' : 'Saved locally (no account linked)', 'success');
+    showToast('Profile saved successfully ✓', 'success');
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
   }
 
@@ -7462,141 +7370,43 @@
       </div>
     </div>`).join('');
   }
-  /* ─── Load rides from API ─── */
-  async function loadRidesFromAPI() {
-    const userId = getUserId();
-    const completedEl = document.getElementById('completedRides');
-    const cancelledEl = document.getElementById('cancelledRides');
-    const paymentEl   = document.getElementById('paymentList');
-
-    // Show loading skeleton
-    const loadingHTML = '<div class="empty-state"><i class="fas fa-circle-notch fa-spin"></i><p>Loading…</p></div>';
-    if (completedEl) completedEl.innerHTML = loadingHTML;
-    if (cancelledEl) cancelledEl.innerHTML = loadingHTML;
-    if (paymentEl)   paymentEl.innerHTML   = loadingHTML;
-
-    if (!userId) {
-      const noUser = '<div class="empty-state"><i class="fas fa-user-slash"></i><p>Sign in to see your rides.</p></div>';
-      if (completedEl) completedEl.innerHTML = noUser;
-      if (cancelledEl) cancelledEl.innerHTML = noUser;
-      if (paymentEl)   paymentEl.innerHTML   = noUser;
-      updateStats();
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API}/trips/passenger/${userId}`);
-      if (!res.ok) throw new Error('API error ' + res.status);
-      const data = await res.json();
-      const rides = data.rides || [];
-
-      // Split into buckets
-      const completed = rides.filter(r => r.status === 'completed');
-      const cancelled = rides.filter(r => r.status === 'cancelled' || r.status === 'no_show');
-      const all = rides;
-      TRIPS = { completed, cancelled, all };
-
-      // Build PAYMENTS from completed rides that have a fare
-      PAYMENTS = completed.map(r => ({
-        label:  `Ride — ${r.pickup_address} → ${r.dropoff_address}`,
-        date:   fmtDate(r.completed_at || r.requested_at),
-        time:   fmtTime(r.completed_at || r.requested_at),
-        amount: r.actual_fare != null ? `GH₵ ${parseFloat(r.actual_fare).toFixed(2)}` : (r.estimated_fare != null ? `GH₵ ${parseFloat(r.estimated_fare).toFixed(2)}` : '—'),
-        method: r.payment_method || 'cash'
-      }));
-
-      renderTrips();
-      renderPayments();
-      updateStats();
-    } catch (err) {
-      console.error('[Rides] Failed to load rides:', err);
-      const errHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><p>Could not load rides. Check your connection.</p></div>';
-      if (completedEl) completedEl.innerHTML = errHTML;
-      if (cancelledEl) cancelledEl.innerHTML = errHTML;
-      if (paymentEl)   paymentEl.innerHTML   = errHTML;
-    }
-  }
-
-  /* ─── Date/time helpers ─── */
-  function fmtDate(iso) {
-    if (!iso) return '—';
-    try {
-      return new Date(iso).toLocaleDateString('en-GH', { day: 'numeric', month: 'short', year: 'numeric' });
-    } catch(e) { return iso.slice(0, 10); }
-  }
-  function fmtTime(iso) {
-    if (!iso) return '—';
-    try {
-      return new Date(iso).toLocaleTimeString('en-GH', { hour: '2-digit', minute: '2-digit' });
-    } catch(e) { return '—'; }
-  }
-  function fmtRelativeStatus(status) {
-    const map = { requested:'Requested', searching:'Searching', accepted:'Accepted', arriving:'Arriving', in_progress:'In Progress', completed:'Completed', cancelled:'Cancelled', no_show:'No Show' };
-    return map[status] || status;
-  }
-
   function renderTrips() {
     const privacyOff = localStorage.getItem('k3k3_privacyTripHistory') === 'false';
-    const completedEl = document.getElementById('completedRides');
-    const cancelledEl = document.getElementById('cancelledRides');
-
     if (privacyOff) {
-      const locked = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
-      if (completedEl) completedEl.innerHTML = locked;
-      if (cancelledEl) cancelledEl.innerHTML = locked;
+      const el = document.getElementById('completedRides');
+      if (el) el.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
       return;
     }
-
-    if (completedEl) {
-      if (!TRIPS.completed.length) {
-        completedEl.innerHTML = '<div class="empty-state"><i class="fas fa-route"></i><p>No completed rides yet. Book your first ride!</p></div>';
-      } else {
-        completedEl.innerHTML = TRIPS.completed.map(r => `
-        <div class="trip-card">
-          <div class="trip-icon completed"><i class="fas fa-check"></i></div>
-          <div class="trip-details">
-            <div class="trip-route">${r.pickup_address} → ${r.dropoff_address}</div>
-            <div class="trip-meta">${fmtDate(r.completed_at || r.requested_at)} · ${fmtTime(r.completed_at || r.requested_at)} · ${r.payment_method === 'momo' ? '<i class="fas fa-mobile-alt"></i> MoMo' : '<i class="fas fa-money-bill-wave"></i> Cash'}</div>
-          </div>
-          <div class="trip-right">
-            <div class="trip-amount">${r.actual_fare != null ? 'GH₵ ' + parseFloat(r.actual_fare).toFixed(2) : r.estimated_fare != null ? 'GH₵ ' + parseFloat(r.estimated_fare).toFixed(2) : '—'}</div>
-            <div class="trip-status completed">Completed</div>
-          </div>
-        </div>`).join('');
-      }
-    }
-
-    if (cancelledEl) {
-      if (!TRIPS.cancelled.length) {
-        cancelledEl.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No cancelled rides. Great track record!</p></div>';
-      } else {
-        cancelledEl.innerHTML = TRIPS.cancelled.map(r => `
-        <div class="trip-card">
-          <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
-          <div class="trip-details">
-            <div class="trip-route">${r.pickup_address} → ${r.dropoff_address}</div>
-            <div class="trip-meta">${fmtDate(r.cancelled_at || r.requested_at)} · ${fmtTime(r.cancelled_at || r.requested_at)}</div>
-            ${r.cancellation_reason ? `<div class="trip-meta" style="color:var(--red)">${r.cancellation_reason}</div>` : ''}
-          </div>
-          <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
-        </div>`).join('');
-      }
-    }
+    document.getElementById('completedRides').innerHTML = TRIPS.completed.map(t => `
+    <div class="trip-card">
+      <div class="trip-icon completed"><i class="fas fa-check"></i></div>
+      <div class="trip-details">
+        <div class="trip-route">${t.from} → ${t.to}</div>
+        <div class="trip-meta">${t.date} · ${t.time} · ${t.driver}</div>
+      </div>
+      <div class="trip-right">
+        <div class="trip-amount">${t.amount}</div>
+        <div class="trip-status completed">Completed</div>
+      </div>
+    </div>`).join('');
+    document.getElementById('cancelledRides').innerHTML = TRIPS.cancelled.map(t => `
+    <div class="trip-card">
+      <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
+      <div class="trip-details">
+        <div class="trip-route">${t.from} → ${t.to}</div>
+        <div class="trip-meta">${t.date} · ${t.time}</div>
+        <div class="trip-meta" style="color:var(--red)">${t.reason}</div>
+      </div>
+      <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
+    </div>`).join('');
   }
-
   function renderPayments() {
-    const el = document.getElementById('paymentList');
-    if (!el) return;
-    if (!PAYMENTS.length) {
-      el.innerHTML = '<div class="empty-state"><i class="fas fa-receipt"></i><p>No payment records yet.</p></div>';
-      return;
-    }
-    el.innerHTML = PAYMENTS.map(p => `
+    document.getElementById('paymentList').innerHTML = PAYMENTS.map(p => `
     <div class="trip-card">
       <div class="trip-icon completed"><i class="fas fa-receipt"></i></div>
       <div class="trip-details">
         <div class="trip-route">${p.label}</div>
-        <div class="trip-meta">${p.date} · ${p.time} · ${p.method === 'momo' ? '<i class="fas fa-mobile-alt"></i> MoMo' : '<i class="fas fa-money-bill-wave"></i> Cash'}</div>
+        <div class="trip-meta">${p.date} · ${p.time}</div>
       </div>
       <div class="trip-right"><div class="trip-amount">${p.amount}</div></div>
     </div>`).join('');
@@ -7637,21 +7447,8 @@
     }
   }
   function updateStats() {
-    const total     = (TRIPS.all || []).length;
-    const completed = (TRIPS.completed || []).length;
-    const cancelled = (TRIPS.cancelled || []).length;
-
-    // Home hero chips
-    const chipTotal     = document.getElementById('chipTotal');
-    const chipCompleted = document.getElementById('chipCompleted');
-    const chipCancelled = document.getElementById('chipCancelled');
-    if (chipTotal)     chipTotal.textContent     = total;
-    if (chipCompleted) chipCompleted.textContent = completed;
-    if (chipCancelled) chipCancelled.textContent = cancelled;
-
-    // Legacy stat element if present
-    const statRides = document.getElementById('statRides');
-    if (statRides) statRides.textContent = completed;
+    const el = document.getElementById('statRides');
+    if (el) el.textContent = TRIPS.completed.length;
   }
 
   function markAllRead() {

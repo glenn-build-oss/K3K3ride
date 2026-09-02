@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>K3K3 — Rider Login</title>
+  <meta name="description" content="K3K3 Rider Portal. Sign in with your Rider ID and password to access your dashboard.">
+  <link rel="icon" type="image/png" href="../assets/k3k3.png">
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --black:    #111111;
+      --black-2:  #1a1a1a;
+      --black-3:  #222222;
+      --yellow:   #FFD60A;
+      --yellow-dk:#E6C000;
+      --yellow-lt:rgba(255,214,10,.12);
+      --white:    #ffffff;
+      --surface:  #F7F8FA;
+      --border:   #E5E7EB;
+      --muted:    #9CA3AF;
+      --text:     #111827;
+      --text-2:   #6B7280;
+      --green:    #10B981;
+      --red:      #EF4444;
+      --r:        12px;
+      --r-lg:     18px;
+      --r-xl:     24px;
+      --r-full:   999px;
+      --ease:     cubic-bezier(.4,0,.2,1);
+      --sh-md:    0 4px 16px rgba(0,0,0,.1);
+      --sh-lg:    0 12px 40px rgba(0,0,0,.18);
+    }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{height:100%;scroll-behavior:smooth}
+    body{
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+      min-height:100vh;overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      background:var(--surface);
+      display:flex;
+    }
+
+    /* ── SPLIT LAYOUT ── */
+    .login-wrapper{
+      display:grid;grid-template-columns:1fr 1fr;
+      min-height:100vh;width:100%;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel{
+      background:var(--black);
+      display:flex;flex-direction:column;
+      justify-content:space-between;
+      padding:48px 56px;
+      position:relative;overflow:hidden;
+    }
+    .left-panel::before{
+      content:'';position:absolute;
+      top:-120px;right:-80px;
+      width:400px;height:400px;
+      background:radial-gradient(circle,rgba(255,214,10,.18) 0%,transparent 65%);
+      pointer-events:none;
+    }
+    .left-panel::after{
+      content:'';position:absolute;
+      bottom:-100px;left:-60px;
+      width:300px;height:300px;
+      background:radial-gradient(circle,rgba(255,214,10,.08) 0%,transparent 65%);
+      pointer-events:none;
+    }
+
+    .left-brand{
+      display:flex;align-items:center;gap:14px;position:relative;z-index:1;
+    }
+    .left-logo{
+      width:48px;height:48px;border-radius:14px;
+      object-fit:contain;
+    }
+    .left-brand-name{
+      font-size:1.5rem;font-weight:900;
+      color:var(--yellow);letter-spacing:-.5px;
+    }
+    .left-brand-tag{
+      font-size:.72rem;color:rgba(255,255,255,.35);
+      font-weight:500;letter-spacing:.04em;
+    }
+
+    .left-hero{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 0;}
+    .left-badge{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:7px 16px;border-radius:var(--r-full);
+      background:var(--yellow-lt);border:1px solid rgba(255,214,10,.25);
+      font-size:.72rem;font-weight:700;color:var(--yellow);
+      letter-spacing:.06em;text-transform:uppercase;
+      margin-bottom:24px;width:fit-content;
+    }
+    .left-badge i{font-size:.65rem}
+    .left-title{
+      font-size:2.8rem;font-weight:900;
+      color:var(--white);line-height:1.12;
+      letter-spacing:-.8px;margin-bottom:18px;
+    }
+    .left-title span{color:var(--yellow)}
+    .left-sub{
+      font-size:.95rem;color:rgba(255,255,255,.42);
+      line-height:1.65;max-width:340px;margin-bottom:40px;
+    }
+
+    .stat-pills{display:flex;gap:12px;flex-wrap:wrap;}
+    .stat-pill{
+      display:flex;align-items:center;gap:9px;
+      padding:10px 18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:var(--r-full);
+    }
+    .stat-pill-icon{
+      width:28px;height:28px;border-radius:8px;
+      background:var(--yellow);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.75rem;color:var(--black);flex-shrink:0;
+    }
+    .stat-pill-val{font-size:.85rem;font-weight:800;color:var(--white)}
+    .stat-pill-lbl{font-size:.68rem;color:rgba(255,255,255,.4);font-weight:500}
+
+    .left-footer{
+      position:relative;z-index:1;
+      font-size:.72rem;color:rgba(255,255,255,.22);
+    }
+    .left-footer a{color:rgba(255,255,255,.35);text-decoration:none;}
+    .left-footer a:hover{color:var(--yellow)}
+
+    /* ── RIGHT PANEL ── */
+    .right-panel{
+      background:var(--white);
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:48px 64px;
+      position:relative;
+    }
+
+    .form-card{width:100%;max-width:420px}
+    .form-eyebrow{
+      font-size:.72rem;font-weight:700;color:var(--yellow);
+      text-transform:uppercase;letter-spacing:.1em;
+      margin-bottom:10px;
+    }
+    .form-heading{
+      font-size:2rem;font-weight:900;color:var(--text);
+      letter-spacing:-.5px;margin-bottom:8px;
+    }
+    .form-subheading{
+      font-size:.875rem;color:var(--text-2);
+      margin-bottom:36px;line-height:1.55;
+    }
+
+    .field{margin-bottom:20px;position:relative}
+    .field label{
+      display:block;font-size:.72rem;font-weight:700;
+      color:var(--text-2);margin-bottom:8px;
+      text-transform:uppercase;letter-spacing:.05em;
+    }
+    .field-wrap{
+      position:relative;display:flex;align-items:center;
+    }
+    .field-icon{
+      position:absolute;left:14px;
+      color:var(--muted);font-size:.9rem;pointer-events:none;z-index:1;
+    }
+    .field input{
+      width:100%;padding:13px 14px 13px 42px;
+      border:1.5px solid var(--border);border-radius:var(--r);
+      font-family:inherit;font-size:.92rem;color:var(--text);
+      background:var(--surface);outline:none;
+      transition:border-color .2s,box-shadow .2s,background .2s;
+    }
+    .field input:hover{background:var(--white);}
+    .field input:focus{
+      border-color:var(--black);
+      box-shadow:0 0 0 3px rgba(17,17,17,.08);
+      background:var(--white);
+    }
+    .field input.error-field{border-color:var(--red);}
+    .pwd-toggle{
+      position:absolute;right:12px;
+      background:none;border:none;cursor:pointer;
+      color:var(--muted);font-size:.9rem;padding:8px;
+      border-radius:50%;
+      transition:all .18s;
+    }
+    .pwd-toggle:hover{color:var(--text);background:rgba(255,255,255,.1);}
+    .pwd-toggle:hover{color:var(--text)}
+
+    .hint{
+      font-size:.72rem;color:var(--muted);
+      margin-top:6px;padding:8px 12px;
+      background:var(--surface);border-radius:8px;
+      border-left:3px solid var(--yellow);
+    }
+    .hint strong{color:var(--text)}
+
+    .login-btn{
+      width:100%;height:50px;
+      background:var(--black);color:var(--white);
+      border:none;border-radius:24px;
+      font-family:inherit;font-size:.95rem;font-weight:600;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .2s var(--ease);
+      margin-top:28px;
+      box-shadow:0 2px 8px rgba(17,17,17,.15);
+    }
+    .login-btn:hover{
+      background:var(--black-2);
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(17,17,17,.25);
+    }
+    .login-btn:active{transform:none}
+    .login-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .error-box{
+      display:none;
+      background:#FEE2E2;border:1px solid #FECACA;
+      border-radius:var(--r);padding:12px 16px;
+      font-size:.83rem;color:#DC2626;font-weight:600;
+      margin-top:16px;
+      display:flex;align-items:center;gap:9px;
+    }
+    .error-box.show{display:flex}
+    .error-box i{flex-shrink:0}
+
+    .divider{
+      display:flex;align-items:center;gap:12px;
+      margin:28px 0 20px;
+    }
+    .divider-line{flex:1;height:1px;background:var(--border)}
+    .divider-text{font-size:.72rem;color:var(--muted);font-weight:600;white-space:nowrap}
+
+    .back-link{
+      display:flex;align-items:center;gap:8px;
+      font-size:.82rem;font-weight:600;color:var(--text-2);
+      text-decoration:none;
+      padding:10px 20px;border-radius:var(--r-full);
+      border:1.5px solid var(--border);
+      transition:all .18s;
+    }
+    .back-link:hover{border-color:var(--black);color:var(--text);background:var(--surface)}
+
+    @media(max-width:900px){
+      .login-wrapper{grid-template-columns:1fr}
+      .left-panel{display:none}
+      .right-panel{
+        padding:40px 24px;
+        min-height:100vh;
+        background:var(--black);
+        justify-content:center;
+        align-items:center;
+        display:flex;
+      }
+      .form-card{max-width:100%;width:100%}
+      .form-eyebrow{color:var(--yellow)}
+      .form-heading{color:var(--white)}
+      .form-subheading{color:rgba(255,255,255,.5)}
+      .field label{color:rgba(255,255,255,.5)}
+      .field input{
+        background:rgba(255,255,255,.07);
+        border-color:rgba(255,255,255,.12);
+        color:var(--white);
+      }
+      .field input::placeholder{color:rgba(255,255,255,.2)}
+      .field input:hover{background:rgba(255,255,255,.1)}
+      .field input:focus{
+        border-color:var(--yellow);
+        box-shadow:0 0 0 3px rgba(255,214,10,.15);
+        background:rgba(255,255,255,.1);
+      }
+      .field-icon{color:rgba(255,255,255,.35)}
+      .pwd-toggle{color:rgba(255,255,255,.35)}
+      .hint{background:rgba(255,255,255,.06);border-left-color:var(--yellow);color:rgba(255,255,255,.5)}
+      .hint strong{color:var(--yellow)}
+      .login-btn{background:var(--yellow);color:var(--black);box-shadow:0 6px 20px rgba(255,214,10,.35)}
+      .login-btn:hover{background:var(--yellow-dk)}
+      .back-link{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.15)}
+      .back-link:hover{color:var(--yellow);border-color:var(--yellow);background:rgba(255,214,10,.08)}
+      .divider-line{background:rgba(255,255,255,.1)}
+      .divider-text{color:rgba(255,255,255,.3)}
+      .mobile-brand{
+        display:flex;align-items:center;gap:12px;margin-bottom:40px;
+      }
+      .mobile-logo{width:40px;height:40px;border-radius:11px;object-fit:contain}
+      .mobile-brand-name{font-size:1.2rem;font-weight:900;color:var(--yellow)}
+      
+      /* Enhanced mobile responsiveness */
+      .form-heading{font-size:1.6rem}
+      .form-subheading{font-size:0.85rem}
+      .field label{font-size:0.7rem}
+      .field input{font-size:0.9rem;padding:12px 14px 12px 40px}
+      .login-btn{font-size:0.9rem;padding:12px 20px;height:48px}
+      .back-link{font-size:0.8rem;padding:8px 16px}
+    }
+    @media(min-width:901px){
+      .mobile-brand{display:none}
+    }
+    @media(max-width:480px){
+      .right-panel{padding:32px 20px}
+      .form-heading{font-size:1.4rem}
+      .form-subheading{font-size:0.8rem}
+      .field label{font-size:0.65rem}
+      .field input{font-size:0.85rem;padding:10px 12px 10px 36px}
+      .login-btn{font-size:0.85rem;padding:10px 16px;height:46px}
+      .mobile-logo{width:35px;height:35px}
+      .mobile-brand-name{font-size:1.1rem}
+      .mobile-brand{margin-bottom:32px}
+    }
+    @media(max-width:360px){
+      .right-panel{padding:28px 16px}
+      .form-heading{font-size:1.3rem}
+      .form-subheading{font-size:0.75rem}
+      .field input{font-size:0.8rem;padding:10px 12px 10px 34px}
+      .login-btn{font-size:0.8rem;padding:10px 14px;height:44px}
+    }
+    @media(max-height:500px) and (orientation: landscape){
+      .right-panel{padding:24px 20px;justify-content:center}
+      .mobile-brand{margin-bottom:24px}
+      .form-heading{font-size:1.3rem;margin-bottom:0.5rem}
+      .form-subheading{font-size:0.75rem;margin-bottom:1.5rem}
+      .field{margin-bottom:16px}
+      .login-btn{margin-top:20px;height:44px}
+    }
+    
+    /* Touch-friendly improvements */
+    @media(pointer: coarse){
+      .login-btn,.pwd-toggle,.back-link{
+        min-height:48px;min-width:48px
+      }
+      .field input{
+        min-height:48px
+      }
+    }
+    @keyframes slideInToast {
+      from { opacity: 0; transform: translateX(40px) scale(0.95); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
+    }
+  </style>
+</head>
+<body>
+<div class="login-wrapper">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="left-panel">
+    <div class="left-brand">
+      <img src="../assets/k3k3.png" alt="K3K3" class="left-logo" onerror="this.style.display='none'">
+      <div>
+        <div class="left-brand-name">K3K3</div>
+        <div class="left-brand-tag">Rider Portal</div>
+      </div>
+    </div>
+
+    <div class="left-hero">
+      <div class="left-badge"><i class="fas fa-motorcycle"></i> Rider Access</div>
+      <h1 class="left-title">Drive.<br>Earn.<br><span>Repeat.</span></h1>
+      <p class="left-sub">Sign in to your K3K3 Rider Dashboard to manage ride requests, track your earnings, and stay online for passengers near you.</p>
+
+      <div class="stat-pills">
+        <div class="stat-pill">
+          <div class="stat-pill-icon"><i class="fas fa-route"></i></div>
+          <div>
+            <div class="stat-pill-val">500+</div>
+            <div class="stat-pill-lbl">Active Riders</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-icon"><i class="fas fa-star"></i></div>
+          <div>
+            <div class="stat-pill-val">4.8★</div>
+            <div class="stat-pill-lbl">Avg. Rating</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-icon"><i class="fas fa-coins"></i></div>
+          <div>
+            <div class="stat-pill-val">₵180+</div>
+            <div class="stat-pill-lbl">Daily Avg.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">
+      &copy; 2025 K3K3 Rides &bull; <a href="../index.html">Home</a> &bull; <a href="../legal/privacy-policy.html">Privacy</a>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+    <div class="form-card">
+
+      <!-- Mobile brand (shows on small screens) -->
+      <div class="mobile-brand">
+        <img src="../assets/k3k3.png" alt="K3K3" class="mobile-logo" onerror="this.style.display='none'">
+        <div class="left-brand-name">K3K3</div>
+      </div>
+
+      <div class="form-eyebrow"><i class="fas fa-lock"></i> Rider Login</div>
+      <h2 class="form-heading">Welcome back</h2>
+      <p class="form-subheading">Sign in with your Rider ID and password to continue.</p>
+
+      <form id="riderLoginForm" autocomplete="off">
+
+        <!-- Rider ID -->
+        <div class="field">
+          <label for="riderId">Rider ID</label>
+          <div class="field-wrap">
+            <i class="fas fa-id-badge field-icon"></i>
+            <input type="text" id="riderId" name="riderId" required
+              placeholder="K3R-"
+              autocomplete="off" spellcheck="false"
+              inputmode="text">
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="field-wrap">
+            <i class="fas fa-lock field-icon"></i>
+            <input type="password" id="password" name="password" required
+              autocomplete="current-password">
+            <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Show/hide password">
+              <i class="fas fa-eye" id="pwdIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-box" id="errorBox">
+          <i class="fas fa-circle-exclamation"></i>
+          <span id="errorText"></span>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">
+          <i class="fas fa-sign-in-alt"></i> Sign In to Rider Panel
+        </button>
+      </form>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">or</div>
+        <div class="divider-line"></div>
+      </div>
+
+      <a href="../index.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:320px;pointer-events:none;"></div>
+
+<script>
+const API_BASE = 'http://localhost:8810';
+
+/* ── Password toggle ── */
+const pwdToggle = document.getElementById('pwdToggle');
+pwdToggle.addEventListener('click', function(){
+  const inp = document.getElementById('password');
+  const ico = document.getElementById('pwdIcon');
+  if(inp.type === 'password'){
+    inp.type = 'text';
+    ico.className = 'fas fa-eye-slash';
+  } else {
+    inp.type = 'password';
+    ico.className = 'fas fa-eye';
+  }
+});
+pwdToggle.addEventListener('mouseenter', () => pwdToggle.style.background = 'rgba(255,255,255,0.1)');
+pwdToggle.addEventListener('mouseleave', () => pwdToggle.style.background = 'none');
+
+/* ── Error display ── */
+function showError(msg){
+  const box = document.getElementById('errorBox');
+  document.getElementById('errorText').textContent = msg;
+  box.classList.add('show');
+}
+function hideError(){
+  document.getElementById('errorBox').classList.remove('show');
+}
+
+/* ── Toast ── */
+function showToast(msg, type='info'){
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  const gradients = {
+    success: 'linear-gradient(135deg,#059669,#10B981)',
+    error:   'linear-gradient(135deg,#DC2626,#EF4444)',
+    info:    'linear-gradient(135deg,#1a1a1a,#2d2d2d)'
+  };
+  const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle' };
+  t.style.cssText = `
+    background:${gradients[type]||gradients.info};
+    color:#fff;padding:14px 20px;border-radius:14px;
+    font-size:.875rem;font-weight:600;
+    box-shadow:0 12px 32px rgba(0,0,0,.22),0 0 0 1px rgba(255,255,255,.08);
+    pointer-events:all;display:flex;align-items:center;gap:12px;
+    animation:slideInToast .35s cubic-bezier(.34,1.56,.64,1);
+    min-width:280px;max-width:360px;backdrop-filter:blur(8px);
+  `;
+  if(type==='info') t.style.border='1px solid rgba(255,214,10,0.2)';
+  t.innerHTML = `
+    <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem;"><i class="fas ${icons[type]||'fa-info-circle'}"></i></div>
+    <div style="flex:1;line-height:1.4;">${msg}</div>
+  `;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all .35s ease'; setTimeout(()=>t.remove(),350); }, 3800);
+}
+
+/* ── Login form — no restrictions, goes directly to dashboard ── */
+document.getElementById('riderLoginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  hideError();
+
+  const riderId   = document.getElementById('riderId').value.trim();
+  const password  = document.getElementById('password').value;
+
+  if(!riderId){ showError('Please enter your Rider ID.'); document.getElementById('riderId').focus(); return; }
+  if(!password){ showError('Please enter your password.'); document.getElementById('password').focus(); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
+
+  // Store rider session and check status before redirect
+  try {
+    // Get existing session to preserve status
+    const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+
+    localStorage.setItem('riderSession', JSON.stringify({
+      riderId:   riderId,
+      dbRiderId: null,
+      userId:    null,
+      firstName: existingSession.firstName || 'Rider',
+      lastName:  existingSession.lastName || '',
+      email:     existingSession.email || '',
+      phone:     existingSession.phone || '',
+      loginTime: new Date().toISOString(),
+      status:    existingSession.status || 'pending',
+      isFirstLogin: false
+    }));
+    sessionStorage.setItem('riderSession', JSON.stringify({
+      riderId:   riderId,
+      firstName: existingSession.firstName || 'Rider',
+      loginTime: new Date().toISOString()
+    }));
+  } catch(err){ console.warn('Storage error:', err); }
+
+  showToast('Login successful! Redirecting…', 'success');
+
+  // Check rider status and redirect accordingly
+  const session = JSON.parse(localStorage.getItem('riderSession') || '{}');
+  setTimeout(() => {
+    if (session.status === 'approved') {
+      window.location.href = 'dashboard.html';
+    } else {
+      window.location.href = 'rider-pending.html';
+    }
+  }, 900);
+});
+
+/* ── Clear error on input ── */
+['riderId','password'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', hideError);
+});
+</script>
+</body>
+</html>

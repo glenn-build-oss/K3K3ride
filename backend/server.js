@@ -15,6 +15,7 @@ const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
+const tripsRoutes = require('./routes/trips.routes');
 
 const app = express();
 const PORT = process.env.PORT || 8810;
@@ -71,6 +72,7 @@ app.use('/api/auth/admin/login', otpLimiter);
 // ─── Routes ───
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/trips', tripsRoutes);
 
 // ─── Root endpoint ───
 app.get('/', (req, res) => {

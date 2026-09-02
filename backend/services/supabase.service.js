@@ -443,6 +443,24 @@ async function getAvailableRides() {
   return data;
 }
 
+/**
+ * Get available riders near a location
+ */
+async function getAvailableRiders(lat = null, lng = null, radiusKm = 5) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('role', 'rider')
+    .eq('status', 'active');
+
+  if (error) {
+    console.error('[Supabase] Error getting available riders:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
 // ─── VEHICLE OPERATIONS ───
 
 /**
@@ -789,6 +807,7 @@ module.exports = {
   getPassengerRides,
   getRiderRides,
   getAvailableRides,
+  getAvailableRiders,
 
   // Vehicle operations
   createVehicle,

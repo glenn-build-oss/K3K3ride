@@ -1,0 +1,11 @@
+{
+  "name": "k3k3-mvp-public",
+  "version": "1.0.0",
+  "description": "Static server for testing PWA",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}

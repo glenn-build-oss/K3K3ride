@@ -669,6 +669,59 @@ router.post('/admin/verify-otp', async (req, res) => {
 // ═══════════════════════════════════════════
 
 /**
+ * GET /api/auth/users/:id
+ * Fetch a user profile by ID (for passenger dashboard).
+ */
+router.get('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { updateUser } = require('../services/supabase.service');
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
+    if (error || !data) return res.status(404).json({ success: false, error: 'User not found' });
+    // Strip password_hash before sending
+    const { password_hash, ...safeUser } = data;
+    res.json({ success: true, user: safeUser });
+  } catch (err) {
+    console.error('[Auth] Error fetching user:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch user' });
+  }
+});
+
+/**
+ * PATCH /api/auth/users/:id
+ * Update user profile (name, email, phone) — called by passenger dashboard Save Profile.
+ */
+router.patch('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { first_name, last_name, email, phone, fname, lname } = req.body;
+
+    const updates = {};
+    const fn = first_name || fname;
+    const ln = last_name || lname;
+    if (fn !== undefined) updates.first_name = fn;
+    if (ln !== undefined) updates.last_name = ln;
+    if (fn !== undefined || ln !== undefined) {
+      updates.full_name = [fn || '', ln || ''].filter(Boolean).join(' ') || null;
+    }
+    if (email !== undefined) updates.email = email.toLowerCase();
+    if (phone !== undefined) updates.phone = phone;
+
+    const { updateUser } = require('../services/supabase.service');
+    const updated = await updateUser(id, updates);
+    if (!updated) return res.status(404).json({ success: false, error: 'User not found or update failed' });
+
+    const { password_hash, ...safeUser } = updated;
+    res.json({ success: true, user: safeUser });
+  } catch (err) {
+    console.error('[Auth] Error updating user:', err);
+    res.status(500).json({ success: false, error: 'Failed to update user' });
+  }
+});
+
+/**
  * GET /api/auth/health
  * Health check + Moolre SMS balance.
  */

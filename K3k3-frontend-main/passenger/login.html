@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>K3K3 | Passenger Login & Sign Up</title>
+    <meta name="description" content="Login or create your K3K3 account — your premium keke ride-sharing service in Ho, Ghana.">
+    <link rel="icon" type="image/png" href="../assets/k3k3.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #111111;
+            --yellow: #FFD60A;
+            --yellow-dk: #E6C000;
+            --yellow-lt: rgba(255, 214, 10, 0.1);
+            --white: #ffffff;
+            --surface: #F7F8FA;
+            --border: #E5E7EB;
+            --text: #111827;
+            --text-2: #6B7280;
+            --muted: #9CA3AF;
+            --red: #EF4444;
+            --green: #10B981;
+            --r: 12px;
+            --r-lg: 18px;
+            --r-xl: 24px;
+            --r-full: 999px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(255, 214, 10, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 214, 10, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+
+        /* ─── Card ─── */
+        .login-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            max-width: 900px;
+            background: var(--white);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        /* ─── Left Panel ─── */
+        .login-left {
+            background: var(--black);
+            padding: 52px 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            right: -80px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 214, 10, 0.12) 0%, transparent 70%);
+        }
+
+        .brand-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            object-fit: contain;
+            background: var(--yellow);
+            padding: 4px;
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--white);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-tagline {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-top: 1px;
+        }
+
+        .left-headline {
+            margin-top: auto;
+            padding-top: 40px;
+        }
+
+        .left-headline h2 {
+            font-size: 1.9rem;
+            font-weight: 900;
+            color: var(--white);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .left-headline h2 span {
+            color: var(--yellow);
+        }
+
+        .left-headline p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        .trust-pills {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 36px;
+        }
+
+        .trust-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        .trust-pill i {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(255, 214, 10, 0.12);
+            color: var(--yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* ─── Right Panel ─── */
+        .login-right {
+            background: var(--white);
+            padding: 52px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-eyebrow {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--yellow-dk);
+            margin-bottom: 8px;
+        }
+
+        .form-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .form-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-2);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        /* ─── Form Fields ─── */
+        .field-group {
+            margin-bottom: 18px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+
+        .phone-field-wrap {
+            display: flex;
+            gap: 0;
+            border: 2px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .phone-field-wrap:focus-within {
+            border-color: var(--yellow-dk);
+        }
+
+        .country-code-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: var(--surface);
+            border: none;
+            border-right: 2px solid var(--border);
+            padding: 0 14px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            min-width: 90px;
+            outline: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 28px;
+        }
+
+        .phone-number-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            background: transparent;
+        }
+
+        .phone-number-input::placeholder {
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .text-input {
+            width: 100%;
+            border: 2px solid var(--border);
+            border-radius: var(--r);
+            outline: none;
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: var(--yellow-dk);
+            background: #fff;
+        }
+
+        .text-input::placeholder {
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        /* ─── Main Button ─── */
+        .otp-btn {
+            width: 100%;
+            padding: 15px 24px;
+            background: var(--yellow);
+            color: var(--black);
+            border: none;
+            border-radius: var(--r);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin-top: 8px;
+            letter-spacing: -0.2px;
+        }
+
+        .otp-btn:hover {
+            background: var(--yellow-dk);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(255, 214, 10, 0.4);
+        }
+
+        .otp-btn:active {
+            transform: translateY(0);
+        }
+
+        .otp-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ─── Sign-up / Login Switch Banner ─── */
+        .auth-switch-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 22px;
+            padding: 14px 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            text-align: center;
+        }
+
+        .auth-switch-banner p {
+            font-size: 0.875rem;
+            color: var(--text-2);
+            font-weight: 500;
+        }
+
+        .auth-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: var(--r-full);
+            padding: 8px 18px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .auth-switch-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        /* ─── Terms ─── */
+        .terms-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+
+        .terms-note a {
+            color: var(--text-2);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        /* ─── Toast ─── */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.08);
+            animation: slideInToast 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-width: 280px;
+            max-width: 360px;
+            backdrop-filter: blur(8px);
+            pointer-events: all;
+        }
+
+        .toast .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        .toast .toast-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .toast.success { background: linear-gradient(135deg, #059669, #10B981); }
+        .toast.error   { background: linear-gradient(135deg, #DC2626, #EF4444); }
+        .toast.info    { background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid rgba(255,214,10,0.2); }
+
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateX(40px) scale(0.95); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        /* ─── Loading spinner ─── */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .fa-spin { animation: spin 1s linear infinite; }
+
+        /* ─── OTP Verification Step ─── */
+        .otp-verify-step {
+            display: none;
+        }
+
+        .otp-verify-step.show {
+            display: block;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        .otp-digit {
+            width: 52px;
+            height: 60px;
+            border: 2px solid var(--border);
+            border-radius: var(--r);
+            text-align: center;
+            font-family: inherit;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .otp-digit:focus {
+            border-color: var(--yellow-dk);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: var(--text);
+        }
+
+        /* ─── Back to home link ─── */
+        .back-home-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-home-link:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            body {
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-wrapper {
+                padding: 0;
+                min-height: 100vh;
+                align-items: stretch;
+                justify-content: stretch;
+            }
+
+            .login-card {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+                width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                padding: 48px 24px 40px;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                min-height: 100vh;
+                background: #fff;
+            }
+
+            .form-title {
+                font-size: 1.5rem;
+            }
+
+            .form-subtitle {
+                font-size: 0.8rem;
+            }
+
+            .field-label {
+                font-size: 0.7rem;
+            }
+
+            .text-input, .phone-number-input {
+                font-size: 0.9rem;
+                padding: 12px 14px;
+            }
+
+            .otp-btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+
+            .auth-switch-banner {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .auth-switch-banner p {
+                font-size: 0.8rem;
+            }
+
+            .auth-switch-btn {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .terms-note {
+                font-size: 0.7rem;
+            }
+
+            .otp-digit {
+                width: 44px;
+                height: 54px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .login-right {
+                padding: 40px 20px 32px;
+            }
+
+            .form-title {
+                font-size: 1.3rem;
+            }
+
+            .form-subtitle {
+                font-size: 0.75rem;
+            }
+
+            .field-label {
+                font-size: 0.65rem;
+            }
+
+            .text-input, .phone-number-input {
+                font-size: 0.85rem;
+                padding: 10px 12px;
+            }
+
+            .country-code-select {
+                font-size: 0.8rem;
+                padding: 0 10px;
+                min-width: 75px;
+            }
+
+            .otp-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .otp-inputs {
+                gap: 6px;
+            }
+            .otp-digit {
+                width: 40px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+
+            .mobile-brand-name {
+                font-size: 1.1rem;
+            }
+
+            .mobile-brand-logo {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .login-right {
+                padding: 32px 16px 28px;
+            }
+
+            .form-title {
+                font-size: 1.2rem;
+            }
+
+            .form-subtitle {
+                font-size: 0.7rem;
+            }
+
+            .otp-digit {
+                width: 36px;
+                height: 46px;
+                font-size: 1.2rem;
+            }
+
+            .otp-inputs {
+                gap: 4px;
+            }
+
+            .otp-btn {
+                padding: 10px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .login-card {
+                max-width: 820px;
+            }
+
+            .login-left {
+                padding: 40px 32px;
+            }
+
+            .login-right {
+                padding: 40px 36px;
+            }
+
+            .form-title {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .login-right {
+                padding: 24px 20px;
+                justify-content: center;
+            }
+
+            .form-title {
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .form-subtitle {
+                font-size: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .field-group {
+                margin-bottom: 12px;
+            }
+
+            .otp-btn {
+                margin-top: 4px;
+                padding: 10px 16px;
+            }
+        }
+
+        /* Mobile top brand bar (visible only on mobile) */
+        .mobile-brand-bar {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .mobile-brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: contain;
+            background: var(--black);
+            padding: 4px;
+        }
+
+        .mobile-brand-name {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-brand-bar {
+                display: flex;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (pointer: coarse) {
+            .otp-btn, .auth-switch-btn, .country-code-select, .text-input, .phone-number-input {
+                min-height: 48px;
+                min-width: 48px;
+            }
+            
+            .otp-digit {
+                min-height: 56px;
+                min-width: 48px;
+            }
+        }
+
+        /* Page transition */
+        .step-hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <!-- ─── Left Panel ─── -->
+            <div class="login-left">
+                <div>
+                    <div class="brand-block">
+                        <img src="../assets/k3k3.png" alt="K3K3" class="brand-logo" onerror="this.style.display='none'">
+                        <div>
+                            <div class="brand-name">K3K3</div>
+                            <div class="brand-tagline">Premium Keke Service</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="left-headline">
+                    <h2>Your ride,<br><span>your way.</span></h2>
+                    <p>Fast, safe and affordable keke rides across Ho and beyond. Join thousands of happy passengers.</p>
+
+                    <div class="trust-pills">
+                        <div class="trust-pill">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Verified, professional riders</span>
+                        </div>
+                        <div class="trust-pill">
+                            <i class="fas fa-bolt"></i>
+                            <span>Pick-up in under 5 minutes</span>
+                        </div>
+                        <div class="trust-pill">
+                            <i class="fas fa-star"></i>
+                            <span>4.9★ rated passenger experience</span>
+                        </div>
+                        <div class="trust-pill">
+                            <i class="fas fa-clock"></i>
+                            <span>Available 24/7, every day</span>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="../index.html" class="back-home-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </div>
+
+            <!-- ─── Right Panel ─── -->
+            <div class="login-right">
+
+                <!-- Mobile Brand -->
+                <div class="mobile-brand-bar">
+                    <img src="../assets/k3k3.png" alt="K3K3" class="mobile-brand-logo" onerror="this.style.display='none'">
+                    <div class="mobile-brand-name">K3K3</div>
+                </div>
+
+                <!-- ═══ LOGIN SECTION ═══ -->
+                <div id="loginSection">
+
+                    <!-- Phone Step -->
+                    <div id="phoneStep">
+                        <div class="form-eyebrow">Passenger Login</div>
+                        <h1 class="form-title">Welcome back</h1>
+                        <p class="form-subtitle">Enter your phone number to receive a one-time verification code.</p>
+
+                        <form id="otpForm" onsubmit="handleSendOTP(event)">
+                            <div class="field-group">
+                                <label class="field-label" for="phoneInput">Phone Number</label>
+                                <div class="phone-field-wrap">
+                                    <select class="country-code-select" id="countryCode" aria-label="Country code">
+                                        <option value="+233">🇬🇭 +233</option>
+                                        <option value="+234">🇳🇬 +234</option>
+                                        <option value="+254">🇰🇪 +254</option>
+                                        <option value="+255">🇹🇿 +255</option>
+                                        <option value="+256">🇺🇬 +256</option>
+                                        <option value="+27">🇿🇦 +27</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+49">🇩🇪 +49</option>
+                                        <option value="+33">🇫🇷 +33</option>
+                                    </select>
+                                    <input
+                                        type="tel"
+                                        id="phoneInput"
+                                        class="phone-number-input"
+                                        placeholder="024 000 0000"
+                                        autocomplete="tel"
+                                        inputmode="numeric"
+                                        maxlength="15"
+                                    >
+                                </div>
+                            </div>
+
+                            <button type="submit" class="otp-btn" id="sendOtpBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                Send OTP
+                            </button>
+                        </form>
+
+                        <p class="terms-note">
+                            By continuing, you agree to K3K3's
+                            <a href="../legal/terms-of-service.html">Terms of Service</a>
+                            and
+                            <a href="../legal/privacy-policy.html">Privacy Policy</a>.
+                        </p>
+
+                        <!-- Don't have an account switch -->
+                        <div class="auth-switch-banner">
+                            <p>Don't have an account?</p>
+                            <button class="auth-switch-btn" onclick="showSignup()">
+                                <i class="fas fa-user-plus"></i>
+                                Create Account
+                            </button>
+                        </div>
+
+                        <p class="terms-note" style="margin-top: 14px;">
+                            <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
+                        </p>
+                    </div>
+
+                    <!-- OTP Verify Step -->
+                    <div id="verifyStep" class="otp-verify-step">
+                        <button class="back-btn" onclick="goBackToPhone()">
+                            <i class="fas fa-arrow-left"></i>
+                            Change number
+                        </button>
+
+                        <div class="form-eyebrow">Verification</div>
+                        <h1 class="form-title">Enter OTP</h1>
+                        <p class="form-subtitle" id="otpSentMsg">We sent a 6-digit code to your number. Enter it below.</p>
+
+                        <div class="otp-inputs" id="otpInputs">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d1">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d4">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d5">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d6">
+                        </div>
+
+                        <button class="otp-btn" id="verifyOtpBtn" onclick="handleVerifyOTP()">
+                            <i class="fas fa-arrow-right"></i>
+                            Verify &amp; Continue
+                        </button>
+
+                        <p class="terms-note" style="margin-top: 16px;">
+                            Didn't receive a code?
+                            <a href="#" onclick="resendOTP(event)" style="color: #111; font-weight: 700;">Resend OTP</a>
+                        </p>
+
+                        <p class="terms-note" style="margin-top: 14px;">
+                            <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- ═══ SIGN UP SECTION ═══ -->
+                <div id="signupSection" class="step-hidden">
+                    <div class="form-eyebrow">New Account</div>
+                    <h1 class="form-title">Create Account</h1>
+                    <p class="form-subtitle">Fill in your details to get started with K3K3.</p>
+
+                    <form id="signupForm" onsubmit="handleSignup(event)">
+                        <div class="field-group">
+                            <label class="field-label" for="fullName">Full Name</label>
+                            <input
+                                type="text"
+                                id="fullName"
+                                class="text-input"
+                                placeholder="e.g. Kofi Mensah"
+                                autocomplete="name"
+                                required
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="signupPhone">Phone Number</label>
+                            <div class="phone-field-wrap">
+                                <select class="country-code-select" id="signupCountryCode" aria-label="Country code">
+                                    <option value="+233">🇬🇭 +233</option>
+                                    <option value="+234">🇳🇬 +234</option>
+                                    <option value="+254">🇰🇪 +254</option>
+                                    <option value="+255">🇹🇿 +255</option>
+                                    <option value="+256">🇺🇬 +256</option>
+                                    <option value="+27">🇿🇦 +27</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+49">🇩🇪 +49</option>
+                                    <option value="+33">🇫🇷 +33</option>
+                                </select>
+                                <input
+                                    type="tel"
+                                    id="signupPhone"
+                                    class="phone-number-input"
+                                    placeholder="024 000 0000"
+                                    autocomplete="tel"
+                                    inputmode="numeric"
+                                    maxlength="15"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <button type="submit" class="otp-btn" id="createAccountBtn">
+                            <i class="fas fa-user-plus"></i>
+                            Create Account
+                        </button>
+                    </form>
+
+                    <p class="terms-note">
+                        By creating an account, you agree to K3K3's
+                        <a href="../legal/terms-of-service.html">Terms of Service</a>
+                        and
+                        <a href="../legal/privacy-policy.html">Privacy Policy</a>.
+                    </p>
+
+                    <!-- Already have an account switch -->
+                    <div class="auth-switch-banner">
+                        <p>Already have an account?</p>
+                        <button class="auth-switch-btn" onclick="showLogin()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Sign In
+                        </button>
+                    </div>
+
+                    <p class="terms-note" style="margin-top: 14px;">
+                        <a href="../index.html" style="color: var(--text-2); font-weight: 600; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-arrow-left" style="font-size:0.7rem;"></i> Back to Home</a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── Toast ───
+        function showToast(msg, type = 'info') {
+            const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.innerHTML = `
+                <div class="toast-icon"><i class="fas ${iconMap[type] || 'fa-info-circle'}"></i></div>
+                <div class="toast-text">${msg}</div>
+            `;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(20px)';
+                el.style.transition = 'all 0.35s ease';
+                setTimeout(() => el.remove(), 350);
+            }, 3800);
+        }
+
+        // ─── Section switches ───
+        function showSignup() {
+            document.getElementById('loginSection').classList.add('step-hidden');
+            document.getElementById('signupSection').classList.remove('step-hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showLogin() {
+            document.getElementById('signupSection').classList.add('step-hidden');
+            document.getElementById('loginSection').classList.remove('step-hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Check URL hash for signup
+        if (window.location.hash === '#signup') {
+            showSignup();
+        }
+
+        // ─── Send OTP Handler ───
+        function handleSendOTP(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phoneInput').value.trim();
+            const countryCode = document.getElementById('countryCode').value;
+
+            if (!phone || phone.replace(/\D/g, '').length < 6) {
+                showToast('Please enter a valid phone number.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('sendOtpBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+
+                const fullPhone = countryCode + ' ' + phone;
+                document.getElementById('otpSentMsg').textContent =
+                    `We sent a 6-digit code to ${fullPhone}. Enter it below.`;
+                document.getElementById('phoneStep').style.display = 'none';
+                document.getElementById('verifyStep').classList.add('show');
+                document.getElementById('d1').focus();
+
+                showToast('OTP sent successfully!', 'success');
+            }, 1200);
+        }
+
+        // ─── OTP digit auto-advance ───
+        document.addEventListener('DOMContentLoaded', () => {
+            const digits = document.querySelectorAll('.otp-digit');
+            digits.forEach((inp, i) => {
+                inp.addEventListener('input', () => {
+                    inp.value = inp.value.replace(/\D/, '');
+                    if (inp.value && i < digits.length - 1) digits[i + 1].focus();
+                    if (Array.from(digits).every(d => d.value)) {
+                        setTimeout(handleVerifyOTP, 300);
+                    }
+                });
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !inp.value && i > 0) digits[i - 1].focus();
+                });
+                inp.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+                    [...paste].forEach((ch, j) => {
+                        if (digits[i + j]) digits[i + j].value = ch;
+                    });
+                    const next = digits[Math.min(i + paste.length, digits.length - 1)];
+                    if (next) next.focus();
+                });
+            });
+        });
+
+        // ─── Verify OTP — bypass auth, go straight to dashboard ───
+        function handleVerifyOTP() {
+            const btn = document.getElementById('verifyOtpBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                sessionStorage.setItem('k3k3_user', JSON.stringify({
+                    fname: 'Passenger',
+                    lname: '',
+                    email: '',
+                    phone: document.getElementById('phoneInput').value,
+                    id: 'guest',
+                    role_type: 'passenger'
+                }));
+                sessionStorage.setItem('k3k3_user_type', 'passenger');
+                sessionStorage.setItem('k3k3_user_name', 'Passenger');
+            } catch (err) {
+                console.warn('Storage error:', err);
+            }
+
+            setTimeout(() => {
+                showToast('Verified! Taking you to your dashboard.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 900);
+            }, 1000);
+        }
+
+        function goBackToPhone() {
+            document.getElementById('verifyStep').classList.remove('show');
+            document.getElementById('phoneStep').style.display = '';
+            document.querySelectorAll('.otp-digit').forEach(d => d.value = '');
+        }
+
+        function resendOTP(e) {
+            e.preventDefault();
+            showToast('New OTP sent!', 'success');
+            document.querySelectorAll('.otp-digit').forEach(d => d.value = '');
+            document.getElementById('d1').focus();
+        }
+
+        // ─── Sign Up Handler ───
+        function handleSignup(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('signupPhone').value.trim();
+            const countryCode = document.getElementById('signupCountryCode').value;
+
+            if (!fullName || fullName.length < 2) {
+                showToast('Please enter your full name.', 'error');
+                return;
+            }
+            if (!phone || phone.replace(/\D/g, '').length < 6) {
+                showToast('Please enter a valid phone number.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('createAccountBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+
+            // Store basic signup session
+            setTimeout(() => {
+                try {
+                    const fullPhone = countryCode + phone;
+                    sessionStorage.setItem('k3k3_user', JSON.stringify({
+                        fname: fullName.split(' ')[0],
+                        lname: fullName.split(' ').slice(1).join(' '),
+                        email: '',
+                        phone: fullPhone,
+                        id: 'new_' + Date.now(),
+                        role_type: 'passenger'
+                    }));
+                    sessionStorage.setItem('k3k3_user_type', 'passenger');
+                    sessionStorage.setItem('k3k3_user_name', fullName.split(' ')[0]);
+                } catch (err) {
+                    console.warn('Storage error:', err);
+                }
+
+                showToast('Account created! Welcome to K3K3 🎉', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1200);
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>

@@ -126,6 +126,10 @@ CREATE TABLE rides (
     estimated_fare DECIMAL(10, 2),
     actual_fare DECIMAL(10, 2),
     
+    -- Payment
+    payment_method VARCHAR(20) CHECK (payment_method IN ('cash', 'momo')),
+    ride_type VARCHAR(20) CHECK (ride_type IN ('shared', 'alone')),
+    
     -- Status
     status VARCHAR(30) DEFAULT 'requested' CHECK (status IN (
         'requested', 'searching', 'accepted', 'arriving', 
