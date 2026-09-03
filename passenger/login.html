@@ -1087,18 +1087,20 @@
 
                 if (data.success) {
                     currentPhone = phone;
-                    let msg = `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')}. Enter it below.`;
-                    // If SMS gateway isn't configured yet, the OTP is logged server-side
-                    // Show a note so user knows to check Vercel logs
-                    if (data._smsWarning) {
-                        msg = '⚠️ SMS not configured yet — check Vercel function logs for your OTP code, then enter it below.';
-                        showToast('SMS not set up yet — check Vercel logs for OTP', 'info');
-                    }
-                    document.getElementById('otpSentMsg').textContent = msg;
                     document.getElementById('phoneStep').style.display = 'none';
                     document.getElementById('verifyStep').classList.add('show');
                     document.getElementById('d1').focus();
-                    if (!data._smsWarning) showToast('Verification code sent!', 'success');
+
+                    if (data._otp) {
+                        // SMS not working yet — show OTP directly on screen
+                        document.getElementById('otpSentMsg').innerHTML =
+                            `⚠️ SMS not active yet. Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${data._otp}</strong><br><small>Enter this code below to log in.</small>`;
+                        showToast(`Your OTP: ${data._otp}`, 'info');
+                    } else {
+                        document.getElementById('otpSentMsg').textContent =
+                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')}. Enter it below.`;
+                        showToast('Verification code sent!', 'success');
+                    }
                 } else {
                     showToast(data.error || 'Failed to send OTP.', 'error');
                 }

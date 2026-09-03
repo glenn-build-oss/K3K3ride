@@ -113,15 +113,14 @@ router.post('/passenger/send-otp', async (req, res) => {
 
     if (!smsResult.success) {
       console.error(`[Auth] Failed to send OTP SMS to ${normalizedPhone}: ${smsResult.error}`);
-      // Log OTP to server logs so admin can retrieve it from Vercel logs if SMS is not configured
       console.log(`[Auth] OTP for ${normalizedPhone}: ${otpCode} (SMS failed - check MOOLRE env vars in Vercel)`);
-      // Still return success — OTP is stored in Supabase and can be verified
-      // This allows the app to function while SMS provider is being configured
+      // Return OTP in response so login can proceed while SMS is being configured
       return res.json({
         success: true,
         message: 'Verification code sent',
         phoneMask: maskPhone(normalizedPhone),
-        _smsWarning: smsResult.error  // visible in browser network tab for debugging
+        _smsWarning: smsResult.error,
+        _otp: otpCode  // shown on screen when SMS fails — remove once SMS is working
       });
     }
 
