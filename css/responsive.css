@@ -629,15 +629,33 @@
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
   display: none;
-  background: none;
+  background: rgba(0,0,0,0.12);
   border: none;
-  padding: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
   cursor: pointer;
-  color: var(--k3k3-primary);
+  color: #0c0d10 !important;
   transition: all 0.3s ease;
 }
 
-/* Mobile-specific micro-interactions */
+.mobile-menu-toggle:hover,
+.mobile-menu-toggle:focus {
+  background: rgba(0,0,0,0.22);
+  color: #000 !important;
+}
+
+.mobile-menu-toggle i {
+  font-size: 1.4rem;
+  color: #0c0d10 !important;
+  display: block;
+}
+
+/* Show mobile menu toggle on smaller screens */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+}
 @media (hover: none) {
   /* Haptic feedback simulation for buttons */
   .btn, .cta-btn, button, .header a {
@@ -727,6 +745,7 @@
 
 .mobile-menu-toggle i {
   font-size: 1.5rem;
+  color: #0c0d10;
 }
 
 /* Show mobile menu toggle on smaller screens */
