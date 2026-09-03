@@ -11,11 +11,19 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('[Supabase] ERROR: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set in .env');
-  process.exit(1);
+  console.error('[Supabase] ERROR: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set — check Vercel env vars');
+  // Do NOT process.exit() — that kills the serverless function silently
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
+
+// Throws a clean error if Supabase isn't configured
+function requireSupabase() {
+  if (!supabase) throw new Error('Database not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel environment variables.');
+  return supabase;
+}
 
 // ─── USER OPERATIONS ───
 
@@ -23,7 +31,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
  * Find user by phone number
  */
 async function findUserByPhone(phone, role) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('phone', phone)
@@ -41,7 +49,7 @@ async function findUserByPhone(phone, role) {
  * Find all users by phone number (for checking multiple roles)
  */
 async function findAllUsersByPhone(phone) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('phone', phone);
@@ -58,7 +66,7 @@ async function findAllUsersByPhone(phone) {
  * Find user by email (for admin)
  */
 async function findUserByEmail(email) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase())
@@ -76,7 +84,7 @@ async function findUserByEmail(email) {
  */
 async function createUser(userData) {
   // Check if phone exists with different role
-  const { data: existingUsers } = await supabase
+  const { data: existingUsers } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('phone', userData.phone);
@@ -91,7 +99,7 @@ async function createUser(userData) {
     }
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .insert([{
       phone: userData.phone,
@@ -118,7 +126,7 @@ async function createUser(userData) {
  * Update user
  */
 async function updateUser(userId, updates) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .update({
       ...updates,
@@ -140,7 +148,7 @@ async function updateUser(userId, updates) {
  * Update user last login
  */
 async function updateUserLastLogin(userId) {
-  const { error } = await supabase
+  const { error } = await requireSupabase()
     .from('users')
     .update({ last_login: new Date().toISOString() })
     .eq('id', userId);
@@ -159,14 +167,14 @@ async function storeOTP(phone, code, purpose, expiryMinutes = 5) {
   const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000).toISOString();
 
   // First, invalidate any existing unused OTPs for this phone
-  await supabase
+  await requireSupabase()
     .from('otp_codes')
     .update({ used: true })
     .eq('phone', phone)
     .eq('used', false);
 
   // Insert new OTP
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('otp_codes')
     .insert([{
       phone,
@@ -191,7 +199,7 @@ async function storeOTP(phone, code, purpose, expiryMinutes = 5) {
  * Verify OTP code
  */
 async function verifyOTP(phone, code) {
-  const { data: otp, error } = await supabase
+  const { data: otp, error } = await requireSupabase()
     .from('otp_codes')
     .select('*')
     .eq('phone', phone)
@@ -207,12 +215,12 @@ async function verifyOTP(phone, code) {
 
   // Check if expired
   if (new Date() > new Date(otp.expires_at)) {
-    await supabase.from('otp_codes').update({ used: true }).eq('id', otp.id);
+    await requireSupabase().from('otp_codes').update({ used: true }).eq('id', otp.id);
     return { valid: false, error: 'Code has expired. Please request a new one.' };
   }
 
   // Mark as used
-  const { error: updateError } = await supabase
+  const { error: updateError } = await requireSupabase()
     .from('otp_codes')
     .update({ 
       used: true,
@@ -232,7 +240,7 @@ async function verifyOTP(phone, code) {
  * Clean up expired OTPs (run periodically)
  */
 async function cleanupExpiredOTPs() {
-  const { error } = await supabase
+  const { error } = await requireSupabase()
     .from('otp_codes')
     .delete()
     .lt('expires_at', new Date(Date.now() - 10 * 60 * 1000).toISOString());
@@ -250,7 +258,7 @@ async function cleanupExpiredOTPs() {
  * Create rider application
  */
 async function createRiderApplication(applicationData) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rider_applications')
     .insert([applicationData])
     .select()
@@ -292,7 +300,7 @@ async function getRiderApplications(filters = {}) {
  * Update rider application status
  */
 async function updateRiderApplicationStatus(applicationId, status, reviewedBy, rejectionReason = null) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rider_applications')
     .update({
       status,
@@ -318,7 +326,7 @@ async function updateRiderApplicationStatus(applicationId, status, reviewedBy, r
  * Create a new ride
  */
 async function createRide(rideData) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rides')
     .insert([rideData])
     .select()
@@ -336,7 +344,7 @@ async function createRide(rideData) {
  * Get ride by ID
  */
 async function getRideById(rideId) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rides')
     .select('*')
     .eq('id', rideId)
@@ -371,7 +379,7 @@ async function updateRideStatus(rideId, status, additionalData = {}) {
     updateData[timestampField] = new Date().toISOString();
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rides')
     .update(updateData)
     .eq('id', rideId)
@@ -390,7 +398,7 @@ async function updateRideStatus(rideId, status, additionalData = {}) {
  * Get rides for a passenger
  */
 async function getPassengerRides(passengerId, limit = 20) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rides')
     .select('*')
     .eq('passenger_id', passengerId)
@@ -409,7 +417,7 @@ async function getPassengerRides(passengerId, limit = 20) {
  * Get rides for a rider
  */
 async function getRiderRides(riderId, limit = 20) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rides')
     .select('*')
     .eq('rider_id', riderId)
@@ -428,7 +436,7 @@ async function getRiderRides(riderId, limit = 20) {
  * Get available rides (for riders to accept)
  */
 async function getAvailableRides() {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rides')
     .select('*')
     .eq('status', 'searching')
@@ -447,7 +455,7 @@ async function getAvailableRides() {
  * Get available riders near a location
  */
 async function getAvailableRiders(lat = null, lng = null, radiusKm = 5) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('role', 'rider')
@@ -467,7 +475,7 @@ async function getAvailableRiders(lat = null, lng = null, radiusKm = 5) {
  * Create rider vehicle
  */
 async function createVehicle(vehicleData) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rider_vehicles')
     .insert([vehicleData])
     .select()
@@ -485,7 +493,7 @@ async function createVehicle(vehicleData) {
  * Get rider vehicles
  */
 async function getRiderVehicles(riderId) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rider_vehicles')
     .select('*')
     .eq('rider_id', riderId)
@@ -505,7 +513,7 @@ async function getRiderVehicles(riderId) {
  * Create payment record
  */
 async function createPayment(paymentData) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('payments')
     .insert([paymentData])
     .select()
@@ -523,7 +531,7 @@ async function createPayment(paymentData) {
  * Update payment status
  */
 async function updatePaymentStatus(paymentId, status, processedAt = null) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('payments')
     .update({
       payment_status: status,
@@ -547,7 +555,7 @@ async function updatePaymentStatus(paymentId, status, processedAt = null) {
  * Get all rider applications
  */
 async function getRiderApplications() {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('rider_applications')
     .select('*')
     .order('created_at', { ascending: false });
@@ -565,7 +573,7 @@ async function getRiderApplications() {
  */
 async function approveRiderApplication(applicationId) {
   // Get the application first
-  const { data: application, error: fetchError } = await supabase
+  const { data: application, error: fetchError } = await requireSupabase()
     .from('rider_applications')
     .select('*')
     .eq('id', applicationId)
@@ -576,7 +584,7 @@ async function approveRiderApplication(applicationId) {
   }
 
   // Update application status
-  const { data: updatedApp, error: updateError } = await supabase
+  const { data: updatedApp, error: updateError } = await requireSupabase()
     .from('rider_applications')
     .update({
       status: 'approved',
@@ -594,7 +602,7 @@ async function approveRiderApplication(applicationId) {
 
   // Update user status to active
   if (application.user_id) {
-    await supabase
+    await requireSupabase()
       .from('users')
       .update({ status: 'active' })
       .eq('id', application.user_id);
@@ -608,7 +616,7 @@ async function approveRiderApplication(applicationId) {
  */
 async function rejectRiderApplication(applicationId, reason) {
   // Get the application first
-  const { data: application, error: fetchError } = await supabase
+  const { data: application, error: fetchError } = await requireSupabase()
     .from('rider_applications')
     .select('*')
     .eq('id', applicationId)
@@ -619,7 +627,7 @@ async function rejectRiderApplication(applicationId, reason) {
   }
 
   // Update application status
-  const { data: updatedApp, error: updateError } = await supabase
+  const { data: updatedApp, error: updateError } = await requireSupabase()
     .from('rider_applications')
     .update({
       status: 'rejected',
@@ -638,7 +646,7 @@ async function rejectRiderApplication(applicationId, reason) {
 
   // Update user status to suspended
   if (application.user_id) {
-    await supabase
+    await requireSupabase()
       .from('users')
       .update({ status: 'suspended' })
       .eq('id', application.user_id);
@@ -651,7 +659,7 @@ async function rejectRiderApplication(applicationId, reason) {
  * Get approved riders
  */
 async function getApprovedRiders() {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('role', 'rider')
@@ -669,7 +677,7 @@ async function getApprovedRiders() {
  * Get pending riders
  */
 async function getPendingRiders() {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('users')
     .select('*')
     .eq('role', 'rider')
@@ -689,7 +697,7 @@ async function getPendingRiders() {
  * Create notification
  */
 async function createNotification(userId, title, message, type = 'info', actionUrl = null) {
-  const { data, error } = await supabase
+  const { data, error } = await requireSupabase()
     .from('notifications')
     .insert([{
       user_id: userId,
@@ -736,7 +744,7 @@ async function getUserNotifications(userId, unreadOnly = false) {
  * Mark notification as read
  */
 async function markNotificationAsRead(notificationId) {
-  const { error } = await supabase
+  const { error } = await requireSupabase()
     .from('notifications')
     .update({ read: true })
     .eq('id', notificationId);
@@ -753,7 +761,7 @@ async function markNotificationAsRead(notificationId) {
  */
 async function healthCheck() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await requireSupabase()
       .from('users')
       .select('count')
       .limit(1)

@@ -10,23 +10,27 @@
  *   POST /open/sms/status   — Check SMS credit balance (type: 2)
  */
 
-const MOOLRE_SMS_URL = process.env.MOOLRE_SMS_URL || 'https://api.moolre.com/open/sms/send';
-const MOOLRE_SMS_VAS_KEY = process.env.MOOLRE_SMS_VAS_KEY;
-const MOOLRE_SENDER_ID = process.env.MOOLRE_SENDER_ID || 'K3K3ride';
+const MOOLRE_SMS_URL = 'https://api.moolre.com/open/sms/send';
+const MOOLRE_SENDER_ID_DEFAULT = 'K3K3ride';
+
+/**
+ * Get the VAS key at call time so Vercel env vars are always fresh.
+ */
+function getMoolreKey() {
+  return process.env.MOOLRE_SMS_VAS_KEY ||
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6MTI1NDksImV4cCI6MTk1NjUyNzk5OX0.GAzLoFSusOOqXbhmllJIGjVKhRM8kEDzJW7PzCsS9o4';
+}
+
+function getMoolreSenderId() {
+  return process.env.MOOLRE_SENDER_ID || MOOLRE_SENDER_ID_DEFAULT;
+}
 
 /**
  * Send an SMS message via Moolre API.
- * 
- * @param {string} recipient - Phone number in format 233XXXXXXXXX (no +)
- * @param {string} message - SMS text content (max 160 chars recommended)
- * @param {string} [ref] - Optional unique reference for tracking delivery
- * @returns {Promise<object>} { success, data, error }
  */
 async function sendSMS(recipient, message, ref) {
-  if (!MOOLRE_SMS_VAS_KEY) {
-    console.error('[Moolre] ERROR: MOOLRE_SMS_VAS_KEY not set in .env');
-    return { success: false, error: 'SMS service not configured. Missing VAS key.' };
-  }
+  const MOOLRE_SMS_VAS_KEY = getMoolreKey();
+  const MOOLRE_SENDER_ID = getMoolreSenderId();
 
   // Strip '+' from phone if present: +233... → 233...
   const cleanRecipient = recipient.replace(/^\+/, '');
@@ -46,10 +50,9 @@ async function sendSMS(recipient, message, ref) {
     ]
   };
 
-  console.log(`[Moolre] Sending SMS to ${cleanRecipient} via ${MOOLRE_SMS_URL}`);
+  console.log(`[Moolre] Sending SMS to ${cleanRecipient}`);
   console.log(`[Moolre] Sender ID: ${MOOLRE_SENDER_ID}`);
-  console.log(`[Moolre] Message: ${message}`);
-  console.log(`[Moolre] Ref: ${msgRef}`);
+  console.log(`[Moolre] Key prefix: ${MOOLRE_SMS_VAS_KEY.substring(0, 20)}...`);
 
   try {
     const response = await fetch(MOOLRE_SMS_URL, {
@@ -63,7 +66,7 @@ async function sendSMS(recipient, message, ref) {
 
     const data = await response.json();
 
-    console.log(`[Moolre] Response:`, JSON.stringify(data, null, 2));
+    console.log(`[Moolre] Response status: ${response.status}`, JSON.stringify(data));
 
     // Check Moolre response format
     if (data.status === 1 && data.code === 'SMS01') {
@@ -73,18 +76,17 @@ async function sendSMS(recipient, message, ref) {
 
     // Handle known error codes
     if (data.code === 'ASMS07') {
-      console.error(`[Moolre] ❌ Sender ID "${MOOLRE_SENDER_ID}" is not approved`);
-      return { success: false, error: 'SMS Sender ID not approved. Contact admin.', data };
+      console.error(`[Moolre] ❌ Sender ID "${MOOLRE_SENDER_ID}" not approved`);
+      return { success: false, error: 'SMS Sender ID not approved', data };
     }
 
     if (data.code === 'AIN01') {
-      console.error(`[Moolre] ❌ Authentication failed — invalid VAS key`);
-      return { success: false, error: 'SMS authentication failed. Check API key.', data };
+      console.error(`[Moolre] ❌ Auth failed — invalid VAS key`);
+      return { success: false, error: 'SMS authentication failed. Check MOOLRE_SMS_VAS_KEY.', data };
     }
 
-    // Generic failure
-    console.error(`[Moolre] ❌ SMS failed:`, data.message || 'Unknown error');
-    return { success: false, error: data.message || 'Failed to send SMS', data };
+    console.error(`[Moolre] ❌ SMS failed:`, data);
+    return { success: false, error: data.message || JSON.stringify(data), data };
 
   } catch (err) {
     console.error(`[Moolre] ❌ Network error:`, err.message);
@@ -112,31 +114,16 @@ async function sendOTP(phone, otpCode) {
  * @returns {Promise<object>} { success, statuses }
  */
 async function checkSMSStatus(refs) {
-  if (!MOOLRE_SMS_VAS_KEY) {
-    return { success: false, error: 'SMS service not configured' };
-  }
-
+  const key = getMoolreKey();
   try {
-    const response = await fetch(`${MOOLRE_SMS_URL.replace('/send', '/status')}`, {
+    const response = await fetch(MOOLRE_SMS_URL.replace('/send', '/status'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-VASKEY': MOOLRE_SMS_VAS_KEY
-      },
-      body: JSON.stringify({
-        type: 5,
-        ref: refs
-      })
+      headers: { 'Content-Type': 'application/json', 'X-API-VASKEY': key },
+      body: JSON.stringify({ type: 5, ref: refs })
     });
-
     const data = await response.json();
-
-    if (data.status === 1) {
-      return { success: true, statuses: data.data };
-    }
-
+    if (data.status === 1) return { success: true, statuses: data.data };
     return { success: false, error: data.message, data };
-
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -148,29 +135,18 @@ async function checkSMSStatus(refs) {
  * @returns {Promise<object>} { success, balance }
  */
 async function checkSMSBalance() {
-  if (!MOOLRE_SMS_VAS_KEY) {
-    return { success: false, error: 'SMS service not configured' };
-  }
-
+  const key = getMoolreKey();
   try {
-    const response = await fetch(`${MOOLRE_SMS_URL.replace('/send', '/status')}`, {
+    const response = await fetch(MOOLRE_SMS_URL.replace('/send', '/status'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-VASKEY': MOOLRE_SMS_VAS_KEY
-      },
+      headers: { 'Content-Type': 'application/json', 'X-API-VASKEY': key },
       body: JSON.stringify({ type: 2 })
     });
-
     const data = await response.json();
-
     if (data.status === 1 && data.data && data.data.balance !== undefined) {
-      console.log(`[Moolre] SMS Balance: ${data.data.balance} credits`);
       return { success: true, balance: data.data.balance };
     }
-
     return { success: false, error: data.message, data };
-
   } catch (err) {
     return { success: false, error: err.message };
   }
