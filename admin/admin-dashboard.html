@@ -467,16 +467,16 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- ──── RIDERS ──── -->
 <div class="dash-section" id="sec-riders">
-  <div class="sec-header"><div><div class="sec-title">Rider Management</div><div class="sec-sub">All approved platform riders</div></div></div>
-  <div class="filter-tabs"><div class="ftab active" onclick="filterRiders('all',this)">All</div><div class="ftab" onclick="filterRiders('online',this)">Online</div><div class="ftab" onclick="filterRiders('offline',this)">Offline</div><div class="ftab" onclick="filterRiders('on-trip',this)">On Trip</div></div>
+  <div class="sec-header"><div><div class="sec-title">Rider Management</div><div class="sec-sub">All platform riders — view documents, monitor performance, suspend or remove accounts</div></div></div>
+  <div class="filter-tabs"><div class="ftab active" onclick="filterRiders('all',this)">All</div><div class="ftab" onclick="filterRiders('online',this)">Online</div><div class="ftab" onclick="filterRiders('offline',this)">Offline</div><div class="ftab" onclick="filterRiders('on-trip',this)">On Trip</div><div class="ftab" onclick="filterRiders('suspended',this)" style="color:var(--red)"><i class="fas fa-ban" style="font-size:.7rem;margin-right:4px"></i>Suspended</div></div>
   <div class="content-grid split">
-    <div class="card"><div class="card-header"><div><div class="card-title">Riders</div><div class="card-sub" id="ridersSub">Loading…</div></div></div><div class="card-body" style="padding:8px 16px" id="ridersList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
+    <div class="card"><div class="card-header"><div><div class="card-title">Riders Fleet</div><div class="card-sub" id="ridersSub">Loading…</div></div></div><div class="card-body" style="padding:8px 16px" id="ridersList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
     <div>
-      <div class="card" style="margin-bottom:14px"><div class="card-header"><div><div class="card-title">Rider Stats</div></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="card" style="margin-bottom:14px"><div class="card-header"><div><div class="card-title">Fleet Statistics</div></div></div><div class="card-body"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
         <div class="kpi-card purple" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon purple" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-users"></i></div></div><div class="kpi-val" style="font-size:1.3rem" id="rsTotal">—</div><div class="kpi-lbl">Total</div></div>
         <div class="kpi-card green" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon green" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-circle"></i></div></div><div class="kpi-val" style="font-size:1.3rem" id="rsOnline">—</div><div class="kpi-lbl">Online</div></div>
         <div class="kpi-card yellow" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon yellow" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-route"></i></div></div><div class="kpi-val" style="font-size:1.3rem" id="rsTrip">—</div><div class="kpi-lbl">On Trip</div></div>
-        <div class="kpi-card teal" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon teal" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-star"></i></div></div><div class="kpi-val" style="font-size:1.3rem">4.8</div><div class="kpi-lbl">Avg Rating</div></div>
+        <div class="kpi-card red" style="padding:14px"><div class="kpi-head" style="margin-bottom:8px"><div class="kpi-icon red" style="width:28px;height:28px;font-size:.7rem"><i class="fas fa-ban"></i></div></div><div class="kpi-val" style="font-size:1.3rem;color:var(--red)" id="rsSuspended">0</div><div class="kpi-lbl">Suspended</div></div>
       </div></div></div>
       <div class="card"><div class="card-header"><div><div class="card-title">Top Earners Today</div></div></div><div class="card-body" style="padding:8px 16px" id="topEarners"><div class="empty-state" style="padding:20px"><i class="fas fa-spinner fa-spin"></i></div></div></div>
     </div>
@@ -508,12 +508,25 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <div class="kpi-card red"><div class="kpi-head"><div class="kpi-icon red"><i class="fas fa-times-circle"></i></div></div><div class="kpi-val" id="appsKpiRejected">—</div><div class="kpi-lbl">Rejected</div></div>
   </div>
 
-  <div class="filter-tabs">
-    <div class="ftab active" onclick="filterApps('all',this)">All</div>
-    <div class="ftab" onclick="filterApps('pending_review',this)">Pending</div>
-    <div class="ftab" onclick="filterApps('approved',this)">Approved</div>
-    <div class="ftab" onclick="filterApps('rejected',this)">Rejected</div>
+  <div class="apps-toolbar" style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <div class="apps-search-wrap" style="position:relative;flex:1;min-width:260px">
+      <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none"></i>
+      <input type="text" id="appSearchInput" placeholder="Search applications by name, phone, plate, ID, city..." 
+             oninput="handleAppSearch(this.value)"
+             style="width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:10px 38px 10px 38px;color:var(--white);font-size:.85rem;outline:none;transition:all .2s"
+             onfocus="this.style.borderColor='var(--yellow)'" onblur="this.style.borderColor='var(--border)'">
+      <button id="appSearchClear" onclick="clearAppSearch()" title="Clear search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;display:none;padding:4px;font-size:.9rem">
+        <i class="fas fa-times-circle"></i>
+      </button>
+    </div>
+    <div class="filter-tabs" style="margin-bottom:0">
+      <div class="ftab active" onclick="filterApps('all',this)">All</div>
+      <div class="ftab" onclick="filterApps('pending_review',this)">Pending</div>
+      <div class="ftab" onclick="filterApps('approved',this)">Approved</div>
+      <div class="ftab" onclick="filterApps('rejected',this)">Rejected</div>
+    </div>
   </div>
+  <div id="appsSearchInfo" style="font-size:.76rem;color:var(--muted);margin-bottom:12px;display:none;align-items:center;gap:6px"></div>
 
   <div id="appsList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div>
 </div>
@@ -582,14 +595,70 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- Rider Detail Modal -->
 <div class="modal-backdrop" id="riderDetailModal">
-  <div class="modal-box" style="max-width:500px">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;overflow-y:auto">
     <div class="modal-header">
       <div class="modal-title">Rider Details</div>
-      <div class="modal-sub">View rider information and statistics</div>
+      <div class="modal-sub">View rider information, documents, and fleet actions</div>
     </div>
     <div id="riderDetailContent"></div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="riderDetailModalFooter">
       <button class="modal-btn primary" onclick="closeModal('riderDetailModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Suspend Rider Modal -->
+<div class="modal-backdrop" id="suspendRiderModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--yellow)"><i class="fas fa-ban"></i> Suspend Rider Account</div>
+      <div class="modal-sub" id="suspendModalSub">Suspend this rider?</div>
+    </div>
+    <div style="margin:16px 0">
+      <label style="font-size:.75rem;color:var(--muted);text-transform:uppercase;font-weight:700;display:block;margin-bottom:6px">Reason for suspension (optional):</label>
+      <textarea id="suspendReasonInput" style="width:100%;min-height:75px;box-sizing:border-box;resize:vertical;padding:10px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-family:inherit;font-size:.85rem" placeholder="e.g. Terms violation, customer complaints, document issue..."></textarea>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:6px;line-height:1.4"><i class="fas fa-info-circle"></i> The rider will receive an SMS notice and will be immediately blocked from accepting rides and going online.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn secondary" onclick="closeModal('suspendRiderModal')">Cancel</button>
+      <button class="modal-btn warn" onclick="confirmSuspendRider()" style="background:#f59e0b;color:#111;font-weight:700"><i class="fas fa-ban"></i> Suspend Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Unsuspend Rider Modal -->
+<div class="modal-backdrop" id="unsuspendRiderModal">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--green)"><i class="fas fa-check-circle"></i> Reactivate Rider Account</div>
+      <div class="modal-sub" id="unsuspendModalSub">Reactivate this rider?</div>
+    </div>
+    <div style="font-size:.82rem;color:var(--text);margin:16px 0;line-height:1.5">
+      The rider will receive an SMS notification and will immediately be able to log in, go online, and accept ride requests.
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn secondary" onclick="closeModal('unsuspendRiderModal')">Cancel</button>
+      <button class="modal-btn primary" onclick="confirmUnsuspendRider()" style="background:var(--green)"><i class="fas fa-check"></i> Reactivate Rider</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Rider Modal -->
+<div class="modal-backdrop" id="removeRiderModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--red)"><i class="fas fa-trash"></i> Remove Rider Account</div>
+      <div class="modal-sub" id="removeModalSub">Permanently remove this rider?</div>
+    </div>
+    <div style="font-size:.82rem;color:var(--text);margin:16px 0;line-height:1.5">
+      <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);padding:12px;border-radius:var(--r);color:var(--red);margin-bottom:10px;font-weight:600">
+        <i class="fas fa-exclamation-triangle"></i> Warning: This permanently removes the rider from the platform fleet.
+      </div>
+      Their rider access will be revoked immediately and all active sessions will be terminated.
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn secondary" onclick="closeModal('removeRiderModal')">Cancel</button>
+      <button class="modal-btn danger" onclick="confirmRemoveRider()"><i class="fas fa-trash"></i> Delete Account</button>
     </div>
   </div>
 </div>
@@ -602,7 +671,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <div class="modal-sub">View full application information and documents</div>
     </div>
     <div id="appDetailContent"></div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="appDetailModalFooter">
       <button class="modal-btn primary" onclick="closeModal('appDetailModal')">Close</button>
     </div>
   </div>
@@ -663,8 +732,21 @@ const STUB_PASS=[
 
 const el=id=>document.getElementById(id);
 const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
+const setElHtml=(id,v)=>{const e=el(id);if(e)e.innerHTML=v};
 
-async function apiFetch(p){try{const r=await fetch(API+p,{signal:AbortSignal.timeout(4000)});if(!r.ok)return null;return await r.json();}catch{return null;}}
+async function apiFetch(p){
+  try{
+    const url = p.startsWith('/api') ? p : (p.startsWith('/') ? '/api' + p : '/api/' + p);
+    let r = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    if (!r.ok && url !== p) {
+      r = await fetch(p, { signal: AbortSignal.timeout(4000) });
+    }
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
+}
 
 const SEC_T={dashboard:'Dashboard',trips:'All Trips',riders:'Riders',passengers:'Passengers',applications:'Applications',payments:'Payments'};
 const SEC_S={dashboard:'K3K3 Platform Overview',trips:'Complete history',riders:'Rider management',passengers:'Registered users',applications:'Application review',payments:'Revenue & transactions'};
@@ -764,7 +846,11 @@ async function loadDashboard(){
   setEl('kpiPass',STUB_PASS.length);setEl('kpiComp',comp.length);
   setEl('kpiCompRate',allTrips.length?Math.round(comp.length/allTrips.length*100)+'% completion rate':'0%');
   setEl('kpiApps',pending.length);setEl('appsBadge',pending.length);
-  el('liveBadge').style.display=active.length?'':'none';setEl('liveBadge',active.length);
+  const liveBadge = el('liveBadge');
+  if (liveBadge) {
+    liveBadge.style.display = active.length ? '' : 'none';
+    liveBadge.textContent = active.length;
+  }
   renderRecentTrips(allTrips.slice(0,6));renderActivity();
 }
 
@@ -828,7 +914,10 @@ function stopLivePolling(){
 
 /* ── All Trips ── */
 async function loadAllTrips(filter){
-  if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
+  if(!allTrips.length){
+    const res = await apiFetch('/trips');
+    allTrips = Array.isArray(res) ? res : (res?.trips || res?.data || STUB_TRIPS);
+  }
   const data=filter==='all'?allTrips:allTrips.filter(t=>t.status===filter);
   setEl('allTripsSub',`${data.length} trip${data.length!==1?'s':''}`);
   const tb=el('allTripsTbody');if(!tb)return;
@@ -874,17 +963,75 @@ function filterTrips(f,btn){document.querySelectorAll('#sec-trips .ftab').forEac
 
 /* ── Riders ── */
 async function loadRiders(filter){
-  if(!allRiders.length)allRiders=await apiFetch('/riders')||STUB_RIDERS;
-  const online=allRiders.filter(r=>r.is_available).length;
+  if(!allRiders.length){
+    const res = await apiFetch('/riders');
+    allRiders = Array.isArray(res) ? res : (res?.riders || res?.data || STUB_RIDERS);
+  }
+
+  // Cross-reference allRiders with allApps / localStorage to ensure documents & vehicle data are preserved
+  try {
+    const localApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+    const localRiders = JSON.parse(localStorage.getItem('k3k3_riders') || '[]');
+    
+    // Merge any locally stored approved riders not already in allRiders
+    localRiders.forEach(lr => {
+      if(!allRiders.some(r => r.id === lr.id || (r.phone && lr.phone && r.phone.replace(/\D/g,'').slice(-9) === lr.phone.replace(/\D/g,'').slice(-9)))) {
+        allRiders.push(lr);
+      }
+    });
+
+    const combinedApps = [...allApps, ...localApps];
+    allRiders.forEach(r => {
+      const match = combinedApps.find(a => 
+        (a.phone && r.phone && a.phone.replace(/\D/g,'').slice(-9) === r.phone.replace(/\D/g,'').slice(-9)) ||
+        (a.email && r.email && a.email.toLowerCase() === r.email.toLowerCase()) ||
+        (r.application_id && a.id === r.application_id) ||
+        (r.app_ref && a.app_ref === r.app_ref)
+      );
+      if(match) {
+        if(!r.driver_license_url && (match.driver_license_url || match.license_front)) r.driver_license_url = match.driver_license_url || match.license_front;
+        if(!r.vehicle_registration_url && (match.vehicle_registration_url || match.registration_doc)) r.vehicle_registration_url = match.vehicle_registration_url || match.registration_doc;
+        if(!r.ghana_card_url && (match.ghana_card_url || match.id_front)) r.ghana_card_url = match.ghana_card_url || match.id_front;
+        if(!r.insurance_url && (match.insurance_url || match.id_back)) r.insurance_url = match.insurance_url || match.id_back;
+        if(!r.passport_photo_url && (match.passport_photo_url || match.passport_photo)) r.passport_photo_url = match.passport_photo_url || match.passport_photo;
+        if(!r.documents && match.documents) r.documents = match.documents;
+        if(!r.vehicle_plate && (match.license_plate || match.vehicle_plate || match.plate_number)) r.vehicle_plate = match.license_plate || match.vehicle_plate || match.plate_number;
+        if(!r.vehicle_type && match.vehicle_type) r.vehicle_type = match.vehicle_type;
+        if(!r.vehicle_make && match.vehicle_make) r.vehicle_make = match.vehicle_make;
+        if(!r.vehicle_model && match.vehicle_model) r.vehicle_model = match.vehicle_model;
+        if(!r.vehicle_color && match.vehicle_color) r.vehicle_color = match.vehicle_color;
+      }
+    });
+  } catch(e) {
+    console.warn('Error enriching riders with local data:', e);
+  }
+
+  const online=allRiders.filter(r=>r.is_available && r.status !== 'suspended').length;
   const onTrip=allRiders.filter(r=>r.on_trip).length;
-  setEl('rsTotal',allRiders.length);setEl('rsOnline',online);setEl('rsTrip',onTrip);
+  const suspended=allRiders.filter(r=>r.status === 'suspended').length;
+  setEl('rsTotal',allRiders.length);setEl('rsOnline',online);setEl('rsTrip',onTrip);setEl('rsSuspended',suspended);
   let data=allRiders;
-  if(filter==='online')data=allRiders.filter(r=>r.is_available&&!r.on_trip);
-  else if(filter==='offline')data=allRiders.filter(r=>!r.is_available);
+  if(filter==='online')data=allRiders.filter(r=>r.is_available&&!r.on_trip&&r.status!=='suspended');
+  else if(filter==='offline')data=allRiders.filter(r=>(!r.is_available||r.status==='suspended')&&!r.on_trip);
   else if(filter==='on-trip')data=allRiders.filter(r=>r.on_trip);
+  else if(filter==='suspended')data=allRiders.filter(r=>r.status==='suspended');
   setEl('ridersSub',`${data.length} rider${data.length!==1?'s':''}`);
   const rl=el('ridersList');
-  if(rl)rl.innerHTML=data.length?data.map(r=>{const st=r.on_trip?'on-trip':(r.is_available?'online':'offline');const stT=r.on_trip?'On Trip':(r.is_available?'Online':'Offline');return`<div class="list-row" onclick="showRiderDetail('${r.id}')"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div style="flex:1;min-width:0"><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'} · ${r.vehicle_plate||'—'} · ⭐ ${r.rating||'—'}</div></div><div class="list-badge ${st}"><i class="fas fa-circle" style="font-size:.5rem"></i>${stT}</div></div>`}).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders found</p></div>';
+  if(rl)rl.innerHTML=data.length?data.map(r=>{
+    const isSusp=r.status==='suspended';
+    const st=isSusp?'suspended':(r.on_trip?'on-trip':(r.is_available?'online':'offline'));
+    const stT=isSusp?'Suspended':(r.on_trip?'On Trip':(r.is_available?'Online':'Offline'));
+    const stIcon=isSusp?'fa-ban':'fa-circle';
+    const stStyle=isSusp?'background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)':'';
+    return`<div class="list-row" onclick="showRiderDetail('${r.id}')" style="${isSusp?'opacity:.88':''}">
+      <div class="list-av ${isSusp?'muted':'yellow'}">${r.fname?.charAt(0)||'R'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="list-name">${r.fname} ${r.lname} ${isSusp?'<span style=\"font-size:.65rem;color:var(--red);font-weight:800;margin-left:4px\"><i class=\"fas fa-ban\"></i> Suspended</span>':''}</div>
+        <div class="list-meta">${r.vehicle_type||'Rider'} · ${r.vehicle_plate||'—'} · ⭐ ${r.rating||'—'}</div>
+      </div>
+      <div class="list-badge ${st}" style="${stStyle}"><i class="fas ${stIcon}" style="font-size:.5rem"></i>${stT}</div>
+    </div>`;
+  }).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders found</p></div>';
   const te=el('topEarners');
   if(te){const e=[...allRiders].sort((a,b)=>(b.total_earnings||0)-(a.total_earnings||0)).slice(0,3);te.innerHTML=e.map((x,i)=>`<div class="list-row" style="padding:8px 0"><div style="width:22px;height:22px;border-radius:50%;background:${['var(--yellow)','rgba(255,255,255,.15)','rgba(255,255,255,.08)'][i]};color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800">${i+1}</div><div class="list-av yellow" style="width:30px;height:30px;font-size:.7rem">${x.fname?.charAt(0)||'R'}</div><div><div class="list-name" style="font-size:.8rem">${x.fname} ${x.lname}</div></div><div style="margin-left:auto;font-size:.85rem;font-weight:800;color:var(--yellow)">₵${(x.total_earnings||0).toFixed(2)}</div></div>`).join('');}
 }
@@ -892,31 +1039,214 @@ async function loadRiders(filter){
 function showRiderDetail(riderId){
   const rider=allRiders.find(r=>r.id===riderId);
   if(!rider)return;
+
+  const isSuspended=rider.status==='suspended';
+  const riderFullName=`${rider.fname||'Rider'} ${rider.lname||''}`.trim();
+  const safeRiderName=riderFullName.replace(/'/g, "\\'");
+  const stBadgeClass=isSuspended?'suspended':(rider.on_trip?'on-trip':(rider.is_available?'online':'offline'));
+  const stBadgeText=isSuspended?'Suspended':(rider.on_trip?'On Trip':(rider.is_available?'Online':'Offline'));
+  const stBadgeIcon=isSuspended?'fa-ban':'fa-circle';
+  const stBadgeStyle=isSuspended?'background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.35)':'';
+
+  // Documents processing for rider
+  let rawDocs = [];
+  if (Array.isArray(rider.documents)) {
+    rawDocs = [...rider.documents];
+  } else if (rider.documents && typeof rider.documents === 'object') {
+    rawDocs = Object.entries(rider.documents).map(([key, val]) => ({
+      key,
+      name: (val && val.name) || key,
+      type: (val && val.type) || ((val && (val.data || val.url) && typeof (val.data || val.url) === 'string' && (val.data || val.url).includes('image/')) ? 'image' : 'image'),
+      url: (val && (val.url || val.data)) || ''
+    }));
+  }
+
+  const resolveDocUrl = url => {
+    if (!url) return '';
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const REQUIRED_DOCS = [
+    {
+      key: 'riderLicense',
+      name: "Rider's License",
+      icon: 'fa-id-badge',
+      sub: 'Driver Authorization',
+      url: rider.driver_license_url || rider.license_front || (rawDocs.find(d => d.key === 'riderLicense' || (d.name && d.name.toLowerCase().includes('license')))?.url)
+    },
+    {
+      key: 'vehicleRegistration',
+      name: "Vehicle Registration",
+      icon: 'fa-file-invoice',
+      sub: 'DVLA Logbook / Cert',
+      url: rider.vehicle_registration_url || rider.registration_doc || (rawDocs.find(d => d.key === 'vehicleRegistration' || (d.name && d.name.toLowerCase().includes('registration')))?.url)
+    },
+    {
+      key: 'idCardFront',
+      name: "National ID — Front",
+      icon: 'fa-address-card',
+      sub: 'Ghana Card Front side',
+      url: rider.ghana_card_url || rider.id_front || (rawDocs.find(d => d.key === 'idCardFront' || (d.name && d.name.toLowerCase().includes('front')))?.url)
+    },
+    {
+      key: 'idCardBack',
+      name: "National ID — Back",
+      icon: 'fa-address-card',
+      sub: 'Ghana Card Back side',
+      url: rider.insurance_url || rider.id_back || (rawDocs.find(d => d.key === 'idCardBack' || (d.name && d.name.toLowerCase().includes('back')))?.url)
+    },
+    {
+      key: 'passportPhoto',
+      name: "Passport Photo",
+      icon: 'fa-user-circle',
+      sub: 'Recent Portrait Photo',
+      url: rider.passport_photo_url || rider.passport_photo || (rawDocs.find(d => d.key === 'passportPhoto' || (d.name && d.name.toLowerCase().includes('passport')))?.url)
+    }
+  ];
+
+  const processedRequiredDocs = REQUIRED_DOCS.map(def => {
+    let url = def.url;
+    if (url && !url.startsWith('data:') && !url.startsWith('http') && !url.startsWith('/uploads/') && !url.startsWith('/')) {
+      url = null;
+    }
+    const isPdf = url && (url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf'));
+    return {
+      ...def,
+      resolvedUrl: resolveDocUrl(url),
+      hasDoc: !!url,
+      isPdf: isPdf
+    };
+  });
+
+  const extraDocs = rawDocs.filter(d => {
+    if (!d.url) return false;
+    const isStd = REQUIRED_DOCS.some(std => std.key === d.key || (d.url && std.url === d.url));
+    return !isStd;
+  });
+
+  const uploadedCount = processedRequiredDocs.filter(d => d.hasDoc).length;
+
+  const riderDocsHtml = `
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:.72rem;font-weight:800;color:var(--white);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px">
+          <i class="fas fa-file-check" style="color:var(--yellow)"></i> Verification & Identity Documents
+        </div>
+        <span style="font-size:.7rem;font-weight:700;color:${uploadedCount >= 5 ? 'var(--green)' : 'var(--yellow)'};background:rgba(255,255,255,.05);padding:2px 8px;border-radius:12px;border:1px solid var(--border)">
+          ${uploadedCount} / 5 Verified
+        </span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+        ${processedRequiredDocs.map(doc => `
+          <div style="background:var(--bg-3);border-radius:var(--r);border:1px solid ${doc.hasDoc ? 'var(--border-2)' : 'rgba(255,255,255,0.06)'};padding:10px;display:flex;flex-direction:column;justify-content:space-between;min-height:160px;position:relative">
+            <div>
+              <div style="font-size:.65rem;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">${escapeHtml(doc.name)}</div>
+              <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px">${escapeHtml(doc.sub)}</div>
+            </div>
+
+            ${doc.hasDoc ? `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;overflow:hidden;background:var(--bg-4);position:relative;margin-bottom:8px"
+                onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                ${doc.isPdf ? `
+                  <div style="padding:14px;text-align:center">
+                    <i class="fas fa-file-pdf" style="font-size:1.8rem;color:var(--red)"></i>
+                    <div style="font-size:.62rem;font-weight:600;color:var(--white);margin-top:4px">View PDF</div>
+                  </div>
+                ` : `
+                  <img src="${doc.resolvedUrl}" alt="${escapeHtml(doc.name)}" style="width:100%;height:76px;object-fit:cover;display:block">
+                  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0'">
+                    <i class="fas fa-search-plus" style="color:white;font-size:1.1rem"></i>
+                  </div>
+                `}
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.6rem;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:3px">
+                  <i class="fas fa-check-circle"></i> On File
+                </span>
+                <button type="button" style="background:none;border:none;color:var(--yellow);font-size:.63rem;font-weight:700;cursor:pointer;padding:0"
+                  onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                  ${doc.isPdf ? 'Open PDF' : 'Inspect'} <i class="fas fa-external-link-alt" style="font-size:.52rem"></i>
+                </button>
+              </div>
+            ` : `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.02);border:1.5px dashed rgba(255,255,255,.1);border-radius:6px;padding:12px;margin-bottom:8px">
+                <i class="fas ${doc.icon}" style="font-size:1.5rem;color:var(--muted);opacity:.4"></i>
+                <div style="font-size:.6rem;color:var(--muted);margin-top:4px">Missing</div>
+              </div>
+              <div>
+                <span style="font-size:.6rem;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:3px">
+                  <i class="fas fa-minus-circle"></i> Not Provided
+                </span>
+              </div>
+            `}
+          </div>
+        `).join('')}
+      </div>
+
+      ${extraDocs.length ? `
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
+            Additional Attachments (${extraDocs.length})
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px">
+            ${extraDocs.map(d => {
+              const resUrl = resolveDocUrl(d.url);
+              const isPdf = d.type === 'pdf' || (d.url && d.url.toLowerCase().includes('.pdf'));
+              return `
+                <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center;cursor:pointer"
+                  onclick="${isPdf ? `window.open('${resUrl}','_blank')` : `openLightbox('${resUrl}','${escapeHtml(d.name || 'Attachment')}')`}">
+                  ${isPdf ? `
+                    <i class="fas fa-file-pdf" style="font-size:1.4rem;color:var(--red)"></i>
+                  ` : `
+                    <img src="${resUrl}" style="width:100%;height:54px;object-fit:cover;border-radius:4px;display:block">
+                  `}
+                  <div style="font-size:.6rem;color:var(--white);font-weight:600;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(d.name || 'Document')}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
   const detailHtml=`
+    ${isSuspended ? `
+      <div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:var(--red);padding:12px 16px;border-radius:var(--r);font-size:.84rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="fas fa-ban" style="font-size:1.1rem"></i>
+          <span>Account Suspended — Blocked from accepting rides</span>
+        </div>
+        <button type="button" onclick="closeModal('riderDetailModal');openUnsuspendRider('${rider.id}','${safeRiderName}')" style="padding:4px 10px;font-size:.72rem;background:var(--green);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:700">Reactivate</button>
+      </div>
+    ` : ''}
+
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-      <div style="width:64px;height:64px;border-radius:50%;background:var(--yellow);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800">${rider.fname?.charAt(0)||'R'}</div>
+      <div style="width:64px;height:64px;border-radius:50%;background:${isSuspended?'rgba(255,255,255,.1)':'var(--yellow)'};color:${isSuspended?'var(--muted)':'var(--bg)'};display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800">${rider.fname?.charAt(0)||'R'}</div>
       <div>
         <div style="font-size:1.2rem;font-weight:800">${rider.fname} ${rider.lname}</div>
         <div style="font-size:.85rem;color:var(--muted)">ID: ${rider.id}</div>
-        <div style="margin-top:4px"><span class="list-badge ${rider.on_trip?'on-trip':(rider.is_available?'online':'offline')}"><i class="fas fa-circle" style="font-size:.5rem"></i>${rider.on_trip?'On Trip':(rider.is_available?'Online':'Offline')}</span></div>
+        <div style="margin-top:4px"><span class="list-badge ${stBadgeClass}" style="${stBadgeStyle}"><i class="fas ${stBadgeIcon}" style="font-size:.5rem"></i>${stBadgeText}</span></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
       <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
         <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Phone</div>
-        <div style="font-size:.95rem;font-weight:600">${rider.phone||'—'}</div>
+        <div style="font-size:.95rem;font-weight:600"><a href="tel:${rider.phone}" style="color:inherit;text-decoration:none">${rider.phone||'—'}</a></div>
       </div>
       <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
         <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Email</div>
-        <div style="font-size:.95rem;font-weight:600">${rider.email||'—'}</div>
+        <div style="font-size:.95rem;font-weight:600">${rider.email ? `<a href="mailto:${rider.email}" style="color:inherit;text-decoration:none">${escapeHtml(rider.email)}</a>` : '—'}</div>
       </div>
       <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
         <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Vehicle</div>
-        <div style="font-size:.95rem;font-weight:600">${rider.vehicle_type||'—'}</div>
+        <div style="font-size:.95rem;font-weight:600">${rider.vehicle_type||'—'} ${rider.vehicle_make ? '· '+rider.vehicle_make : ''}</div>
       </div>
       <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
         <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Plate Number</div>
-        <div style="font-size:.95rem;font-weight:600">${rider.vehicle_plate||'—'}</div>
+        <div style="font-size:.95rem;font-weight:600;color:var(--yellow);font-family:monospace">${rider.vehicle_plate||'—'}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
@@ -933,16 +1263,191 @@ function showRiderDetail(riderId){
         <div style="font-size:.7rem;color:var(--muted)">Earnings</div>
       </div>
     </div>
-    <div style="font-size:.8rem;color:var(--muted)">Joined: ${rider.joined||'—'}</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Joined: ${rider.joined||'—'}</div>
+    ${riderDocsHtml}
   `;
-  setEl('riderDetailContent',detailHtml);
+  const contentEl=document.getElementById('riderDetailContent');
+  if(contentEl) contentEl.innerHTML=detailHtml;
+
+  // Modal actions in footer
+  const footerEl=document.getElementById('riderDetailModalFooter');
+  if(footerEl){
+    footerEl.innerHTML=`
+      <button class="modal-btn danger" onclick="closeModal('riderDetailModal');openRemoveRider('${rider.id}','${safeRiderName}')" style="margin-right:auto">
+        <i class="fas fa-trash"></i> Remove Account
+      </button>
+      ${isSuspended ? `
+        <button class="modal-btn" onclick="closeModal('riderDetailModal');openUnsuspendRider('${rider.id}','${safeRiderName}')" style="background:var(--green);color:white;font-weight:700">
+          <i class="fas fa-check-circle"></i> Reactivate Account
+        </button>
+      ` : `
+        <button class="modal-btn warn" onclick="closeModal('riderDetailModal');openSuspendRider('${rider.id}','${safeRiderName}')" style="background:#f59e0b;color:#111;font-weight:700">
+          <i class="fas fa-ban"></i> Suspend Account
+        </button>
+      `}
+      <button class="modal-btn secondary" onclick="closeModal('riderDetailModal')">Close</button>
+    `;
+  }
+
   openModal('riderDetailModal');
 }
-function filterRiders(f,btn){document.querySelectorAll('#sec-riders .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadRiders(f);}
+
+let curRiderFilter='all';
+function filterRiders(f,btn){
+  document.querySelectorAll('#sec-riders .ftab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  curRiderFilter=f;
+  loadRiders(f);
+}
+
+let targetRiderId=null;
+
+function openSuspendRider(id,name){
+  targetRiderId=id;
+  const rider=allRiders.find(r=>r.id===id);
+  const n=name||(rider?`${rider.fname} ${rider.lname}`.trim():'Rider');
+  setElHtml('suspendModalSub',`Suspend rider <strong>${escapeHtml(n)}</strong>? They will be immediately blocked from accepting rides and going online.`);
+  const reasonInput=el('suspendReasonInput');
+  if(reasonInput) reasonInput.value='';
+  openModal('suspendRiderModal');
+}
+
+function openUnsuspendRider(id,name){
+  targetRiderId=id;
+  const rider=allRiders.find(r=>r.id===id);
+  const n=name||(rider?`${rider.fname} ${rider.lname}`.trim():'Rider');
+  setElHtml('unsuspendModalSub',`Reactivate rider <strong>${escapeHtml(n)}</strong>? They will be able to log in, go online, and accept ride requests immediately.`);
+  openModal('unsuspendRiderModal');
+}
+
+function openRemoveRider(id,name){
+  targetRiderId=id;
+  const rider=allRiders.find(r=>r.id===id);
+  const n=name||(rider?`${rider.fname} ${rider.lname}`.trim():'Rider');
+  setElHtml('removeModalSub',`Permanently delete rider account for <strong>${escapeHtml(n)}</strong> and revoke all platform access?`);
+  openModal('removeRiderModal');
+}
+
+async function confirmSuspendRider(){
+  closeModal('suspendRiderModal');
+  if(!targetRiderId)return;
+  const reason=el('suspendReasonInput')?.value?.trim()||'Suspended by administration';
+  showToast('Suspending rider account…','info');
+  try{
+    const res=await fetch(`${API}/riders/${targetRiderId}/suspend`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({reason})
+    });
+    if(!res.ok)throw new Error(await res.text());
+
+    const r=allRiders.find(x=>x.id===targetRiderId);
+    if(r){
+      r.status='suspended';
+      r.is_available=false;
+    }
+
+    // LocalStorage fallback
+    try{
+      const localRiders=JSON.parse(localStorage.getItem('k3k3_riders')||'[]');
+      const lr=localRiders.find(x=>x.id===targetRiderId||(r&&x.phone===r.phone));
+      if(lr){
+        lr.status='suspended';
+        lr.is_available=false;
+        localStorage.setItem('k3k3_riders',JSON.stringify(localRiders));
+      }
+    }catch(_){}
+
+    showToast('Rider account suspended','warn');
+    loadRiders(curRiderFilter||'all');
+  }catch(err){
+    showToast('Suspension failed: '+err.message,'error');
+  }
+  targetRiderId=null;
+}
+
+async function confirmUnsuspendRider(){
+  closeModal('unsuspendRiderModal');
+  if(!targetRiderId)return;
+  showToast('Reactivating rider account…','info');
+  try{
+    const res=await fetch(`${API}/riders/${targetRiderId}/unsuspend`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'}
+    });
+    if(!res.ok)throw new Error(await res.text());
+
+    const r=allRiders.find(x=>x.id===targetRiderId);
+    if(r){
+      r.status='active';
+      r.is_available=true;
+    }
+
+    // LocalStorage fallback
+    try{
+      const localRiders=JSON.parse(localStorage.getItem('k3k3_riders')||'[]');
+      const lr=localRiders.find(x=>x.id===targetRiderId||(r&&x.phone===r.phone));
+      if(lr){
+        lr.status='active';
+        lr.is_available=true;
+        localStorage.setItem('k3k3_riders',JSON.stringify(localRiders));
+      }
+    }catch(_){}
+
+    showToast('Rider account reactivated!','success');
+    loadRiders(curRiderFilter||'all');
+  }catch(err){
+    showToast('Reactivation failed: '+err.message,'error');
+  }
+  targetRiderId=null;
+}
+
+async function confirmRemoveRider(){
+  closeModal('removeRiderModal');
+  if(!targetRiderId)return;
+  showToast('Removing rider account…','info');
+  try{
+    const res=await fetch(`${API}/riders/${targetRiderId}`,{
+      method:'DELETE'
+    });
+    if(!res.ok&&res.status!==204)throw new Error(await res.text());
+
+    const r=allRiders.find(x=>x.id===targetRiderId);
+    allRiders=allRiders.filter(x=>x.id!==targetRiderId);
+
+    // Also remove from localStorage
+    try{
+      const localRiders=JSON.parse(localStorage.getItem('k3k3_riders')||'[]');
+      const updated=localRiders.filter(x=>x.id!==targetRiderId&&(!r||x.phone!==r.phone));
+      localStorage.setItem('k3k3_riders',JSON.stringify(updated));
+    }catch(_){}
+
+    showToast('Rider account removed permanently','success');
+    loadRiders(curRiderFilter||'all');
+  }catch(err){
+    showToast('Remove failed: '+err.message,'error');
+  }
+  targetRiderId=null;
+}
 
 /* ── Passengers ── */
 async function loadPassengers(){
-  const data=STUB_PASS;
+  let data = STUB_PASS;
+  try {
+    const res = await apiFetch('/passengers');
+    const list = Array.isArray(res) ? res : (res?.passengers || res?.data || []);
+    if (list.length) {
+      data = list.map(p => ({
+        fname: p.first_name || (p.full_name ? p.full_name.split(' ')[0] : 'User'),
+        lname: p.last_name || (p.full_name ? p.full_name.split(' ').slice(1).join(' ') : ''),
+        email: p.email || p.phone || '—',
+        phone: p.phone || '—',
+        trips: p.trips_count || p.trips || 0,
+        joined: p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : 'Recently'
+      }));
+    }
+  } catch (_) {}
+
   setEl('psTotal',data.length);setEl('psActive',Math.ceil(data.length*0.6));
   setEl('psAvg',(data.reduce((s,p)=>s+(p.trips||0),0)/data.length).toFixed(1));
   setEl('passSub',`${data.length} passengers`);
@@ -986,14 +1491,38 @@ const APP_CSS=`
 `;
 (function injectAppCss(){const s=document.createElement('style');s.textContent=APP_CSS;document.head.appendChild(s);})();
 
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
 /* ── Applications ── */
 let curAppFilter='all';
+let appSearchQuery='';
+
+function handleAppSearch(val){
+  appSearchQuery=(val||'').trim().toLowerCase();
+  const clearBtn=document.getElementById('appSearchClear');
+  if(clearBtn) clearBtn.style.display=appSearchQuery?'inline-block':'none';
+  renderFilteredApps();
+}
+
+function clearAppSearch(){
+  const input=document.getElementById('appSearchInput');
+  if(input) input.value='';
+  appSearchQuery='';
+  const clearBtn=document.getElementById('appSearchClear');
+  if(clearBtn) clearBtn.style.display='none';
+  renderFilteredApps();
+}
+
 async function loadApps(filter,force){
-  curAppFilter=filter||'all';
+  if(filter) curAppFilter=filter;
   const al=el('appsList');if(!al)return;
   if(!allApps.length||force){
-    al.innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div>';
-    allApps=await apiFetch('/applications')||[];
+    al.innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading applications…</p></div>';
+    const res = await apiFetch('/applications');
+    allApps = Array.isArray(res) ? res : (res?.applications || res?.data || []);
     
     // Fallback to localStorage for rider form submissions only
     if(!allApps.length){
@@ -1007,155 +1536,507 @@ async function loadApps(filter,force){
   // Load stats - always calculate from current data
   if(allApps.length){
     const total=allApps.length;
-    const pending=allApps.filter(a=>a.status==='pending_review'||a.status==='pending').length;
+    const pending=allApps.filter(a=>a.status==='pending_review'||a.status==='pending'||a.status==='under_review').length;
     const approved=allApps.filter(a=>a.status==='approved').length;
     const rejected=allApps.filter(a=>a.status==='rejected').length;
     setEl('appsKpiTotal',total);setEl('appsKpiPending',pending);setEl('appsKpiApproved',approved);setEl('appsKpiRejected',rejected);
   }
 
-  let data=allApps;
-  if(curAppFilter==='pending_review') data=allApps.filter(a=>a.status==='pending_review'||a.status==='pending');
-  else if(curAppFilter!=='all') data=allApps.filter(a=>a.status===curAppFilter);
+  renderFilteredApps();
+}
 
-  if(!data.length){al.innerHTML='<div class="empty-state"><i class="fas fa-user-plus"></i><p>No applications found</p></div>';return;}
+function renderFilteredApps(){
+  const al=el('appsList');
+  if(!al)return;
+
+  let data=allApps;
+  if(curAppFilter==='pending_review'||curAppFilter==='pending') {
+    data=allApps.filter(a=>a.status==='pending_review'||a.status==='pending'||a.status==='under_review');
+  } else if(curAppFilter!=='all') {
+    data=allApps.filter(a=>a.status===curAppFilter);
+  }
+
+  if(appSearchQuery){
+    data=data.filter(a=>{
+      const name=`${a.first_name||a.fname||''} ${a.last_name||a.lname||''}`.toLowerCase();
+      const phone=(a.phone||'').toLowerCase();
+      const email=(a.email||'').toLowerCase();
+      const plate=(a.license_plate||a.vehicle_plate||a.reg_number||'').toLowerCase();
+      const ref=(a.app_ref||('app-'+String(a.id))).toLowerCase();
+      const city=(a.city||'').toLowerCase();
+      const address=(a.address||'').toLowerCase();
+      const vtype=(a.vehicle_type||'').toLowerCase();
+      const vmake=(a.vehicle_make||'').toLowerCase();
+      const vmodel=(a.vehicle_model||'').toLowerCase();
+      const card=(a.ghana_card_number||a.id_number||a.ghana_card_url||'').toLowerCase();
+      const lic=(a.license_number||a.licence_number||a.driver_license_url||'').toLowerCase();
+
+      return name.includes(appSearchQuery) ||
+             phone.includes(appSearchQuery) ||
+             email.includes(appSearchQuery) ||
+             plate.includes(appSearchQuery) ||
+             ref.includes(appSearchQuery) ||
+             city.includes(appSearchQuery) ||
+             address.includes(appSearchQuery) ||
+             vtype.includes(appSearchQuery) ||
+             vmake.includes(appSearchQuery) ||
+             vmodel.includes(appSearchQuery) ||
+             card.includes(appSearchQuery) ||
+             lic.includes(appSearchQuery);
+    });
+  }
+
+  const infoEl=document.getElementById('appsSearchInfo');
+  if(infoEl){
+    if(appSearchQuery){
+      infoEl.style.display='flex';
+      infoEl.innerHTML=`<i class="fas fa-search" style="color:var(--yellow)"></i> Showing <strong>${data.length}</strong> application${data.length!==1?'s':''} matching "<strong>${escapeHtml(appSearchQuery)}</strong>"`;
+    } else {
+      infoEl.style.display='none';
+    }
+  }
+
+  if(!data.length){
+    if(appSearchQuery){
+      al.innerHTML=`
+        <div class="empty-state" style="padding:32px 16px;text-align:center">
+          <i class="fas fa-search" style="font-size:2rem;color:var(--muted);margin-bottom:10px"></i>
+          <p style="font-size:.92rem;color:var(--text);font-weight:600">No applications match "${escapeHtml(appSearchQuery)}"</p>
+          <p style="font-size:.78rem;color:var(--muted);margin-top:4px">Try searching by name, phone number, plate number, or reference.</p>
+          <button class="card-action" onclick="clearAppSearch()" style="margin-top:14px;padding:6px 16px;background:var(--yellow);color:var(--bg);font-weight:700">Clear Search</button>
+        </div>`;
+    } else {
+      al.innerHTML='<div class="empty-state"><i class="fas fa-user-plus"></i><p>No applications found</p></div>';
+    }
+    return;
+  }
+
   al.innerHTML=data.map(a=>renderAppCard(a)).join('');
 }
 
 function renderAppCard(a){
-  const isPending=a.status==='pending_review'||a.status==='pending';
-  const statusLabel=a.status==='pending_review'?'Pending Review':a.status;
-  const docsCount=(a.documents||[]).length;
+  const isPending=a.status==='pending_review'||a.status==='pending'||a.status==='under_review';
+  const statusLabel=isPending?'Pending Review':a.status;
+  const docsList = Array.isArray(a.documents) ? a.documents : (a.documents && typeof a.documents === 'object' ? Object.keys(a.documents) : []);
+  const docsCount = Math.max(docsList.length, (a.driver_license_url ? 1 : 0) + (a.vehicle_registration_url ? 1 : 0) + (a.ghana_card_url ? 1 : 0) + (a.insurance_url ? 1 : 0) + (a.passport_photo_url ? 1 : 0));
+  const applicantName=((a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')).trim() || 'Applicant';
+  const safeName=applicantName.replace(/'/g, "\\'");
+  const plateNumber=a.license_plate||a.vehicle_plate||a.reg_number||'—';
+  const vehicleDesc=[a.vehicle_type, a.vehicle_make, a.vehicle_model].filter(Boolean).join(' ') || 'Vehicle';
+
   const actions=isPending
-    ?`<button class="app-btn-view" onclick="showAppDetail(${a.id})"><i class="fas fa-eye"></i> View Details</button>
-       <button class="app-btn-approve" onclick="openApprove(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-check"></i> Approve</button>
-       <button class="app-btn-decline" onclick="openDecline(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-times"></i> Decline</button>`
-    :`<button class="app-btn-view" onclick="showAppDetail(${a.id})"><i class="fas fa-eye"></i> View Details</button>`;
+    ?`<button class="app-btn-view" onclick="showAppDetail('${a.id}')"><i class="fas fa-eye"></i> View Details</button>
+       <button class="app-btn-approve" onclick="openApprove('${a.id}','${safeName}')"><i class="fas fa-check"></i> Approve</button>
+       <button class="app-btn-decline" onclick="openDecline('${a.id}','${safeName}')"><i class="fas fa-times"></i> Decline</button>`
+    :`<button class="app-btn-view" onclick="showAppDetail('${a.id}')"><i class="fas fa-eye"></i> View Details</button>`;
+
   return`
 <div class="app-card" id="appCard-${a.id}">
   <div class="app-card-head">
     <div class="app-av">${(a.first_name||a.fname||'A').charAt(0).toUpperCase()}</div>
     <div class="app-head-info">
       <div class="app-name">${a.first_name||a.fname||'—'} ${a.last_name||a.lname||''}</div>
-      <div class="app-ref">${a.app_ref||'—'} · ${a.email||'—'}</div>
+      <div class="app-ref">${a.app_ref||('APP-'+String(a.id).substring(0,8).toUpperCase())} · ${a.email||a.phone||'—'}</div>
       <div style="margin-top:4px"><span class="app-status-badge ${a.status}">${statusLabel}</span>${a.admin_notes?`<span class="app-notes"><i class="fas fa-comment"></i> ${a.admin_notes}</span>`:''}</div>
     </div>
     <div style="text-align:right">
       <div style="font-size:.72rem;color:var(--muted)">${a.submitted_at?new Date(a.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>
-      ${docsCount?`<div style="font-size:.68rem;color:var(--muted);margin-top:2px"><i class="fas fa-paperclip"></i> ${docsCount} doc${docsCount!==1?'s':''}</div>`:''}
+      <div style="font-size:.72rem;color:var(--yellow);font-weight:700;font-family:monospace;margin-top:3px">${plateNumber}</div>
     </div>
   </div>
   <div class="app-summary">
     <div class="app-summary-item"><i class="fas fa-phone"></i> ${a.phone||'—'}</div>
-    <div class="app-summary-item"><i class="fas fa-motorcycle"></i> ${a.vehicle_type||'—'}</div>
-    <div class="app-summary-item"><i class="fas fa-star"></i> ${a.experience||'0'} exp</div>
+    <div class="app-summary-item"><i class="fas fa-motorcycle"></i> ${vehicleDesc}</div>
+    <div class="app-summary-item"><i class="fas fa-history"></i> ${a.experience||'0'} exp</div>
+    <div class="app-summary-item"><i class="fas fa-paperclip" style="color:${docsCount >= 5 ? 'var(--green)' : 'var(--yellow)'}"></i> ${docsCount} doc${docsCount !== 1 ? 's' : ''}</div>
   </div>
   <div class="app-actions">
     ${actions}
-    <button class="app-btn-delete" onclick="openDeleteApp(${a.id},'${(a.first_name||a.fname||'')+' '+(a.last_name||a.lname||'')}')"><i class="fas fa-trash"></i> Delete</button>
+    <button class="app-btn-delete" onclick="openDeleteApp('${a.id}','${safeName}')"><i class="fas fa-trash"></i> Delete</button>
   </div>
 </div>`;
 }
 
 function filterApps(f,btn){
   document.querySelectorAll('#sec-applications .ftab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  loadApps(f);
+  if(btn) btn.classList.add('active');
+  curAppFilter=f;
+  renderFilteredApps();
 }
 
 function showAppDetail(appId){
-  const app=allApps.find(a=>a.id===appId);
+  const app=allApps.find(a=>String(a.id)===String(appId));
   if(!app)return;
-  const docs=(app.documents||[]);
-  const docsHtml=docs.length?`
-    <div style="margin-bottom:20px">
-      <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px"><i class="fas fa-paperclip"></i> Documents (${docs.length})</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px">
-        ${docs.map(d=>d.url
-          ? (d.type==='image'
-            ?`<div style="cursor:pointer" onclick="openLightbox('${API}${d.url}','${d.name}')"><img src="${API}${d.url}" alt="${d.name}" style="width:100%;height:100px;object-fit:cover;border-radius:var(--r);border:1.5px solid var(--border-2);transition:all .18s" onmouseover="this.style.borderColor='var(--yellow)'" onmouseout="this.style.borderColor='var(--border-2)'"><div style="font-size:.65rem;color:var(--muted);text-align:center;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</div></div>`
-            :`<div style="cursor:pointer" onclick="window.open('${API}${d.url}','_blank')" style="width:100%;height:100px;border-radius:var(--r);background:var(--red-lt);border:1.5px solid rgba(239,68,68,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:all .18s" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='rgba(239,68,68,.2)'"><i class="fas fa-file-pdf" style="font-size:1.8rem;color:var(--red)"></i><div style="font-size:.6rem;color:var(--red);font-weight:700;text-transform:uppercase">PDF</div><div style="font-size:.6rem;color:var(--muted);text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</div></div>`)
-          : (d.type==='image'
-            ?`<div style="width:100%;height:100px;border-radius:var(--r);background:var(--bg-4);display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="color:var(--muted);font-size:1.5rem"></i><div style="font-size:.6rem;color:var(--muted);text-align:center;margin-top:4px">${d.name}</div></div>`
-            :`<div style="width:100%;height:100px;border-radius:var(--r);background:var(--bg-4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><i class="fas fa-file-pdf" style="color:var(--muted);font-size:1.5rem"></i><div style="font-size:.6rem;color:var(--muted);font-weight:700;text-transform:uppercase">PDF</div><div style="font-size:.6rem;color:var(--muted);text-align:center;margin-top:2px">${d.name}</div></div>`)
-        ).join('')}
-      </div>
-    </div>`:'';
-  
-  const detailHtml = `
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800">${(app.first_name||app.fname||'A').charAt(0).toUpperCase()}</div>
-      <div>
-        <div style="font-size:1.2rem;font-weight:800">${app.first_name||app.fname||'—'} ${app.last_name||app.lname||''}</div>
-        <div style="font-size:.85rem;color:var(--muted)">ID: ${app.app_ref||'—'}</div>
-        <div style="margin-top:4px"><span class="app-status-badge ${app.status}">${app.status==='pending_review'?'Pending Review':app.status}</span></div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Email</div>
-        <div style="font-size:.9rem;font-weight:600">${app.email||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Phone</div>
-        <div style="font-size:.9rem;font-weight:600">${app.phone||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Date of Birth</div>
-        <div style="font-size:.9rem;font-weight:600">${app.date_of_birth||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Gender</div>
-        <div style="font-size:.9rem;font-weight:600">${app.gender||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Nationality</div>
-        <div style="font-size:.9rem;font-weight:600">${app.nationality||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Experience</div>
-        <div style="font-size:.9rem;font-weight:600">${app.experience||'—'}</div>
-      </div>
-    </div>
-    <div style="background:var(--bg-3);padding:14px;border-radius:var(--r);margin-bottom:20px">
-      <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Address</div>
-      <div style="font-size:.9rem;font-weight:600">${app.address||'—'}, ${app.city||'—'}</div>
-      ${app.about?`<div style="font-size:.8rem;color:var(--muted);margin-top:6px">${app.about}</div>`:''}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Ghana Card</div>
-        <div style="font-size:.9rem;font-weight:600">${app.ghana_card_number||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">License No.</div>
-        <div style="font-size:.9rem;font-weight:600">${app.license_number||'—'}</div>
-        <div style="font-size:.75rem;color:var(--muted);margin-top:2px">Exp: ${app.license_expiry||'—'}</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Vehicle</div>
-        <div style="font-size:.9rem;font-weight:600">${app.vehicle_make||'—'} ${app.vehicle_model||'—'} ${app.vehicle_year||'—'}</div>
-      </div>
-      <div style="background:var(--bg-3);padding:14px;border-radius:var(--r)">
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Plate · Colour</div>
-        <div style="font-size:.9rem;font-weight:600">${app.vehicle_plate||'—'} · ${app.vehicle_color||'—'}</div>
-      </div>
-    </div>
-    ${docsHtml}
-    <div style="font-size:.75rem;color:var(--muted)">Submitted: ${app.created_at?new Date(app.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—'}</div>
-  `;
-  
-  const contentEl = document.getElementById('appDetailContent');
-  if(contentEl) {
-    contentEl.innerHTML = detailHtml;
+
+  const applicantName=((app.first_name||app.fname||'')+' '+(app.last_name||app.lname||'')).trim() || 'Applicant';
+  const safeName=applicantName.replace(/'/g, "\\'");
+  const isPending=app.status==='pending_review'||app.status==='pending'||app.status==='under_review';
+  const plateNumber=app.license_plate||app.vehicle_plate||app.reg_number||'—';
+  const appRef=app.app_ref||('APP-'+String(app.id).substring(0,8).toUpperCase());
+
+  // ─── Documents Aggregation & Verification ───
+  let rawDocs = [];
+  if (Array.isArray(app.documents)) {
+    rawDocs = [...app.documents];
+  } else if (app.documents && typeof app.documents === 'object') {
+    rawDocs = Object.entries(app.documents).map(([key, val]) => ({
+      key,
+      name: (val && val.name) || key,
+      type: (val && val.type) || ((val && (val.data || val.url) && typeof (val.data || val.url) === 'string' && (val.data || val.url).includes('image/')) ? 'image' : 'image'),
+      url: (val && (val.url || val.data)) || ''
+    }));
   }
+
+  const resolveDocUrl = url => {
+    if (!url) return '';
+    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  // 5 Standard Required Documents
+  const REQUIRED_DOCS = [
+    {
+      key: 'riderLicense',
+      name: "Rider's License",
+      icon: 'fa-id-badge',
+      sub: 'Driver Authorization',
+      url: app.driver_license_url || (rawDocs.find(d => d.key === 'riderLicense' || (d.name && d.name.toLowerCase().includes('license')))?.url)
+    },
+    {
+      key: 'vehicleRegistration',
+      name: "Vehicle Registration",
+      icon: 'fa-file-invoice',
+      sub: 'DVLA Logbook / Cert',
+      url: app.vehicle_registration_url || (rawDocs.find(d => d.key === 'vehicleRegistration' || (d.name && d.name.toLowerCase().includes('registration')))?.url)
+    },
+    {
+      key: 'idCardFront',
+      name: "National ID — Front",
+      icon: 'fa-address-card',
+      sub: 'Ghana Card Front side',
+      url: app.ghana_card_url || (rawDocs.find(d => d.key === 'idCardFront' || (d.name && d.name.toLowerCase().includes('front')))?.url)
+    },
+    {
+      key: 'idCardBack',
+      name: "National ID — Back",
+      icon: 'fa-address-card',
+      sub: 'Ghana Card Back side',
+      url: app.insurance_url || (rawDocs.find(d => d.key === 'idCardBack' || (d.name && d.name.toLowerCase().includes('back')))?.url)
+    },
+    {
+      key: 'passportPhoto',
+      name: "Passport Photo",
+      icon: 'fa-user-circle',
+      sub: 'Recent Portrait Photo',
+      url: app.passport_photo_url || (rawDocs.find(d => d.key === 'passportPhoto' || (d.name && d.name.toLowerCase().includes('passport')))?.url)
+    }
+  ];
+
+  // Resolve URLs & determine if image or pdf
+  const processedRequiredDocs = REQUIRED_DOCS.map(def => {
+    let url = def.url;
+    if (url && !url.startsWith('data:') && !url.startsWith('http') && !url.startsWith('/uploads/') && !url.startsWith('/')) {
+      url = null;
+    }
+    const isPdf = url && (url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf'));
+    return {
+      ...def,
+      resolvedUrl: resolveDocUrl(url),
+      hasDoc: !!url,
+      isPdf: isPdf
+    };
+  });
+
+  // Check additional uploaded documents that aren't one of the 5 standard keys
+  const extraDocs = rawDocs.filter(d => {
+    if (!d.url) return false;
+    const isStd = REQUIRED_DOCS.some(std => std.key === d.key || (d.url && std.url === d.url));
+    return !isStd;
+  });
+
+  const uploadedCount = processedRequiredDocs.filter(d => d.hasDoc).length;
+
+  const docsHtml = `
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:.75rem;font-weight:800;color:var(--white);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px">
+          <i class="fas fa-file-check" style="color:var(--yellow)"></i> Required Verification Documents
+        </div>
+        <span style="font-size:.72rem;font-weight:700;color:${uploadedCount >= 5 ? 'var(--green)' : 'var(--yellow)'};background:rgba(255,255,255,.05);padding:2px 8px;border-radius:12px;border:1px solid var(--border)">
+          ${uploadedCount} / 5 Provided
+        </span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">
+        ${processedRequiredDocs.map(doc => `
+          <div style="background:var(--bg-3);border-radius:var(--r);border:1px solid ${doc.hasDoc ? 'var(--border-2)' : 'rgba(255,255,255,0.06)'};padding:10px;display:flex;flex-direction:column;justify-content:space-between;min-height:165px;position:relative">
+            <div>
+              <div style="font-size:.65rem;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">${escapeHtml(doc.name)}</div>
+              <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px">${escapeHtml(doc.sub)}</div>
+            </div>
+
+            ${doc.hasDoc ? `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;overflow:hidden;background:var(--bg-4);position:relative;margin-bottom:8px"
+                onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                ${doc.isPdf ? `
+                  <div style="padding:14px;text-align:center">
+                    <i class="fas fa-file-pdf" style="font-size:2rem;color:var(--red)"></i>
+                    <div style="font-size:.65rem;font-weight:600;color:var(--white);margin-top:4px">View PDF</div>
+                  </div>
+                ` : `
+                  <img src="${doc.resolvedUrl}" alt="${escapeHtml(doc.name)}" style="width:100%;height:84px;object-fit:cover;display:block">
+                  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0'">
+                    <i class="fas fa-search-plus" style="color:white;font-size:1.2rem"></i>
+                  </div>
+                `}
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:.62rem;font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:3px">
+                  <i class="fas fa-check-circle"></i> Uploaded
+                </span>
+                <button type="button" style="background:none;border:none;color:var(--yellow);font-size:.65rem;font-weight:700;cursor:pointer;padding:0"
+                  onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                  ${doc.isPdf ? 'Open PDF' : 'Inspect'} <i class="fas fa-external-link-alt" style="font-size:.55rem"></i>
+                </button>
+              </div>
+            ` : `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.02);border:1.5px dashed rgba(255,255,255,.1);border-radius:6px;padding:12px;margin-bottom:8px">
+                <i class="fas ${doc.icon}" style="font-size:1.6rem;color:var(--muted);opacity:.4"></i>
+                <div style="font-size:.62rem;color:var(--muted);margin-top:4px">Missing</div>
+              </div>
+              <div>
+                <span style="font-size:.62rem;font-weight:600;color:var(--red);display:inline-flex;align-items:center;gap:3px">
+                  <i class="fas fa-times-circle"></i> Not Provided
+                </span>
+              </div>
+            `}
+          </div>
+        `).join('')}
+      </div>
+
+      ${extraDocs.length ? `
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
+            Additional Attachments (${extraDocs.length})
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px">
+            ${extraDocs.map(d => {
+              const resUrl = resolveDocUrl(d.url);
+              const isPdf = d.type === 'pdf' || (d.url && d.url.toLowerCase().includes('.pdf'));
+              return `
+                <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center;cursor:pointer"
+                  onclick="${isPdf ? `window.open('${resUrl}','_blank')` : `openLightbox('${resUrl}','${escapeHtml(d.name || 'Attachment')}')`}">
+                  ${isPdf ? `
+                    <i class="fas fa-file-pdf" style="font-size:1.5rem;color:var(--red)"></i>
+                  ` : `
+                    <img src="${resUrl}" style="width:100%;height:60px;object-fit:cover;border-radius:4px;display:block">
+                  `}
+                  <div style="font-size:.62rem;color:var(--white);font-weight:600;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(d.name || 'Document')}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // Calculate age if DOB provided
+  let ageDisplay = '';
+  if(app.date_of_birth||app.dob){
+    const dob = new Date(app.date_of_birth||app.dob);
+    if(!isNaN(dob.getTime())){
+      const ageDifMs = Date.now() - dob.getTime();
+      const ageDate = new Date(ageDifMs);
+      const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+      if(age > 0 && age < 120) ageDisplay = ` (${age} yrs)`;
+    }
+  }
+
+  const detailHtml = `
+    <!-- Header Banner -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg)">
+      <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;flex-shrink:0">
+        ${(app.first_name||app.fname||'A').charAt(0).toUpperCase()}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:1.25rem;font-weight:900;color:var(--white);line-height:1.2">${escapeHtml(applicantName)}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap">
+          <span style="font-size:.72rem;font-family:monospace;color:var(--yellow);background:var(--yellow-lt);border:1px solid var(--yellow-bdr);padding:2px 8px;border-radius:4px;font-weight:700">${appRef}</span>
+          <span class="app-status-badge ${app.status}">${isPending?'Pending Review':app.status}</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Submitted</div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--white);margin-top:2px">
+          ${app.submitted_at?new Date(app.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):(app.created_at?new Date(app.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Personal & Contact Details -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">
+        <i class="fas fa-user" style="color:var(--blue);margin-right:4px"></i> Personal & Contact Info
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Phone Number</div>
+          <div style="font-size:.88rem;font-weight:700;color:var(--white);margin-top:2px">
+            <a href="tel:${app.phone}" style="color:inherit;text-decoration:none">${app.phone||'—'}</a>
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Email Address</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px;overflow:hidden;text-overflow:ellipsis">
+            ${app.email ? `<a href="mailto:${app.email}" style="color:inherit;text-decoration:none">${escapeHtml(app.email)}</a>` : '<span style="color:var(--muted)">Not provided</span>'}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Date of Birth</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px">
+            ${app.date_of_birth||app.dob||'—'}<span style="color:var(--muted);font-weight:400">${ageDisplay}</span>
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Gender & Nationality</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px;text-transform:capitalize">
+            ${app.gender||'—'} · ${app.nationality||app.region||'Ghanaian'}
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border);margin-top:12px">
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Residential Address & Location</div>
+        <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px">
+          ${escapeHtml(app.address||'—')}${app.city ? ', ' + escapeHtml(app.city) : ''}${app.region && app.region!==app.nationality ? ' (' + escapeHtml(app.region) + ')' : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Identification & Driver Verification -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">
+        <i class="fas fa-id-card" style="color:var(--teal);margin-right:4px"></i> Identification & Verification
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">${escapeHtml(app.id_type||'Ghana Card / ID Number')}</div>
+          <div style="font-size:.88rem;font-weight:700;color:var(--teal);margin-top:2px;font-family:monospace">
+            ${escapeHtml(app.ghana_card_number||app.id_number||app.ghana_card_url||'—')}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Driving License Number</div>
+          <div style="font-size:.88rem;font-weight:700;color:var(--white);margin-top:2px;font-family:monospace">
+            ${escapeHtml(app.license_number||app.licence_number||app.driver_license_url||'—')}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">License Expiry</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px">
+            ${app.license_expiry||app.licence_expiry||'—'}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Driving Experience</div>
+          <div style="font-size:.88rem;font-weight:700;color:var(--yellow);margin-top:2px">
+            ${escapeHtml(app.experience||'0 years')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Vehicle Information -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">
+        <i class="fas fa-motorcycle" style="color:var(--yellow);margin-right:4px"></i> Vehicle Details
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Vehicle Type</div>
+          <div style="font-size:.88rem;font-weight:700;color:var(--white);margin-top:2px">
+            ${escapeHtml(app.vehicle_type||'Tricycle')}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">License Plate / Reg</div>
+          <div style="font-size:.88rem;font-weight:800;color:var(--yellow);margin-top:2px;font-family:monospace">
+            ${plateNumber}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Make, Model & Year</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px">
+            ${[app.vehicle_make, app.vehicle_model, app.vehicle_year].filter(Boolean).map(escapeHtml).join(' ') || '—'}
+          </div>
+        </div>
+        <div style="background:var(--bg-3);padding:12px;border-radius:var(--r);border:1px solid var(--border)">
+          <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Color & Seats Capacity</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--white);margin-top:2px">
+            ${escapeHtml(app.vehicle_color||'—')}${app.vehicle_seats ? ' · ' + escapeHtml(app.vehicle_seats) + ' seats' : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: About / Applicant Statement -->
+    ${(app.about || app.extra) ? `
+    <div style="background:var(--bg-3);padding:14px;border-radius:var(--r);border:1px solid var(--border);border-left:3px solid var(--yellow);margin-bottom:20px">
+      <div style="font-size:.65rem;color:var(--yellow);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">
+        <i class="fas fa-comment-dots"></i> Applicant Notes / Statement
+      </div>
+      <div style="font-size:.84rem;color:var(--text);line-height:1.5">
+        "${escapeHtml(app.about || app.extra)}"
+      </div>
+    </div>` : ''}
+
+    <!-- Section 5: Emergency Contact -->
+    ${(app.emergency_contact_name && !app.emergency_contact_name.startsWith('Exp:') || app.emergency_contact_phone) ? `
+    <div style="background:var(--bg-3);padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Emergency Contact</div>
+        <div style="font-size:.88rem;font-weight:700;color:var(--white);margin-top:2px">${escapeHtml(app.emergency_contact_name||'—')}</div>
+      </div>
+      ${app.emergency_contact_phone ? `<div style="font-size:.85rem;font-weight:600;color:var(--yellow)"><a href="tel:${app.emergency_contact_phone}" style="color:inherit;text-decoration:none"><i class="fas fa-phone"></i> ${app.emergency_contact_phone}</a></div>` : ''}
+    </div>` : ''}
+
+    <!-- Uploaded Documents Section -->
+    ${docsHtml}
+
+    <!-- Admin Review Log -->
+    ${app.reviewed_at ? `
+    <div style="padding:10px 14px;background:rgba(255,255,255,.03);border-radius:var(--r);font-size:.74rem;color:var(--muted);display:flex;justify-content:space-between">
+      <span>Reviewed on: ${new Date(app.reviewed_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
+      ${app.rejection_reason ? `<span style="color:var(--red)">Reason: ${escapeHtml(app.rejection_reason)}</span>` : ''}
+    </div>` : ''}
+  `;
+
+  const contentEl=document.getElementById('appDetailContent');
+  if(contentEl) contentEl.innerHTML=detailHtml;
+
+  // Render dynamic action buttons in modal footer
+  const footerEl=document.getElementById('appDetailModalFooter');
+  if(footerEl){
+    if(isPending){
+      footerEl.innerHTML=`
+        <button class="modal-btn secondary" onclick="closeModal('appDetailModal')">Close</button>
+        <button class="modal-btn danger" onclick="closeModal('appDetailModal');openDecline('${app.id}','${safeName}')"><i class="fas fa-times"></i> Decline</button>
+        <button class="modal-btn primary" onclick="closeModal('appDetailModal');openApprove('${app.id}','${safeName}')"><i class="fas fa-check"></i> Approve Application</button>
+      `;
+    } else {
+      footerEl.innerHTML=`
+        <button class="modal-btn danger" onclick="closeModal('appDetailModal');openDeleteApp('${app.id}','${safeName}')" style="margin-right:auto"><i class="fas fa-trash"></i> Delete</button>
+        <button class="modal-btn primary" onclick="closeModal('appDetailModal')">Close</button>
+      `;
+    }
+  }
+
   openModal('appDetailModal');
 }
 
-function openApprove(id,name){approveId=id;setEl('approveModalSub',`Approve the application from <strong>${name}</strong>? A K3R Rider ID and account will be created.`);openModal('approveModal');}
-function openDecline(id,name){declineId=id;setEl('declineModalSub',`Decline the application from <strong>${name}</strong>?`);openModal('declineModal');}
-function openDeleteApp(id,name){deleteId=id;setEl('deleteModalSub',`Permanently delete the application from <strong>${name}</strong> and all uploaded documents?`);openModal('deleteAppModal');}
+function openApprove(id,name){approveId=id;setElHtml('approveModalSub',`Approve the application from <strong>${escapeHtml(name)}</strong>? A K3R Rider ID and account will be created.`);openModal('approveModal');}
+function openDecline(id,name){declineId=id;setElHtml('declineModalSub',`Decline the application from <strong>${escapeHtml(name)}</strong>?`);openModal('declineModal');}
+function openDeleteApp(id,name){deleteId=id;setElHtml('deleteModalSub',`Permanently delete the application from <strong>${escapeHtml(name)}</strong> and all uploaded documents?`);openModal('deleteAppModal');}
 
 async function confirmApprove(){
   closeModal('approveModal');
@@ -1172,7 +2053,55 @@ async function confirmApprove(){
     setEl('k3rRefDisplay',data.app_ref||'—');
     window._lastK3rId=data.rider_id;
     openModal('k3rModal');
+
+    // Also update localStorage so offline/mock state stays in sync
+    try {
+      const localApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+      const matchedApp = localApps.find(x => String(x.id) === String(approveId)) || allApps.find(x => String(x.id) === String(approveId));
+      if (matchedApp) {
+        matchedApp.status = 'approved';
+        localStorage.setItem('k3k3_applications', JSON.stringify(localApps));
+
+        // Create approved rider entry for localStorage.k3k3_riders
+        const localRiders = JSON.parse(localStorage.getItem('k3k3_riders') || '[]');
+        const newRider = {
+          id: data.rider_id || ('K3R-' + String(approveId).slice(-6)),
+          fname: data.first_name || matchedApp.first_name || matchedApp.fname || 'Rider',
+          lname: data.last_name || matchedApp.last_name || matchedApp.lname || '',
+          phone: matchedApp.phone,
+          email: matchedApp.email,
+          vehicle_type: matchedApp.vehicle_type || 'Tricycle',
+          vehicle_plate: matchedApp.license_plate || matchedApp.vehicle_plate || '—',
+          vehicle_make: matchedApp.vehicle_make || '',
+          vehicle_model: matchedApp.vehicle_model || '',
+          vehicle_color: matchedApp.vehicle_color || '',
+          driver_license_url: matchedApp.driver_license_url || matchedApp.license_front,
+          vehicle_registration_url: matchedApp.vehicle_registration_url || matchedApp.registration_doc,
+          ghana_card_url: matchedApp.ghana_card_url || matchedApp.id_front,
+          insurance_url: matchedApp.insurance_url || matchedApp.id_back,
+          passport_photo_url: matchedApp.passport_photo_url || matchedApp.passport_photo,
+          documents: matchedApp.documents,
+          rating: 5.0,
+          trips_completed: 0,
+          total_earnings: 0,
+          is_available: true,
+          on_trip: false,
+          joined: 'Today'
+        };
+        const existingIdx = localRiders.findIndex(r => r.id === newRider.id || (r.phone && r.phone === newRider.phone));
+        if (existingIdx >= 0) {
+          localRiders[existingIdx] = { ...localRiders[existingIdx], ...newRider };
+        } else {
+          localRiders.unshift(newRider);
+        }
+        localStorage.setItem('k3k3_riders', JSON.stringify(localRiders));
+      }
+    } catch(eLocal) {
+      console.warn('Error syncing localStorage on approve:', eLocal);
+    }
+
     allApps=[];// force reload
+    allRiders=[];// force reload riders list
     showToast(`Rider ${data.rider_id} created!`,'success');
   }catch(e){
     showToast('Approval failed: '+e.message,'error');
@@ -1282,7 +2211,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
-    ['logoutModal','approveModal','declineModal','deleteAppModal','k3rModal','imgLightbox'].forEach(id=>{
+    ['logoutModal','approveModal','declineModal','deleteAppModal','k3rModal','riderDetailModal','suspendRiderModal','unsuspendRiderModal','removeRiderModal','imgLightbox'].forEach(id=>{
       const m=el(id);if(m){m.style.display='';m.classList.remove('show');}
     });
     closeMenu();

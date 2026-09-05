@@ -159,6 +159,9 @@ async function checkSMSBalance() {
  * @returns {Promise<object>} { success, approval }
  */
 async function checkSenderIdStatus(senderId) {
+  const MOOLRE_SMS_VAS_KEY = getMoolreKey();
+  const MOOLRE_SENDER_ID = getMoolreSenderId();
+
   if (!MOOLRE_SMS_VAS_KEY) {
     return { success: false, error: 'SMS service not configured' };
   }

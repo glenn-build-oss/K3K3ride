@@ -1300,6 +1300,23 @@ function loadSession() {
   try { session = JSON.parse(sessionStorage.getItem('riderSession') || localStorage.getItem('riderSession') || 'null'); }
   catch(e) { session = null; }
 
+  // Approval gate: If rider account is pending review, redirect to pending landing page
+  if (session && (session.status === 'pending' || session.status === 'under_review' || session.status === 'pending_review')) {
+    window.location.href = 'pending.html';
+    return;
+  }
+
+  // Suspension gate: If rider account is suspended, inform and log out
+  if (session && session.status === 'suspended') {
+    alert('Your rider account has been suspended by administration. Please contact K3K3 Support.');
+    try {
+      sessionStorage.removeItem('riderSession');
+      localStorage.removeItem('riderSession');
+    } catch(_) {}
+    window.location.href = '../index.html';
+    return;
+  }
+
   const fn  = session?.firstName || 'Rider';
   const ln  = session?.lastName  || '';
   const ini = fn.charAt(0).toUpperCase();

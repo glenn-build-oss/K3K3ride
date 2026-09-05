@@ -988,6 +988,103 @@
       box-shadow: var(--sh-md)
     }
 
+    /* ── Document Upload Zones ── */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 640px) {
+      .upload-grid { grid-template-columns: 1fr; }
+    }
+    .upload-item { display: flex; flex-direction: column; gap: 6px; }
+    .upload-item label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r);
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      background: var(--surface-2);
+      min-height: 125px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--yellow);
+      background: rgba(255,214,10,0.06);
+    }
+    .upload-zone.has-file {
+      border-color: var(--green);
+      background: rgba(16,185,129,0.06);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2;
+    }
+    .upload-zone .upload-icon { font-size: 1.6rem; color: var(--text-3); }
+    .upload-zone.has-file .upload-icon { color: var(--green); }
+    .upload-zone .upload-text { font-size: 0.82rem; color: var(--text-2); font-weight: 600; }
+    .upload-zone .upload-sub { font-size: 0.72rem; color: var(--text-3); }
+    .upload-zone .upload-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-full);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      pointer-events: none;
+    }
+    .upload-zone .file-preview {
+      width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .upload-zone .file-preview img { max-height: 70px; max-width: 100%; border-radius: 6px; object-fit: cover; }
+    .upload-zone .file-preview .file-name { font-size: 0.75rem; color: var(--text); font-weight: 600; word-break: break-all; }
+    .upload-zone .file-preview .file-size { font-size: 0.68rem; color: var(--text-2); }
+    .remove-file-btn {
+      position: absolute; top: 8px; right: 8px;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--red); color: white; border: none; cursor: pointer;
+      font-size: 0.68rem; display: none; align-items: center; justify-content: center;
+      z-index: 6; box-shadow: 0 2px 6px rgba(239,68,68,0.3);
+    }
+    .upload-zone.has-file .remove-file-btn { display: flex; }
+
+    .review-docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .review-doc-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
+    }
+    .review-doc-card i { font-size: 1.2rem; color: var(--green); }
+    .review-doc-card .doc-title { font-size: 0.75rem; font-weight: 700; color: var(--text); }
+    .review-doc-card .doc-file { font-size: 0.68rem; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+
     .apply-success {
       text-align: center;
       padding: 60px 32px;
@@ -4854,7 +4951,80 @@
             <div class="form-field">
               <label class="form-label" for="applyExtra">Additional Information (Optional)</label>
               <textarea class="textarea-input" id="applyExtra"
-                placeholder="Any additional information you'd like us to know…" style="min-height:100px"></textarea>
+                placeholder="Any additional information you'd like us to know…" style="min-height:90px"></textarea>
+            </div>
+
+            <!-- Required Documents -->
+            <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
+              <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:4px">Required Documents</div>
+              <div style="font-size:.82rem;color:var(--text-2);margin-bottom:16px">Upload clear photos or scans (PNG, JPG, PDF)</div>
+
+              <div class="upload-grid">
+                <div class="upload-item">
+                  <label>Rider's License <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-riderLicense" data-name="riderLicense">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'riderLicense')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-riderLicense" accept="image/*,.pdf" onchange="handlePassengerDocUpload('riderLicense', this)">
+                    <i class="fas fa-id-card upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item">
+                  <label>Vehicle Registration <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-vehicleRegistration" data-name="vehicleRegistration">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'vehicleRegistration')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-vehicleRegistration" accept="image/*,.pdf" onchange="handlePassengerDocUpload('vehicleRegistration', this)">
+                    <i class="fas fa-car upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item">
+                  <label>National ID — Front <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-idCardFront" data-name="idCardFront">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'idCardFront')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-idCardFront" accept="image/*,.pdf" onchange="handlePassengerDocUpload('idCardFront', this)">
+                    <i class="fas fa-address-card upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Front side · Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item">
+                  <label>National ID — Back <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-idCardBack" data-name="idCardBack">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'idCardBack')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-idCardBack" accept="image/*,.pdf" onchange="handlePassengerDocUpload('idCardBack', this)">
+                    <i class="fas fa-address-card upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Back side · Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item" style="grid-column: 1 / -1;">
+                  <label>Passport Photo <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-passportPhoto" data-name="passportPhoto">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'passportPhoto')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-passportPhoto" accept="image/*" onchange="handlePassengerDocUpload('passportPhoto', this)">
+                    <i class="fas fa-portrait upload-icon"></i>
+                    <span class="upload-text">Tap to choose photo</span>
+                    <span class="upload-sub">PNG, JPG · max 10MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-camera"></i> Choose Photo</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;padding:12px 14px;background:var(--yellow-lt);border-radius:var(--r);border-left:3px solid var(--yellow);font-size:.82rem;color:var(--text-2);display:flex;align-items:center;gap:10px">
+                <i class="fas fa-info-circle" style="color:var(--yellow);font-size:1.1rem;flex-shrink:0"></i>
+                <span>Ensure all documents are clear and readable. Upload both the front and back of your National ID Card.</span>
+              </div>
             </div>
           </div>
 
@@ -7306,6 +7476,97 @@
     if (applyCurrentStep === applyTotalSteps) buildApplyReview();
   }
 
+  /* ─── Passenger Document Upload Handling ─── */
+  const passengerUploadedDocs = {};
+
+  function handlePassengerDocUpload(name, input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const maxMB = name === 'passportPhoto' ? 10 : 20;
+    if (file.size > maxMB * 1024 * 1024) {
+      showToast(`File is too large. Maximum allowed size is ${maxMB}MB.`, 'error');
+      input.value = '';
+      return;
+    }
+
+    const allowed = name === 'passportPhoto'
+      ? ['image/jpeg', 'image/png', 'image/jpg']
+      : ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowed.includes(file.type)) {
+      showToast('Invalid file format. Please upload PNG, JPG, or PDF.', 'error');
+      input.value = '';
+      return;
+    }
+
+    const zone = document.getElementById(`pzone-${name}`);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      passengerUploadedDocs[name] = {
+        data: e.target.result,
+        name: file.name,
+        type: file.type.startsWith('image/') ? 'image' : 'pdf',
+        size: file.size
+      };
+
+      if (zone) {
+        zone.classList.add('has-file');
+        const icon = zone.querySelector('.upload-icon');
+        const textEl = zone.querySelector('.upload-text');
+        const subEl = zone.querySelector('.upload-sub');
+        const triggerBtn = zone.querySelector('.upload-trigger-btn');
+        if (icon) icon.style.display = 'none';
+        if (textEl) textEl.style.display = 'none';
+        if (subEl) subEl.style.display = 'none';
+        if (triggerBtn) triggerBtn.style.display = 'none';
+
+        let previewEl = zone.querySelector('.file-preview');
+        if (!previewEl) {
+          previewEl = document.createElement('div');
+          previewEl.className = 'file-preview';
+          zone.appendChild(previewEl);
+        }
+
+        if (file.type.startsWith('image/')) {
+          previewEl.innerHTML = `
+            <img src="${e.target.result}" alt="${file.name}">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${(file.size / (1024 * 1024)).toFixed(2)} MB</div>
+          `;
+        } else {
+          previewEl.innerHTML = `
+            <i class="fas fa-file-pdf" style="font-size:2rem;color:var(--red);margin-bottom:4px"></i>
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${(file.size / (1024 * 1024)).toFixed(2)} MB</div>
+          `;
+        }
+      }
+      showToast(`${file.name} uploaded ✓`, 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPassengerDoc(e, name) {
+    if (e) e.stopPropagation();
+    delete passengerUploadedDocs[name];
+    const input = document.getElementById(`pfile-${name}`);
+    if (input) input.value = '';
+    const zone = document.getElementById(`pzone-${name}`);
+    if (zone) {
+      zone.classList.remove('has-file');
+      const previewEl = zone.querySelector('.file-preview');
+      if (previewEl) previewEl.remove();
+      const icon = zone.querySelector('.upload-icon');
+      const textEl = zone.querySelector('.upload-text');
+      const subEl = zone.querySelector('.upload-sub');
+      const triggerBtn = zone.querySelector('.upload-trigger-btn');
+      if (icon) icon.style.display = '';
+      if (textEl) textEl.style.display = '';
+      if (subEl) subEl.style.display = '';
+      if (triggerBtn) triggerBtn.style.display = '';
+    }
+  }
+
   function applyValidateStep() {
     if (applyCurrentStep === 1) {
       if (!document.getElementById('applyFName').value.trim()) { showToast('Please enter your first name', 'error'); return false; }
@@ -7325,6 +7586,20 @@
       if (!document.getElementById('applyIdNumber').value.trim()) { showToast('Please enter your ID number', 'error'); return false; }
       if (!document.getElementById('applyLicenceNumber').value.trim()) { showToast("Please enter your driver's licence number", 'error'); return false; }
       if (!document.getElementById('applyLicenceExpiry').value) { showToast('Please enter your licence expiry date', 'error'); return false; }
+
+      const requiredDocs = [
+        { key: 'riderLicense', label: "Rider's License" },
+        { key: 'vehicleRegistration', label: "Vehicle Registration" },
+        { key: 'idCardFront', label: "National ID — Front" },
+        { key: 'idCardBack', label: "National ID — Back" },
+        { key: 'passportPhoto', label: "Passport Photo" }
+      ];
+      for (const d of requiredDocs) {
+        if (!passengerUploadedDocs[d.key]) {
+          showToast(`Please upload your ${d.label}`, 'error');
+          return false;
+        }
+      }
     }
     if (applyCurrentStep === 4) {
       if (!document.getElementById('applyTermsCheck').checked) { showToast('Please agree to the Terms of Service to proceed', 'error'); return false; }
@@ -7366,11 +7641,42 @@
     };
     const rc = document.getElementById('applyReviewContent');
     if (!rc) return;
-    rc.innerHTML = Object.entries(vals).filter(([, v]) => v.trim()).map(([k, v]) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:.78rem;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em">${k}</span>
-      <span style="font-size:.88rem;font-weight:600;color:var(--text)">${v}</span>
-    </div>`).join('');
+
+    let html = Object.entries(vals).filter(([, v]) => v && v.trim()).map(([k, v]) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.78rem;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em">${k}</span>
+        <span style="font-size:.88rem;font-weight:600;color:var(--text)">${v}</span>
+      </div>`).join('');
+
+    // Review uploaded documents
+    const docLabels = {
+      riderLicense: "Rider's License",
+      vehicleRegistration: "Vehicle Registration",
+      idCardFront: "National ID — Front",
+      idCardBack: "National ID — Back",
+      passportPhoto: "Passport Photo"
+    };
+    const uploadedKeys = Object.keys(passengerUploadedDocs);
+    if (uploadedKeys.length > 0) {
+      html += `
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:.78rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">
+            <i class="fas fa-file-check" style="color:var(--green);margin-right:4px"></i> Uploaded Documents (${uploadedKeys.length})
+          </div>
+          <div class="review-docs-grid">
+            ${uploadedKeys.map(k => `
+              <div class="review-doc-card">
+                <i class="fas ${passengerUploadedDocs[k].type === 'image' ? 'fa-image' : 'fa-file-pdf'}"></i>
+                <span class="doc-title">${docLabels[k] || k}</span>
+                <span class="doc-file">${passengerUploadedDocs[k].name}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    rc.innerHTML = html;
   }
 
   async function submitRiderApplication() {
@@ -7378,20 +7684,26 @@
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…'; }
 
     const userId = getUserId();
+    const rawPhone = document.getElementById('applyPhone').value.trim();
+    const fullPhone = rawPhone.startsWith('+') ? rawPhone : ('+233' + (rawPhone.startsWith('0') ? rawPhone.substring(1) : rawPhone));
+    const genRef = 'K3PA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
     const payload = {
       user_id: userId || null,
+      app_ref: genRef,
       fname: document.getElementById('applyFName').value.trim(),
       lname: document.getElementById('applyLName').value.trim(),
       dob: document.getElementById('applyDOB').value,
       gender: document.getElementById('applyGender').value,
-      phone: document.getElementById('applyPhone').value.trim(),
-      nationality: document.getElementById('applyNationality').value.trim() || 'Ghanaian',
+      phone: fullPhone,
+      nationality: (document.getElementById('applyNationality') ? document.getElementById('applyNationality').value.trim() : '') || 'Ghanaian',
       address: document.getElementById('applyAddress').value.trim(),
+      city: 'Accra',
       vehicle_type: document.getElementById('applyVehicleType').value,
       vehicle_make: document.getElementById('applyVehicleMake').value.trim(),
       vehicle_model: document.getElementById('applyVehicleModel').value.trim(),
       vehicle_year: document.getElementById('applyVehicleYear').value,
-      vehicle_color: document.getElementById('applyVehicleColor').value.trim(),
+      vehicle_color: (document.getElementById('applyVehicleColor') ? document.getElementById('applyVehicleColor').value.trim() : '') || 'Black',
       reg_number: document.getElementById('applyRegNumber').value.toUpperCase().trim(),
       id_type: document.getElementById('applyIdType').value,
       id_number: document.getElementById('applyIdNumber').value.trim(),
@@ -7400,27 +7712,103 @@
       experience: document.getElementById('applyExperience').value,
       extra: document.getElementById('applyExtra').value.trim(),
       status: 'pending',
+      documents: passengerUploadedDocs
     };
 
+    // Save to local applications for immediate admin dashboard visibility
     try {
+      const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+      const newApp = {
+        id: Date.now(),
+        app_ref: genRef,
+        first_name: payload.fname,
+        last_name: payload.lname,
+        email: '',
+        phone: fullPhone,
+        date_of_birth: payload.dob || null,
+        gender: payload.gender || null,
+        nationality: payload.nationality || 'Ghanaian',
+        address: payload.address || null,
+        city: 'Accra',
+        vehicle_type: payload.vehicle_type || null,
+        vehicle_make: payload.vehicle_make || null,
+        vehicle_model: payload.vehicle_model || null,
+        vehicle_year: payload.vehicle_year || null,
+        vehicle_plate: payload.reg_number || null,
+        vehicle_color: payload.vehicle_color || null,
+        license_number: payload.licence_number || null,
+        license_expiry: payload.licence_expiry || null,
+        experience: payload.experience || null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        documents: Object.keys(passengerUploadedDocs).map(k => ({
+          key: k,
+          name: passengerUploadedDocs[k].name,
+          type: passengerUploadedDocs[k].type,
+          url: passengerUploadedDocs[k].data
+        }))
+      };
+      existingApps.unshift(newApp);
+      localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
+    } catch(e) {}
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = (typeof getAuthToken === 'function') ? getAuthToken() : null;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(`${API}/applications/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) console.warn(`Server responded with ${res.status}`);
     } catch (err) {
       console.warn('Application API submission note:', err.message);
-      // Proceed to success state anyway if it's a 422/already submitted scenario
     }
 
-    // Show success state
+    try {
+      localStorage.setItem('lastRiderApplication', JSON.stringify({
+        firstName: payload.fname,
+        lastName: payload.lname,
+        phone: fullPhone,
+        email: '',
+        appRef: genRef
+      }));
+      localStorage.setItem('lastApplicationRef', genRef);
+      localStorage.setItem('lastRiderPhone', fullPhone);
+      localStorage.setItem('riderSession', JSON.stringify({
+        phone: fullPhone,
+        firstName: payload.fname,
+        lastName: payload.lname,
+        status: 'pending',
+        applicationRef: genRef
+      }));
+    } catch(_) {}
+
+    // Show success state and redirect to pending.html
     document.querySelectorAll('.apply-form-step').forEach(s => s.classList.remove('active-step'));
     const success = document.getElementById('applySuccess');
-    if (success) success.classList.add('show');
-    document.getElementById('applyFormFooter').style.display = 'none';
-    document.getElementById('applyStepper').style.display = 'none';
+    if (success) {
+      success.classList.add('show');
+      success.innerHTML = `
+        <div class="apply-success-icon"><i class="fas fa-check"></i></div>
+        <h3>Application Submitted!</h3>
+        <p style="color:var(--text-2);margin:8px 0 16px;font-size:.9rem">Your application has been received and is pending admin approval. Redirecting to your status page…</p>
+        <a href="../rider/pending.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:var(--r-full);background:var(--yellow);color:var(--black);font-weight:700;text-decoration:none">
+          <i class="fas fa-clock"></i> View Application Status
+        </a>
+      `;
+    }
+    const footer = document.getElementById('applyFormFooter');
+    if (footer) footer.style.display = 'none';
+    const stepper = document.getElementById('applyStepper');
+    if (stepper) stepper.style.display = 'none';
     if (btn) { btn.disabled = false; }
+
+    setTimeout(() => {
+      window.location.href = '../rider/pending.html';
+    }, 2200);
   }
 
   /* ─── Book Modal ─── */

@@ -9,10 +9,26 @@ const router = express.Router();
 const { 
   createRide, 
   getRideById, 
+  getAllRides,
   getPassengerRides, 
   updateRideStatus,
   getAvailableRiders
 } = require('../services/supabase.service');
+
+/**
+ * GET /api/trips
+ * Get all trips for admin/monitoring
+ */
+router.get('/', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const trips = await getAllRides(limit);
+    res.json({ success: true, trips });
+  } catch (error) {
+    console.error('[Trips] Error fetching all trips:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch trips' });
+  }
+});
 
 /**
  * POST /api/trips/

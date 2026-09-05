@@ -20,7 +20,7 @@ const { normalizePhone, maskPhone } = require('../utils/phone');
 const { generateOTP } = require('../services/otp.service');
 const { sendSMS, sendOTP: moolreSendOTP, checkSMSBalance, checkSenderIdStatus } = require('../services/moolre.service');
 const { sendAdminOTP } = require('../services/email.service');
-const { findUserByPhone, findAllUsersByPhone, findUserByEmail, createUser, updateUserLastLogin, storeOTP: dbStoreOTP, verifyOTP: dbVerifyOTP } = require('../services/supabase.service');
+const { findUserByPhone, findAllUsersByPhone, findUserByEmail, createUser, updateUserLastLogin, storeOTP: dbStoreOTP, verifyOTP: dbVerifyOTP, getRiderApplicationStatus } = require('../services/supabase.service');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'k3k3_dev_secret';
 const JWT_EXPIRY = '24h';
@@ -319,35 +319,22 @@ router.post('/rider/send-otp', async (req, res) => {
       return res.status(400).json({ success: false, error: err.message });
     }
 
-    // Check if rider account already exists
-    const allUsers = await findAllUsersByPhone(normalizedPhone);
-    const riderUser = allUsers.find(u => u.role === 'rider');
-
-    if (riderUser) {
-      return res.json({
-        success: true,
-        message: 'A rider account is already registered with this phone number. Please log in.',
-        hasExistingAccount: true,
-        phoneMask: maskPhone(normalizedPhone)
-      });
-    }
-
     const otpCode = generateOTP();
-    storeOTP(normalizedPhone, otpCode, 'login');
+    await dbStoreOTP(normalizedPhone, otpCode, 'login');
 
     const smsResult = await moolreSendOTP(normalizedPhone, otpCode);
 
     if (!smsResult.success) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[Auth] DEV MODE — Rider OTP for ${normalizedPhone}: ${otpCode}`);
-        return res.json({
-          success: true,
-          message: 'OTP sent (dev mode)',
-          phoneMask: maskPhone(normalizedPhone),
-          _devOTP: otpCode
-        });
-      }
-      return res.status(500).json({ success: false, error: 'Failed to send verification code.' });
+      console.error(`[Auth] Failed to send rider OTP SMS to ${normalizedPhone}: ${smsResult.error}`);
+      console.log(`[Auth] Rider OTP for ${normalizedPhone}: ${otpCode}`);
+      return res.json({
+        success: true,
+        message: 'Verification code sent',
+        phoneMask: maskPhone(normalizedPhone),
+        _smsWarning: smsResult.error,
+        _otp: otpCode,
+        _devOTP: otpCode
+      });
     }
 
     res.json({
@@ -393,23 +380,38 @@ router.post('/rider/verify-otp', async (req, res) => {
       .filter(u => u.role !== 'rider')
       .map(u => u.role);
 
+    // Check if application has been approved by admin
+    const app = await getRiderApplicationStatus(normalizedPhone);
+
+    // Check if account is suspended
+    if (riderUser?.status === 'suspended' || app?.status === 'suspended') {
+      return res.status(403).json({
+        success: false,
+        status: 'suspended',
+        error: 'Your rider account has been suspended by administration. Please contact K3K3 support for assistance.'
+      });
+    }
+
     // If rider account exists, use it for login
     if (riderUser) {
       await updateUserLastLogin(riderUser.id);
       const token = generateToken(riderUser);
+      const isApproved = (riderUser.status === 'active' || riderUser.status === 'approved') || (app && app.status === 'approved');
+      const riderStatus = isApproved ? 'approved' : 'pending';
 
       return res.json({
         success: true,
         message: 'Login successful',
         token,
+        status: riderStatus,
         user: {
           id: riderUser.id,
           phone: riderUser.phone,
-          firstName: riderUser.first_name,
-          lastName: riderUser.last_name,
-          email: riderUser.email,
+          firstName: riderUser.first_name || app?.first_name || 'Rider',
+          lastName: riderUser.last_name || app?.last_name || '',
+          email: riderUser.email || app?.email || '',
           role: riderUser.role,
-          status: riderUser.status,
+          status: riderStatus,
           isNew: false
         }
       });
@@ -440,19 +442,22 @@ router.post('/rider/verify-otp', async (req, res) => {
     await updateUserLastLogin(user.id);
     
     const token = generateToken(user);
+    const isApproved = (app && app.status === 'approved');
+    const riderStatus = isApproved ? 'approved' : 'pending';
 
     res.json({
       success: true,
       message: isNew ? 'Account created' : 'Login successful',
       token,
+      status: riderStatus,
       user: {
         id: user.id,
         phone: user.phone,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email,
+        firstName: user.first_name || app?.first_name || 'Rider',
+        lastName: user.last_name || app?.last_name || '',
+        email: user.email || app?.email || '',
         role: user.role,
-        status: user.status,
+        status: riderStatus,
         isNew
       }
     });
@@ -460,6 +465,65 @@ router.post('/rider/verify-otp', async (req, res) => {
   } catch (err) {
     console.error('[Auth] Error in rider/verify-otp:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /api/auth/rider/status
+ * Check approval status of a rider by phone number
+ */
+router.get('/rider/status', async (req, res) => {
+  try {
+    const { phone } = req.query;
+    if (!phone) {
+      return res.status(400).json({ success: false, error: 'Phone number is required' });
+    }
+
+    let normalizedPhone;
+    try {
+      normalizedPhone = normalizePhone(phone);
+    } catch (_) {
+      normalizedPhone = phone;
+    }
+
+    // Check application record
+    const app = await getRiderApplicationStatus(normalizedPhone);
+    const appStatus = app ? app.status : null;
+
+    // Check user record
+    const user = await findUserByPhone(normalizedPhone, 'rider');
+    const userStatus = user ? user.status : null;
+
+    const isSuspended = (appStatus === 'suspended') || (userStatus === 'suspended');
+    if (isSuspended) {
+      return res.json({
+        success: true,
+        status: 'suspended',
+        isApproved: false,
+        isSuspended: true,
+        message: 'Your rider account is currently suspended. Please contact K3K3 support.',
+        application_ref: app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null,
+        first_name: app?.first_name || user?.first_name || '',
+        last_name: app?.last_name || user?.last_name || '',
+        phone: normalizedPhone
+      });
+    }
+
+    const isApproved = (appStatus === 'approved') || (userStatus === 'active' || userStatus === 'approved');
+    const finalStatus = isApproved ? 'approved' : (appStatus || userStatus || 'pending');
+
+    res.json({
+      success: true,
+      status: finalStatus,
+      isApproved,
+      application_ref: app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null,
+      first_name: app?.first_name || user?.first_name || '',
+      last_name: app?.last_name || user?.last_name || '',
+      phone: normalizedPhone
+    });
+  } catch (err) {
+    console.error('[Auth] Error in rider/status:', err);
+    res.status(500).json({ success: false, error: 'Failed to check status' });
   }
 });
 

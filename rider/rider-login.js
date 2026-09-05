@@ -401,10 +401,10 @@ class RiderLoginSystem {
         localStorage.setItem('riderSession', JSON.stringify(session));
 
         // Check rider status and redirect accordingly
-        if (session.status === 'approved') {
+        if (session.status === 'approved' || session.status === 'active') {
             window.location.href = 'dashboard.html';
         } else {
-            window.location.href = 'rider-pending.html';
+            window.location.href = 'pending.html';
         }
     }
 }

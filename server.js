@@ -2,7 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8081;
+const PORT = process.env.PORT || 8081;
+const BACKEND_PORT = process.env.BACKEND_PORT || 8810;
 const ROOT = __dirname;
 
 const MIME = {
@@ -18,6 +19,41 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
+  // Proxy API, trips, applications, riders, and admin non-static requests to backend server
+  const isBackendRoute = 
+    req.url.startsWith('/api/') || req.url === '/api' ||
+    req.url.startsWith('/trips') ||
+    req.url.startsWith('/applications') ||
+    req.url.startsWith('/riders') ||
+    req.url.startsWith('/passengers') ||
+    req.url.startsWith('/uploads') ||
+    (req.url.startsWith('/admin/') && !req.url.match(/\.(html|js|css|png|jpg|ico|svg|webmanifest)(\?.*)?$/i));
+
+  if (isBackendRoute) {
+    const proxyReq = http.request({
+      hostname: '127.0.0.1',
+      port: BACKEND_PORT,
+      path: req.url,
+      method: req.method,
+      headers: {
+        ...req.headers,
+        host: `127.0.0.1:${BACKEND_PORT}`,
+      },
+    }, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode, proxyRes.headers);
+      proxyRes.pipe(res);
+    });
+
+    proxyReq.on('error', (err) => {
+      console.error(`[Proxy Error] ${req.method} ${req.url} → ${err.message}`);
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: `Backend API server unavailable on port ${BACKEND_PORT}: ${err.message}` }));
+    });
+
+    req.pipe(proxyReq);
+    return;
+  }
+
   let url = req.url.split('?')[0];
   if (url === '/') url = '/index.html';
 

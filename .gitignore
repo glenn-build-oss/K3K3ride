@@ -9,11 +9,16 @@ dist/
 build/
 
 # Environment variables
-# .env
-# .env.local
-# .env.development.local
-# .env.test.local
-# .env.production.local
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Uploads
+uploads/
+backend/uploads/
 
 # IDE and editor files
 .vscode/

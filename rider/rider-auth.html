@@ -843,31 +843,32 @@
 
       const result = await verifyOtpWithBackend(siPhone, otp);
       if (result.ok) {
+        const isApproved = result.status === 'approved' || result.user?.status === 'approved' || result.user?.status === 'active';
+        const finalStatus = isApproved ? 'approved' : (result.user?.status || 'pending');
+
         try {
-          // Check existing session to get rider details
           const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
           localStorage.setItem('riderSession', JSON.stringify({
             phone: siPhone,
-            firstName: existingSession.firstName || '',
-            lastName: existingSession.lastName || '',
-            email: existingSession.email || '',
+            firstName: result.user?.firstName || existingSession.firstName || '',
+            lastName: result.user?.lastName || existingSession.lastName || '',
+            email: result.user?.email || existingSession.email || '',
             token: result.token,
             loginTime: new Date().toISOString(),
-            status: existingSession.status || 'pending'
+            status: finalStatus
           }));
+          localStorage.setItem('lastRiderPhone', siPhone);
         } catch(e) {}
 
-        showToast('Signed in successfully!', 'success');
+        showToast(isApproved ? 'Signed in! Opening Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
 
-        // Check rider status and redirect accordingly
-        const session = JSON.parse(localStorage.getItem('riderSession') || '{}');
         setTimeout(() => {
-          if (session.status === 'approved') {
+          if (finalStatus === 'approved') {
             window.location.href = 'dashboard.html';
           } else {
-            window.location.href = 'rider-pending.html';
+            window.location.href = 'pending.html';
           }
-        }, 1000);
+        }, 900);
       } else {
         showErr('siOtpError', 'siOtpErrorText', result.msg);
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify &amp; Sign In';

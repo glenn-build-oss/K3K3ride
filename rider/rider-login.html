@@ -567,10 +567,10 @@ document.getElementById('riderLoginForm').addEventListener('submit', async funct
   // Check rider status and redirect accordingly
   const session = JSON.parse(localStorage.getItem('riderSession') || '{}');
   setTimeout(() => {
-    if (session.status === 'approved') {
+    if (session.status === 'approved' || session.status === 'active') {
       window.location.href = 'dashboard.html';
     } else {
-      window.location.href = 'rider-pending.html';
+      window.location.href = 'pending.html';
     }
   }, 900);
 });

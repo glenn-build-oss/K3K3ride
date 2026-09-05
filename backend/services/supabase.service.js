@@ -255,45 +255,118 @@ async function cleanupExpiredOTPs() {
 // ─── RIDER APPLICATION OPERATIONS ───
 
 /**
- * Create rider application
+ * Create rider application with strict schema mapping
  */
 async function createRiderApplication(applicationData) {
-  const { data, error } = await requireSupabase()
-    .from('rider_applications')
-    .insert([applicationData])
-    .select()
-    .single();
+  try {
+    // Map input fields to actual table columns in rider_applications
+    const allowedFields = [
+      'user_id', 'phone', 'first_name', 'last_name', 'email',
+      'date_of_birth', 'gender', 'address', 'city', 'region',
+      'emergency_contact_name', 'emergency_contact_phone',
+      'vehicle_type', 'vehicle_make', 'vehicle_model', 'vehicle_year',
+      'vehicle_color', 'license_plate', 'driver_license_url',
+      'insurance_url', 'vehicle_registration_url', 'ghana_card_url',
+      'passport_photo_url', 'status'
+    ];
 
-  if (error) {
-    console.error('[Supabase] Error creating rider application:', error);
-    return null;
+    const cleanData = {};
+    for (const field of allowedFields) {
+      if (applicationData[field] !== undefined) {
+        cleanData[field] = applicationData[field];
+      }
+    }
+
+    // Handle common alternative field names from various forms
+    if (!cleanData.first_name && (applicationData.fname || applicationData.firstName)) {
+      cleanData.first_name = applicationData.fname || applicationData.firstName;
+    }
+    if (!cleanData.last_name && (applicationData.lname || applicationData.lastName)) {
+      cleanData.last_name = applicationData.lname || applicationData.lastName;
+    }
+    if (!cleanData.date_of_birth && (applicationData.dob || applicationData.dateOfBirth)) {
+      cleanData.date_of_birth = applicationData.dob || applicationData.dateOfBirth;
+    }
+    if (!cleanData.license_plate && (applicationData.vehicle_plate || applicationData.reg_number || applicationData.vehiclePlate)) {
+      cleanData.license_plate = applicationData.vehicle_plate || applicationData.reg_number || applicationData.vehiclePlate;
+    }
+    if (!cleanData.status) {
+      cleanData.status = 'pending';
+    }
+
+    // Ensure user_id is a valid UUID or omit it
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (cleanData.user_id && !uuidRegex.test(cleanData.user_id)) {
+      delete cleanData.user_id;
+    }
+
+    const { data, error } = await requireSupabase()
+      .from('rider_applications')
+      .insert([cleanData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[Supabase] Error creating rider application:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, application: data };
+  } catch (err) {
+    console.error('[Supabase] createRiderApplication catch:', err.message);
+    return { success: false, error: err.message };
   }
-
-  return data;
 }
 
 /**
  * Get rider applications
  */
 async function getRiderApplications(filters = {}) {
-  let query = supabase.from('rider_applications').select('*');
+  try {
+    let query = requireSupabase().from('rider_applications').select('*');
 
-  if (filters.status) {
-    query = query.eq('status', filters.status);
-  }
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
 
-  if (filters.user_id) {
-    query = query.eq('user_id', filters.user_id);
-  }
+    if (filters.user_id) {
+      query = query.eq('user_id', filters.user_id);
+    }
 
-  const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('[Supabase] Error getting rider applications:', error);
+    if (error) {
+      console.error('[Supabase] Error getting rider applications:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error('[Supabase] getRiderApplications catch:', err.message);
     return [];
   }
+}
 
-  return data;
+/**
+ * Delete a rider application
+ */
+async function deleteRiderApplication(applicationId) {
+  try {
+    const { data, error } = await requireSupabase()
+      .from('rider_applications')
+      .delete()
+      .eq('id', applicationId);
+
+    if (error) {
+      console.error('[Supabase] Error deleting rider application:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('[Supabase] deleteRiderApplication catch:', err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 /**
@@ -452,6 +525,28 @@ async function getAvailableRides() {
 }
 
 /**
+ * Get all rides (for admin dashboard)
+ */
+async function getAllRides(limit = 100) {
+  try {
+    const { data, error } = await requireSupabase()
+      .from('rides')
+      .select('*')
+      .order('requested_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[Supabase] Error getting all rides:', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('[Supabase] getAllRides catch:', err.message);
+    return [];
+  }
+}
+
+/**
  * Get available riders near a location
  */
 async function getAvailableRiders(lat = null, lng = null, radiusKm = 5) {
@@ -584,28 +679,62 @@ async function approveRiderApplication(applicationId) {
   }
 
   // Update application status
+  const updatePayload = {
+    status: 'approved',
+    reviewed_at: new Date().toISOString()
+  };
+
   const { data: updatedApp, error: updateError } = await requireSupabase()
     .from('rider_applications')
-    .update({
-      status: 'approved',
-      reviewed_at: new Date().toISOString(),
-      reviewed_by: 'admin'
-    })
+    .update(updatePayload)
     .eq('id', applicationId)
     .select()
     .single();
 
   if (updateError) {
     console.error('[Supabase] Error approving application:', updateError);
-    return { success: false, error: 'Failed to approve application' };
+    return { success: false, error: 'Failed to approve application: ' + updateError.message };
   }
 
-  // Update user status to active
-  if (application.user_id) {
-    await requireSupabase()
-      .from('users')
-      .update({ status: 'active' })
-      .eq('id', application.user_id);
+  // Update or create rider account so rider can log in
+  try {
+    let riderUserId = application.user_id;
+    if (!riderUserId) {
+      let existingUser = await findUserByPhone(application.phone, 'rider');
+      if (!existingUser) {
+        existingUser = await findUserByPhone(application.phone, 'passenger');
+      }
+      if (existingUser) {
+        riderUserId = existingUser.id;
+      } else {
+        const createRes = await createUser({
+          phone: application.phone,
+          firstName: application.first_name,
+          lastName: application.last_name,
+          fullName: `${application.first_name || ''} ${application.last_name || ''}`.trim(),
+          email: application.email,
+          role: 'rider'
+        });
+        if (createRes?.id) {
+          riderUserId = createRes.id;
+        }
+      }
+      if (riderUserId) {
+        await requireSupabase()
+          .from('rider_applications')
+          .update({ user_id: riderUserId })
+          .eq('id', applicationId);
+      }
+    }
+
+    if (riderUserId) {
+      await requireSupabase()
+        .from('users')
+        .update({ status: 'active', role: 'rider' })
+        .eq('id', riderUserId);
+    }
+  } catch (userErr) {
+    console.warn('[Supabase] Warning updating user account on application approval:', userErr.message);
   }
 
   return { success: true, application: updatedApp };
@@ -632,8 +761,7 @@ async function rejectRiderApplication(applicationId, reason) {
     .update({
       status: 'rejected',
       rejection_reason: reason || null,
-      reviewed_at: new Date().toISOString(),
-      reviewed_by: 'admin'
+      reviewed_at: new Date().toISOString()
     })
     .eq('id', applicationId)
     .select()
@@ -656,21 +784,160 @@ async function rejectRiderApplication(applicationId, reason) {
 }
 
 /**
- * Get approved riders
+ * Check latest rider application status for a given phone
+ */
+async function getRiderApplicationStatus(phone) {
+  try {
+    if (!phone) return null;
+    let norm = phone;
+    try {
+      const { normalizePhone } = require('../utils/phone');
+      norm = normalizePhone(phone);
+    } catch (_) {}
+
+    const { data, error } = await requireSupabase()
+      .from('rider_applications')
+      .select('*')
+      .eq('phone', norm)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (data && data.length > 0) return data[0];
+
+    // Try alternate phone representation (with/without leading zero or +233)
+    const alt = phone.startsWith('+233') ? '0' + phone.slice(4) : (phone.startsWith('0') ? '+233' + phone.slice(1) : phone);
+    const { data: dataAlt } = await requireSupabase()
+      .from('rider_applications')
+      .select('*')
+      .eq('phone', alt)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (dataAlt && dataAlt.length > 0) return dataAlt[0];
+    return null;
+  } catch (err) {
+    console.warn('[Supabase] Error in getRiderApplicationStatus:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Get approved riders with vehicle details and uploaded documents
  */
 async function getApprovedRiders() {
-  const { data, error } = await requireSupabase()
-    .from('users')
-    .select('*')
-    .eq('role', 'rider')
-    .eq('status', 'active');
+  try {
+    const { data: users, error: userError } = await requireSupabase()
+      .from('users')
+      .select('*')
+      .eq('role', 'rider')
+      .neq('status', 'deleted');
 
-  if (error) {
-    console.error('[Supabase] Error getting approved riders:', error);
+    const { data: apps, error: appError } = await requireSupabase()
+      .from('rider_applications')
+      .select('*')
+      .in('status', ['approved', 'suspended']);
+
+    const appMap = new Map();
+    if (apps && Array.isArray(apps)) {
+      for (const app of apps) {
+        let parsedDocs = [];
+        if (app.address && app.address.includes('__METADATA__:')) {
+          try {
+            const meta = JSON.parse(app.address.split('__METADATA__:')[1].trim());
+            if (meta.documents) parsedDocs = meta.documents;
+          } catch (_) {}
+        }
+        app.documents = parsedDocs;
+        if (app.phone) appMap.set(app.phone, app);
+        if (app.user_id) appMap.set(app.user_id, app);
+      }
+    }
+
+    const ridersList = [];
+    const processedPhones = new Set();
+
+    if (users && Array.isArray(users)) {
+      for (const u of users) {
+        const matchingApp = appMap.get(u.phone) || appMap.get(u.id);
+        if (u.phone) processedPhones.add(u.phone);
+
+        const riderStatus = (u.status === 'suspended' || matchingApp?.status === 'suspended') ? 'suspended' : 'active';
+        const isAvailable = riderStatus === 'suspended' ? false : (u.is_available ?? true);
+
+        const riderObj = {
+          id: u.id,
+          user_id: u.id,
+          fname: u.first_name || matchingApp?.first_name || 'Rider',
+          lname: u.last_name || matchingApp?.last_name || '',
+          phone: u.phone || matchingApp?.phone || '',
+          email: u.email || matchingApp?.email || '',
+          role: 'rider',
+          status: riderStatus,
+          is_available: isAvailable,
+          on_trip: false,
+          rating: 4.9,
+          trips_completed: 0,
+          total_earnings: 0,
+          vehicle_type: matchingApp?.vehicle_type || 'Tricycle',
+          vehicle_make: matchingApp?.vehicle_make || '',
+          vehicle_model: matchingApp?.vehicle_model || '',
+          vehicle_year: matchingApp?.vehicle_year || '',
+          vehicle_color: matchingApp?.vehicle_color || '',
+          vehicle_plate: matchingApp?.license_plate || matchingApp?.vehicle_plate || '—',
+          driver_license_url: matchingApp?.driver_license_url || null,
+          vehicle_registration_url: matchingApp?.vehicle_registration_url || null,
+          ghana_card_url: matchingApp?.ghana_card_url || null,
+          insurance_url: matchingApp?.insurance_url || null,
+          passport_photo_url: matchingApp?.passport_photo_url || null,
+          documents: matchingApp?.documents || [],
+          joined: u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : 'Recently'
+        };
+        ridersList.push(riderObj);
+      }
+    }
+
+    // Also include any approved applications that don't have a users record yet
+    if (apps && Array.isArray(apps)) {
+      for (const app of apps) {
+        if (app.phone && !processedPhones.has(app.phone)) {
+          processedPhones.add(app.phone);
+          const appStatus = app.status === 'suspended' ? 'suspended' : 'active';
+          ridersList.push({
+            id: app.user_id || app.id,
+            fname: app.first_name || 'Rider',
+            lname: app.last_name || '',
+            phone: app.phone || '',
+            email: app.email || '',
+            role: 'rider',
+            status: appStatus,
+            is_available: appStatus === 'suspended' ? false : true,
+            on_trip: false,
+            rating: 5.0,
+            trips_completed: 0,
+            total_earnings: 0,
+            vehicle_type: app.vehicle_type || 'Tricycle',
+            vehicle_make: app.vehicle_make || '',
+            vehicle_model: app.vehicle_model || '',
+            vehicle_year: app.vehicle_year || '',
+            vehicle_color: app.vehicle_color || '',
+            vehicle_plate: app.license_plate || app.vehicle_plate || '—',
+            driver_license_url: app.driver_license_url || null,
+            vehicle_registration_url: app.vehicle_registration_url || null,
+            ghana_card_url: app.ghana_card_url || null,
+            insurance_url: app.insurance_url || null,
+            passport_photo_url: app.passport_photo_url || null,
+            documents: app.documents || [],
+            joined: app.created_at ? new Date(app.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : 'Recently'
+          });
+        }
+      }
+    }
+
+    return ridersList;
+  } catch (err) {
+    console.error('[Supabase] Error in getApprovedRiders:', err);
     return [];
   }
-
-  return data;
 }
 
 /**
@@ -689,6 +956,131 @@ async function getPendingRiders() {
   }
 
   return data;
+}
+
+/**
+ * Suspend a rider account
+ */
+async function suspendRider(riderId, reason = 'Suspended by admin') {
+  try {
+    const supabase = requireSupabase();
+    let phone = null;
+    let riderName = 'Rider';
+
+    const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
+    if (user) {
+      phone = user.phone;
+      riderName = user.first_name || riderName;
+      await supabase.from('users').update({ status: 'suspended', updated_at: new Date().toISOString() }).eq('id', riderId);
+    }
+
+    const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
+    if (app) {
+      if (!phone) phone = app.phone;
+      if (riderName === 'Rider') riderName = app.first_name || riderName;
+      await supabase.from('rider_applications').update({ status: 'suspended', rejection_reason: reason, updated_at: new Date().toISOString() }).eq('id', app.id);
+    }
+
+    if (phone) {
+      await supabase.from('users').update({ status: 'suspended', updated_at: new Date().toISOString() }).eq('phone', phone);
+      await supabase.from('rider_applications').update({ status: 'suspended', rejection_reason: reason, updated_at: new Date().toISOString() }).eq('phone', phone);
+    }
+
+    return { success: true, message: 'Rider suspended successfully', status: 'suspended', phone, riderName };
+  } catch (err) {
+    console.error('[Supabase] Error suspending rider:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Reactivate / Unsuspend a rider account
+ */
+async function unsuspendRider(riderId) {
+  try {
+    const supabase = requireSupabase();
+    let phone = null;
+    let riderName = 'Rider';
+
+    const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
+    if (user) {
+      phone = user.phone;
+      riderName = user.first_name || riderName;
+      await supabase.from('users').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', riderId);
+    }
+
+    const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
+    if (app) {
+      if (!phone) phone = app.phone;
+      if (riderName === 'Rider') riderName = app.first_name || riderName;
+      await supabase.from('rider_applications').update({ status: 'approved', rejection_reason: null, updated_at: new Date().toISOString() }).eq('id', app.id);
+    }
+
+    if (phone) {
+      await supabase.from('users').update({ status: 'active', updated_at: new Date().toISOString() }).eq('phone', phone);
+      await supabase.from('rider_applications').update({ status: 'approved', rejection_reason: null, updated_at: new Date().toISOString() }).eq('phone', phone);
+    }
+
+    return { success: true, message: 'Rider account reactivated successfully', status: 'active', phone, riderName };
+  } catch (err) {
+    console.error('[Supabase] Error unsuspending rider:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Permanently remove / delete a rider account
+ */
+async function deleteRider(riderId) {
+  try {
+    const supabase = requireSupabase();
+    let phone = null;
+
+    const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
+    if (user) {
+      phone = user.phone;
+      await supabase.from('users').delete().eq('id', riderId);
+    }
+
+    const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
+    if (app) {
+      if (!phone) phone = app.phone;
+      await supabase.from('rider_applications').delete().eq('id', app.id);
+    }
+
+    if (phone) {
+      await supabase.from('users').delete().eq('phone', phone).eq('role', 'rider');
+      await supabase.from('rider_applications').delete().eq('phone', phone);
+    }
+
+    return { success: true, message: 'Rider account removed successfully' };
+  } catch (err) {
+    console.error('[Supabase] Error deleting rider:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Get registered passengers
+ */
+async function getRegisteredPassengers() {
+  try {
+    const { data, error } = await requireSupabase()
+      .from('users')
+      .select('*')
+      .eq('role', 'passenger')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[Supabase] Error getting registered passengers:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error('[Supabase] getRegisteredPassengers catch:', err.message);
+    return [];
+  }
 }
 
 // ─── NOTIFICATION OPERATIONS ───
@@ -803,14 +1195,21 @@ module.exports = {
   // Rider application operations
   createRiderApplication,
   getRiderApplications,
+  getRiderApplicationStatus,
   approveRiderApplication,
   rejectRiderApplication,
+  deleteRiderApplication,
   getApprovedRiders,
   getPendingRiders,
+  getRegisteredPassengers,
+  suspendRider,
+  unsuspendRider,
+  deleteRider,
 
   // Ride operations
   createRide,
   getRideById,
+  getAllRides,
   updateRideStatus,
   getPassengerRides,
   getRiderRides,
