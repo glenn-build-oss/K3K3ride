@@ -188,11 +188,11 @@ async function storeOTP(phone, code, purpose, expiryMinutes = 5) {
 
   if (error) {
     console.error('[Supabase] Error storing OTP:', error);
-    return null;
+    return { error: error.message || 'Failed to store OTP in database' };
   }
 
   console.log(`[Supabase] Stored OTP for ${phone}: ${code} (expires: ${expiresAt})`);
-  return data;
+  return { data };
 }
 
 /**
