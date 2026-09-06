@@ -100,12 +100,7 @@ router.post('/passenger/send-otp', async (req, res) => {
 
     // Generate 6-digit OTP
     const otpCode = generateOTP();
-    const storeResult = 
-    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, '');
-    if (storeResult && storeResult.error) {
-      console.error([Auth] Database error storing OTP: );
-      return res.status(500).json({ success: false, error: 'Failed to generate verification code. Please check server database.' });
-    }
+    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, 'login');
     if (storeResult && storeResult.error) {
       console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
       return res.status(500).json({ success: false, error: 'Failed to generate verification code. Please check server database.' });
@@ -274,10 +269,9 @@ router.post('/passenger/register', async (req, res) => {
 
     // Generate OTP
     const otpCode = generateOTP();
-    
-    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, '');
+    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, 'signup');
     if (storeResult && storeResult.error) {
-      console.error([Auth] Database error storing OTP: );
+      console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
       return res.status(500).json({ success: false, error: 'Failed to generate verification code. Please check server database.' });
     }
 
@@ -334,10 +328,9 @@ router.post('/rider/send-otp', async (req, res) => {
     }
 
     const otpCode = generateOTP();
-    
-    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, '');
+    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, 'login');
     if (storeResult && storeResult.error) {
-      console.error([Auth] Database error storing OTP: );
+      console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
       return res.status(500).json({ success: false, error: 'Failed to generate verification code. Please check server database.' });
     }
 
@@ -579,10 +572,9 @@ router.post('/rider/register', async (req, res) => {
     });
 
     const otpCode = generateOTP();
-    
-    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, '');
+    const storeResult = await dbStoreOTP(normalizedPhone, otpCode, 'signup');
     if (storeResult && storeResult.error) {
-      console.error([Auth] Database error storing OTP: );
+      console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
       return res.status(500).json({ success: false, error: 'Failed to generate verification code. Please check server database.' });
     }
 
@@ -644,10 +636,9 @@ router.post('/admin/login', async (req, res) => {
 
     // Generate OTP for 2FA
     const otpCode = generateOTP();
-    
-    const storeResult = await dbStoreOTP(admin.phone, otpCode, '');
+    const storeResult = await dbStoreOTP(admin.phone, otpCode, 'verify');
     if (storeResult && storeResult.error) {
-      console.error([Auth] Database error storing OTP: );
+      console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
       return res.status(500).json({ success: false, error: 'Failed to generate verification code. Please check server database.' });
     }
 
