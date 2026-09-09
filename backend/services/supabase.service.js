@@ -122,16 +122,30 @@ async function createUser(userData) {
   return data;
 }
 
+const ALLOWED_USER_COLUMNS = new Set([
+  'phone', 'email', 'first_name', 'last_name', 'full_name',
+  'role', 'status', 'password_hash', 'avatar_url', 'last_login'
+]);
+
 /**
  * Update user
  */
 async function updateUser(userId, updates) {
+  const safeUpdates = {
+    updated_at: new Date().toISOString()
+  };
+
+  if (updates && typeof updates === 'object') {
+    for (const [key, value] of Object.entries(updates)) {
+      if (ALLOWED_USER_COLUMNS.has(key)) {
+        safeUpdates[key] = value;
+      }
+    }
+  }
+
   const { data, error } = await requireSupabase()
     .from('users')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString()
-    })
+    .update(safeUpdates)
     .eq('id', userId)
     .select()
     .single();

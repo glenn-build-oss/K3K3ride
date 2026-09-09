@@ -79,6 +79,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/trips', tripsRoutes);
 
 // Compatibility aliases for legacy and direct frontend calls
+app.use('/api/users', authRoutes);
+app.use('/users', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api', adminRoutes);
 app.use('/admin', adminRoutes);
 app.use('/trips', tripsRoutes);

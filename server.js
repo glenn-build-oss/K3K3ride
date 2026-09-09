@@ -19,13 +19,15 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
-  // Proxy API, trips, applications, riders, and admin non-static requests to backend server
+  // Proxy API, trips, applications, riders, users, auth, and admin non-static requests to backend server
   const isBackendRoute = 
     req.url.startsWith('/api/') || req.url === '/api' ||
     req.url.startsWith('/trips') ||
     req.url.startsWith('/applications') ||
     req.url.startsWith('/riders') ||
     req.url.startsWith('/passengers') ||
+    req.url.startsWith('/users') ||
+    req.url.startsWith('/auth') ||
     req.url.startsWith('/uploads') ||
     (req.url.startsWith('/admin/') && !req.url.match(/\.(html|js|css|png|jpg|ico|svg|webmanifest)(\?.*)?$/i));
 

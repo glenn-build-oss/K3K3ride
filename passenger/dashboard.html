@@ -5362,7 +5362,7 @@
      JAVASCRIPT
 ═══════════════════════════════════════ -->
   <script>
-    const API = '';
+    const API = '/api';
 
     /* ─── State ─── */
     let currentSection = 'home';
@@ -5687,9 +5687,10 @@
           const headers = { 'Content-Type': 'application/json' };
           const token = getAuthToken();
           if (token) headers['Authorization'] = `Bearer ${token}`;
-          const res = await fetch(`${API}/users/${userId}`, { headers });
+          const res = await fetch(`${API}/auth/users/${userId}`, { headers });
           if (res.ok) {
-            userData = await res.json();
+            const json = await res.json();
+            userData = json.user || json;
           }
         } catch (err) {
           console.warn('Could not fetch user from API, using session data:', err.message);
@@ -5701,8 +5702,8 @@
         const s = getStoredSession();
         if (s) {
           userData = {
-            fname: s.fname || s.first_name || s.name || s.fullname?.split(' ')[0] || 'Friend',
-            lname: s.lname || s.last_name || s.fullname?.split(' ').slice(1).join(' ') || '',
+            fname: s.fname || s.first_name || (s.name && s.name !== 'Passenger' ? s.name.split(' ')[0] : '') || '',
+            lname: s.lname || s.last_name || (s.name && s.name !== 'Passenger' ? s.name.split(' ').slice(1).join(' ') : '') || '',
             email: s.email || '',
             phone: s.phone || '',
             id: s.id || s.user_id || null,
@@ -5710,38 +5711,67 @@
         }
       }
 
-      // Auth suspended — always provide a default user so dashboard is accessible
       if (!userData) {
-        userData = { fname: 'Passenger', lname: '', email: '', phone: '' };
+        userData = { fname: '', lname: '', email: '', phone: '' };
+      }
+
+      // If user data has a real name, persist it to storage
+      if (userData.fname || userData.first_name) {
+        try {
+          const currentSession = getStoredSession() || {};
+          const fName = userData.fname || userData.first_name || '';
+          const lName = userData.lname || userData.last_name || '';
+          const fullName = userData.full_name || `${fName} ${lName}`.trim() || fName;
+          const merged = {
+            ...currentSession,
+            ...userData,
+            fname: fName,
+            lname: lName,
+            name: fullName
+          };
+          sessionStorage.setItem('k3k3_user', JSON.stringify(merged));
+          localStorage.setItem('k3k3_user', JSON.stringify(merged));
+          if (fName) localStorage.setItem('k3k3_user_name', fName);
+        } catch (_) {}
       }
 
       applyUserToUI(userData);
     }
 
     function applyUserToUI(u) {
-      const fn = u.fname || u.first_name || u.name || 'Friend';
-      const ln = u.lname || u.last_name || '';
+      let rawFn = (u.fname || u.first_name || '').trim();
+      let rawLn = (u.lname || u.last_name || '').trim();
+      if (!rawFn && u.name && u.name !== 'Passenger') {
+        const parts = u.name.trim().split(' ');
+        rawFn = parts[0] || '';
+        rawLn = parts.slice(1).join(' ') || '';
+      }
+
+      const fn = rawFn;
+      const ln = rawLn;
       const email = u.email || '';
       const phone = u.phone || '';
-      const dn = fn + (ln ? ' ' + ln : '');
-      const initials = fn.charAt(0).toUpperCase();
+      const fallbackDisplay = phone ? `Member (${phone.slice(-4)})` : 'Member';
+      const displayFirstName = fn || fallbackDisplay;
+      const dn = (fn && ln) ? `${fn} ${ln}` : (fn || fallbackDisplay);
+      const initials = (fn ? fn.charAt(0) : (phone ? phone.slice(-2) : 'M')).toUpperCase();
 
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
       const setV = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
 
-      set('heroName', fn);
-      set('drawerName', fn);
+      set('heroName', displayFirstName);
+      set('drawerName', dn);
       set('drawerAvatar', initials);
       set('acctAvatarBig', initials);
       set('acctName', dn);
-      set('acctEmail', email || 'K3K3 Passenger Member');
+      set('acctEmail', email || (phone ? `Phone: ${phone}` : 'K3K3 Passenger Member'));
       set('profileAvatarBig', initials);
       set('profileDisplayName', dn);
 
       const ha = document.getElementById('headerUserAvatar');
       const hn = document.getElementById('headerUserName');
       if (ha) ha.textContent = initials;
-      if (hn) hn.textContent = fn;
+      if (hn) hn.textContent = displayFirstName;
 
       const ppd = document.getElementById('profilePhoneDisplay');
       const ped = document.getElementById('profileEmailDisplay');
@@ -5798,15 +5828,28 @@
           };
           let res = await fetch(`${API}/auth/passenger/profile`, { method: 'PUT', headers, body: JSON.stringify(body) });
           if (res.ok) {
-            const updated = await res.json();
+            const resp = await res.json();
+            const updated = resp.user || resp;
             // Update session with latest data
-            const s = getStoredSession();
-            if (s) {
-              Object.assign(s, updated);
-              try { sessionStorage.setItem('k3k3_user', JSON.stringify(s)); } catch (e) { }
-            }
+            const s = getStoredSession() || {};
+            Object.assign(s, updated, { fname: fn, lname: ln, full_name: `${fn} ${ln}`.trim(), emergency_name: en, emergency_phone: ep });
+            try {
+              sessionStorage.setItem('k3k3_user', JSON.stringify(s));
+              localStorage.setItem('k3k3_user', JSON.stringify(s));
+              localStorage.setItem('k3k3_user_name', fn);
+            } catch (e) { }
+          } else {
+            const errJson = await res.json().catch(() => ({}));
+            showToast(errJson.error || 'Failed to save profile', 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
+            return;
           }
-        } catch (err) { console.warn('Profile API save note:', err.message); }
+        } catch (err) {
+          console.warn('Profile API save note:', err.message);
+          showToast('Cannot connect to server. Please try again.', 'error');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
+          return;
+        }
       }
 
       // Refresh UI from API
@@ -6734,112 +6777,188 @@
     /* ══════════════════════════════════════════
        Render Functions
     ══════════════════════════════════════════ */
-    function renderDrivers() {
+    async function renderDrivers() {
       const el = document.getElementById('driversList');
       if (!el) return;
-      el.innerHTML = DRIVERS.map(d => `
-    <div class="driver-row" onclick="openBookModal(null)">
-      <div class="driver-avatar">${d.name.charAt(0)}</div>
-      <div class="driver-info">
-        <div class="driver-name">${d.name}</div>
-        <div class="driver-vehicle">${d.vehicle}</div>
-      </div>
-      <div class="driver-meta">
-        <div class="driver-eta"><i class="fas fa-clock" style="font-size:.7rem"></i> ${d.eta}</div>
-        <div class="driver-rating"><i class="fas fa-star" style="color:var(--yellow);font-size:.7rem"></i> ${d.rating}</div>
-      </div>
-    </div>`).join('');
+
+      try {
+        const res = await fetch(`${API}/trips/riders/available?radius=15`);
+        if (res.ok) {
+          const data = await res.json();
+          const riders = data.riders || (Array.isArray(data) ? data : []);
+          if (riders.length > 0) {
+            el.innerHTML = riders.map(d => `
+              <div class="driver-row" onclick="openBookModal(null)">
+                <div class="driver-avatar">${(d.first_name || d.name || 'R').charAt(0).toUpperCase()}</div>
+                <div class="driver-info">
+                  <div class="driver-name">${d.first_name || d.name || 'Available Rider'} ${d.last_name || ''}</div>
+                  <div class="driver-vehicle">${d.vehicle_make || d.vehicle || 'K3K3 Tricycle'} · ${d.license_plate || d.vehicle_plate || 'Active'}</div>
+                </div>
+                <div class="driver-meta">
+                  <div class="driver-eta"><i class="fas fa-clock" style="font-size:.7rem"></i> ${d.eta || '3 min'}</div>
+                  <div class="driver-rating"><i class="fas fa-star" style="color:var(--yellow);font-size:.7rem"></i> ${d.rating || '4.9'}</div>
+                </div>
+              </div>`).join('');
+            return;
+          }
+        }
+      } catch (_) {}
+
+      // Clean live status when no active riders in immediate radius
+      el.innerHTML = `
+        <div style="padding:28px 16px;text-align:center;color:var(--text-2);background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border)">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--yellow-lt);color:var(--yellow-dk);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.2rem">
+            <i class="fas fa-motorcycle"></i>
+          </div>
+          <div style="font-weight:700;color:var(--text);font-size:0.95rem;margin-bottom:4px">K3K3 Campus Network Active</div>
+          <div style="font-size:0.82rem;color:var(--text-2);max-width:280px;margin:0 auto 14px">Available riders will be matched automatically when you request a ride.</div>
+          <button onclick="openBookModal(null)" style="background:var(--yellow);color:var(--black);font-weight:700;border:none;padding:8px 18px;border-radius:var(--r-full);cursor:pointer;font-size:0.82rem;display:inline-flex;align-items:center;gap:6px">
+            <i class="fas fa-bolt"></i> Request Ride Now
+          </button>
+        </div>`;
     }
+
     async function renderTrips() {
       const privOff = sessionStorage.getItem('k3k3_privacyTripHistory') === 'false';
       const cEl = document.getElementById('completedRides');
       const xEl = document.getElementById('cancelledRides');
       if (privOff) {
         if (cEl) cEl.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
+        if (xEl) xEl.innerHTML = '';
         return;
       }
-      
-      let completed = TRIPS.completed;
-      let cancelled = TRIPS.cancelled;
-      
+
+      let completed = [];
+      let cancelled = [];
+
       const userId = getUserId();
       if (userId) {
         try {
           const res = await fetch(`${API}/trips/passenger/${userId}`);
           if (res.ok) {
             const data = await res.json();
-            if (data.success && data.rides) {
-              completed = data.rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
-                from: r.pickup_label || 'Unknown',
-                to: r.dest_label || 'Unknown',
-                date: new Date(r.created_at).toLocaleDateString(),
-                time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                driver: r.driver_name || 'Assigned Driver',
-                amount: `GH₵ ${r.fare_estimate || '0.00'}`
-              }));
-              cancelled = data.rides.filter(r => r.status === 'cancelled').map(r => ({
-                from: r.pickup_label || 'Unknown',
-                to: r.dest_label || 'Unknown',
-                date: new Date(r.created_at).toLocaleDateString(),
-                time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                reason: 'Cancelled'
-              }));
-            }
+            const rides = data.rides || (Array.isArray(data) ? data : []);
+            completed = rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
+              from: r.pickup_address || r.pickup_label || 'Pickup Location',
+              to: r.dropoff_address || r.dest_label || 'Destination',
+              date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent',
+              time: r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              driver: r.driver_name || r.rider_name || 'K3K3 Rider',
+              amount: `GH₵ ${(parseFloat(r.estimated_fare || r.fare_estimate || 0)).toFixed(2)}`
+            }));
+            cancelled = rides.filter(r => r.status === 'cancelled').map(r => ({
+              from: r.pickup_address || r.pickup_label || 'Pickup Location',
+              to: r.dropoff_address || r.dest_label || 'Destination',
+              date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent',
+              time: r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              reason: r.cancel_reason || 'Cancelled'
+            }));
           }
         } catch (err) {
-          console.warn('Could not fetch real trips, falling back to mock:', err);
+          console.warn('Could not fetch real trips:', err.message);
         }
       }
 
+      // NO mock fallback! If 0 trips, display clean empty state
       if (cEl) {
         if (completed.length === 0) {
-           cEl.innerHTML = '<div class="empty-state"><i class="fas fa-route"></i><p>No completed rides yet.</p></div>';
+          cEl.innerHTML = `
+            <div class="empty-state" style="padding:40px 16px;text-align:center">
+              <div style="width:52px;height:52px;border-radius:50%;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem">
+                <i class="fas fa-route"></i>
+              </div>
+              <p style="font-weight:700;color:var(--text);margin-bottom:4px">No completed rides yet</p>
+              <p style="font-size:0.85rem;color:var(--text-2);margin-bottom:14px">Your completed trips and receipts will appear here.</p>
+              <button onclick="openBookModal(null)" style="background:var(--yellow);color:var(--black);font-weight:700;border:none;padding:8px 18px;border-radius:var(--r-full);cursor:pointer;font-size:0.82rem">
+                Book a Ride
+              </button>
+            </div>`;
         } else {
-           cEl.innerHTML = completed.map(tr => `
-    <div class="trip-card">
-      <div class="trip-icon completed"><i class="fas fa-check"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${tr.from} → ${tr.to}</div>
-        <div class="trip-meta">${tr.date} · ${tr.time} · ${tr.driver}</div>
-      </div>
-      <div class="trip-right">
-        <div class="trip-amount">${tr.amount}</div>
-        <div class="trip-status completed">Completed</div>
-      </div>
-    </div>`).join('');
+          cEl.innerHTML = completed.map(tr => `
+            <div class="trip-card">
+              <div class="trip-icon completed"><i class="fas fa-check"></i></div>
+              <div class="trip-details">
+                <div class="trip-route">${tr.from} → ${tr.to}</div>
+                <div class="trip-meta">${tr.date} ${tr.time ? '· ' + tr.time : ''} · ${tr.driver}</div>
+              </div>
+              <div class="trip-right">
+                <div class="trip-amount">${tr.amount}</div>
+                <div class="trip-status completed">Completed</div>
+              </div>
+            </div>`).join('');
         }
       }
-      
+
       if (xEl) {
         if (cancelled.length === 0) {
-           xEl.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No cancelled rides.</p></div>';
+          xEl.innerHTML = `
+            <div class="empty-state" style="padding:32px 16px;text-align:center">
+              <i class="fas fa-check-circle" style="font-size:1.4rem;color:var(--green);margin-bottom:8px"></i>
+              <p style="font-weight:600;color:var(--text);font-size:0.9rem">No cancelled rides</p>
+            </div>`;
         } else {
-           xEl.innerHTML = cancelled.map(tr => `
-    <div class="trip-card">
-      <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${tr.from} → ${tr.to}</div>
-        <div class="trip-meta">${tr.date} · ${tr.time}</div>
-        <div class="trip-meta" style="color:var(--red)">${tr.reason}</div>
-      </div>
-      <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
-    </div>`).join('');
+          xEl.innerHTML = cancelled.map(tr => `
+            <div class="trip-card">
+              <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
+              <div class="trip-details">
+                <div class="trip-route">${tr.from} → ${tr.to}</div>
+                <div class="trip-meta">${tr.date} ${tr.time ? '· ' + tr.time : ''}</div>
+                <div class="trip-meta" style="color:var(--red)">${tr.reason}</div>
+              </div>
+              <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
+            </div>`).join('');
         }
       }
+
+      const st = document.getElementById('statRides');
+      if (st) st.textContent = completed.length;
     }
-    function renderPayments() {
+
+    async function renderPayments() {
       const el = document.getElementById('paymentList');
       if (!el) return;
-      el.innerHTML = PAYMENTS.map(p => `
-    <div class="trip-card">
-      <div class="trip-icon completed"><i class="fas fa-receipt"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${p.label}</div>
-        <div class="trip-meta">${p.date} · ${p.time}</div>
-      </div>
-      <div class="trip-right"><div class="trip-amount">${p.amount}</div></div>
-    </div>`).join('');
+
+      const userId = getUserId();
+      let payments = [];
+
+      if (userId) {
+        try {
+          const res = await fetch(`${API}/trips/passenger/${userId}`);
+          if (res.ok) {
+            const data = await res.json();
+            const rides = data.rides || (Array.isArray(data) ? data : []);
+            payments = rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
+              label: `Ride — ${r.pickup_address || r.pickup_label || 'Pickup'} → ${r.dropoff_address || r.dest_label || 'Destination'}`,
+              date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent',
+              time: r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              amount: `GH₵ ${(parseFloat(r.estimated_fare || r.fare_estimate || 0)).toFixed(2)}`
+            }));
+          }
+        } catch (_) {}
+      }
+
+      if (payments.length === 0) {
+        el.innerHTML = `
+          <div class="empty-state" style="padding:40px 16px;text-align:center">
+            <div style="width:52px;height:52px;border-radius:50%;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem">
+              <i class="fas fa-receipt"></i>
+            </div>
+            <p style="font-weight:700;color:var(--text);margin-bottom:4px">No transactions yet</p>
+            <p style="font-size:0.85rem;color:var(--text-2)">Payment receipts for your completed rides will appear here.</p>
+          </div>`;
+      } else {
+        el.innerHTML = payments.map(p => `
+          <div class="trip-card">
+            <div class="trip-icon completed"><i class="fas fa-receipt"></i></div>
+            <div class="trip-details">
+              <div class="trip-route">${p.label}</div>
+              <div class="trip-meta">${p.date} ${p.time ? '· ' + p.time : ''}</div>
+            </div>
+            <div class="trip-right"><div class="trip-amount">${p.amount}</div></div>
+          </div>`).join('');
+      }
     }
+
     function renderNotifications() {
       const ridesOn = sessionStorage.getItem('k3k3_notifRideUpdates') !== 'false';
       const driversOn = sessionStorage.getItem('k3k3_notifDriverAlerts') !== 'false';
@@ -6849,36 +6968,23 @@
         if (!ridesOn) {
           el1.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Ride update notifications are disabled in Settings.</p></div>';
         } else {
-          el1.innerHTML = NOTIFS.rides.map(n => `
-        <div class="notif-item ${n.read ? '' : 'unread'}">
-          <div class="notif-icon"><i class="fas fa-motorcycle"></i></div>
-          <div class="notif-body">
-            <div class="notif-title">${n.title}</div>
-            <div class="notif-desc">${n.desc}</div>
-            <div class="notif-time">${n.time}</div>
-          </div>
-        </div>`).join('');
+          el1.innerHTML = '<div class="empty-state" style="padding:32px 16px;text-align:center"><i class="fas fa-bell-slash" style="font-size:1.4rem;color:var(--muted);margin-bottom:8px"></i><p style="font-weight:600;color:var(--text);font-size:0.9rem">No ride updates right now</p><p style="font-size:0.8rem;color:var(--text-2);margin-top:4px">Updates will appear when you have an active ride.</p></div>';
         }
       }
       if (el2) {
         if (!driversOn) {
           el2.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Driver alert notifications are disabled in Settings.</p></div>';
         } else {
-          el2.innerHTML = NOTIFS.drivers.map(n => `
-        <div class="notif-item ${n.read ? '' : 'unread'}">
-          <div class="notif-icon"><i class="fas fa-user-circle"></i></div>
-          <div class="notif-body">
-            <div class="notif-title">${n.title}</div>
-            <div class="notif-desc">${n.desc}</div>
-            <div class="notif-time">${n.time}</div>
-          </div>
-        </div>`).join('');
+          el2.innerHTML = '<div class="empty-state" style="padding:32px 16px;text-align:center"><i class="fas fa-user-clock" style="font-size:1.4rem;color:var(--muted);margin-bottom:8px"></i><p style="font-weight:600;color:var(--text);font-size:0.9rem">No driver alerts</p><p style="font-size:0.8rem;color:var(--text-2);margin-top:4px">Arrival alerts will show when your rider is nearby.</p></div>';
         }
       }
+      unreadCount = 0;
+      updateNotifBadge();
     }
+
     function updateStats() {
       const el = document.getElementById('statRides');
-      if (el) el.textContent = TRIPS.completed.length;
+      if (el && (!el.textContent || el.textContent === '—')) el.textContent = '0';
     }
     function markAllRead() {
       NOTIFS.rides.forEach(n => n.read = true);

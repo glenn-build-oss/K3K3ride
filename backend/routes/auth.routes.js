@@ -48,17 +48,47 @@ async function findOrCreateUser(phone, role, extraData = {}) {
   let user = await findUserByPhone(phone, role);
   
   if (user) {
+    // If user exists and extraData has name info that was missing or updated, persist it!
+    const updates = {};
+    const providedFirstName = extraData.firstName || (extraData.fullName ? extraData.fullName.split(' ')[0] : '');
+    const providedLastName = extraData.lastName || (extraData.fullName ? extraData.fullName.split(' ').slice(1).join(' ') : '');
+    const providedFullName = extraData.fullName || (providedFirstName ? `${providedFirstName} ${providedLastName}`.trim() : '');
+
+    if (providedFirstName && (!user.first_name || user.first_name.trim() === '')) {
+      updates.first_name = providedFirstName;
+    }
+    if (providedLastName && (!user.last_name || user.last_name.trim() === '')) {
+      updates.last_name = providedLastName;
+    }
+    if (providedFullName && (!user.full_name || user.full_name.trim() === '')) {
+      updates.full_name = providedFullName;
+    } else if (!user.full_name && (updates.first_name || user.first_name)) {
+      updates.full_name = `${updates.first_name || user.first_name || ''} ${updates.last_name || user.last_name || ''}`.trim();
+    }
+    if (extraData.email && (!user.email || user.email.trim() === '')) {
+      updates.email = extraData.email;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const updatedUser = await updateUser(user.id, updates);
+      if (updatedUser) user = updatedUser;
+    }
+
     return { user, isNew: false };
   }
 
   // Create new user
+  const firstName = extraData.firstName || (extraData.fullName ? extraData.fullName.split(' ')[0] : '');
+  const lastName = extraData.lastName || (extraData.fullName ? extraData.fullName.split(' ').slice(1).join(' ') : '');
+  const fullName = extraData.fullName || (firstName ? `${firstName} ${lastName}`.trim() : '');
+
   const newUser = await createUser({
     phone,
     role,
-    firstName: extraData.firstName || '',
-    lastName: extraData.lastName || '',
-    fullName: extraData.fullName || '',
-    email: extraData.email || '',
+    firstName: firstName || null,
+    lastName: lastName || null,
+    fullName: fullName || null,
+    email: extraData.email || null,
     status: role === 'rider' ? 'pending' : 'active'
   });
 
@@ -146,7 +176,7 @@ router.post('/passenger/send-otp', async (req, res) => {
  */
 router.post('/passenger/verify-otp', async (req, res) => {
   try {
-    const { phone, otp } = req.body;
+    const { phone, otp, fullName, firstName, lastName } = req.body;
 
     if (!phone || !otp) {
       return res.status(400).json({ success: false, error: 'Phone and OTP are required' });
@@ -165,6 +195,10 @@ router.post('/passenger/verify-otp', async (req, res) => {
       return res.status(400).json({ success: false, error: result.error });
     }
 
+    const providedFullName = (fullName || '').trim();
+    const providedFirstName = (firstName || (providedFullName ? providedFullName.split(' ')[0] : '')).trim();
+    const providedLastName = (lastName || (providedFullName ? providedFullName.split(' ').slice(1).join(' ') : '')).trim();
+
     // Check if user has other roles
     const allUsers = await findAllUsersByPhone(normalizedPhone);
     const passengerUser = allUsers.find(u => u.role === 'passenger');
@@ -174,21 +208,42 @@ router.post('/passenger/verify-otp', async (req, res) => {
 
     // If passenger account exists, use it for login
     if (passengerUser) {
-      await updateUserLastLogin(passengerUser.id);
-      const token = generateToken(passengerUser);
+      let activeUser = passengerUser;
+      const updates = {};
+      if (providedFirstName && (!passengerUser.first_name || passengerUser.first_name.trim() === '')) {
+        updates.first_name = providedFirstName;
+      }
+      if (providedLastName && (!passengerUser.last_name || passengerUser.last_name.trim() === '')) {
+        updates.last_name = providedLastName;
+      }
+      if (providedFullName && (!passengerUser.full_name || passengerUser.full_name.trim() === '')) {
+        updates.full_name = providedFullName;
+      } else if (!passengerUser.full_name && (updates.first_name || passengerUser.first_name)) {
+        updates.full_name = `${updates.first_name || passengerUser.first_name || ''} ${updates.last_name || passengerUser.last_name || ''}`.trim();
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const updated = await updateUser(passengerUser.id, updates);
+        if (updated) activeUser = updated;
+      }
+
+      await updateUserLastLogin(activeUser.id);
+      const token = generateToken(activeUser);
+      const computedFullName = activeUser.full_name || `${activeUser.first_name || ''} ${activeUser.last_name || ''}`.trim();
 
       return res.json({
         success: true,
         message: 'Login successful',
         token,
         user: {
-          id: passengerUser.id,
-          phone: passengerUser.phone,
-          firstName: passengerUser.first_name,
-          lastName: passengerUser.last_name,
-          email: passengerUser.email,
-          role: passengerUser.role,
-          status: passengerUser.status,
+          id: activeUser.id,
+          phone: activeUser.phone,
+          firstName: activeUser.first_name,
+          lastName: activeUser.last_name,
+          fullName: computedFullName,
+          email: activeUser.email,
+          role: activeUser.role,
+          status: activeUser.status,
           isNew: false
         }
       });
@@ -203,7 +258,11 @@ router.post('/passenger/verify-otp', async (req, res) => {
     }
 
     // Create new passenger account
-    const { user, isNew, error } = await findOrCreateUser(normalizedPhone, 'passenger');
+    const { user, isNew, error } = await findOrCreateUser(normalizedPhone, 'passenger', {
+      fullName: providedFullName,
+      firstName: providedFirstName,
+      lastName: providedLastName
+    });
     
     if (!user) {
       return res.status(400).json({ success: false, error: error || 'Failed to create user account' });
@@ -214,6 +273,7 @@ router.post('/passenger/verify-otp', async (req, res) => {
 
     // Generate JWT
     const token = generateToken(user);
+    const computedFullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim();
 
     res.json({
       success: true,
@@ -224,7 +284,8 @@ router.post('/passenger/verify-otp', async (req, res) => {
         phone: user.phone,
         firstName: user.first_name,
         lastName: user.last_name,
-        fullName: user.full_name,
+        fullName: computedFullName,
+        email: user.email,
         role: user.role,
         status: user.status,
         isNew
@@ -322,20 +383,30 @@ router.put('/passenger/profile', async (req, res) => {
       first_name: fname || '',
       last_name: lname || '',
       full_name: `${fname || ''} ${lname || ''}`.trim(),
-      email: email || '',
-      emergency_name: emergency_name || null,
-      emergency_phone: emergency_phone || null
+      email: email || ''
     };
+    if (phone) updates.phone = phone;
     
     const result = await updateUser(decoded.id, updates);
-    if (result && result.error) {
-      return res.status(400).json({ success: false, error: result.error });
+    if (!result) {
+      return res.status(500).json({ success: false, error: 'Failed to update profile in database' });
     }
     
     res.json({
       success: true,
-      message: 'Profile updated',
-      user: updates
+      message: 'Profile updated successfully',
+      user: {
+        id: result.id,
+        phone: result.phone,
+        firstName: result.first_name,
+        lastName: result.last_name,
+        fullName: result.full_name,
+        email: result.email,
+        role: result.role,
+        status: result.status,
+        emergency_name: emergency_name || null,
+        emergency_phone: emergency_phone || null
+      }
     });
   } catch (err) {
     console.error('[Auth] Error in passenger/profile update:', err);
@@ -807,7 +878,10 @@ router.get('/users/:id', async (req, res) => {
     if (error || !data) return res.status(404).json({ success: false, error: 'User not found' });
     // Strip password_hash before sending
     const { password_hash, ...safeUser } = data;
-    res.json({ success: true, user: safeUser });
+    safeUser.fname = safeUser.first_name || '';
+    safeUser.lname = safeUser.last_name || '';
+    safeUser.name = safeUser.full_name || `${safeUser.first_name || ''} ${safeUser.last_name || ''}`.trim();
+    res.json({ success: true, user: safeUser, ...safeUser });
   } catch (err) {
     console.error('[Auth] Error fetching user:', err);
     res.status(500).json({ success: false, error: 'Failed to fetch user' });

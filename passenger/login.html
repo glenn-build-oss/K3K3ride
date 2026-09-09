@@ -1151,33 +1151,41 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
+            const signupName = sessionStorage.getItem('k3k3_signup_name') || '';
+
             try {
                 const res = await fetch(`${API_BASE}/api/auth/passenger/verify-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: currentPhone, otp })
+                    body: JSON.stringify({ phone: currentPhone, otp, fullName: signupName })
                 });
                 const data = await res.json();
 
                 if (data.success) {
+                    const realFullName = data.user.fullName || (data.user.firstName ? `${data.user.firstName} ${data.user.lastName || ''}`.trim() : '') || signupName || '';
+                    const realFirstName = data.user.firstName || (realFullName ? realFullName.split(' ')[0] : '') || '';
+                    const realLastName = data.user.lastName || (realFullName ? realFullName.split(' ').slice(1).join(' ') : '') || '';
+                    const displayName = realFirstName || realFullName || data.user.phone || 'Member';
+
                     try {
                         localStorage.setItem('k3k3_user', JSON.stringify({
-                            fname: data.user.firstName || data.user.fullName || 'Passenger',
-                            lname: data.user.lastName || '',
-                            name: data.user.firstName || data.user.fullName || 'Passenger',
+                            fname: realFirstName,
+                            lname: realLastName,
+                            name: realFullName || displayName,
                             email: data.user.email || '',
                             phone: data.user.phone,
                             id: data.user.id,
                             role_type: 'passenger'
                         }));
                         localStorage.setItem('k3k3_user_type', 'passenger');
-                        localStorage.setItem('k3k3_user_name', data.user.firstName || data.user.fullName || 'Passenger');
+                        localStorage.setItem('k3k3_user_name', displayName);
                         localStorage.setItem('k3k3_token', data.token);
+                        sessionStorage.removeItem('k3k3_signup_name');
                     } catch (err) {
                         console.warn('Storage error:', err);
                     }
 
-                    showToast('Verified! Taking you to your dashboard.', 'success');
+                    showToast(`Welcome ${displayName}! Taking you to your dashboard.`, 'success');
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 900);

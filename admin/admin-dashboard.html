@@ -1432,7 +1432,7 @@ async function confirmRemoveRider(){
 
 /* ── Passengers ── */
 async function loadPassengers(){
-  let data = STUB_PASS;
+  let data = [];
   try {
     const res = await apiFetch('/passengers');
     const list = Array.isArray(res) ? res : (res?.passengers || res?.data || []);
