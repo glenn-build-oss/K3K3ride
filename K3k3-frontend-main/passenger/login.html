@@ -1140,16 +1140,17 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
             try {
-                sessionStorage.setItem('k3k3_user', JSON.stringify({
+                localStorage.setItem('k3k3_user', JSON.stringify({
                     fname: 'Passenger',
                     lname: '',
+                    name: 'Passenger',
                     email: '',
                     phone: document.getElementById('phoneInput').value,
                     id: 'guest',
                     role_type: 'passenger'
                 }));
-                sessionStorage.setItem('k3k3_user_type', 'passenger');
-                sessionStorage.setItem('k3k3_user_name', 'Passenger');
+                localStorage.setItem('k3k3_user_type', 'passenger');
+                localStorage.setItem('k3k3_user_name', 'Passenger');
             } catch (err) {
                 console.warn('Storage error:', err);
             }

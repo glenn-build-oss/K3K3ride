@@ -20,7 +20,7 @@ const { normalizePhone, maskPhone } = require('../utils/phone');
 const { generateOTP } = require('../services/otp.service');
 const { sendSMS, sendOTP: moolreSendOTP, checkSMSBalance, checkSenderIdStatus } = require('../services/moolre.service');
 const { sendAdminOTP } = require('../services/email.service');
-const { findUserByPhone, findAllUsersByPhone, findUserByEmail, createUser, updateUserLastLogin, storeOTP: dbStoreOTP, verifyOTP: dbVerifyOTP, getRiderApplicationStatus } = require('../services/supabase.service');
+const { findUserByPhone, findAllUsersByPhone, findUserByEmail, createUser, updateUser, updateUserLastLogin, storeOTP: dbStoreOTP, verifyOTP: dbVerifyOTP, getRiderApplicationStatus } = require('../services/supabase.service');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'k3k3_dev_secret';
 const JWT_EXPIRY = '24h';
@@ -303,6 +303,45 @@ router.post('/passenger/register', async (req, res) => {
   }
 });
 
+/**
+ * PUT /api/auth/passenger/profile
+ * Update passenger profile details.
+ */
+router.put('/passenger/profile', async (req, res) => {
+  try {
+    const { fname, lname, phone, email, emergency_name, emergency_phone } = req.body;
+    
+    // Extract userId from auth header
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded || !decoded.id) return res.status(401).json({ success: false, error: 'Invalid token' });
+    
+    const updates = {
+      first_name: fname || '',
+      last_name: lname || '',
+      full_name: `${fname || ''} ${lname || ''}`.trim(),
+      email: email || '',
+      emergency_name: emergency_name || null,
+      emergency_phone: emergency_phone || null
+    };
+    
+    const result = await updateUser(decoded.id, updates);
+    if (result && result.error) {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Profile updated',
+      user: updates
+    });
+  } catch (err) {
+    console.error('[Auth] Error in passenger/profile update:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
 
 // ═══════════════════════════════════════════
 //  RIDER ENDPOINTS

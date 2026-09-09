@@ -1161,17 +1161,18 @@
 
                 if (data.success) {
                     try {
-                        sessionStorage.setItem('k3k3_user', JSON.stringify({
+                        localStorage.setItem('k3k3_user', JSON.stringify({
                             fname: data.user.firstName || data.user.fullName || 'Passenger',
                             lname: data.user.lastName || '',
+                            name: data.user.firstName || data.user.fullName || 'Passenger',
                             email: data.user.email || '',
                             phone: data.user.phone,
                             id: data.user.id,
                             role_type: 'passenger'
                         }));
-                        sessionStorage.setItem('k3k3_user_type', 'passenger');
-                        sessionStorage.setItem('k3k3_user_name', data.user.firstName || data.user.fullName || 'Passenger');
-                        sessionStorage.setItem('k3k3_token', data.token);
+                        localStorage.setItem('k3k3_user_type', 'passenger');
+                        localStorage.setItem('k3k3_user_name', data.user.firstName || data.user.fullName || 'Passenger');
+                        localStorage.setItem('k3k3_token', data.token);
                     } catch (err) {
                         console.warn('Storage error:', err);
                     }

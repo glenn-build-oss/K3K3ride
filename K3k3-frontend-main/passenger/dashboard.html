@@ -5553,8 +5553,7 @@
             fname: fn, lname: ln, phone: ph, email: em,
             emergency_name: en, emergency_phone: ep
           };
-          let res = await fetch(`${API}/users/${userId}`, { method: 'PATCH', headers, body: JSON.stringify(body) });
-          if (!res.ok) res = await fetch(`${API}/users/${userId}`, { method: 'PUT', headers, body: JSON.stringify(body) });
+          let res = await fetch(`${API}/auth/passenger/profile`, { method: 'PUT', headers, body: JSON.stringify(body) });
           if (res.ok) {
             const updated = await res.json();
             // Update session with latest data
@@ -6470,7 +6469,7 @@
       </div>
     </div>`).join('');
     }
-    function renderTrips() {
+    async function renderTrips() {
       const privOff = sessionStorage.getItem('k3k3_privacyTripHistory') === 'false';
       const cEl = document.getElementById('completedRides');
       const xEl = document.getElementById('cancelledRides');
@@ -6478,7 +6477,44 @@
         if (cEl) cEl.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
         return;
       }
-      if (cEl) cEl.innerHTML = TRIPS.completed.map(tr => `
+      
+      let completed = TRIPS.completed;
+      let cancelled = TRIPS.cancelled;
+      
+      const userId = getUserId();
+      if (userId) {
+        try {
+          const res = await fetch(`${API}/trips/passenger/${userId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.rides) {
+              completed = data.rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
+                from: r.pickup_label || 'Unknown',
+                to: r.dest_label || 'Unknown',
+                date: new Date(r.created_at).toLocaleDateString(),
+                time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                driver: r.driver_name || 'Assigned Driver',
+                amount: `GH₵ ${r.fare_estimate || '0.00'}`
+              }));
+              cancelled = data.rides.filter(r => r.status === 'cancelled').map(r => ({
+                from: r.pickup_label || 'Unknown',
+                to: r.dest_label || 'Unknown',
+                date: new Date(r.created_at).toLocaleDateString(),
+                time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                reason: 'Cancelled'
+              }));
+            }
+          }
+        } catch (err) {
+          console.warn('Could not fetch real trips, falling back to mock:', err);
+        }
+      }
+
+      if (cEl) {
+        if (completed.length === 0) {
+           cEl.innerHTML = '<div class="empty-state"><i class="fas fa-route"></i><p>No completed rides yet.</p></div>';
+        } else {
+           cEl.innerHTML = completed.map(tr => `
     <div class="trip-card">
       <div class="trip-icon completed"><i class="fas fa-check"></i></div>
       <div class="trip-details">
@@ -6490,7 +6526,14 @@
         <div class="trip-status completed">Completed</div>
       </div>
     </div>`).join('');
-      if (xEl) xEl.innerHTML = TRIPS.cancelled.map(tr => `
+        }
+      }
+      
+      if (xEl) {
+        if (cancelled.length === 0) {
+           xEl.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No cancelled rides.</p></div>';
+        } else {
+           xEl.innerHTML = cancelled.map(tr => `
     <div class="trip-card">
       <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
       <div class="trip-details">
@@ -6500,6 +6543,8 @@
       </div>
       <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
     </div>`).join('');
+        }
+      }
     }
     function renderPayments() {
       const el = document.getElementById('paymentList');
@@ -7370,14 +7415,52 @@
       </div>
     </div>`).join('');
   }
-  function renderTrips() {
+  async function renderTrips() {
     const privacyOff = localStorage.getItem('k3k3_privacyTripHistory') === 'false';
+    const cEl = document.getElementById('completedRides');
+    const xEl = document.getElementById('cancelledRides');
     if (privacyOff) {
-      const el = document.getElementById('completedRides');
-      if (el) el.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
+      if (cEl) cEl.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
       return;
     }
-    document.getElementById('completedRides').innerHTML = TRIPS.completed.map(t => `
+
+    let completed = TRIPS.completed;
+    let cancelled = TRIPS.cancelled;
+    
+    const userId = getUserId();
+    if (userId) {
+      try {
+        const res = await fetch(`${API}/trips/passenger/${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.rides) {
+            completed = data.rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
+              from: r.pickup_label || 'Unknown',
+              to: r.dest_label || 'Unknown',
+              date: new Date(r.created_at).toLocaleDateString(),
+              time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+              driver: r.driver_name || 'Assigned Driver',
+              amount: `GH₵ ${r.fare_estimate || '0.00'}`
+            }));
+            cancelled = data.rides.filter(r => r.status === 'cancelled').map(r => ({
+              from: r.pickup_label || 'Unknown',
+              to: r.dest_label || 'Unknown',
+              date: new Date(r.created_at).toLocaleDateString(),
+              time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+              reason: 'Cancelled'
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch real trips, falling back to mock:', err);
+      }
+    }
+
+    if (cEl) {
+      if (completed.length === 0) {
+         cEl.innerHTML = '<div class="empty-state"><i class="fas fa-route"></i><p>No completed rides yet.</p></div>';
+      } else {
+         cEl.innerHTML = completed.map(t => `
     <div class="trip-card">
       <div class="trip-icon completed"><i class="fas fa-check"></i></div>
       <div class="trip-details">
@@ -7389,7 +7472,14 @@
         <div class="trip-status completed">Completed</div>
       </div>
     </div>`).join('');
-    document.getElementById('cancelledRides').innerHTML = TRIPS.cancelled.map(t => `
+      }
+    }
+    
+    if (xEl) {
+      if (cancelled.length === 0) {
+         xEl.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No cancelled rides.</p></div>';
+      } else {
+         xEl.innerHTML = cancelled.map(t => `
     <div class="trip-card">
       <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
       <div class="trip-details">
@@ -7399,6 +7489,8 @@
       </div>
       <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
     </div>`).join('');
+      }
+    }
   }
   function renderPayments() {
     document.getElementById('paymentList').innerHTML = PAYMENTS.map(p => `
