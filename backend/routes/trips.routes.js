@@ -12,6 +12,7 @@ const {
   getAllRides, 
   getPassengerRides, 
   deletePassengerRides, 
+  getRiderRides,
   updateRideStatus, 
   getAvailableRiders,
   requireSupabase
@@ -214,6 +215,90 @@ router.delete('/passenger/:passengerId', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Failed to delete ride history' 
+    });
+  }
+});
+
+/**
+ * GET /api/trips/rider/:riderId
+ * Get all rides and aggregated earnings summary for a rider
+ */
+router.get('/rider/:riderId', async (req, res) => {
+  try {
+    const { riderId } = req.params;
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const rides = await getRiderRides(riderId, limit);
+
+    // Calculate live earnings and trip statistics
+    const today = new Date().toISOString().split('T')[0];
+    let totalEarnings = 0;
+    let todayEarnings = 0;
+    let completedTrips = 0;
+    let todayTrips = 0;
+    let cashEarnings = 0;
+    let momoEarnings = 0;
+    let cashTrips = 0;
+    let momoTrips = 0;
+
+    const formattedRides = (rides || []).map(r => {
+      const fare = parseFloat(r.actual_fare || r.estimated_fare || r.fare || 0);
+      const isCompleted = r.status === 'completed' || r.status === 'done';
+      const rDate = r.requested_at || r.created_at;
+      const isToday = rDate ? rDate.startsWith(today) : false;
+
+      if (isCompleted) {
+        completedTrips++;
+        totalEarnings += fare;
+        if (isToday) {
+          todayTrips++;
+          todayEarnings += fare;
+        }
+        if (r.payment_method === 'momo') {
+          momoEarnings += fare;
+          momoTrips++;
+        } else {
+          cashEarnings += fare;
+          cashTrips++;
+        }
+      }
+
+      return {
+        id: r.id,
+        from: r.pickup_address || 'Campus Location',
+        to: r.dropoff_address || 'Destination',
+        fare: fare,
+        status: r.status,
+        payment_method: r.payment_method || 'cash',
+        ride_type: r.ride_type || 'shared',
+        passenger_name: r.passenger_name || 'Passenger',
+        created_at: rDate,
+        date: rDate ? new Date(rDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Today',
+        time: rDate ? new Date(rDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'
+      };
+    });
+
+    const avgFare = completedTrips > 0 ? (totalEarnings / completedTrips) : 0;
+
+    res.json({
+      success: true,
+      rides: formattedRides,
+      stats: {
+        totalEarnings: Math.round(totalEarnings * 100) / 100,
+        todayEarnings: Math.round(todayEarnings * 100) / 100,
+        completedTrips,
+        todayTrips,
+        cashEarnings: Math.round(cashEarnings * 100) / 100,
+        momoEarnings: Math.round(momoEarnings * 100) / 100,
+        cashTrips,
+        momoTrips,
+        averageFare: Math.round(avgFare * 100) / 100
+      }
+    });
+  } catch (error) {
+    console.error('[Trips] Error fetching rider rides:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch rider trips' 
     });
   }
 });

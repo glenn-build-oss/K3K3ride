@@ -547,6 +547,10 @@ async function deletePassengerRides(passengerId) {
  * Get rides for a rider
  */
 async function getRiderRides(riderId, limit = 20) {
+  if (!riderId || typeof riderId !== 'string') return [];
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(riderId);
+  if (!isUuid) return [];
+
   const { data, error } = await requireSupabase()
     .from('rides')
     .select('*')

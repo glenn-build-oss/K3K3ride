@@ -728,7 +728,7 @@
       display:none;position:fixed;bottom:0;left:0;right:0;
       background:var(--white);border-top:1.5px solid var(--border);
       padding:10px 0 max(10px,env(safe-area-inset-bottom));
-      z-index:700;grid-template-columns:repeat(4,1fr);
+      z-index:700;grid-template-columns:repeat(5,1fr);
     }
     .bnav-item {
       display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -1122,6 +1122,498 @@
       .profile-stats-grid { grid-template-columns: 1fr; }
       .form-group-2 { grid-template-columns: 1fr; }
     }
+
+    /* ════════════════════════════════════════
+       EARNINGS & PAYMENT SUMMARY STYLES
+    ════════════════════════════════════════ */
+    .earnings-hero-card {
+      background: linear-gradient(135deg, #18181B 0%, #09090B 100%);
+      border-radius: var(--r-xl);
+      padding: 26px 28px;
+      color: var(--white);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,.14);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .earnings-hero-card::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255,214,10,.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .earnings-hero-main {
+      position: relative;
+      z-index: 2;
+    }
+    .earnings-hero-lbl {
+      font-size: .8rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.6);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+    .earnings-hero-val {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--white);
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .earnings-hero-sub {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .earnings-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.1);
+      color: rgba(255,255,255,.9);
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .earnings-badge.gold {
+      background: rgba(255,214,10,.18);
+      color: var(--yellow);
+      border: 1px solid rgba(255,214,10,.3);
+    }
+    .earnings-target-box {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      min-width: 260px;
+      position: relative;
+      z-index: 2;
+    }
+    .earnings-target-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: .78rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,.8);
+    }
+    .target-bar-bg {
+      height: 9px;
+      background: rgba(255,255,255,.15);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .target-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #F59E0B, #FFD60A);
+      border-radius: 5px;
+      transition: width .4s var(--ease);
+    }
+    .earnings-target-foot {
+      font-size: .7rem;
+      color: rgba(255,255,255,.5);
+    }
+    .earnings-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .earnings-stat-box {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      transition: all .2s;
+    }
+    .earnings-stat-box:hover {
+      border-color: var(--yellow-dk);
+      transform: translateY(-1px);
+    }
+    .earnings-stat-box .lbl {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+    }
+    .earnings-stat-box .val {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+    .earnings-stat-box .sub {
+      font-size: .7rem;
+      color: var(--muted);
+    }
+    .payment-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .pay-method-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px 20px;
+      position: relative;
+    }
+    .pay-method-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .pay-method-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .pay-method-icon.cash {
+      background: rgba(16,185,129,.14);
+      color: var(--green);
+    }
+    .pay-method-icon.momo {
+      background: rgba(147,51,234,.12);
+      color: #9333ea;
+    }
+    .pay-method-badge {
+      font-size: .72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .pay-method-badge.cash {
+      background: rgba(16,185,129,.12);
+      color: var(--green);
+    }
+    .pay-method-badge.momo {
+      background: rgba(147,51,234,.12);
+      color: #9333ea;
+    }
+    .pay-method-amount {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .pay-method-sub {
+      font-size: .75rem;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .pay-method-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .pay-bar-fill.cash {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width .3s ease;
+    }
+    .pay-bar-fill.momo {
+      height: 100%;
+      background: #9333ea;
+      border-radius: 3px;
+      transition: width .3s ease;
+    }
+    .settlement-info-box {
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      border-radius: var(--r);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .settlement-info-icon {
+      font-size: 1.3rem;
+      color: var(--blue);
+      flex-shrink: 0;
+    }
+    .settlement-info-title {
+      font-size: .8rem;
+      font-weight: 800;
+      color: #1E40AF;
+      margin-bottom: 2px;
+    }
+    .settlement-info-text {
+      font-size: .74rem;
+      color: #1E3A8A;
+      line-height: 1.4;
+    }
+
+    /* ════════════════════════════════════════
+       TRIP HISTORY & FILTER STYLES
+    ════════════════════════════════════════ */
+    .trip-filter-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 14px;
+      margin-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .trip-filter-bar::-webkit-scrollbar { display: none; }
+    .filter-pill {
+      padding: 6px 14px;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-2);
+      font-family: inherit;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .18s;
+    }
+    .filter-pill:hover {
+      background: var(--surface-2);
+      border-color: var(--text);
+    }
+    .filter-pill.active {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .trip-list-rich {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .trip-card-rich {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      transition: all .2s;
+    }
+    .trip-card-rich:hover {
+      border-color: var(--yellow-dk);
+      box-shadow: 0 4px 12px rgba(0,0,0,.04);
+    }
+    .trip-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .trip-card-date {
+      font-size: .74rem;
+      font-weight: 600;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .trip-card-fare {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .trip-card-route {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+    .route-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .route-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .route-dot.pickup { background: var(--green); }
+    .route-dot.dest { background: var(--red); }
+    .trip-card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .trip-card-pax {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--text-2);
+    }
+    .trip-card-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .trip-tag {
+      font-size: .68rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .trip-tag.completed {
+      background: rgba(16,185,129,.12);
+      color: var(--green);
+    }
+    .trip-tag.cash {
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+    }
+    .trip-tag.momo {
+      background: #FAF5FF;
+      color: #6B21A8;
+      border: 1px solid #E9D5FF;
+    }
+    .trip-tag.type {
+      background: var(--surface-2);
+      color: var(--text-2);
+    }
+    .trip-count-badge {
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: .76rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .empty-trip-box {
+      text-align: center;
+      padding: 42px 20px;
+    }
+    .empty-trip-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto 14px;
+    }
+    .empty-trip-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .empty-trip-sub {
+      font-size: .82rem;
+      color: var(--muted);
+      max-width: 380px;
+      margin: 0 auto 16px;
+      line-height: 1.4;
+    }
+
+    /* Radar Scanning Indicator */
+    .radar-pulse-ring {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .radar-pulse-ring::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--yellow);
+      opacity: .6;
+      animation: radarPing 1.8s cubic-bezier(0,0,0.2,1) infinite;
+    }
+    @keyframes radarPing {
+      75%, 100% {
+        transform: scale(1.9);
+        opacity: 0;
+      }
+    }
+
+    /* ════════════════════════════════════════
+       FULL DEVICE RESPONSIVE ADJUSTMENTS
+    ════════════════════════════════════════ */
+    @media(max-width: 900px) {
+      .earnings-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media(max-width: 600px) {
+      .earnings-hero-card { padding: 18px 16px; gap: 16px; }
+      .earnings-hero-val { font-size: 2rem; }
+      .earnings-target-box { min-width: 100%; width: 100%; }
+      .payment-summary-grid { grid-template-columns: 1fr; }
+      .profile-header-card { padding: 18px 16px; }
+      .profile-avatar-group { gap: 12px; }
+      .profile-avatar-big { width: 62px; height: 62px; font-size: 1.5rem; }
+      .profile-hero-info h2 { font-size: 1.2rem; }
+      .profile-edit-btn { width: 100%; justify-content: center; }
+    }
+    @media(max-width: 480px) {
+      .earnings-stats-grid { grid-template-columns: 1fr; }
+      .trip-card-top { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .trip-card-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .trip-card-tags { width: 100%; }
+      .bottom-nav { grid-template-columns: repeat(5, 1fr); }
+      .bnav-item { font-size: .56rem; }
+      .bnav-item i { font-size: 1.05rem; }
+    }
+    @media(max-width: 360px) {
+      .bnav-item span { display: none; }
+      .bnav-item i { font-size: 1.2rem; margin: 4px 0; }
+      .earnings-hero-val { font-size: 1.7rem; }
+      .pay-method-amount { font-size: 1.35rem; }
+    }
   </style>
 </head>
 <body>
@@ -1353,7 +1845,7 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title"><i class="fas fa-bell" style="color:var(--yellow);margin-right:6px"></i>All Ride Requests</div>
+          <div class="card-title"><i class="fas fa-bell" style="color:var(--yellow);margin-right:6px"></i> All Ride Requests</div>
           <div class="card-sub" id="allReqSub">Waiting for requests…</div>
         </div>
         <button class="card-action" id="allReqBtn" onclick="toggleOnline()">Go Online</button>
@@ -1361,10 +1853,10 @@
       <div class="card-body">
         <div class="request-list" id="allReqList">
           <div class="idle-state" id="allIdle">
-            <div class="idle-icon"><i class="fas fa-satellite-dish"></i></div>
+            <div class="idle-icon" id="allIdleIcon"><i class="fas fa-satellite-dish"></i></div>
             <div class="idle-title" id="allIdleTitle">You're Offline</div>
-            <div class="idle-sub" id="allIdleSub">Switch online to receive passenger requests.</div>
-            <button class="go-online-cta" onclick="toggleOnline()"><i class="fas fa-bolt"></i> Go Online</button>
+            <div class="idle-sub" id="allIdleSub">Switch online to receive passenger requests across campus hubs.</div>
+            <button class="go-online-cta" id="allIdleCta" onclick="toggleOnline()"><i class="fas fa-bolt"></i> Go Online</button>
           </div>
         </div>
       </div>
@@ -1374,21 +1866,150 @@
   <!-- ── TRIPS ── -->
   <div id="sec-trips" style="display:none">
     <div class="card">
-      <div class="card-header"><div><div class="card-title">Trip History</div><div class="card-sub">All completed rides</div></div></div>
-      <div class="trip-list" id="allTripsList">
-        <div class="trip-item" style="justify-content:center;color:var(--muted);font-size:.8rem;padding:28px">No trips recorded yet.</div>
+      <div class="card-header" style="flex-wrap:wrap;gap:12px">
+        <div>
+          <div class="card-title"><i class="fas fa-route" style="color:var(--yellow);margin-right:6px"></i> Trip History</div>
+          <div class="card-sub">All completed and logged campus rides</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="trip-count-badge" id="tripHistoryCountBadge">0 Rides</span>
+          <button class="card-action" onclick="fetchRiderTripsAndEarnings()" title="Refresh Trip History">
+            <i class="fas fa-rotate"></i> Refresh
+          </button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:8px">
+        <!-- Filter Pills -->
+        <div class="trip-filter-bar">
+          <button class="filter-pill active" id="tfAll" onclick="setTripFilter('all')">All Rides</button>
+          <button class="filter-pill" id="tfToday" onclick="setTripFilter('today')">Today</button>
+          <button class="filter-pill" id="tfCash" onclick="setTripFilter('cash')">Cash</button>
+          <button class="filter-pill" id="tfMomo" onclick="setTripFilter('momo')">MoMo</button>
+        </div>
+
+        <!-- Trip List Container -->
+        <div class="trip-list-rich" id="allTripsList">
+          <div class="empty-trip-box" id="allTripsEmpty">
+            <div class="empty-trip-icon"><i class="fas fa-route"></i></div>
+            <div class="empty-trip-title">No completed rides yet</div>
+            <div class="empty-trip-sub">When you accept and finish rides on campus, your route details, fares, and payment methods will appear here.</div>
+            <button class="go-online-cta" onclick="showSec('home')"><i class="fas fa-house"></i> Return to Dashboard</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ── EARNINGS ── -->
   <div id="sec-earnings" style="display:none">
-    <div class="card">
-      <div class="card-header"><div><div class="card-title">Earnings Overview</div><div class="card-sub">Your payment summary</div></div></div>
-      <div class="card-body" style="text-align:center;padding:44px">
-        <div style="font-size:2.4rem;font-weight:900;color:var(--text)" id="earnBigPage">₵0.00</div>
-        <div style="color:var(--muted);font-size:.86rem;margin-top:6px">Total earned today</div>
-        <div style="margin-top:24px;color:var(--text-2);font-size:.86rem">Complete trips to see your earnings breakdown here.</div>
+    <!-- Top Hero Banner Card -->
+    <div class="earnings-hero-card">
+      <div class="earnings-hero-main">
+        <div class="earnings-hero-lbl">Today's Gross Earnings</div>
+        <div class="earnings-hero-val" id="earnBigPage">₵0.00</div>
+        <div class="earnings-hero-sub">
+          <span class="earnings-badge" id="earnTripsTodayBadge"><i class="fas fa-circle-check"></i> 0 trips today</span>
+          <span class="earnings-badge gold" id="earnStatusBadge"><i class="fas fa-bolt"></i> Live Aggregated</span>
+        </div>
+      </div>
+      <div class="earnings-target-box">
+        <div class="earnings-target-header">
+          <span>Daily Target (₵300.00)</span>
+          <strong id="earningsTargetPct">0%</strong>
+        </div>
+        <div class="target-bar-bg">
+          <div class="target-bar-fill" id="earningsTargetBar" style="width:0%"></div>
+        </div>
+        <div class="earnings-target-foot" id="earningsTargetRemaining">₵300.00 to reach daily goal</div>
+      </div>
+    </div>
+
+    <!-- 4-Stat Metric Performance Grid -->
+    <div class="earnings-stats-grid">
+      <div class="earnings-stat-box">
+        <div class="lbl"><i class="fas fa-wallet" style="color:var(--yellow-dk);margin-right:6px"></i> Total Revenue</div>
+        <div class="val" id="earnMetricTotal">₵0.00</div>
+        <div class="sub">Direct rider earnings</div>
+      </div>
+      <div class="earnings-stat-box">
+        <div class="lbl"><i class="fas fa-calendar-day" style="color:var(--blue);margin-right:6px"></i> Today's Gross</div>
+        <div class="val" id="earnMetricToday">₵0.00</div>
+        <div class="sub">Settled today</div>
+      </div>
+      <div class="earnings-stat-box">
+        <div class="lbl"><i class="fas fa-route" style="color:var(--green);margin-right:6px"></i> Completed Trips</div>
+        <div class="val" id="earnMetricTrips">0</div>
+        <div class="sub">Verified passenger rides</div>
+      </div>
+      <div class="earnings-stat-box">
+        <div class="lbl"><i class="fas fa-chart-line" style="color:#9333ea;margin-right:6px"></i> Avg Fare Per Ride</div>
+        <div class="val" id="earnMetricAvg">₵0.00</div>
+        <div class="sub">Campus rate index</div>
+      </div>
+    </div>
+
+    <!-- Payment Summary Breakdown Card -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div>
+          <div class="card-title"><i class="fas fa-receipt" style="color:var(--yellow);margin-right:8px"></i> Payment Summary</div>
+          <div class="card-sub">Actual collection breakdown by payment channel</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="payment-summary-grid">
+          <!-- Cash Card -->
+          <div class="pay-method-box">
+            <div class="pay-method-top">
+              <div class="pay-method-icon cash"><i class="fas fa-money-bill-wave"></i></div>
+              <span class="pay-method-badge cash">In-Hand Cash</span>
+            </div>
+            <div class="pay-method-amount" id="paySummaryCashAmount">₵0.00</div>
+            <div class="pay-method-sub" id="paySummaryCashTrips">0 rides completed</div>
+            <div class="pay-method-bar"><div class="pay-bar-fill cash" id="payBarCash" style="width:0%"></div></div>
+          </div>
+
+          <!-- MoMo Card -->
+          <div class="pay-method-box">
+            <div class="pay-method-top">
+              <div class="pay-method-icon momo"><i class="fas fa-mobile-screen"></i></div>
+              <span class="pay-method-badge momo">MTN / Telecel MoMo</span>
+            </div>
+            <div class="pay-method-amount" id="paySummaryMomoAmount">₵0.00</div>
+            <div class="pay-method-sub" id="paySummaryMomoTrips">0 rides completed</div>
+            <div class="pay-method-bar"><div class="pay-bar-fill momo" id="payBarMomo" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- Settlement Account Info -->
+        <div class="settlement-info-box">
+          <div class="settlement-info-icon"><i class="fas fa-shield-check"></i></div>
+          <div class="settlement-info-content">
+            <div class="settlement-info-title">Settlement & Wallet Destination</div>
+            <div class="settlement-info-text">
+              Digital fares are credited directly to your registered driver mobile number: 
+              <strong id="settlementPhone">050 000 0000</strong>. Cash fares are retained directly in hand.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Fare Settlements History -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header">
+        <div>
+          <div class="card-title"><i class="fas fa-clock-rotate-left" style="color:var(--yellow);margin-right:8px"></i> Recent Earnings Settlements</div>
+          <div class="card-sub">Individual completed ride payments and fares</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:0">
+        <div class="trip-list-rich" id="earningsTransList">
+          <div class="empty-trip-box" style="padding:28px">
+            <div class="empty-trip-title" style="font-size:.9rem">No fare transactions recorded yet</div>
+            <div class="empty-trip-sub">Completed rides will list their payouts and payment channels here.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1615,6 +2236,7 @@
   <div class="bnav-item active" id="bnavHome" onclick="showSec('home')"><i class="fas fa-house"></i><span>Home</span></div>
   <div class="bnav-item" id="bnavRequests" onclick="showSec('requests')"><i class="fas fa-bell"></i><span>Requests</span></div>
   <div class="bnav-item" id="bnavTrips" onclick="showSec('trips')"><i class="fas fa-route"></i><span>Trips</span></div>
+  <div class="bnav-item" id="bnavEarnings" onclick="showSec('earnings')"><i class="fas fa-coins"></i><span>Earnings</span></div>
   <div class="bnav-item" id="bnavProfile" onclick="showSec('profile')"><i class="fas fa-user"></i><span>Profile</span></div>
 </nav>
 
@@ -1694,15 +2316,24 @@
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label class="form-label" for="editProfStation">Preferred Campus Hub</label>
-            <select id="editProfStation" class="form-control">
-              <option value="KNUST Main Gate">KNUST Main Gate</option>
-              <option value="Commercial Area">Commercial Area</option>
-              <option value="Tech Junction">Tech Junction</option>
-              <option value="Ayeduase Gate">Ayeduase Gate</option>
-              <option value="Brunei Complex">Brunei Complex</option>
-              <option value="Hall 7 / Boakye">Hall 7 / Boakye</option>
-              <option value="Gaza / Kotei Gate">Gaza / Kotei Gate</option>
-            </select>
+            <input type="text" id="editProfStation" class="form-control" list="campusHubsList" placeholder="e.g. KNUST Main Gate, Gaza, Commercial Area..." required>
+            <datalist id="campusHubsList">
+              <option value="KNUST Main Gate">
+              <option value="Commercial Area">
+              <option value="Tech Junction">
+              <option value="Ayeduase Gate">
+              <option value="Brunei Complex">
+              <option value="Hall 7 / Boakye">
+              <option value="Gaza / Kotei Gate">
+              <option value="Engineering Gate">
+              <option value="Conti / Unity Hall">
+              <option value="Katanga / University Hall">
+              <option value="Africa Hall">
+              <option value="Queen Elizabeth II Hall">
+              <option value="Independence Hall">
+              <option value="SRC Hostel">
+              <option value="Kotei Station">
+            </datalist>
           </div>
         </div>
 
@@ -1753,6 +2384,9 @@ let session       = null;   // rider session (from sessionStorage)
 let isOnline      = false;
 let activeTrip    = null;
 let todayTrips    = [];     // completed trips today
+let allRiderTrips = [];     // all trips for rider from DB
+let currentTripFilter = 'all'; // filter for trip history
+let riderEarningsStats = null;
 let pendingReqs   = [];     // live pending ride requests
 let todayEarnings = 0;
 let tripsToday    = 0;
@@ -1803,6 +2437,7 @@ function loadSession() {
 
   renderRiderProfile(session);
   loadRiderProfileFromAPI();
+  fetchRiderTripsAndEarnings();
 }
 
 function renderRiderProfile(data) {
@@ -1871,6 +2506,46 @@ async function loadRiderProfileFromAPI() {
   }
 }
 
+async function fetchRiderTripsAndEarnings() {
+  const riderId = session?.riderId || session?.id || session?.dbRiderId || 'rider-demo';
+  try {
+    const res = await fetch(`/api/trips/rider/${encodeURIComponent(riderId)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.success) {
+      allRiderTrips = data.rides || [];
+      riderEarningsStats = data.stats || {};
+
+      todayEarnings = typeof riderEarningsStats.todayEarnings === 'number' ? riderEarningsStats.todayEarnings : 0;
+      tripsToday = typeof riderEarningsStats.todayTrips === 'number' ? riderEarningsStats.todayTrips : 0;
+      todayTrips = allRiderTrips.filter(t => t.status === 'completed' || t.status === 'done');
+
+      renderEarnings(riderEarningsStats);
+      renderTripLists();
+
+      if (riderEarningsStats.completedTrips !== undefined) {
+        setEl('profTripsCount', riderEarningsStats.completedTrips);
+      }
+      if (riderEarningsStats.totalEarnings !== undefined) {
+        setEl('profEarnings', '₵ ' + riderEarningsStats.totalEarnings.toFixed(2));
+      }
+    }
+  } catch (err) {
+    console.warn('[Rider Trips & Earnings] Remote fetch info:', err.message);
+    renderEarnings();
+    renderTripLists();
+  }
+}
+
+function setTripFilter(filter) {
+  currentTripFilter = filter;
+  ['All', 'Today', 'Cash', 'Momo'].forEach(f => {
+    const b = el('tf' + f);
+    if (b) b.classList.toggle('active', f.toLowerCase() === filter);
+  });
+  renderTripLists();
+}
+
 function openEditProfileModal() {
   const s = session || {};
   const fnInput = el('editProfFirstName');
@@ -1882,10 +2557,10 @@ function openEditProfileModal() {
   const enInput = el('editProfEmergencyName');
   const epInput = el('editProfEmergencyPhone');
 
-  if (fnInput) fnInput.value = s.firstName || s.first_name || '';
-  if (lnInput) lnInput.value = s.lastName  || s.last_name  || '';
-  if (phInput) phInput.value = s.phone !== 'Not set' ? (s.phone || '') : '';
-  if (emInput) emInput.value = s.email !== 'Not set' ? (s.email || '') : '';
+  if (fnInput) fnInput.value = s.firstName || s.first_name || (s.fullName ? s.fullName.split(' ')[0] : 'K3K3');
+  if (lnInput) lnInput.value = s.lastName  || s.last_name  || (s.fullName ? s.fullName.split(' ').slice(1).join(' ') : 'Rider');
+  if (phInput) phInput.value = (s.phone && s.phone !== 'Not set') ? s.phone : '0504842974';
+  if (emInput) emInput.value = (s.email && s.email !== 'Not set') ? s.email : '';
   if (stInput) stInput.value = s.station || 'KNUST Main Gate';
   if (plInput) plInput.value = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'AS 4920-24';
   if (enInput) enInput.value = s.emergencyName || s.emergency_name || '';
@@ -2096,30 +2771,29 @@ function updateOnlineUI() {
   const toggleTxt = el('statusToggleTxt');
 
   if (isOnline) {
-    pill.className     = 'online-pill online';
-    pillTxt.textContent = 'Online';
-    toggle.className   = 'status-toggle online';
-    toggleTxt.textContent = 'Online';
-    el('homeIdle').style.display    = 'none';
-    el('homeReqList').style.display = 'flex';
+    if (pill) pill.className     = 'online-pill online';
+    if (pillTxt) pillTxt.textContent = 'Online';
+    if (toggle) toggle.className   = 'status-toggle online';
+    if (toggleTxt) toggleTxt.textContent = 'Online';
+    if (el('homeIdle')) el('homeIdle').style.display    = 'none';
+    if (el('homeReqList')) el('homeReqList').style.display = 'flex';
     setEl('homeReqSub', 'Listening for passengers near you…');
-    setEl('allIdleTitle', 'Waiting for Requests');
-    setEl('allIdleSub',   'You are online. Ride requests appear here automatically.');
+    setEl('allReqSub', 'Online · Radar active across campus hubs');
     const btn = el('allReqBtn');
     if (btn) { btn.textContent='Go Offline'; btn.style.color='#DC2626'; btn.style.background='rgba(239,68,68,.08)'; }
   } else {
-    pill.className     = 'online-pill offline';
-    pillTxt.textContent = 'Offline';
-    toggle.className   = 'status-toggle offline';
-    toggleTxt.textContent = 'Go Online';
-    el('homeIdle').style.display    = 'flex';
-    el('homeReqList').style.display = 'none';
+    if (pill) pill.className     = 'online-pill offline';
+    if (pillTxt) pillTxt.textContent = 'Offline';
+    if (toggle) toggle.className   = 'status-toggle offline';
+    if (toggleTxt) toggleTxt.textContent = 'Go Online';
+    if (el('homeIdle')) el('homeIdle').style.display    = 'flex';
+    if (el('homeReqList')) el('homeReqList').style.display = 'none';
     setEl('homeReqSub', 'Go online to receive requests');
-    setEl('allIdleTitle', 'You\'re Offline');
-    setEl('allIdleSub',   'Switch online to start receiving passenger requests.');
+    setEl('allReqSub', 'Offline · Not receiving requests');
     const btn = el('allReqBtn');
     if (btn) { btn.textContent='Go Online'; btn.style.color=''; btn.style.background=''; }
   }
+  renderRequests();
 }
 
 async function setAvailability(available) {
@@ -2383,7 +3057,7 @@ function renderRequests() {
   ['reqBadge','notifCount'].forEach(id => {
     const e = el(id);
     if (!e) return;
-    e.style.display = count > 0 ? 'flex' : 'none';
+    e.style.display = (count > 0 && isOnline) ? 'flex' : 'none';
     e.textContent = count;
   });
 
@@ -2398,15 +3072,37 @@ function renderRequests() {
     // Show/hide idle state in allReqList
     if (listId === 'allReqList') {
       const idle = el('allIdle');
-      if (idle) idle.style.display = (count === 0 || !isOnline) ? 'flex' : 'none';
+      if (idle) {
+        if (!isOnline) {
+          idle.style.display = 'flex';
+          setEl('allIdleTitle', "You're Offline");
+          setEl('allIdleSub', "Switch online to receive passenger requests across campus hubs.");
+          const icon = el('allIdleIcon');
+          if (icon) icon.innerHTML = '<i class="fas fa-satellite-dish"></i>';
+          const cta = el('allIdleCta');
+          if (cta) { cta.style.display = 'inline-flex'; cta.innerHTML = '<i class="fas fa-bolt"></i> Go Online'; }
+        } else if (count === 0) {
+          idle.style.display = 'flex';
+          setEl('allIdleTitle', "Waiting for Requests");
+          setEl('allIdleSub', "You are online and visible on the campus radar. Incoming passenger rides will appear here.");
+          const icon = el('allIdleIcon');
+          if (icon) icon.innerHTML = '<div class="radar-pulse-ring"><i class="fas fa-satellite-dish" style="color:var(--yellow-dk);font-size:1.5rem"></i></div>';
+          const cta = el('allIdleCta');
+          if (cta) cta.style.display = 'none';
+        } else {
+          idle.style.display = 'none';
+        }
+      }
     }
 
     if (listId === 'homeReqList') {
       list.style.display = isOnline ? 'flex' : 'none';
     }
 
-    const toShow = listId === 'homeReqList' ? pendingReqs.slice(0,2) : pendingReqs;
-    toShow.forEach(r => list.appendChild(buildReqCard(r)));
+    if (isOnline && count > 0) {
+      const toShow = listId === 'homeReqList' ? pendingReqs.slice(0,2) : pendingReqs;
+      toShow.forEach(r => list.appendChild(buildReqCard(r)));
+    }
   });
 }
 
@@ -2589,32 +3285,39 @@ async function doCompleteTrip() {
 
   const earned = activeTrip.fare;
   const tripId = activeTrip.id;
+  const riderId = session?.dbRiderId || session?.id || session?.riderId;
 
   // Call backend
-  if (session?.dbRiderId) {
+  if (riderId) {
     try {
-      await fetch(`${API}/trips/${tripId}/complete?actual_fare=${earned}`, { method:'PUT' });
+      await fetch(`${API}/trips/${tripId}/complete?actual_fare=${earned}&rider_id=${encodeURIComponent(riderId)}`, { method:'PUT' });
     } catch(e) { console.warn('Complete API error:', e.message) }
   }
 
   todayEarnings += earned;
   tripsToday++;
-  todayTrips.unshift({
+  const completedEntry = {
+    id: tripId,
     from:   activeTrip.pickup,
     to:     activeTrip.drop,
     fare:   earned,
     time:   new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
     date:   'Today',
-    status: 'done'
-  });
+    status: 'completed',
+    payment_method: activeTrip.payment_method || 'cash',
+    ride_type: activeTrip.ride_type || 'shared',
+    passenger_name: activeTrip.passengerName || 'Passenger'
+  };
+  todayTrips.unshift(completedEntry);
+  allRiderTrips.unshift(completedEntry);
 
   activeTrip = null;
   atStart    = null;
   el('activeTripCard').classList.remove('show');
   setEl('atTimer','00:00');
 
-  renderEarnings();
-  renderTripLists();
+  // Refresh live aggregated stats from backend
+  await fetchRiderTripsAndEarnings();
   showToast('Trip completed! You earned ₵'+earned.toFixed(2), 'success');
 }
 
@@ -2623,22 +3326,64 @@ function callPassenger() { showToast('Connecting call to passenger…','info') }
 /* ════════════════════════════════════════
    EARNINGS
 ════════════════════════════════════════ */
-function renderEarnings() {
-  const pct = Math.min(Math.round(todayEarnings/GOAL*100),100);
+function renderEarnings(stats) {
+  const currentTotal = stats?.totalEarnings !== undefined ? stats.totalEarnings : todayEarnings;
+  const currentToday = stats?.todayEarnings !== undefined ? stats.todayEarnings : todayEarnings;
+  const currentTrips = stats?.completedTrips !== undefined ? stats.completedTrips : (todayTrips.length || tripsToday);
+  const currentAvg   = stats?.averageFare !== undefined ? stats.averageFare : (tripsToday > 0 ? todayEarnings / tripsToday : 0);
+  const cashTotal    = stats?.cashEarnings !== undefined ? stats.cashEarnings : currentToday;
+  const momoTotal    = stats?.momoEarnings !== undefined ? stats.momoEarnings : 0;
+  const cashTripsCount = stats?.cashTrips !== undefined ? stats.cashTrips : currentTrips;
+  const momoTripsCount = stats?.momoTrips !== undefined ? stats.momoTrips : 0;
+
+  const pct = Math.min(Math.round(todayEarnings/GOAL*100), 100);
+
+  // Home Screen Widgets
   setEl('heroEarn',    '₵'+todayEarnings.toFixed(2));
   setEl('stEarn',      '₵'+Math.round(todayEarnings));
   setEl('earnBig',     todayEarnings.toFixed(2));
-  setEl('earnBigPage', '₵'+todayEarnings.toFixed(2));
   setEl('stTrips',     tripsToday.toString());
   setEl('tripFareVal', '₵'+todayEarnings.toFixed(2));
   setEl('tripFareSub', tripsToday+' trip'+(tripsToday!==1?'s':''));
   setEl('goalPct',     pct+'%');
   const bar = el('earnBarFill');
   if (bar) bar.style.width = pct+'%';
+
+  // Dedicated Earnings Section (#sec-earnings)
+  setEl('earnBigPage', '₵' + todayEarnings.toFixed(2));
+  const earnBadge = el('earnTripsTodayBadge');
+  if (earnBadge) earnBadge.innerHTML = `<i class="fas fa-circle-check"></i> ${tripsToday} trip${tripsToday !== 1 ? 's' : ''} today`;
+  setEl('earningsTargetPct', pct + '%');
+  const tBar = el('earningsTargetBar');
+  if (tBar) tBar.style.width = pct + '%';
+  setEl('earningsTargetRemaining', '₵' + Math.max(0, GOAL - todayEarnings).toFixed(2) + ' to reach daily goal');
+
+  setEl('earnMetricTotal', '₵' + currentTotal.toFixed(2));
+  setEl('earnMetricToday', '₵' + currentToday.toFixed(2));
+  setEl('earnMetricTrips', currentTrips.toString());
+  setEl('earnMetricAvg',   '₵' + currentAvg.toFixed(2));
+
+  // Payment Summary Cards
+  setEl('paySummaryCashAmount', '₵' + cashTotal.toFixed(2));
+  setEl('paySummaryCashTrips', `${cashTripsCount} ride${cashTripsCount !== 1 ? 's' : ''} (${currentTotal > 0 ? Math.round((cashTotal / currentTotal) * 100) : 100}%)`);
+  setEl('paySummaryMomoAmount', '₵' + momoTotal.toFixed(2));
+  setEl('paySummaryMomoTrips', `${momoTripsCount} ride${momoTripsCount !== 1 ? 's' : ''} (${currentTotal > 0 ? Math.round((momoTotal / currentTotal) * 100) : 0}%)`);
+
+  const cashPct = currentTotal > 0 ? Math.round((cashTotal / currentTotal) * 100) : 100;
+  const momoPct = currentTotal > 0 ? Math.round((momoTotal / currentTotal) * 100) : 0;
+  const pbCash = el('payBarCash');
+  if (pbCash) pbCash.style.width = cashPct + '%';
+  const pbMomo = el('payBarMomo');
+  if (pbMomo) pbMomo.style.width = momoPct + '%';
+
+  setEl('settlementPhone', session?.phone || '050 000 0000');
+
+  // Profile Section Sync
+  setEl('profEarnings', '₵ ' + currentTotal.toFixed(2));
+  setEl('profTripsCount', currentTrips.toString());
 }
 
 function buildMiniChart() {
-  // Weekly bars — last bar = today (live)
   const data = [62,45,80,52,88,74,0];
   const days  = ['M','T','W','T','F','S','T'];
   const chart = el('miniChart');
@@ -2651,35 +3396,145 @@ function buildMiniChart() {
 }
 
 /* ════════════════════════════════════════
-   TRIP LISTS
+   TRIP LISTS & HISTORY
 ════════════════════════════════════════ */
 function renderTripLists() {
-  const buildItem = t => {
+  const recent = el('recentTrips');
+  const all    = el('allTripsList');
+  const trans  = el('earningsTransList');
+
+  const buildCompactItem = t => {
+    const isDone = t.status === 'completed' || t.status === 'done';
+    const fare   = typeof t.fare === 'number' ? t.fare.toFixed(2) : '0.00';
     const d = document.createElement('div');
     d.className = 'trip-item';
     d.innerHTML = `
-      <div class="trip-icon ${t.status==='done'?'done':'cancel'}">
-        <i class="fas ${t.status==='done'?'fa-check':'fa-times'}"></i>
+      <div class="trip-icon ${isDone ? 'done' : 'cancel'}">
+        <i class="fas ${isDone ? 'fa-check' : 'fa-times'}"></i>
       </div>
       <div class="trip-info">
-        <div class="trip-route">${t.from} → ${t.to}</div>
-        <div class="trip-date">${t.date} · ${t.time}</div>
+        <div class="trip-route">${t.from || 'Pickup'} → ${t.to || 'Dropoff'}</div>
+        <div class="trip-date">${t.date || 'Today'} · ${t.time || ''}</div>
       </div>
-      <div class="trip-earn">${t.status==='done'?'₵'+t.fare.toFixed(2):'—'}</div>`;
+      <div class="trip-earn">${isDone ? '₵' + fare : '—'}</div>`;
     return d;
   };
 
-  const recent = el('recentTrips');
-  const all    = el('allTripsList');
+  const buildRichCard = t => {
+    const isDone = t.status === 'completed' || t.status === 'done';
+    const fare   = typeof t.fare === 'number' ? t.fare.toFixed(2) : '0.00';
+    const isCash = (t.payment_method || '').toLowerCase() !== 'momo';
+    const card = document.createElement('div');
+    card.className = 'trip-card-rich';
+    card.innerHTML = `
+      <div class="trip-card-top">
+        <div class="trip-card-date">
+          <i class="fas fa-calendar-day" style="color:var(--muted)"></i>
+          <span>${t.date || 'Today'} · ${t.time || ''}</span>
+        </div>
+        <div class="trip-card-fare">₵${fare}</div>
+      </div>
+      <div class="trip-card-route">
+        <div class="route-node">
+          <div class="route-dot pickup"></div>
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.from || 'Campus Hub'}</div>
+        </div>
+        <div class="route-node">
+          <div class="route-dot dest"></div>
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.to || 'Campus Destination'}</div>
+        </div>
+      </div>
+      <div class="trip-card-bottom">
+        <div class="trip-card-pax">
+          <i class="fas fa-user-circle" style="color:var(--yellow-dk)"></i>
+          <span>${t.passenger_name || 'Passenger'}</span>
+        </div>
+        <div class="trip-card-tags">
+          <span class="trip-tag ${isCash ? 'cash' : 'momo'}">
+            <i class="fas ${isCash ? 'fa-money-bill-wave' : 'fa-mobile-screen'}"></i>
+            ${isCash ? 'Cash' : 'MoMo'}
+          </span>
+          <span class="trip-tag type">${(t.ride_type || 'shared') === 'alone' ? 'Private' : 'Shared'}</span>
+          <span class="trip-tag completed">
+            <i class="fas fa-check-circle"></i> Completed
+          </span>
+        </div>
+      </div>
+    `;
+    return card;
+  };
+
+  const buildTransItem = t => {
+    const fare   = typeof t.fare === 'number' ? t.fare.toFixed(2) : '0.00';
+    const isCash = (t.payment_method || '').toLowerCase() !== 'momo';
+    const row = document.createElement('div');
+    row.className = 'trip-item';
+    row.innerHTML = `
+      <div class="trip-icon ${isCash ? 'done' : 'momo'}" style="${!isCash ? 'background:rgba(147,51,234,.1);color:#9333ea' : ''}">
+        <i class="fas ${isCash ? 'fa-money-bill-wave' : 'fa-mobile-screen'}"></i>
+      </div>
+      <div class="trip-info">
+        <div class="trip-route">${t.from || 'Pickup'} → ${t.to || 'Dropoff'}</div>
+        <div class="trip-date">${t.date || 'Today'} · ${t.time || ''} · <span style="font-weight:700;color:${isCash ? 'var(--green)' : '#9333ea'}">${isCash ? 'Cash Retained' : 'MoMo Settled'}</span></div>
+      </div>
+      <div class="trip-earn" style="color:var(--text);font-weight:900">₵${fare}</div>
+    `;
+    return row;
+  };
+
+  // 1. Home Screen Recent Trips
   if (recent) {
     recent.innerHTML = '';
-    if (todayTrips.length) todayTrips.slice(0,4).forEach(t => recent.appendChild(buildItem(t)));
-    else recent.innerHTML = '<div class="trip-item" style="justify-content:center;color:var(--muted);font-size:.8rem;padding:22px">No trips yet today</div>';
+    const completed = todayTrips.length ? todayTrips : allRiderTrips.filter(t => t.status === 'completed' || t.status === 'done');
+    if (completed.length) {
+      completed.slice(0, 4).forEach(t => recent.appendChild(buildCompactItem(t)));
+    } else {
+      recent.innerHTML = '<div class="trip-item" style="justify-content:center;color:var(--muted);font-size:.8rem;padding:22px">No trips yet today</div>';
+    }
   }
+
+  // 2. Trip History Page (#allTripsList)
   if (all) {
     all.innerHTML = '';
-    if (todayTrips.length) todayTrips.forEach(t => all.appendChild(buildItem(t)));
-    else all.innerHTML = '<div class="trip-item" style="justify-content:center;color:var(--muted);font-size:.8rem;padding:28px">No trips recorded yet.</div>';
+    const baseList = allRiderTrips.length ? allRiderTrips : todayTrips;
+    let filtered = baseList;
+    if (currentTripFilter === 'today') {
+      filtered = baseList.filter(t => (t.date === 'Today' || (t.created_at && t.created_at.startsWith(new Date().toISOString().split('T')[0]))));
+    } else if (currentTripFilter === 'cash') {
+      filtered = baseList.filter(t => (t.payment_method || 'cash').toLowerCase() !== 'momo');
+    } else if (currentTripFilter === 'momo') {
+      filtered = baseList.filter(t => (t.payment_method || '').toLowerCase() === 'momo');
+    }
+
+    const badge = el('tripHistoryCountBadge');
+    if (badge) badge.textContent = `${filtered.length} Ride${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length) {
+      filtered.forEach(t => all.appendChild(buildRichCard(t)));
+    } else {
+      all.innerHTML = `
+        <div class="empty-trip-box">
+          <div class="empty-trip-icon"><i class="fas fa-route"></i></div>
+          <div class="empty-trip-title">No trips recorded yet</div>
+          <div class="empty-trip-sub">When you accept and finish rides on campus, your route details, fares, and payment methods will appear here.</div>
+          <button class="go-online-cta" onclick="showSec('home')"><i class="fas fa-house"></i> Return to Dashboard</button>
+        </div>`;
+    }
+  }
+
+  // 3. Earnings Transactions List (#earningsTransList)
+  if (trans) {
+    trans.innerHTML = '';
+    const completed = allRiderTrips.length ? allRiderTrips.filter(t => t.status === 'completed' || t.status === 'done') : todayTrips;
+    if (completed.length) {
+      completed.slice(0, 8).forEach(t => trans.appendChild(buildTransItem(t)));
+    } else {
+      trans.innerHTML = `
+        <div class="empty-trip-box" style="padding:28px">
+          <div class="empty-trip-title" style="font-size:.9rem">No fare transactions recorded yet</div>
+          <div class="empty-trip-sub">Completed rides will list their payouts and payment channels here.</div>
+        </div>`;
+    }
   }
 }
 

@@ -842,6 +842,7 @@ router.put('/rider/profile', async (req, res) => {
         if (email) appUpdates.email = email.toLowerCase().trim();
         const plate = licensePlate || vehiclePlate;
         if (plate) appUpdates.vehicle_plate = plate.trim();
+        if (station) appUpdates.station = station.trim();
         const emName = emergencyName || emergency_name;
         if (emName) appUpdates.emergency_contact_name = emName.trim();
         const emPhone = emergencyPhone || emergency_phone;
