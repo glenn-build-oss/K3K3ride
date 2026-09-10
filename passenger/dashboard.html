@@ -4420,6 +4420,53 @@
       </div>
 
       <div class="home-body">
+        <!-- Active Trip Card / Live Tracking Banner -->
+        <div id="homeActiveTripCard" style="display:none;margin-bottom:24px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:20px;box-shadow:var(--sh-md)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.2)"></span>
+              <span style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--green)" id="homeAtStatus">Rider Assigned</span>
+            </div>
+            <div style="font-size:.9rem;font-weight:800;color:var(--text)" id="homeAtFare">₵5.00</div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-2);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:46px;height:46px;border-radius:50%;background:var(--yellow);color:var(--black);font-weight:800;font-size:1.2rem;display:flex;align-items:center;justify-content:center" id="homeAtAvatar">K</div>
+              <div>
+                <div style="font-weight:700;font-size:.95rem;color:var(--text)" id="homeAtName">Kofi Mensah</div>
+                <div style="font-size:.78rem;color:var(--text-2)" id="homeAtVehicle">Tricycle · AS 4920-24</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase">ETA</div>
+              <div style="font-size:1.15rem;font-weight:900;color:var(--text)" id="homeAtETA">~3 min</div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:.84rem;color:var(--text);margin-bottom:16px;padding:0 4px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <i class="fas fa-circle-dot" style="color:var(--green);font-size:.8rem"></i>
+              <span style="color:var(--text-2)">Pickup:</span>
+              <strong id="homeAtPickup">Main Gate</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <i class="fas fa-flag-checkered" style="color:var(--red);font-size:.8rem"></i>
+              <span style="color:var(--text-2)">Drop-off:</span>
+              <strong id="homeAtDrop">Library</strong>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px">
+            <a id="homeAtCall" href="tel:" style="flex:1;height:44px;background:var(--black);color:var(--white);border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:.85rem;text-decoration:none">
+              <i class="fas fa-phone"></i> Call Driver
+            </a>
+            <button onclick="cancelActiveTrip()" style="height:44px;padding:0 18px;background:var(--red-lt);color:var(--red);border:none;border-radius:var(--r-full);font-weight:700;font-size:.85rem;cursor:pointer">
+              Cancel
+            </button>
+          </div>
+        </div>
+
         <!-- No quick destinations - book directly from the hero -->
       </div><!-- end home-body -->
     </section>
@@ -5443,6 +5490,35 @@
         </div>
       </div>
 
+      <!-- ASSIGNED STATE (when rider accepts) -->
+      <div id="assignedState" style="display:none;text-align:center">
+        <div style="width:72px;height:72px;border-radius:50%;background:#D1FAE5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem">
+          <i class="fas fa-check"></i>
+        </div>
+        <div class="search-status-title" style="color:var(--text)">Rider Assigned!</div>
+        <div class="search-status-sub" id="assignedRiderSub">Your K3K3 keke is on the way</div>
+        
+        <div style="background:var(--surface-2);border-radius:var(--r-lg);padding:16px;margin:16px 0;text-align:left;display:flex;align-items:center;gap:14px">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--yellow);color:var(--black);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:1.2rem" id="assignedRiderAvatar">K</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:1rem;color:var(--text)" id="assignedRiderName">Kofi Mensah</div>
+            <div style="font-size:.82rem;color:var(--text-2)" id="assignedRiderVehicle">Tricycle · AS 4920-24</div>
+          </div>
+          <a id="assignedRiderCall" href="tel:" style="width:40px;height:40px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;text-decoration:none">
+            <i class="fas fa-phone"></i>
+          </a>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);font-size:.88rem;margin-bottom:20px">
+          <span style="color:var(--text-2)"><i class="fas fa-clock" style="color:var(--yellow-dk)"></i> Estimated Arrival</span>
+          <span style="font-weight:800;color:var(--text)" id="assignedRiderETA">~3 min</span>
+        </div>
+
+        <button class="rsearch-retry-btn" onclick="closeRiderSearch()" style="background:var(--yellow);color:var(--black)">
+          <i class="fas fa-eye"></i> View Trip Details
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -5473,6 +5549,14 @@
       </div>
     </div>
   </div>
+
+  <!-- Socket.io Real-Time Client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    if (typeof io === 'undefined') {
+      document.write('<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"><\/script>');
+    }
+  </script>
 
   <!-- ═══════════════════════════════════════
      JAVASCRIPT
@@ -6720,6 +6804,205 @@
       }
     }
 
+    // ─── Socket.io & Real-Time Dispatch Integration ───
+    let passengerSocket = null;
+
+    function initPassengerSocket() {
+      if (typeof io === 'undefined') {
+        console.warn('[Socket.io] Client library not loaded. Falling back to HTTP polling.');
+        return;
+      }
+      if (passengerSocket && passengerSocket.connected) return;
+
+      try {
+        passengerSocket = io({
+          path: '/socket.io',
+          transports: ['websocket', 'polling'],
+          reconnection: true,
+          reconnectionAttempts: 20,
+          reconnectionDelay: 1500
+        });
+
+        passengerSocket.on('connect', () => {
+          console.log('[Passenger Socket] Connected, socket ID:', passengerSocket.id);
+          const userId = getUserId();
+          if (userId) {
+            passengerSocket.emit('passenger:join', { passengerId: userId });
+          }
+          // Re-subscribe to any active trip in session
+          try {
+            const active = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+            if (active && (active.id || active.tripId)) {
+              passengerSocket.emit('trip:join', { tripId: active.id || active.tripId });
+            }
+          } catch(_) {}
+        });
+
+        // Event: Rider accepted trip!
+        passengerSocket.on('trip:accepted', (data) => {
+          handleTripAccepted(data);
+        });
+
+        // Event: In-trip GPS location ping from rider
+        passengerSocket.on('trip:rider_location', (coords) => {
+          handleRiderLocationPing(coords);
+        });
+
+        // Event: Trip status change
+        passengerSocket.on('trip:status_change', (update) => {
+          handleTripStatusChange(update);
+        });
+
+        // Event: No riders available
+        passengerSocket.on('trip:no_riders', (data) => {
+          document.getElementById('searchingState').style.display = 'none';
+          document.getElementById('assignedState').style.display = 'none';
+          document.getElementById('noRidersState').style.display = 'block';
+          showToast(data.message || 'No available riders near your pickup.', 'info');
+        });
+
+        // Event: Online keke pool update
+        passengerSocket.on('riders:pool_update', (pool) => {
+          if (typeof renderDrivers === 'function') renderDrivers();
+        });
+
+      } catch (err) {
+        console.warn('[Passenger Socket Error]', err.message);
+      }
+    }
+
+    function handleTripAccepted(data) {
+      console.log('[Trip Assigned]', data);
+      const tripId = data.tripId || data.id;
+      sessionStorage.setItem('k3k3_active_trip', JSON.stringify(data));
+
+      // Subscribe to trip room for live GPS
+      if (passengerSocket && passengerSocket.connected && tripId) {
+        passengerSocket.emit('trip:join', { tripId });
+      }
+
+      // Update Assigned State in modal
+      document.getElementById('searchingState').style.display = 'none';
+      document.getElementById('noRidersState').style.display = 'none';
+      const assigned = document.getElementById('assignedState');
+      if (assigned) assigned.style.display = 'block';
+
+      const rider = data.rider || {};
+      const riderName = rider.name || 'K3K3 Rider';
+      const vehicle = `${rider.vehicleType || 'Tricycle'} · ${rider.licensePlate || 'Active'}`;
+      const phone = rider.phone || '';
+
+      const aName = document.getElementById('assignedRiderName');
+      const aVeh  = document.getElementById('assignedRiderVehicle');
+      const aCall = document.getElementById('assignedRiderCall');
+      const aAva  = document.getElementById('assignedRiderAvatar');
+      if (aName) aName.textContent = riderName;
+      if (aVeh)  aVeh.textContent  = vehicle;
+      if (aCall) aCall.href = phone ? `tel:${phone}` : 'javascript:void(0)';
+      if (aAva)  aAva.textContent  = riderName.charAt(0).toUpperCase();
+
+      // Render Home Active Trip Card
+      renderHomeActiveTrip(data);
+
+      showToast(`Rider ${riderName} assigned! Keke is en route.`, 'success');
+    }
+
+    function handleRiderLocationPing(coords) {
+      if (!coords) return;
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      if (!trip) return;
+
+      // Calculate dynamic ETA using pickup coords
+      const pLat = parseFloat(trip.pickup_lat || sessionStorage.getItem('k3k3_lat') || '6.6745');
+      const pLng = parseFloat(trip.pickup_lng || sessionStorage.getItem('k3k3_lng') || '-1.5716');
+      const dist = estimateDist({ lat: coords.lat, lng: coords.lng }, { lat: pLat, lng: pLng });
+      const etaMin = Math.max(1, Math.ceil((dist / 18) * 60));
+
+      const etaStr = `~${etaMin} min (${dist.toFixed(1)} km)`;
+      const aEta = document.getElementById('assignedRiderETA');
+      const hEta = document.getElementById('homeAtETA');
+      if (aEta) aEta.textContent = etaStr;
+      if (hEta) hEta.textContent = etaStr;
+    }
+
+    function handleTripStatusChange(update) {
+      console.log('[Trip Status Change]', update);
+      if (update.status === 'completed') {
+        sessionStorage.removeItem('k3k3_active_trip');
+        const card = document.getElementById('homeActiveTripCard');
+        if (card) card.style.display = 'none';
+        closeRiderSearch();
+        showToast('Trip completed! Thank you for riding with K3K3.', 'success');
+        if (typeof renderTrips === 'function') renderTrips();
+        if (typeof renderPayments === 'function') renderPayments();
+      } else if (update.status === 'cancelled') {
+        sessionStorage.removeItem('k3k3_active_trip');
+        const card = document.getElementById('homeActiveTripCard');
+        if (card) card.style.display = 'none';
+        closeRiderSearch();
+        showToast('Trip was cancelled.', 'info');
+      } else if (update.status === 'arriving') {
+        const s = document.getElementById('homeAtStatus');
+        if (s) s.textContent = 'Rider Arrived at Pickup';
+        showToast('Your rider has arrived at your pickup spot!', 'warn');
+      } else if (update.status === 'in_progress') {
+        const s = document.getElementById('homeAtStatus');
+        if (s) s.textContent = 'Trip in Progress';
+      }
+    }
+
+    function renderHomeActiveTrip(tripData) {
+      const card = document.getElementById('homeActiveTripCard');
+      if (!card || !tripData) return;
+
+      const r = tripData.rider || {};
+      const pickup = tripData.pickup || tripData.pickup_address || 'Pickup Location';
+      const drop   = tripData.drop || tripData.dropoff_address || 'Destination';
+      const fare   = parseFloat(tripData.fare || tripData.estimated_fare || 5).toFixed(2);
+      const name   = r.name || 'K3K3 Rider';
+
+      document.getElementById('homeAtName').textContent    = name;
+      document.getElementById('homeAtVehicle').textContent = `${r.vehicleType || 'Tricycle'} · ${r.licensePlate || 'Active'}`;
+      document.getElementById('homeAtPickup').textContent  = pickup;
+      document.getElementById('homeAtDrop').textContent    = drop;
+      document.getElementById('homeAtFare').textContent    = '₵' + fare;
+      document.getElementById('homeAtAvatar').textContent  = name.charAt(0).toUpperCase();
+      document.getElementById('homeAtCall').href          = r.phone ? `tel:${r.phone}` : 'javascript:void(0)';
+
+      card.style.display = 'block';
+    }
+
+    async function cancelActiveTrip() {
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      if (!trip) return;
+      const tripId = trip.tripId || trip.id;
+      if (!confirm('Are you sure you want to cancel this ride?')) return;
+
+      try {
+        await fetch(`${API}/trips/${tripId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'cancelled' })
+        });
+      } catch(_) {}
+
+      sessionStorage.removeItem('k3k3_active_trip');
+      document.getElementById('homeActiveTripCard').style.display = 'none';
+      showToast('Ride request cancelled.', 'info');
+    }
+
+    // Call initPassengerSocket on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      initPassengerSocket();
+      // Restore active trip if one exists in sessionStorage
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+        if (saved && (saved.status === 'accepted' || saved.rider)) {
+          renderHomeActiveTrip(saved);
+        }
+      } catch(_) {}
+    });
+
     async function confirmRide() {
       if (!_rideType || !_campusFare || !paymentMethod) return;
 
@@ -6727,7 +7010,6 @@
       const dest   = _destVal;
       const fare   = _rideType === 'shared' ? _campusFare : _campusFare * ALONE_MULTIPLIER;
 
-      // Update legacy input fields so existing showRiderSearch() still works
       const pickupInputEl = document.getElementById('pickupInput');
       const destInputEl   = document.getElementById('destInput');
       if (pickupInputEl) pickupInputEl.value = pickup;
@@ -6736,42 +7018,45 @@
       closeBookModal();
       showRiderSearch(pickup, dest);
 
-      // Post to API
+      // Post to backend API (which automatically triggers dispatchService.dispatchRide)
       const sess = getStoredSession();
-      const passengerId = sess?.passenger_id || sess?.passengerId || sess?.id || null;
+      const passengerId = sess?.passenger_id || sess?.passengerId || sess?.id || 'passenger-demo';
 
-      if (passengerId) {
-        try {
-          const body = {
-            passenger_id:  passengerId,
-            pickup_lat:    parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6018'),
-            pickup_lng:    parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4685'),
-            dest_lat:      6.6018,
-            dest_lng:      0.4685,
-            pickup_label:  pickup,
-            dest_label:    dest,
-            fare_estimate: fare,
-            ride_type:     _rideType,            // 'shared' | 'alone'
-            campus_fare:   _campusFare,          // base per-person fixed fare
-            payment_method: paymentMethod,       // 'cash' | 'momo'
-          };
-          const res = await fetch(`${API}/trips/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
-          if (res.ok) {
-            const trip = await res.json();
-            sessionStorage.setItem('k3k3_active_trip', JSON.stringify(trip));
-            showToast('Ride requested! Searching for a rider…', 'success');
-            pollTripStatus(trip.id);
-          } else {
-            const err = await res.json().catch(() => ({}));
-            showToast(err.detail || 'Could not request ride. Try again.', 'error');
+      try {
+        const body = {
+          passenger_id:  passengerId,
+          pickup_lat:    parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6745'),
+          pickup_lng:    parseFloat(sessionStorage.getItem('k3k3_lng') || '-1.5716'),
+          dest_lat:      6.6800,
+          dest_lng:      -1.5750,
+          pickup_label:  pickup,
+          dest_label:    dest,
+          fare_estimate: fare,
+          ride_type:     _rideType,
+          campus_fare:   _campusFare,
+          payment_method: paymentMethod,
+        };
+        const res = await fetch(`${API}/trips/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          const resp = await res.json();
+          const trip = resp.ride || resp;
+          sessionStorage.setItem('k3k3_active_trip', JSON.stringify(trip));
+          showToast('Ride requested! Dispatching nearest keke…', 'success');
+
+          // Subscribe socket to this trip
+          if (passengerSocket && passengerSocket.connected && trip.id) {
+            passengerSocket.emit('trip:join', { tripId: trip.id });
           }
-        } catch (e) {
-          showToast('Network error — please retry.', 'error');
+        } else {
+          const err = await res.json().catch(() => ({}));
+          showToast(err.detail || err.error || 'Could not request ride. Try again.', 'error');
         }
+      } catch (e) {
+        showToast('Network error — please retry.', 'error');
       }
     }
 
@@ -6789,44 +7074,27 @@
     }
 
     function estimateFare(lat1, lng1, lat2, lng2) {
-      // Kept for legacy references; campus uses fixed fares from matrix
       return _campusFare || DEFAULT_CAMPUS_FARE;
     }
 
-    async function pollTripStatus(tripId, attempts = 0) {
-      if (attempts > 24) return; // stop after 2 min
-      await new Promise(r => setTimeout(r, 5000));
-      try {
-        const res = await fetch(`${API}/trips/${tripId}`);
-        if (!res.ok) return;
-        const t = await res.json();
-        if (t.status === 'accepted') {
-          showToast('A rider has accepted your trip!', 'success');
-          return;
-        }
-        if (t.status === 'requested') pollTripStatus(tripId, attempts + 1);
-      } catch (e) { }
-    }
-
     function showRiderSearch(pickup, dest) {
-      // Reset to searching state
+      // Reset states
       document.getElementById('searchingState').style.display = 'block';
       document.getElementById('noRidersState').style.display = 'none';
+      document.getElementById('assignedState').style.display = 'none';
+
       const sub = document.getElementById('searchStatusSub');
       if (sub) sub.textContent = `Searching near "${pickup}"…`;
 
       document.getElementById('riderSearchOverlay').classList.add('show');
 
-      // Step 1 — 1.5s: update message
+      // Update search status message progressively without closing prematurely
+      clearTimeout(riderSearchTimer);
       riderSearchTimer = setTimeout(() => {
-        if (sub) sub.textContent = 'Contacting available riders in your area…';
-      }, 1500);
-
-      // Step 2 — 4s: show "no riders" professional state
-      riderSearchTimer = setTimeout(() => {
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('noRidersState').style.display = 'block';
-      }, 4000);
+        if (sub && document.getElementById('searchingState').style.display !== 'none') {
+          sub.textContent = 'Contacting available keke riders in your area…';
+        }
+      }, 3000);
     }
 
     function retryRiderSearch() {
@@ -6834,14 +7102,14 @@
       const dest = document.getElementById('destInput').value.trim();
       document.getElementById('searchingState').style.display = 'block';
       document.getElementById('noRidersState').style.display = 'none';
+      document.getElementById('assignedState').style.display = 'none';
+
       const sub = document.getElementById('searchStatusSub');
       if (sub) sub.textContent = `Retrying search near "${pickup}"…`;
 
       clearTimeout(riderSearchTimer);
-      riderSearchTimer = setTimeout(() => {
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('noRidersState').style.display = 'block';
-      }, 4000);
+      // Re-trigger confirmRide
+      confirmRide();
     }
 
     function closeRiderSearch() {
@@ -6849,7 +7117,6 @@
       document.getElementById('riderSearchOverlay').classList.remove('show');
       document.getElementById('pickupInput').value = '';
       document.getElementById('destInput').value = '';
-      // Re-fill pickup if location available
       const lat = sessionStorage.getItem('k3k3_lat');
       const lng = sessionStorage.getItem('k3k3_lng');
       if (lat && lng) autoFillPickup(parseFloat(lat), parseFloat(lng));

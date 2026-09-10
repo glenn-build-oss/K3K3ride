@@ -414,6 +414,7 @@ const ALLOWED_RIDE_COLUMNS = new Set([
   'pickup_address', 'pickup_latitude', 'pickup_longitude', 'pickup_landmark',
   'dropoff_address', 'dropoff_latitude', 'dropoff_longitude', 'dropoff_landmark',
   'distance_km', 'estimated_duration_minutes', 'estimated_fare', 'actual_fare',
+  'payment_method', 'ride_type',
   'status', 'requested_at', 'accepted_at', 'arrived_at', 'started_at',
   'completed_at', 'cancelled_at', 'cancelled_by', 'cancellation_reason',
   'passenger_notes', 'rider_notes'
@@ -467,7 +468,17 @@ async function getRideById(rideId) {
 /**
  * Update ride status
  */
-async function updateRideStatus(rideId, status, additionalData = {}) {
+async function updateRideStatus(rideId, statusOrData, additionalData = {}) {
+  let status;
+  let updateData = {};
+  if (typeof statusOrData === 'object' && statusOrData !== null) {
+    status = statusOrData.status;
+    updateData = { ...statusOrData, ...additionalData };
+  } else {
+    status = statusOrData;
+    updateData = { status, ...additionalData };
+  }
+
   const timestampField = {
     'accepted': 'accepted_at',
     'arriving': 'arrived_at',
@@ -476,12 +487,7 @@ async function updateRideStatus(rideId, status, additionalData = {}) {
     'cancelled': 'cancelled_at'
   }[status] || null;
 
-  const updateData = {
-    status,
-    ...additionalData
-  };
-
-  if (timestampField) {
+  if (timestampField && !updateData[timestampField]) {
     updateData[timestampField] = new Date().toISOString();
   }
 

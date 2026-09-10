@@ -1,9 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const net = require('net');
 
 const PORT = process.env.PORT || 8081;
-const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
+const BACKEND_PORT = process.env.BACKEND_PORT || 8810;
 const ROOT = __dirname;
 
 const MIME = {
@@ -46,8 +47,10 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  // Proxy API, trips, applications, riders, users, auth, and admin non-static requests to backend server
+  // Proxy API, trips, applications, riders, users, auth, admin, and socket.io requests to backend server
   const isBackendRoute = 
+    req.url.startsWith('/socket.io') ||
+    req.url.startsWith('/ws') ||
     req.url.startsWith('/api/') || req.url === '/api' ||
     req.url.startsWith('/trips') ||
     req.url.startsWith('/applications') ||
@@ -109,6 +112,35 @@ const server = http.createServer((req, res) => {
     });
     res.end(data);
   });
+});
+
+// Proxy WebSocket upgrade requests (Socket.io & WS) to backend server
+server.on('upgrade', (req, clientSocket, head) => {
+  if (req.url.startsWith('/socket.io') || req.url.startsWith('/ws')) {
+    const serverSocket = net.connect(BACKEND_PORT, '127.0.0.1', () => {
+      let rawRequest = `${req.method} ${req.url} HTTP/${req.httpVersion}\r\n`;
+      for (let i = 0; i < req.rawHeaders.length; i += 2) {
+        rawRequest += `${req.rawHeaders[i]}: ${req.rawHeaders[i + 1]}\r\n`;
+      }
+      rawRequest += '\r\n';
+      serverSocket.write(rawRequest);
+      if (head && head.length) serverSocket.write(head);
+
+      serverSocket.pipe(clientSocket);
+      clientSocket.pipe(serverSocket);
+    });
+
+    serverSocket.on('error', (err) => {
+      console.error(`[WS Upgrade Proxy Error] ${err.message}`);
+      clientSocket.destroy();
+    });
+
+    clientSocket.on('error', () => {
+      serverSocket.destroy();
+    });
+  } else {
+    clientSocket.destroy();
+  }
 });
 
 server.listen(PORT, () => {

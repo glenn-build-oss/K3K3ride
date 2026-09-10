@@ -9,12 +9,14 @@ const router = express.Router();
 const { 
   createRide, 
   getRideById, 
-  getAllRides,
+  getAllRides, 
   getPassengerRides, 
-  deletePassengerRides,
-  updateRideStatus,
-  getAvailableRiders
+  deletePassengerRides, 
+  updateRideStatus, 
+  getAvailableRiders,
+  requireSupabase
 } = require('../services/supabase.service');
+const dispatchService = require('../services/dispatch.service');
 
 /**
  * GET /api/trips
@@ -91,6 +93,13 @@ router.post('/', async (req, res) => {
 
     const ride = await createRide(rideData);
     
+    if (ride) {
+      // Trigger real-time dispatch engine
+      dispatchService.dispatchRide(ride).catch(err => {
+        console.error('[Trips] Dispatch error:', err);
+      });
+    }
+
     res.status(201).json({
       success: true,
       message: 'Ride requested successfully',
@@ -102,6 +111,29 @@ router.post('/', async (req, res) => {
       success: false, 
       error: 'Failed to create ride request' 
     });
+  }
+});
+
+/**
+ * GET /api/trips/pending
+ * Get all open/pending trips awaiting dispatch
+ */
+router.get('/pending', async (req, res) => {
+  try {
+    const supabase = requireSupabase();
+    const { data, error } = await supabase
+      .from('rides')
+      .select('*')
+      .in('status', ['requested', 'searching'])
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) {
+      return res.json({ success: true, trips: [] });
+    }
+    res.json({ success: true, trips: data || [] });
+  } catch (error) {
+    res.json({ success: true, trips: [] });
   }
 });
 
@@ -237,7 +269,6 @@ router.get('/riders/available', async (req, res) => {
       lng ? parseFloat(lng) : null,
       parseFloat(radius)
     );
-    
     res.json({ success: true, riders });
   } catch (error) {
     console.error('[Trips] Error fetching available riders:', error);
@@ -245,6 +276,106 @@ router.get('/riders/available', async (req, res) => {
       success: false, 
       error: 'Failed to fetch available riders' 
     });
+  }
+});
+
+/**
+ * GET /api/trips/pending
+ * Get all unassigned pending trips (for rider fallback polling)
+ */
+router.get('/pending', async (req, res) => {
+  try {
+    const { data, error } = await requireSupabase()
+      .from('rides')
+      .select('*')
+      .in('status', ['requested', 'searching'])
+      .order('requested_at', { ascending: false })
+      .limit(30);
+
+    if (error) throw error;
+    res.json(data || []);
+  } catch (error) {
+    console.error('[Trips] Error fetching pending trips:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch pending trips' });
+  }
+});
+
+/**
+ * GET /api/trips/riders/online
+ * Get currently online riders in memory pool
+ */
+router.get('/riders/online', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      onlineCount: dispatchService.getOnlineCount(),
+      riders: dispatchService.getAvailableRidersSummary()
+    });
+  } catch (error) {
+    console.error('[Trips] Error fetching online riders:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch online riders' });
+  }
+});
+
+/**
+ * PUT /api/trips/:id/accept
+ * Rider accepts a ride (REST fallback for Socket.io)
+ */
+router.put('/:id/accept', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const riderId = req.query.rider_id || req.body?.rider_id;
+    if (!riderId) {
+      return res.status(400).json({ success: false, detail: 'rider_id is required' });
+    }
+
+    const result = await dispatchService.acceptRide(id, riderId);
+    if (!result.success) {
+      return res.status(result.code || 400).json({ success: false, detail: result.error });
+    }
+
+    res.json({ success: true, trip: result.trip, rider: result.rider });
+  } catch (error) {
+    console.error('[Trips] Error accepting trip:', error);
+    res.status(500).json({ success: false, detail: 'Server error' });
+  }
+});
+
+/**
+ * PUT /api/trips/:id/complete
+ * Rider completes a ride
+ */
+router.put('/:id/complete', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const riderId = req.query.rider_id || req.body?.rider_id;
+    const actualFare = req.query.actual_fare || req.body?.actual_fare;
+
+    const result = await dispatchService.completeRide(id, riderId, actualFare);
+    res.json({ success: true, trip: result.trip });
+  } catch (error) {
+    console.error('[Trips] Error completing trip:', error);
+    res.status(500).json({ success: false, detail: 'Server error' });
+  }
+});
+
+/**
+ * PUT /api/trips/:id/decline
+ * Rider declines a ride offer
+ */
+router.put('/:id/decline', (req, res) => {
+  try {
+    const { id } = req.params;
+    const riderId = req.query.rider_id || req.body?.rider_id;
+    if (!riderId) {
+      return res.status(400).json({ success: false, detail: 'rider_id is required' });
+    }
+
+    const success = dispatchService.declineRide(id, riderId);
+    res.json({ success });
+  } catch (error) {
+    console.error('[Trips] Error declining trip:', error);
+    res.status(500).json({ success: false, detail: 'Server error' });
   }
 });
 

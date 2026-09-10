@@ -869,6 +869,259 @@
       .status-toggle.online .status-switch-knob { left:14px; }
     }
     @media(max-width:480px) { .main-content { padding:12px 10px 86px } }
+
+    /* ════════════════════════════════════════
+       RIDER PROFILE STYLES
+    ════════════════════════════════════════ */
+    .profile-header-card {
+      background: linear-gradient(135deg, var(--black) 0%, #1c1c1c 100%);
+      border-radius: var(--r-xl);
+      padding: 26px 28px;
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 2px solid rgba(255,214,10,.25);
+      box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    }
+    .profile-header-card::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(255,214,10,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .profile-hero-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+    .profile-avatar-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .profile-avatar-big {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: var(--black);
+      color: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      border: 3.5px solid var(--yellow);
+      box-shadow: 0 0 0 4px rgba(255,214,10,.25);
+      flex-shrink: 0;
+    }
+    .profile-hero-info h2 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 4px;
+      letter-spacing: -.3px;
+    }
+    .profile-hero-info p {
+      font-size: .82rem;
+      color: rgba(255,255,255,.5);
+      margin-bottom: 8px;
+    }
+    .profile-pill-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .profile-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .profile-pill.verified {
+      background: rgba(16,185,129,.18);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,.35);
+    }
+    .profile-pill.id-pill {
+      background: rgba(255,255,255,.1);
+      color: var(--yellow);
+      border: 1px solid rgba(255,214,10,.25);
+    }
+    .profile-edit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 20px;
+      background: var(--yellow);
+      color: var(--black);
+      font-family: inherit;
+      font-size: .84rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all .2s var(--ease);
+      box-shadow: 0 4px 12px rgba(255,214,10,.25);
+    }
+    .profile-edit-btn:hover {
+      background: var(--yellow-dk);
+      transform: translateY(-1px);
+    }
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .profile-stat-box {
+      background: var(--white);
+      border-radius: var(--r-lg);
+      padding: 16px 18px;
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all .2s var(--ease);
+    }
+    .profile-stat-box:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--sh-md);
+    }
+    .profile-stat-box .lbl {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .profile-stat-box .val {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .profile-stat-box .sub {
+      font-size: .7rem;
+      color: var(--muted);
+    }
+    .profile-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .profile-field-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .profile-field-row:last-child {
+      margin-bottom: 0;
+    }
+    .profile-field-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0;
+    }
+    .profile-field-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .profile-field-lbl {
+      font-size: .66rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 2px;
+    }
+    .profile-field-val {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .license-plate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFFBEB;
+      color: #92400E;
+      border: 2px solid #F59E0B;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-family: 'Inter', monospace, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      box-shadow: 0 2px 6px rgba(245,158,11,.15);
+    }
+    .form-group-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: var(--r);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .88rem;
+      font-weight: 600;
+      outline: none;
+      transition: all .2s;
+    }
+    .form-control:focus {
+      border-color: var(--black);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(0,0,0,.08);
+    }
+    @media(max-width:900px) {
+      .profile-stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .profile-details-grid { grid-template-columns: 1fr; }
+    }
+    @media(max-width:480px) {
+      .profile-stats-grid { grid-template-columns: 1fr; }
+      .form-group-2 { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -1142,29 +1395,178 @@
 
   <!-- ── PROFILE ── -->
   <div id="sec-profile" style="display:none">
-    <div class="card">
-      <div class="card-header"><div><div class="card-title">My Profile</div></div></div>
-      <div class="card-body">
-        <div style="display:flex;align-items:center;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--border);margin-bottom:22px">
-          <div style="width:60px;height:60px;border-radius:50%;background:var(--black);color:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;border:3px solid var(--yellow)" id="profAvatar">R</div>
+    <!-- Profile Hero Header Banner -->
+    <div class="profile-header-card">
+      <div class="profile-hero-content">
+        <div class="profile-avatar-group">
+          <div class="profile-avatar-big" id="profAvatar">R</div>
+          <div class="profile-hero-info">
+            <h2 id="profName">Rider</h2>
+            <p id="profId">Rider ID: —</p>
+            <div class="profile-pill-wrap">
+              <span class="profile-pill verified"><i class="fas fa-certificate"></i> Verified Partner</span>
+              <span class="profile-pill id-pill" id="profStatusBadge"><i class="fas fa-circle-check"></i> Active & Approved</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <button class="profile-edit-btn" onclick="openEditProfileModal()">
+            <i class="fas fa-user-pen"></i> Edit Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4-Stat Metrics Bar -->
+    <div class="profile-stats-grid">
+      <div class="profile-stat-box">
+        <div class="lbl">Driver Rating</div>
+        <div class="val" style="color:var(--yellow-dk)"><i class="fas fa-star" style="font-size:1rem;color:var(--yellow);margin-right:4px"></i><span id="profRating">4.9</span></div>
+        <div class="sub">128+ Passenger Reviews</div>
+      </div>
+      <div class="profile-stat-box">
+        <div class="lbl">Trips Completed</div>
+        <div class="val" style="color:var(--blue)" id="profTripsCount">84</div>
+        <div class="sub">Campus Shared & Alone</div>
+      </div>
+      <div class="profile-stat-box">
+        <div class="lbl">Acceptance Rate</div>
+        <div class="val" style="color:var(--green)" id="profAcceptRate">98%</div>
+        <div class="sub">High Reliability Index</div>
+      </div>
+      <div class="profile-stat-box">
+        <div class="lbl">Total Earnings</div>
+        <div class="val" style="color:var(--text)" id="profEarnings">₵ 640.00</div>
+        <div class="sub">Direct Payouts</div>
+      </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="profile-details-grid">
+      <!-- Personal & Contact Information -->
+      <div class="card">
+        <div class="card-header">
           <div>
-            <div style="font-size:1.05rem;font-weight:800" id="profName">Rider</div>
-            <div style="font-size:.8rem;color:var(--muted);margin-top:2px" id="profId">—</div>
+            <div class="card-title"><i class="fas fa-address-card" style="color:var(--yellow);margin-right:8px"></i> Personal & Contact Info</div>
+            <div class="card-sub">Your registered driver credentials</div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px">
-          <div style="padding:13px;background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border)">
-            <div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Phone</div>
-            <div style="font-size:.88rem;font-weight:600" id="profPhone">Not set</div>
+        <div class="card-body">
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(59,130,246,.1);color:var(--blue)">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Full Name</div>
+              <div class="profile-field-val" id="profDetailName">Rider</div>
+            </div>
           </div>
-          <div style="padding:13px;background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border)">
-            <div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Email</div>
-            <div style="font-size:.88rem;font-weight:600" id="profEmail">Not set</div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(16,185,129,.1);color:var(--green)">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Phone Number</div>
+              <div class="profile-field-val" id="profPhone">Not set</div>
+            </div>
+          </div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(245,158,11,.1);color:var(--yellow-dk)">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Email Address</div>
+              <div class="profile-field-val" id="profEmail">Not set</div>
+            </div>
+          </div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(147,51,234,.1);color:#9333ea">
+              <i class="fas fa-location-dot"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Preferred Campus Station</div>
+              <div class="profile-field-val" id="profStation">KNUST Main Gate</div>
+            </div>
           </div>
         </div>
-        <button onclick="openModal('logoutModal')" style="width:100%;padding:12px;border-radius:var(--r-full);background:var(--red-lt);color:var(--red);border:1.5px solid rgba(239,68,68,.25);font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
+      </div>
+
+      <!-- Vehicle & Operational Details -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fas fa-motorcycle" style="color:var(--yellow);margin-right:8px"></i> Vehicle & Tricycle Info</div>
+            <div class="card-sub">Campus registered keke specifications</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(255,214,10,.18);color:var(--yellow-dk)">
+              <i class="fas fa-id-card"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Vehicle License Plate</div>
+              <div style="margin-top:4px">
+                <span class="license-plate-badge" id="profPlateBadge">AS 4920-24</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(59,130,246,.1);color:var(--blue)">
+              <i class="fas fa-truck-pickup"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Vehicle Model & Capacity</div>
+              <div class="profile-field-val" id="profVehicleType">TVS King Deluxe · 3 Passenger Seats</div>
+            </div>
+          </div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(239,68,68,.1);color:var(--red)">
+              <i class="fas fa-shield-heart"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Emergency Contact</div>
+              <div class="profile-field-val" id="profEmergency">Not set</div>
+            </div>
+          </div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(16,185,129,.1);color:var(--green)">
+              <i class="fas fa-award"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Campus Permit & Safety</div>
+              <div class="profile-field-val" style="color:var(--green);font-weight:700">
+                <i class="fas fa-check-circle"></i> Roadworthy & Inspected
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Actions Row -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Security & Account Settings</div>
+          <div class="card-sub">Manage your credentials and sign out of the rider panel</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button onclick="openEditProfileModal()" style="flex:1;min-width:180px;padding:12px 18px;border-radius:var(--r);background:var(--surface-2);color:var(--text);border:1.5px solid var(--border);font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s">
+            <i class="fas fa-pen"></i> Edit Profile Info
+          </button>
+          <button onclick="openModal('logoutModal')" style="flex:1;min-width:180px;padding:12px 18px;border-radius:var(--r);background:var(--red-lt);color:var(--red);border:1.5px solid rgba(239,68,68,.25);font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1254,12 +1656,94 @@
   </div>
 </div>
 
+<!-- Edit Profile Modal -->
+<div class="modal-backdrop" id="editProfileModal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-user-pen" style="color:var(--yellow);margin-right:8px"></i> Edit Rider Profile</div>
+      <div class="modal-sub">Update your contact details, campus hub station, and vehicle information</div>
+    </div>
+    <form id="editProfileForm" onsubmit="saveRiderProfile(event)">
+      <div class="modal-body" style="max-height:68vh;overflow-y:auto">
+        <div class="form-group-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfFirstName">First Name</label>
+            <input type="text" id="editProfFirstName" class="form-control" placeholder="First name" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfLastName">Last Name</label>
+            <input type="text" id="editProfLastName" class="form-control" placeholder="Last name" required>
+          </div>
+        </div>
+
+        <div class="form-group-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfPhone">Phone Number</label>
+            <input type="tel" id="editProfPhone" class="form-control" placeholder="050 000 0000" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfEmail">Email Address</label>
+            <input type="email" id="editProfEmail" class="form-control" placeholder="rider@k3k3.com">
+          </div>
+        </div>
+
+        <div class="form-group-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfPlate">Vehicle Plate Number</label>
+            <input type="text" id="editProfPlate" class="form-control" placeholder="e.g. AS 4920-24">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfStation">Preferred Campus Hub</label>
+            <select id="editProfStation" class="form-control">
+              <option value="KNUST Main Gate">KNUST Main Gate</option>
+              <option value="Commercial Area">Commercial Area</option>
+              <option value="Tech Junction">Tech Junction</option>
+              <option value="Ayeduase Gate">Ayeduase Gate</option>
+              <option value="Brunei Complex">Brunei Complex</option>
+              <option value="Hall 7 / Boakye">Hall 7 / Boakye</option>
+              <option value="Gaza / Kotei Gate">Gaza / Kotei Gate</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin:16px 0 10px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="form-label" style="color:var(--text);font-size:.78rem"><i class="fas fa-shield-halved" style="color:var(--red);margin-right:6px"></i> Emergency Contact (Optional)</div>
+        </div>
+
+        <div class="form-group-2">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfEmergencyName">Contact Full Name</label>
+            <input type="text" id="editProfEmergencyName" class="form-control" placeholder="Contact person">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="editProfEmergencyPhone">Emergency Phone</label>
+            <input type="tel" id="editProfEmergencyPhone" class="form-control" placeholder="050 000 0000">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-btn secondary" onclick="closeEditProfileModal()">Cancel</button>
+        <button type="submit" class="modal-btn primary" id="saveProfileBtn">
+          <i class="fas fa-check"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toastCont"></div>
 
 <!-- ════════════════════════════════════════
      JAVASCRIPT
 ════════════════════════════════════════ -->
+<!-- Socket.io Real-Time Client -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  if (typeof io === 'undefined') {
+    document.write('<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"><\/script>');
+  }
+</script>
 <script>
 const API  = '';
 const GOAL = 300; // daily earnings target in GH₵
@@ -1317,21 +1801,177 @@ function loadSession() {
     return;
   }
 
-  const fn  = session?.firstName || 'Rider';
-  const ln  = session?.lastName  || '';
-  const ini = fn.charAt(0).toUpperCase();
-  const rid = session?.riderId   || '—';
+  renderRiderProfile(session);
+  loadRiderProfileFromAPI();
+}
 
-  el('sbAvatar').textContent      = ini;
-  el('sbName').textContent        = fn + (ln ? ' '+ln : '');
-  el('sbId').textContent          = rid !== '—' ? 'ID: '+rid : 'Guest Mode';
-  el('topAvatar').textContent     = ini;
-  el('heroName').textContent      = fn;
-  el('profAvatar').textContent    = ini;
-  el('profName').textContent      = fn + (ln ? ' '+ln : '');
-  el('profId').textContent        = rid !== '—' ? 'Rider ID: '+rid : 'Not logged in';
-  el('profEmail').textContent     = session?.email || 'Not set';
-  el('profPhone').textContent     = session?.phone || 'Not set';
+function renderRiderProfile(data) {
+  const s = data || session || {};
+  const fn  = s.firstName || s.first_name || 'Rider';
+  const ln  = s.lastName  || s.last_name  || '';
+  const full = s.fullName || (fn ? `${fn} ${ln}`.trim() : 'K3K3 Rider');
+  const ini = fn.charAt(0).toUpperCase();
+  const rid = s.riderId || s.id || '—';
+  const phone = s.phone || 'Not set';
+  const email = s.email || 'Not set';
+  const station = s.station || 'KNUST Main Gate';
+  const plate = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'AS 4920-24';
+  const vehicle = s.vehicleType || s.vehicle_type || 'TVS King Deluxe · 3 Passenger Seats';
+  const emName = s.emergencyName || s.emergency_name || '';
+  const emPhone = s.emergencyPhone || s.emergency_phone || '';
+
+  // Header & Sidebar
+  setEl('sbAvatar', ini);
+  setEl('sbName', full);
+  setEl('sbId', rid !== '—' ? 'ID: ' + (String(rid).length > 10 ? String(rid).substring(0, 8).toUpperCase() : rid) : 'Guest Mode');
+  setEl('topAvatar', ini);
+  setEl('heroName', fn);
+
+  // Profile Section elements
+  setEl('profAvatar', ini);
+  setEl('profName', full);
+  setEl('profDetailName', full);
+  setEl('profId', rid !== '—' ? 'Rider ID: ' + (String(rid).length > 10 ? String(rid).substring(0, 8).toUpperCase() : rid) : 'Active Partner');
+  setEl('profPhone', phone);
+  setEl('profEmail', email);
+  setEl('profStation', station);
+  setEl('profPlateBadge', plate);
+  setEl('profVehicleType', vehicle);
+  setEl('profEmergency', emName ? `${emName} (${emPhone || 'No phone'})` : 'Not set');
+
+  // Stats
+  if (s.rating) setEl('profRating', s.rating);
+  if (s.tripsCompleted) setEl('profTripsCount', s.tripsCompleted);
+  if (s.acceptanceRate) setEl('profAcceptRate', s.acceptanceRate);
+}
+
+async function loadRiderProfileFromAPI() {
+  if (!session) return;
+  const rid = session.riderId || session.id;
+  const phone = session.phone;
+  if (!rid && !phone) return;
+
+  try {
+    const params = new URLSearchParams();
+    if (rid && rid !== '—') params.append('riderId', rid);
+    if (phone && phone !== 'Not set') params.append('phone', phone);
+
+    const res = await fetch(`/api/auth/rider/profile?${params.toString()}`);
+    if (res.ok) {
+      const result = await res.json();
+      if (result.success && result.profile) {
+        session = { ...session, ...result.profile };
+        localStorage.setItem('riderSession', JSON.stringify(session));
+        sessionStorage.setItem('riderSession', JSON.stringify(session));
+        renderRiderProfile(session);
+      }
+    }
+  } catch (err) {
+    console.warn('[Profile] Could not fetch remote profile:', err.message);
+  }
+}
+
+function openEditProfileModal() {
+  const s = session || {};
+  const fnInput = el('editProfFirstName');
+  const lnInput = el('editProfLastName');
+  const phInput = el('editProfPhone');
+  const emInput = el('editProfEmail');
+  const stInput = el('editProfStation');
+  const plInput = el('editProfPlate');
+  const enInput = el('editProfEmergencyName');
+  const epInput = el('editProfEmergencyPhone');
+
+  if (fnInput) fnInput.value = s.firstName || s.first_name || '';
+  if (lnInput) lnInput.value = s.lastName  || s.last_name  || '';
+  if (phInput) phInput.value = s.phone !== 'Not set' ? (s.phone || '') : '';
+  if (emInput) emInput.value = s.email !== 'Not set' ? (s.email || '') : '';
+  if (stInput) stInput.value = s.station || 'KNUST Main Gate';
+  if (plInput) plInput.value = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'AS 4920-24';
+  if (enInput) enInput.value = s.emergencyName || s.emergency_name || '';
+  if (epInput) epInput.value = s.emergencyPhone || s.emergency_phone || '';
+
+  openModal('editProfileModal');
+}
+
+function closeEditProfileModal() {
+  closeModal('editProfileModal');
+}
+
+async function saveRiderProfile(e) {
+  if (e) e.preventDefault();
+
+  const fn = (el('editProfFirstName')?.value || '').trim();
+  const ln = (el('editProfLastName')?.value || '').trim();
+  const phone = (el('editProfPhone')?.value || '').trim();
+  const email = (el('editProfEmail')?.value || '').trim();
+  const station = el('editProfStation')?.value || 'KNUST Main Gate';
+  const plate = (el('editProfPlate')?.value || '').trim();
+  const emName = (el('editProfEmergencyName')?.value || '').trim();
+  const emPhone = (el('editProfEmergencyPhone')?.value || '').trim();
+
+  if (!fn) {
+    showToast('First name is required', 'error');
+    return;
+  }
+  if (!phone) {
+    showToast('Phone number is required', 'error');
+    return;
+  }
+
+  const saveBtn = el('saveProfileBtn');
+  const origText = saveBtn ? saveBtn.innerHTML : 'Save Changes';
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+  }
+
+  const payload = {
+    riderId: session?.riderId || session?.id,
+    userId: session?.id,
+    firstName: fn,
+    lastName: ln,
+    fullName: `${fn} ${ln}`.trim(),
+    phone,
+    email,
+    station,
+    licensePlate: plate,
+    emergencyName: emName,
+    emergencyPhone: emPhone
+  };
+
+  try {
+    const res = await fetch('/api/auth/rider/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      session = { ...session, ...data.profile, firstName: fn, lastName: ln, fullName: `${fn} ${ln}`.trim(), phone, email, station, licensePlate: plate, emergencyName: emName, emergencyPhone: emPhone };
+      localStorage.setItem('riderSession', JSON.stringify(session));
+      sessionStorage.setItem('riderSession', JSON.stringify(session));
+      renderRiderProfile(session);
+      closeEditProfileModal();
+      showToast('Profile updated successfully!', 'success');
+    } else {
+      showToast(data.error || 'Failed to update profile', 'error');
+    }
+  } catch (err) {
+    console.warn('[Profile Save] Fallback to local session update:', err.message);
+    session = { ...session, firstName: fn, lastName: ln, fullName: `${fn} ${ln}`.trim(), phone, email, station, licensePlate: plate, emergencyName: emName, emergencyPhone: emPhone };
+    localStorage.setItem('riderSession', JSON.stringify(session));
+    sessionStorage.setItem('riderSession', JSON.stringify(session));
+    renderRiderProfile(session);
+    closeEditProfileModal();
+    showToast('Profile saved locally.', 'success');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = origText;
+    }
+  }
 }
 
 function el(id) { return document.getElementById(id); }
@@ -1490,12 +2130,82 @@ async function setAvailability(available) {
 }
 
 /* ════════════════════════════════════════
-   WEBSOCKET — real-time push from backend
+   WEBSOCKET & SOCKET.IO — real-time push from backend
 ════════════════════════════════════════ */
+let gpsWatchId = null;
+
 function connectWS() {
-  if (!session?.dbRiderId) return;
+  const riderId = session?.dbRiderId || session?.id || session?.riderId || 'rider-demo';
+
+  // 1. Preferred: Socket.io bidirectional connection
+  if (typeof io !== 'undefined') {
+    if (wsConn && wsConn.connected) return;
+    try {
+      wsConn = io({
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 25,
+        reconnectionDelay: 1500
+      });
+
+      wsConn.on('connect', () => {
+        console.log('[Socket.io] Rider connected, ID:', wsConn.id);
+
+        const lat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6745');
+        const lng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '-1.5716');
+
+        // Register online with backend dispatch
+        wsConn.emit('rider:online', {
+          riderId: riderId,
+          name: `${session?.firstName || ''} ${session?.lastName || ''}`.trim() || 'Keke Rider',
+          phone: session?.phone || '',
+          lat: lat,
+          lng: lng,
+          capacity: 3,
+          vehicleType: session?.vehicleType || 'tricycle',
+          licensePlate: session?.licensePlate || ''
+        });
+
+        // Start GPS streaming
+        startLocationTracking();
+      });
+
+      // Targeted trip offer from dispatch cascade
+      wsConn.on('trip:offer', (offer) => {
+        handleWsMessage(offer);
+      });
+
+      // Broadcast fallback
+      wsConn.on('new_trip', (offer) => {
+        handleWsMessage(offer);
+      });
+
+      // Offer expired or assigned to someone else
+      wsConn.on('trip:offer_expired', (data) => {
+        if (data?.tripId) dismissReq(data.tripId);
+      });
+      wsConn.on('trip:offer_taken', (data) => {
+        if (data?.tripId) {
+          dismissReq(data.tripId);
+          showToast('Trip was assigned to another rider or expired.', 'info');
+        }
+      });
+
+      wsConn.on('disconnect', (reason) => {
+        console.log('[Socket.io] Disconnected:', reason);
+      });
+
+      return;
+    } catch (err) {
+      console.warn('[Socket.io Error]', err.message);
+    }
+  }
+
+  // 2. Legacy fallback
   try {
-    wsConn = new WebSocket(`wss://k3-k3ride.vercel.app/ws/drivers/${session.dbRiderId}`);
+    const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    wsConn = new WebSocket(`${wsProto}//${window.location.host}/ws/drivers/${riderId}`);
     wsConn.onopen    = () => console.log('[WS] Rider channel open');
     wsConn.onmessage = (ev) => {
       try {
@@ -1505,8 +2215,6 @@ function connectWS() {
     };
     wsConn.onerror  = (e)  => console.warn('[WS] Error', e);
     wsConn.onclose  = ()   => {
-      console.log('[WS] Closed');
-      // Auto-reconnect if still online
       if (isOnline) setTimeout(connectWS, 3000);
     };
   } catch(e) {
@@ -1514,32 +2222,113 @@ function connectWS() {
   }
 }
 
+function startLocationTracking() {
+  if (!navigator.geolocation) return;
+  if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    pos => {
+      const { latitude, longitude, heading, speed } = pos.coords;
+      sessionStorage.setItem('k3k3_rider_lat', latitude);
+      sessionStorage.setItem('k3k3_rider_lng', longitude);
+
+      if (wsConn && wsConn.emit) {
+        // Stream rider coordinates to dispatch pool
+        wsConn.emit('rider:location', {
+          lat: latitude,
+          lng: longitude,
+          heading: heading || 0,
+          speed: speed || 0
+        });
+
+        // If currently driving an active trip, forward to trip room
+        if (activeTrip && activeTrip.id) {
+          wsConn.emit('trip:location_update', {
+            tripId: activeTrip.id,
+            riderId: session?.dbRiderId || session?.id,
+            lat: latitude,
+            lng: longitude,
+            heading: heading || 0,
+            speed: speed || 0
+          });
+        }
+      }
+    },
+    err => console.warn('[GPS Tracking Warning]', err.message),
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+  );
+}
+
+function stopLocationTracking() {
+  if (gpsWatchId) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+}
+
 function disconnectWS() {
-  if (wsConn) { try { wsConn.close(); } catch(e) {} wsConn = null; }
+  stopLocationTracking();
+  if (wsConn) {
+    try {
+      if (wsConn.emit) {
+        wsConn.emit('rider:offline');
+        wsConn.disconnect();
+      } else {
+        wsConn.close();
+      }
+    } catch(e) {}
+    wsConn = null;
+  }
 }
 
 function handleWsMessage(msg) {
-  if (msg.type === 'new_trip') {
-    // Backend pushed a new trip directly to this rider
-    const req = {
-      id:             msg.trip_id,
-      passenger_id:   msg.passenger_id,
-      passengerName:  msg.passenger_name || 'Passenger',
-      passengerRating: 4.8,
-      pickup:  msg.pickup_label  || coordLabel(msg.pickup?.lat,  msg.pickup?.lng),
-      drop:    msg.dest_label    || coordLabel(msg.destination?.lat, msg.destination?.lng),
-      pickup_lat: msg.pickup?.lat,
-      pickup_lng: msg.pickup?.lng,
-      fare:    parseFloat(msg.fare_estimate || 0) || estimateFare(msg.pickup, msg.destination),
-      distance: estimateDist(msg.pickup, msg.destination),
-      isNew: true, ttl: 30,
-    };
-    if (!pendingReqs.find(r => r.id === req.id)) {
-      pendingReqs.unshift(req);
-      renderRequests();
-      showToast('New ride request from '+req.passengerName+'!', 'warn');
-    }
-  }
+  const tripId = msg.trip_id || msg.id;
+  if (!tripId) return;
+  if (pendingReqs.find(r => r.id == tripId)) return;
+
+  const req = {
+    id:             tripId,
+    passenger_id:   msg.passenger_id,
+    passengerName:  msg.passenger_name || 'Passenger',
+    passengerRating: msg.passenger_rating || 4.9,
+    pickup:  msg.pickup || msg.pickup_label || coordLabel(msg.pickup_lat, msg.pickup_lng),
+    drop:    msg.drop || msg.dest_label || coordLabel(msg.dest_lat, msg.dest_lng),
+    pickup_lat: msg.pickup_lat,
+    pickup_lng: msg.pickup_lng,
+    dest_lat: msg.dest_lat,
+    dest_lng: msg.dest_lng,
+    fare:    parseFloat(msg.fare_estimate || msg.fare || 5.0),
+    ride_type: msg.ride_type || 'shared',
+    distance: typeof msg.distance_km === 'number' ? msg.distance_km : estimateDist(
+      { lat: msg.pickup_lat || 6.6745, lng: msg.pickup_lng || -1.5716 },
+      { lat: msg.dest_lat || 6.6800,   lng: msg.dest_lng || -1.5750 }
+    ),
+    isNew: true,
+    ttl: msg.ttl_seconds || 20
+  };
+
+  pendingReqs.unshift(req);
+  renderRequests();
+  showToast(`New ride request from ${req.passengerName}! (₵${req.fare.toFixed(2)})`, 'warn');
+
+  // Play audio chime
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch(_) {}
+
+  // Auto-dismiss after TTL seconds
+  reqTimers[req.id] = setTimeout(() => dismissReq(req.id), (req.ttl || 20) * 1000);
 }
 
 /* ════════════════════════════════════════
@@ -1695,20 +2484,27 @@ async function acceptReq(id) {
   clearTimeout(reqTimers[id]);
   pendingReqs = pendingReqs.filter(x => x.id != id);
 
-  // Call backend
-  const riderId = session?.dbRiderId;
+  const riderId = session?.dbRiderId || session?.id || session?.riderId;
+
+  // 1. Real-time Socket.io accept
+  if (wsConn && wsConn.emit) {
+    wsConn.emit('trip:accept', { tripId: id, riderId }, (ack) => {
+      if (ack && !ack.success && ack.code === 409) {
+        showToast('This trip was already taken by another rider.', 'error');
+      }
+    });
+  }
+
+  // 2. REST API fallback
   if (riderId) {
     try {
       const res = await fetch(`${API}/trips/${id}/accept?rider_id=${riderId}`, { method:'PUT' });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        // Trip may have already been taken
         if (res.status === 409) {
           showToast('This trip was already taken by another rider.', 'error');
           renderRequests();
           return;
         }
-        console.warn('Accept failed:', err.detail);
       }
     } catch(e) {
       console.warn('Accept API error:', e.message);
@@ -1729,6 +2525,14 @@ function declineReq(id) {
   pendingReqs = pendingReqs.filter(x => x.id != id);
   document.querySelectorAll('#rc-'+id).forEach(c => c.remove());
   renderRequests();
+
+  const riderId = session?.dbRiderId || session?.id || session?.riderId;
+  if (wsConn && wsConn.emit) {
+    wsConn.emit('trip:decline', { tripId: id, riderId });
+  }
+  if (riderId) {
+    fetch(`${API}/trips/${id}/decline?rider_id=${riderId}`, { method: 'PUT' }).catch(() => {});
+  }
 }
 
 function dismissReq(id) {

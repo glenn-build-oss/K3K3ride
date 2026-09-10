@@ -9,16 +9,123 @@
 
 require('dotenv').config();
 
+const http = require('http');
 const express = require('express');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const tripsRoutes = require('./routes/trips.routes');
+const dispatchService = require('./services/dispatch.service');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 8810;
+
+// ─── Socket.io Real-Time Engine ───
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true
+  },
+  pingTimeout: 30000,
+  pingInterval: 10000
+});
+
+// Attach io to dispatchService and Express app
+dispatchService.setIO(io);
+app.set('io', io);
+app.set('dispatchService', dispatchService);
+
+// ─── Socket.io Connection & Event Handling ───
+io.on('connection', (socket) => {
+  console.log(`[Socket.io] Client connected: ${socket.id}`);
+
+  // Rider goes online
+  socket.on('rider:online', (data) => {
+    socket.join('riders:online');
+    if (data?.riderId) {
+      socket.join(`rider:${data.riderId}`);
+    }
+    const state = dispatchService.registerRider(socket.id, data);
+    socket.emit('rider:online_ack', { success: true, rider: state });
+  });
+
+  // Rider GPS location stream
+  socket.on('rider:location', (coords) => {
+    dispatchService.updateRiderLocation(socket.id, coords);
+  });
+
+  // Rider goes offline
+  socket.on('rider:offline', () => {
+    socket.leave('riders:online');
+    dispatchService.unregisterRider(socket.id);
+    socket.emit('rider:offline_ack', { success: true });
+  });
+
+  // Passenger registers session room
+  socket.on('passenger:join', (data) => {
+    if (data?.passengerId) {
+      socket.join(`passenger:${data.passengerId}`);
+      socket.emit('passenger:joined', { passengerId: data.passengerId });
+    }
+  });
+
+  // Client subscribes to trip updates
+  socket.on('trip:join', (data) => {
+    if (data?.tripId) {
+      socket.join(`trip:${data.tripId}`);
+      socket.emit('trip:joined', { tripId: data.tripId });
+    }
+  });
+
+  // Rider accepts trip
+  socket.on('trip:accept', async (data, ack) => {
+    if (!data?.tripId || !data?.riderId) {
+      if (typeof ack === 'function') ack({ success: false, error: 'Missing tripId or riderId' });
+      return;
+    }
+    const result = await dispatchService.acceptRide(data.tripId, data.riderId);
+    if (result.success) {
+      socket.join(`trip:${data.tripId}`);
+    }
+    if (typeof ack === 'function') ack(result);
+  });
+
+  // Rider declines trip
+  socket.on('trip:decline', (data, ack) => {
+    if (!data?.tripId || !data?.riderId) {
+      if (typeof ack === 'function') ack({ success: false });
+      return;
+    }
+    const success = dispatchService.declineRide(data.tripId, data.riderId);
+    if (typeof ack === 'function') ack({ success });
+  });
+
+  // In-trip location stream
+  socket.on('trip:location_update', (data) => {
+    if (data?.tripId && typeof data.lat === 'number' && typeof data.lng === 'number') {
+      io.to(`trip:${data.tripId}`).emit('trip:rider_location', {
+        tripId: data.tripId,
+        riderId: data.riderId,
+        lat: data.lat,
+        lng: data.lng,
+        heading: data.heading || 0,
+        speed: data.speed || 0,
+        timestamp: Date.now()
+      });
+    }
+  });
+
+  // Disconnect
+  socket.on('disconnect', (reason) => {
+    console.log(`[Socket.io] Client disconnected: ${socket.id} (${reason})`);
+    dispatchService.unregisterRider(socket.id);
+  });
+});
 
 // ─── CORS ───
 app.use(cors({
@@ -165,10 +272,11 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start server ───
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log('');
   console.log('  ╔══════════════════════════════════════════╗');
   console.log('  ║         K3K3 Backend API Server          ║');
+  console.log('  ║    (Express API + Socket.io Engine)      ║');
   console.log('  ╠══════════════════════════════════════════╣');
   console.log(`  ║  URL:      http://localhost:${PORT}          ║`);
   console.log(`  ║  ENV:      ${(process.env.NODE_ENV || 'development').padEnd(28)}║`);
@@ -186,5 +294,6 @@ app.listen(PORT, () => {
   console.log('    → POST /api/auth/admin/login');
   console.log('    → POST /api/auth/admin/verify-otp');
   console.log('    → GET  /api/auth/health');
+  console.log('    → WS   /socket.io/ (Real-Time Dispatch)');
   console.log('');
 });

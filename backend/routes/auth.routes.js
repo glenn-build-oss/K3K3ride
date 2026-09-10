@@ -728,6 +728,156 @@ router.post('/rider/register', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/auth/rider/profile
+ * Fetch comprehensive profile for a rider (from users + rider_applications).
+ */
+router.get('/rider/profile', async (req, res) => {
+  try {
+    const riderId = req.query.riderId || req.query.id;
+    const phone = req.query.phone;
+
+    let user = null;
+    if (riderId && riderId !== 'undefined' && riderId !== '—') {
+      try {
+        const { createClient } = require('@supabase/supabase-js');
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        const { data } = await supabase.from('users').select('*').eq('id', riderId).single();
+        if (data) user = data;
+      } catch (_) {}
+    }
+
+    if (!user && phone) {
+      let normalizedPhone = phone;
+      try { normalizedPhone = normalizePhone(phone); } catch(_) {}
+      user = await findUserByPhone(normalizedPhone, 'rider');
+    }
+
+    let app = null;
+    const searchPhone = user?.phone || phone;
+    if (searchPhone) {
+      let normalized = searchPhone;
+      try { normalized = normalizePhone(searchPhone); } catch(_) {}
+      app = await getRiderApplicationStatus(normalized);
+    }
+
+    const fn = user?.first_name || app?.first_name || 'Rider';
+    const ln = user?.last_name || app?.last_name || '';
+    const full = user?.full_name || (fn ? `${fn} ${ln}`.trim() : (app?.full_name || 'K3K3 Rider'));
+
+    res.json({
+      success: true,
+      profile: {
+        id: user?.id || riderId || 'rider-demo',
+        phone: user?.phone || app?.phone || phone || '',
+        firstName: fn,
+        lastName: ln,
+        fullName: full,
+        email: user?.email || app?.email || '',
+        role: 'rider',
+        status: user?.status || app?.status || 'approved',
+        vehicleType: app?.vehicle_type || 'TVS King Deluxe Tricycle',
+        licensePlate: app?.vehicle_plate || app?.reg_number || 'AS 4920-24',
+        capacity: 3,
+        station: app?.station || 'KNUST Main Gate',
+        rating: 4.9,
+        acceptanceRate: '98%',
+        tripsCompleted: 84,
+        emergencyName: app?.emergency_contact_name || user?.emergency_name || '',
+        emergencyPhone: app?.emergency_contact_phone || user?.emergency_phone || '',
+        joinedDate: user?.created_at || app?.created_at || new Date().toISOString()
+      }
+    });
+  } catch (err) {
+    console.error('[Auth] Error fetching rider profile:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * PUT /api/auth/rider/profile
+ * Update rider profile (users table + rider_applications).
+ */
+router.put('/rider/profile', async (req, res) => {
+  try {
+    const {
+      riderId, userId,
+      firstName, lastName, fname, lname,
+      email, phone,
+      licensePlate, vehiclePlate,
+      station,
+      emergencyName, emergencyPhone,
+      emergency_name, emergency_phone
+    } = req.body;
+
+    const targetId = riderId || userId;
+    const fn = (firstName || fname || '').trim();
+    const ln = (lastName || lname || '').trim();
+    const full = [fn, ln].filter(Boolean).join(' ');
+
+    const updates = {};
+    if (fn) updates.first_name = fn;
+    if (ln) updates.last_name = ln;
+    if (full) updates.full_name = full;
+    if (email) updates.email = email.toLowerCase().trim();
+    if (phone) updates.phone = phone.trim();
+
+    let updatedUser = null;
+    if (targetId && targetId !== 'rider-demo' && targetId !== '—') {
+      try {
+        updatedUser = await updateUser(targetId, updates);
+      } catch (err) {
+        console.warn('[Auth] Could not update user in supabase:', err.message);
+      }
+    }
+
+    const effectivePhone = phone || updatedUser?.phone;
+    if (effectivePhone) {
+      try {
+        const { createClient } = require('@supabase/supabase-js');
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        const appUpdates = {};
+        if (fn) appUpdates.first_name = fn;
+        if (ln) appUpdates.last_name = ln;
+        if (email) appUpdates.email = email.toLowerCase().trim();
+        const plate = licensePlate || vehiclePlate;
+        if (plate) appUpdates.vehicle_plate = plate.trim();
+        const emName = emergencyName || emergency_name;
+        if (emName) appUpdates.emergency_contact_name = emName.trim();
+        const emPhone = emergencyPhone || emergency_phone;
+        if (emPhone) appUpdates.emergency_contact_phone = emPhone.trim();
+
+        await supabase
+          .from('rider_applications')
+          .update(appUpdates)
+          .eq('phone', effectivePhone);
+      } catch (e) {
+        console.warn('[Auth] Could not update rider_applications table:', e.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Rider profile updated successfully',
+      profile: {
+        id: targetId || updatedUser?.id || 'rider-demo',
+        firstName: fn || updatedUser?.first_name || 'Rider',
+        lastName: ln || updatedUser?.last_name || '',
+        fullName: full || updatedUser?.full_name || 'Rider',
+        email: email || updatedUser?.email || '',
+        phone: effectivePhone || '',
+        licensePlate: licensePlate || vehiclePlate || 'AS 4920-24',
+        station: station || 'KNUST Main Gate',
+        emergencyName: emergencyName || emergency_name || '',
+        emergencyPhone: emergencyPhone || emergency_phone || ''
+      }
+    });
+  } catch (err) {
+    console.error('[Auth] Error updating rider profile:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 
 // ═══════════════════════════════════════════
 //  ADMIN ENDPOINTS
