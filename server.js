@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8081;
-const BACKEND_PORT = process.env.BACKEND_PORT || 8810;
+const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
 const ROOT = __dirname;
 
 const MIME = {
@@ -13,12 +13,39 @@ const MIME = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.pdf': 'application/pdf',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.webmanifest': 'application/manifest+json',
 };
 
 const server = http.createServer((req, res) => {
+  const cleanUrl = req.url.split('?')[0];
+  const baseFilename = path.basename(cleanUrl);
+
+  // Directly serve uploaded documents from backend/uploads to prevent any 404
+  if (cleanUrl.startsWith('/uploads') || cleanUrl.startsWith('/admin/app_') || baseFilename.startsWith('app_')) {
+    const candidatePaths = [
+      path.join(ROOT, 'backend', 'uploads', 'applications', baseFilename),
+      path.join(ROOT, 'backend', decodeURIComponent(cleanUrl.startsWith('/') ? cleanUrl.slice(1) : cleanUrl)),
+      path.join(ROOT, decodeURIComponent(cleanUrl.startsWith('/') ? cleanUrl.slice(1) : cleanUrl))
+    ];
+
+    for (const targetFile of candidatePaths) {
+      if (fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
+        const ext = path.extname(targetFile).toLowerCase();
+        res.writeHead(200, {
+          'Content-Type': MIME[ext] || 'application/octet-stream',
+          'Cache-Control': 'no-cache',
+          'Access-Control-Allow-Origin': '*'
+        });
+        fs.createReadStream(targetFile).pipe(res);
+        return;
+      }
+    }
+  }
+
   // Proxy API, trips, applications, riders, users, auth, and admin non-static requests to backend server
   const isBackendRoute = 
     req.url.startsWith('/api/') || req.url === '/api' ||
@@ -28,8 +55,7 @@ const server = http.createServer((req, res) => {
     req.url.startsWith('/passengers') ||
     req.url.startsWith('/users') ||
     req.url.startsWith('/auth') ||
-    req.url.startsWith('/uploads') ||
-    (req.url.startsWith('/admin/') && !req.url.match(/\.(html|js|css|png|jpg|ico|svg|webmanifest)(\?.*)?$/i));
+    (req.url.startsWith('/admin/') && !req.url.match(/\.(html|js|css|png|jpg|jpeg|pdf|ico|svg|webmanifest)(\?.*)?$/i));
 
   if (isBackendRoute) {
     const proxyReq = http.request({

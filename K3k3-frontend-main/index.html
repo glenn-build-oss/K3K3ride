@@ -137,10 +137,10 @@
       <div class="footer-section">
         <h4 id="footer-support-title">Support</h4>
         <ul>
-          <li><a href="https://wa.me/233504842974" target="_blank" id="footer-help">Help Center</a></li>
-          <li><a href="https://wa.me/233504842974" target="_blank" id="footer-safety">Safety</a></li>
-          <li><a href="https://wa.me/233504842974" target="_blank" id="footer-contact">Contact Us</a></li>
-          <li><a href="https://wa.me/233504842974" target="_blank" id="footer-faqs">FAQs</a></li>
+          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%20(%40k3k3rideservice)%2C%20I%20need%20assistance%20from%20the%20Help%20Center." target="_blank" rel="noopener noreferrer" id="footer-help" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support (@k3k3rideservice), I need assistance from the Help Center.')">Help Center</a></li>
+          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Safety%20Team%20(%40k3k3rideservice)%2C%20I%20have%20a%20safety%20inquiry%20or%20incident%20to%20report." target="_blank" rel="noopener noreferrer" id="footer-safety" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Safety Team (@k3k3rideservice), I have a safety inquiry or incident to report.')">Safety</a></li>
+          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20(%40k3k3rideservice)%2C%20I%20would%20like%20to%20contact%20support." target="_blank" rel="noopener noreferrer" id="footer-contact" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business (@k3k3rideservice), I would like to contact support.')">Contact Us</a></li>
+          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%20(%40k3k3rideservice)%2C%20I%20have%20a%20frequently%20asked%20question." target="_blank" rel="noopener noreferrer" id="footer-faqs" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support (@k3k3rideservice), I have a frequently asked question.')">FAQs</a></li>
         </ul>
       </div>
       <div class="footer-section">
@@ -405,6 +405,19 @@
         });
       }
     });
+
+    function openWhatsAppBusiness(event, message) {
+      const phone = '233504842974';
+      const encodedText = encodeURIComponent(message || 'Hello K3K3 Ride Business Support (@k3k3rideservice)');
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      if (isAndroid) {
+        // Try opening WhatsApp Business app directly on Android, with fallback to web link
+        const intentUrl = `intent://send?phone=${phone}&text=${encodedText}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`;
+        const fallbackUrl = `https://wa.me/${phone}?text=${encodedText}`;
+        const timeout = setTimeout(() => { window.open(fallbackUrl, '_blank'); }, 1200);
+        window.location.href = intentUrl;
+      }
+    }
   </script>
   <script src="about.js"></script>
 

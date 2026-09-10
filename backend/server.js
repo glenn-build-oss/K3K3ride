@@ -45,7 +45,21 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ─── Static uploads serving ───
 const path = require('path');
+const fs = require('fs');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/applications', express.static(path.join(__dirname, 'uploads', 'applications')));
+
+// Direct serving fallback for bare app_* document filenames or /admin/app_* requests
+app.use((req, res, next) => {
+  const baseFilename = path.basename(req.path);
+  if (baseFilename.startsWith('app_')) {
+    const appFilePath = path.join(__dirname, 'uploads', 'applications', baseFilename);
+    if (fs.existsSync(appFilePath)) {
+      return res.sendFile(appFilePath);
+    }
+  }
+  next();
+});
 
 // ─── Request logging ───
 app.use((req, res, next) => {

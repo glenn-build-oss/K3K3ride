@@ -1064,13 +1064,19 @@ function showRiderDetail(riderId){
   const resolveDocUrl = url => {
     if (!url) return '';
     if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\'))) {
+      return `/uploads/applications/${url}`;
+    }
+    if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
+      return url.startsWith('/') ? url : `/${url}`;
+    }
     return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const REQUIRED_DOCS = [
     {
       key: 'riderLicense',
-      name: "Rider's License",
+      name: "Rider License",
       icon: 'fa-id-badge',
       sub: 'Driver Authorization',
       url: rider.driver_license_url || rider.license_front || (rawDocs.find(d => d.key === 'riderLicense' || (d.name && d.name.toLowerCase().includes('license')))?.url)
@@ -1107,8 +1113,8 @@ function showRiderDetail(riderId){
 
   const processedRequiredDocs = REQUIRED_DOCS.map(def => {
     let url = def.url;
-    if (url && !url.startsWith('data:') && !url.startsWith('http') && !url.startsWith('/uploads/') && !url.startsWith('/')) {
-      url = null;
+    if (url && (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\')))) {
+      url = `/uploads/applications/${url}`;
     }
     const isPdf = url && (url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf'));
     return {
@@ -1148,7 +1154,7 @@ function showRiderDetail(riderId){
 
             ${doc.hasDoc ? `
               <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;overflow:hidden;background:var(--bg-4);position:relative;margin-bottom:8px"
-                onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                onclick="${doc.isPdf ? `window.open('${escapeJs(doc.resolvedUrl)}','_blank')` : `openLightbox('${escapeJs(doc.resolvedUrl)}','${escapeJs(doc.name)}')`}">
                 ${doc.isPdf ? `
                   <div style="padding:14px;text-align:center">
                     <i class="fas fa-file-pdf" style="font-size:1.8rem;color:var(--red)"></i>
@@ -1166,7 +1172,7 @@ function showRiderDetail(riderId){
                   <i class="fas fa-check-circle"></i> On File
                 </span>
                 <button type="button" style="background:none;border:none;color:var(--yellow);font-size:.63rem;font-weight:700;cursor:pointer;padding:0"
-                  onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                  onclick="${doc.isPdf ? `window.open('${escapeJs(doc.resolvedUrl)}','_blank')` : `openLightbox('${escapeJs(doc.resolvedUrl)}','${escapeJs(doc.name)}')`}">
                   ${doc.isPdf ? 'Open PDF' : 'Inspect'} <i class="fas fa-external-link-alt" style="font-size:.52rem"></i>
                 </button>
               </div>
@@ -1496,6 +1502,11 @@ function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
+function escapeJs(str){
+  if(!str) return '';
+  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
 /* ── Applications ── */
 let curAppFilter='all';
 let appSearchQuery='';
@@ -1690,6 +1701,12 @@ function showAppDetail(appId){
   const resolveDocUrl = url => {
     if (!url) return '';
     if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\'))) {
+      return `/uploads/applications/${url}`;
+    }
+    if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
+      return url.startsWith('/') ? url : `/${url}`;
+    }
     return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
@@ -1697,7 +1714,7 @@ function showAppDetail(appId){
   const REQUIRED_DOCS = [
     {
       key: 'riderLicense',
-      name: "Rider's License",
+      name: "Rider License",
       icon: 'fa-id-badge',
       sub: 'Driver Authorization',
       url: app.driver_license_url || (rawDocs.find(d => d.key === 'riderLicense' || (d.name && d.name.toLowerCase().includes('license')))?.url)
@@ -1735,8 +1752,8 @@ function showAppDetail(appId){
   // Resolve URLs & determine if image or pdf
   const processedRequiredDocs = REQUIRED_DOCS.map(def => {
     let url = def.url;
-    if (url && !url.startsWith('data:') && !url.startsWith('http') && !url.startsWith('/uploads/') && !url.startsWith('/')) {
-      url = null;
+    if (url && (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\')))) {
+      url = `/uploads/applications/${url}`;
     }
     const isPdf = url && (url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf'));
     return {
@@ -1758,26 +1775,26 @@ function showAppDetail(appId){
 
   const docsHtml = `
     <div style="margin-bottom:24px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-size:.75rem;font-weight:800;color:var(--white);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px">
-          <i class="fas fa-file-check" style="color:var(--yellow)"></i> Required Verification Documents
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:.76rem;font-weight:800;color:var(--white);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px">
+          <i class="fas fa-file-check" style="color:var(--yellow)"></i> Verification & Identity Documents
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:${uploadedCount >= 5 ? 'var(--green)' : 'var(--yellow)'};background:rgba(255,255,255,.05);padding:2px 8px;border-radius:12px;border:1px solid var(--border)">
-          ${uploadedCount} / 5 Provided
+        <span style="font-size:.72rem;font-weight:700;color:${uploadedCount >= 5 ? 'var(--green)' : 'var(--yellow)'};background:rgba(255,255,255,.05);padding:3px 10px;border-radius:12px;border:1px solid var(--border)">
+          ${uploadedCount} / 5 Uploaded
         </span>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">
         ${processedRequiredDocs.map(doc => `
-          <div style="background:var(--bg-3);border-radius:var(--r);border:1px solid ${doc.hasDoc ? 'var(--border-2)' : 'rgba(255,255,255,0.06)'};padding:10px;display:flex;flex-direction:column;justify-content:space-between;min-height:165px;position:relative">
+          <div style="background:var(--bg-3);border-radius:var(--r);border:1px solid ${doc.hasDoc ? 'var(--border-2)' : 'rgba(255,255,255,0.06)'};padding:12px;display:flex;flex-direction:column;justify-content:space-between;min-height:180px;position:relative">
             <div>
-              <div style="font-size:.65rem;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">${escapeHtml(doc.name)}</div>
+              <div style="font-size:.68rem;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">${escapeHtml(doc.name)}</div>
               <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px">${escapeHtml(doc.sub)}</div>
             </div>
 
             ${doc.hasDoc ? `
               <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;overflow:hidden;background:var(--bg-4);position:relative;margin-bottom:8px"
-                onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                onclick="${doc.isPdf ? `window.open('${escapeJs(doc.resolvedUrl)}','_blank')` : `openLightbox('${escapeJs(doc.resolvedUrl)}','${escapeJs(doc.name)}')`}">
                 ${doc.isPdf ? `
                   <div style="padding:14px;text-align:center">
                     <i class="fas fa-file-pdf" style="font-size:2rem;color:var(--red)"></i>
@@ -1795,7 +1812,7 @@ function showAppDetail(appId){
                   <i class="fas fa-check-circle"></i> Uploaded
                 </span>
                 <button type="button" style="background:none;border:none;color:var(--yellow);font-size:.65rem;font-weight:700;cursor:pointer;padding:0"
-                  onclick="${doc.isPdf ? `window.open('${doc.resolvedUrl}','_blank')` : `openLightbox('${doc.resolvedUrl}','${escapeHtml(doc.name)}')`}">
+                  onclick="${doc.isPdf ? `window.open('${escapeJs(doc.resolvedUrl)}','_blank')` : `openLightbox('${escapeJs(doc.resolvedUrl)}','${escapeJs(doc.name)}')`}">
                   ${doc.isPdf ? 'Open PDF' : 'Inspect'} <i class="fas fa-external-link-alt" style="font-size:.55rem"></i>
                 </button>
               </div>
@@ -1825,7 +1842,7 @@ function showAppDetail(appId){
               const isPdf = d.type === 'pdf' || (d.url && d.url.toLowerCase().includes('.pdf'));
               return `
                 <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center;cursor:pointer"
-                  onclick="${isPdf ? `window.open('${resUrl}','_blank')` : `openLightbox('${resUrl}','${escapeHtml(d.name || 'Attachment')}')`}">
+                  onclick="${isPdf ? `window.open('${escapeJs(resUrl)}','_blank')` : `openLightbox('${escapeJs(resUrl)}','${escapeJs(d.name || 'Attachment')}')`}">
                   ${isPdf ? `
                     <i class="fas fa-file-pdf" style="font-size:1.5rem;color:var(--red)"></i>
                   ` : `
