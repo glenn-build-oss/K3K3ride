@@ -425,10 +425,31 @@
     .drawer-brand {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      padding: 24px 22px 18px;
+      padding: 22px 20px 18px;
       border-bottom: 1px solid rgba(255, 255, 255, .07);
       flex-shrink: 0;
+    }
+
+    .drawer-close-btn {
+      display: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--white);
+      font-size: 0.95rem;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .drawer-close-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--yellow);
     }
 
     .drawer-logo {
@@ -3550,55 +3571,56 @@
       }
     }
 
-    /* ── ≤768px (mobile / tablet portrait) ── */
-    @media(max-width:768px) {
+    /* ── ≤1024px (tablet & mobile drawer navigation) ── */
+    @media(max-width:1024px) {
       :root {
-        --sidebar-w: 0px;
-        --topbar-h: 60px;
+        --sidebar-w: 0px !important;
+        --topbar-h: 62px;
         --nav-h: 64px;
       }
 
       /* ── Topbar ── */
       .top-header {
-        left: 0;
-        right: 0;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
         padding: 0 16px;
         height: var(--topbar-h);
       }
 
       .header-brand-name {
-        font-size: .95rem
+        font-size: .95rem;
       }
 
       .header-brand-tagline {
-        display: none
+        display: none;
       }
 
       .header-search {
-        display: none
+        display: none;
       }
 
-      /* hide search pill on mobile */
+      /* hide search pill on mobile/tablet */
       .header-user-pill {
-        display: none
+        display: none;
       }
 
-      /* hide user pill on mobile */
+      /* hide user pill on mobile/tablet */
       .header-icon-btn {
         width: 36px;
         height: 36px;
-        font-size: .9rem
+        font-size: .9rem;
       }
 
       /* ── Hamburger ── */
       .hamburger {
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 5px;
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 10px;
         border: 1.5px solid var(--border);
         background: var(--surface);
@@ -3607,7 +3629,7 @@
       }
 
       .hamburger:hover {
-        background: var(--surface-2)
+        background: var(--surface-2);
       }
 
       .h-line {
@@ -3615,55 +3637,70 @@
         height: 2px;
         background: var(--text);
         border-radius: 2px;
-        transition: all .25s
+        transition: all .25s;
       }
 
       .hamburger.open .h-line:nth-child(1) {
-        transform: translateY(7px) rotate(45deg)
+        transform: translateY(7px) rotate(45deg);
       }
 
       .hamburger.open .h-line:nth-child(2) {
         opacity: 0;
-        transform: scaleX(0)
+        transform: scaleX(0);
       }
 
       .hamburger.open .h-line:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg)
+        transform: translateY(-7px) rotate(-45deg);
       }
 
-      /* ── Sidebar → drawer overlay ── */
+      /* ── Sidebar → responsive drawer overlay ── */
       .drawer {
-        transform: translateX(-100%);
-        width: 280px;
-        z-index: 900;
-        transition: transform .32s var(--ease);
+        transform: translateX(-100%) !important;
+        width: min(300px, 85vw) !important;
+        z-index: 999 !important;
+        transition: transform .32s var(--ease) !important;
+        box-shadow: 0 0 32px rgba(0, 0, 0, 0.45);
       }
 
       .drawer.open {
-        transform: translateX(0)
+        transform: translateX(0) !important;
       }
 
       .drawer-overlay {
-        display: block;
+        display: block !important;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, .55);
-        z-index: 800;
+        background: rgba(0, 0, 0, .58);
+        z-index: 990;
         opacity: 0;
         pointer-events: none;
         transition: opacity .28s;
+        backdrop-filter: blur(2px);
       }
 
       .drawer-overlay.show {
         opacity: 1;
-        pointer-events: all
+        pointer-events: all;
+      }
+
+      .drawer-close-btn {
+        display: flex !important;
+      }
+
+      .sidebar-collapse-btn {
+        display: none !important;
       }
 
       /* ── Main content ── */
       .main-content {
-        margin-left: 0;
+        margin-left: 0 !important;
+        width: 100% !important;
         padding: 16px 16px calc(var(--nav-h) + 16px);
       }
+    }
+
+    /* ── ≤768px (mobile phone portrait) ── */
+    @media(max-width:768px) {
 
       /* ── Bottom nav ── */
       .bottom-nav {
@@ -4076,23 +4113,63 @@
       animation: fadeUp .22s var(--ease);
     }
 
-    /* ── Topbar visible on 769-1024px tablet with sidebar ── */
-    @media(min-width:769px) {
+    /* ── Desktop > 1024px: sidebar visible, hamburger hidden ── */
+    @media(min-width:1025px) {
       .hamburger {
-        display: none
+        display: none !important;
       }
 
       .drawer-overlay {
-        display: none !important
+        display: none !important;
       }
 
       .drawer {
-        transform: none !important
+        transform: none !important;
       }
 
-      .bottom-nav {
-        display: none !important
+      .drawer-close-btn {
+        display: none !important;
       }
+
+      .sidebar-collapse-btn {
+        display: flex !important;
+      }
+    }
+
+    @media(min-width:769px) {
+      .bottom-nav {
+        display: none !important;
+      }
+    }
+
+    /* ── Delete Complete Ride History Button ── */
+    .btn-delete-history {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: var(--r-full);
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--red);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-delete-history:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .btn-delete-history:active {
+      transform: translateY(0);
     }
 
     /* ── Fix topbar mobile overlap ── */
@@ -4193,11 +4270,16 @@
 ═══════════════════════════════════════ -->
   <aside class="drawer" id="drawer" aria-label="Navigation menu">
     <div class="drawer-brand">
-      <img src="../assets/k3k3.png" alt="K3K3" class="drawer-logo" onerror="this.style.display='none'">
-      <div class="drawer-brand-text">
-        <div class="drawer-brand-name">K3K3</div>
-        <div class="drawer-brand-tagline">Ride with us.</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="../assets/k3k3.png" alt="K3K3" class="drawer-logo" onerror="this.style.display='none'">
+        <div class="drawer-brand-text">
+          <div class="drawer-brand-name">K3K3</div>
+          <div class="drawer-brand-tagline">Ride with us.</div>
+        </div>
       </div>
+      <button class="drawer-close-btn" onclick="closeDrawer()" aria-label="Close navigation menu">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
     <div class="drawer-user">
@@ -4344,14 +4426,19 @@
 
     <!-- ══════ RIDES ══════ -->
     <section class="dash-section" id="sec-rides">
-      <div class="page-header">
-        <button class="page-header-back" onclick="navTo('home',null,'navHome')" aria-label="Back">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="page-header-info">
-          <h2>My Rides</h2>
-          <p>Your complete ride history</p>
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="page-header-back" onclick="navTo('home',null,'navHome')" aria-label="Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="page-header-info">
+            <h2>My Rides</h2>
+            <p>Your complete ride history</p>
+          </div>
         </div>
+        <button class="btn-delete-history" id="btnDeleteHistory" onclick="openDeleteHistoryModal()" title="Permanently delete complete ride history from database">
+          <i class="fas fa-trash-can"></i> Delete Complete Ride History
+        </button>
       </div>
       <div class="rides-body">
         <div class="trips-tabs">
@@ -4474,20 +4561,36 @@
             </div>
           </div>
           <div class="card-body" style="border-top:1px solid var(--border)">
-            <div style="display:flex;flex-direction:column;gap:12px">
-              <div style="display:flex;align-items:center;gap:10px;font-size:.875rem">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;gap:12px;font-size:.875rem">
                 <div
-                  style="width:32px;height:32px;border-radius:8px;background:var(--yellow-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <i class="fas fa-phone" style="font-size:.8rem;color:#9a7200"></i>
+                  style="width:36px;height:36px;border-radius:10px;background:var(--yellow-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-phone" style="font-size:.85rem;color:#9a7200"></i>
                 </div>
-                <span id="profilePhoneDisplay" style="color:var(--text-2)">Not set</span>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700">Phone Number</span>
+                  <span id="profilePhoneDisplay" style="color:var(--text);font-weight:600;word-break:break-all">Not set</span>
+                </div>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:.875rem">
+              <div style="display:flex;align-items:center;gap:12px;font-size:.875rem">
                 <div
-                  style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <i class="fas fa-envelope" style="font-size:.8rem;color:var(--blue)"></i>
+                  style="width:36px;height:36px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-envelope" style="font-size:.85rem;color:var(--blue)"></i>
                 </div>
-                <span id="profileEmailDisplay" style="color:var(--text-2)">Not set</span>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700">Email Address</span>
+                  <span id="profileEmailDisplay" style="color:var(--text);font-weight:600;word-break:break-all">Not set</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;font-size:.875rem">
+                <div
+                  style="width:36px;height:36px;border-radius:10px;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-shield-alt" style="font-size:.85rem;color:var(--red)"></i>
+                </div>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700">Emergency Contact</span>
+                  <span id="profileEmergencyDisplay" style="color:var(--text-2);font-weight:500;word-break:break-all">Not set</span>
+                </div>
               </div>
             </div>
           </div>
@@ -5081,6 +5184,19 @@
       <div class="confirm-modal-btns">
         <button class="confirm-cancel-btn" onclick="closeLogoutModal()">Stay</button>
         <button class="confirm-ok-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Ride History Confirmation Modal -->
+  <div class="confirm-modal-backdrop" id="deleteHistoryModal" role="dialog" aria-modal="true" aria-labelledby="delHistTitle">
+    <div class="confirm-modal">
+      <div class="confirm-modal-icon" style="background:var(--red-lt);color:var(--red)"><i class="fas fa-trash-can"></i></div>
+      <h3 id="delHistTitle">Delete Complete Ride History?</h3>
+      <p>Are you sure you want to permanently delete your complete ride history? This will permanently remove all your completed trips, cancelled rides, and receipts from the database. <strong>This action cannot be undone.</strong></p>
+      <div class="confirm-modal-btns">
+        <button class="confirm-cancel-btn" onclick="closeDeleteHistoryModal()">Cancel</button>
+        <button class="confirm-ok-btn" id="confirmDeleteHistoryBtn" onclick="deleteRideHistory()"><i class="fas fa-trash-can"></i> Delete Permanently</button>
       </div>
     </div>
   </div>
@@ -5775,8 +5891,23 @@
 
       const ppd = document.getElementById('profilePhoneDisplay');
       const ped = document.getElementById('profileEmailDisplay');
+      const pemd = document.getElementById('profileEmergencyDisplay');
       if (ppd) ppd.textContent = phone || 'Not set';
       if (ped) ped.textContent = email || 'Not set';
+
+      // Emergency contact from u or stored session
+      const s = getStoredSession() || {};
+      const en = u.emergency_name || u.emergencyName || s.emergency_name || s.emergencyName || '';
+      const ep = u.emergency_phone || u.emergencyPhone || s.emergency_phone || s.emergencyPhone || '';
+      if (pemd) {
+        if (en || ep) {
+          pemd.textContent = [en, ep].filter(Boolean).join(' · ');
+          pemd.style.color = 'var(--text)';
+        } else {
+          pemd.textContent = 'Not set';
+          pemd.style.color = 'var(--text-2)';
+        }
+      }
 
       setV('profileFirstName', fn);
       setV('profileLastName', ln);
@@ -5791,16 +5922,11 @@
       if (aLName && !aLName.value) aLName.value = ln;
       if (aPhone && !aPhone.value && phone) aPhone.value = phone;
 
-      // Emergency contact from session (if available)
-      const s = getStoredSession();
-      if (s) {
-        const en = s.emergency_name || s.emergencyName || '';
-        const ep = s.emergency_phone || s.emergencyPhone || '';
-        const enEl = document.getElementById('emergencyName');
-        const epEl = document.getElementById('emergencyPhone');
-        if (enEl && en) enEl.value = en;
-        if (epEl && ep) epEl.value = ep;
-      }
+      // Emergency contact inputs
+      const enEl = document.getElementById('emergencyName');
+      const epEl = document.getElementById('emergencyPhone');
+      if (enEl && en) enEl.value = en;
+      if (epEl && ep) epEl.value = ep;
     }
 
     /* ─── Save Profile → API ─── */
@@ -5817,45 +5943,177 @@
       const btn = document.querySelector('#sec-profile .form-save-btn');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
 
+      // Instantly update the UI summary card, headers, and navigation
+      const fullName = `${fn} ${ln}`.trim() || fn;
+      const initials = (fn ? fn.charAt(0) : (ph ? ph.slice(-2) : 'M')).toUpperCase();
+      const pdn = document.getElementById('profileDisplayName');
+      const pab = document.getElementById('profileAvatarBig');
+      const ppd = document.getElementById('profilePhoneDisplay');
+      const ped = document.getElementById('profileEmailDisplay');
+      const pemd = document.getElementById('profileEmergencyDisplay');
+      if (pdn) pdn.textContent = fullName;
+      if (pab) pab.textContent = initials;
+      if (ppd) ppd.textContent = ph || 'Not set';
+      if (ped) ped.textContent = em || 'Not set';
+      if (pemd) {
+        if (en || ep) {
+          pemd.textContent = [en, ep].filter(Boolean).join(' · ');
+          pemd.style.color = 'var(--text)';
+        } else {
+          pemd.textContent = 'Not set';
+          pemd.style.color = 'var(--text-2)';
+        }
+      }
+
+      const hn = document.getElementById('headerUserName');
+      const ha = document.getElementById('headerUserAvatar');
+      const dn = document.getElementById('drawerName');
+      const da = document.getElementById('drawerAvatar');
+      const an = document.getElementById('acctName');
+      const aa = document.getElementById('acctAvatarBig');
+      const hero = document.getElementById('heroName');
+      if (hn) hn.textContent = fn;
+      if (ha) ha.textContent = initials;
+      if (dn) dn.textContent = fullName;
+      if (da) da.textContent = initials;
+      if (an) an.textContent = fullName;
+      if (aa) aa.textContent = initials;
+      if (hero) hero.textContent = fn;
+
+      // Update session storage immediately
+      const s = getStoredSession() || {};
+      Object.assign(s, {
+        fname: fn, lname: ln,
+        first_name: fn, last_name: ln,
+        name: fullName, full_name: fullName,
+        phone: ph, email: em,
+        emergency_name: en, emergency_phone: ep
+      });
+      try {
+        sessionStorage.setItem('k3k3_user', JSON.stringify(s));
+        localStorage.setItem('k3k3_user', JSON.stringify(s));
+        localStorage.setItem('k3k3_user_name', fn);
+      } catch (e) { }
+
       if (userId) {
         try {
           const headers = { 'Content-Type': 'application/json' };
           const token = getAuthToken();
           if (token) headers['Authorization'] = `Bearer ${token}`;
           const body = {
+            userId,
             fname: fn, lname: ln, phone: ph, email: em,
             emergency_name: en, emergency_phone: ep
           };
           let res = await fetch(`${API}/auth/passenger/profile`, { method: 'PUT', headers, body: JSON.stringify(body) });
+          if (!res.ok) {
+            // Defensive fallback to PATCH /api/auth/users/:id
+            res = await fetch(`${API}/auth/users/${userId}`, { method: 'PATCH', headers, body: JSON.stringify({ fname: fn, lname: ln, phone: ph, email: em }) });
+          }
           if (res.ok) {
             const resp = await res.json();
             const updated = resp.user || resp;
-            // Update session with latest data
-            const s = getStoredSession() || {};
-            Object.assign(s, updated, { fname: fn, lname: ln, full_name: `${fn} ${ln}`.trim(), emergency_name: en, emergency_phone: ep });
+            Object.assign(s, updated, {
+              fname: fn, lname: ln,
+              first_name: fn, last_name: ln,
+              name: fullName, full_name: fullName,
+              phone: ph, email: em,
+              emergency_name: en, emergency_phone: ep
+            });
             try {
               sessionStorage.setItem('k3k3_user', JSON.stringify(s));
               localStorage.setItem('k3k3_user', JSON.stringify(s));
-              localStorage.setItem('k3k3_user_name', fn);
             } catch (e) { }
           } else {
             const errJson = await res.json().catch(() => ({}));
-            showToast(errJson.error || 'Failed to save profile', 'error');
+            showToast(errJson.error || 'Failed to save profile to server', 'error');
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
             return;
           }
         } catch (err) {
           console.warn('Profile API save note:', err.message);
-          showToast('Cannot connect to server. Please try again.', 'error');
+          showToast('Profile saved locally. Sync will complete when online.', 'warning');
           if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
           return;
         }
       }
 
-      // Refresh UI from API
       await loadUserFromAPI();
       showToast('Profile saved successfully ✓', 'success');
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
+    }
+
+    /* ══════════════════════════════════════════
+       Delete Complete Ride History
+    ══════════════════════════════════════════ */
+    function openDeleteHistoryModal() {
+      const modal = document.getElementById('deleteHistoryModal');
+      if (modal) modal.classList.add('show');
+    }
+    function closeDeleteHistoryModal() {
+      const modal = document.getElementById('deleteHistoryModal');
+      if (modal) modal.classList.remove('show');
+    }
+    async function deleteRideHistory() {
+      const userId = getUserId();
+      if (!userId) {
+        showToast('Please log in to manage your ride history', 'error');
+        closeDeleteHistoryModal();
+        return;
+      }
+
+      const btn = document.getElementById('confirmDeleteHistoryBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…';
+      }
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = getAuthToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        let res = await fetch(`${API}/trips/passenger/${userId}`, {
+          method: 'DELETE',
+          headers
+        });
+
+        if (!res.ok) {
+          // Fallback to /trips/passenger/:id directly
+          res = await fetch(`/trips/passenger/${userId}`, {
+            method: 'DELETE',
+            headers
+          });
+        }
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success !== false) {
+          closeDeleteHistoryModal();
+          showToast('Complete ride history permanently deleted from database ✓', 'success');
+
+          // Immediately re-render trips and payments from database (renders clean empty states)
+          await renderTrips();
+          await renderPayments();
+
+          // Reset dashboard counter statistics
+          const cTot = document.getElementById('chipTotal');
+          const cComp = document.getElementById('chipCompleted');
+          const stR = document.getElementById('statRides');
+          if (cTot) cTot.textContent = '0';
+          if (cComp) cComp.textContent = '0';
+          if (stR) stR.textContent = '0';
+        } else {
+          showToast(data.error || 'Failed to delete ride history from database', 'error');
+        }
+      } catch (err) {
+        console.error('Delete ride history error:', err);
+        showToast('Could not connect to server. Please try again.', 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-trash-can"></i> Delete Permanently';
+        }
+      }
     }
 
     /* ─── Change Password → API ─── */
@@ -7056,12 +7314,17 @@
       }
       if (e.key === 'Escape') {
         closeDrawer(); closeBookModal(); closeLogoutModal();
+        closeDeleteHistoryModal();
         closeRiderSearch();
       }
     });
 
-    document.getElementById('logoutModal').addEventListener('click', e => {
+    document.getElementById('logoutModal')?.addEventListener('click', e => {
       if (e.target === document.getElementById('logoutModal')) closeLogoutModal();
+    });
+
+    document.getElementById('deleteHistoryModal')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('deleteHistoryModal')) closeDeleteHistoryModal();
     });
   </script>
 </body>

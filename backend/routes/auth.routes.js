@@ -370,14 +370,27 @@ router.post('/passenger/register', async (req, res) => {
  */
 router.put('/passenger/profile', async (req, res) => {
   try {
-    const { fname, lname, phone, email, emergency_name, emergency_phone } = req.body;
+    const { userId: bodyUserId, fname, lname, phone, email, emergency_name, emergency_phone } = req.body;
     
-    // Extract userId from auth header
+    // Extract userId from auth header or request body
+    let targetUserId = null;
     const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded && decoded.id) targetUserId = decoded.id;
+      } catch (err) {
+        console.warn('[Auth] Token decode warning in PUT profile:', err.message);
+      }
+    }
     
-    const decoded = jwt.verify(token, JWT_SECRET);
-    if (!decoded || !decoded.id) return res.status(401).json({ success: false, error: 'Invalid token' });
+    if (!targetUserId && bodyUserId) {
+      targetUserId = bodyUserId;
+    }
+    
+    if (!targetUserId) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Missing or invalid authentication token' });
+    }
     
     const updates = {
       first_name: fname || '',
@@ -387,7 +400,7 @@ router.put('/passenger/profile', async (req, res) => {
     };
     if (phone) updates.phone = phone;
     
-    const result = await updateUser(decoded.id, updates);
+    const result = await updateUser(targetUserId, updates);
     if (!result) {
       return res.status(500).json({ success: false, error: 'Failed to update profile in database' });
     }

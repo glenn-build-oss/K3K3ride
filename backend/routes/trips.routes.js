@@ -11,6 +11,7 @@ const {
   getRideById, 
   getAllRides,
   getPassengerRides, 
+  deletePassengerRides,
   updateRideStatus,
   getAvailableRiders
 } = require('../services/supabase.service');
@@ -145,6 +146,42 @@ router.get('/passenger/:passengerId', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Failed to fetch rides' 
+    });
+  }
+});
+
+/**
+ * DELETE /api/trips/passenger/:passengerId
+ * Permanently delete complete ride history for a passenger
+ */
+router.delete('/passenger/:passengerId', async (req, res) => {
+  try {
+    const { passengerId } = req.params;
+    if (!passengerId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Passenger ID is required' 
+      });
+    }
+
+    const result = await deletePassengerRides(passengerId);
+    if (!result.success) {
+      return res.status(500).json({ 
+        success: false, 
+        error: result.error || 'Failed to delete ride history' 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Complete ride history permanently deleted from database',
+      deletedCount: result.count
+    });
+  } catch (error) {
+    console.error('[Trips] Error deleting passenger ride history:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to delete ride history' 
     });
   }
 });

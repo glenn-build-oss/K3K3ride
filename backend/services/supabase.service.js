@@ -409,13 +409,32 @@ async function updateRiderApplicationStatus(applicationId, status, reviewedBy, r
 
 // ─── RIDE OPERATIONS ───
 
+const ALLOWED_RIDE_COLUMNS = new Set([
+  'passenger_id', 'rider_id', 'vehicle_id',
+  'pickup_address', 'pickup_latitude', 'pickup_longitude', 'pickup_landmark',
+  'dropoff_address', 'dropoff_latitude', 'dropoff_longitude', 'dropoff_landmark',
+  'distance_km', 'estimated_duration_minutes', 'estimated_fare', 'actual_fare',
+  'status', 'requested_at', 'accepted_at', 'arrived_at', 'started_at',
+  'completed_at', 'cancelled_at', 'cancelled_by', 'cancellation_reason',
+  'passenger_notes', 'rider_notes'
+]);
+
 /**
  * Create a new ride
  */
 async function createRide(rideData) {
+  const safeRideData = {};
+  if (rideData && typeof rideData === 'object') {
+    for (const [key, value] of Object.entries(rideData)) {
+      if (ALLOWED_RIDE_COLUMNS.has(key)) {
+        safeRideData[key] = value;
+      }
+    }
+  }
+
   const { data, error } = await requireSupabase()
     .from('rides')
-    .insert([rideData])
+    .insert([safeRideData])
     .select()
     .single();
 
@@ -498,6 +517,24 @@ async function getPassengerRides(passengerId, limit = 20) {
   }
 
   return data;
+}
+
+/**
+ * Delete all rides for a passenger (permanently clear ride history from DB)
+ */
+async function deletePassengerRides(passengerId) {
+  const { data, error } = await requireSupabase()
+    .from('rides')
+    .delete()
+    .eq('passenger_id', passengerId)
+    .select();
+
+  if (error) {
+    console.error('[Supabase] Error deleting passenger rides:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, count: data ? data.length : 0 };
 }
 
 /**
@@ -1226,6 +1263,7 @@ module.exports = {
   getAllRides,
   updateRideStatus,
   getPassengerRides,
+  deletePassengerRides,
   getRiderRides,
   getAvailableRides,
   getAvailableRiders,
