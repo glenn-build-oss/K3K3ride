@@ -266,6 +266,99 @@ async function cleanupExpiredOTPs() {
   }
 }
 
+/**
+ * Get OTP logs for Moolre overview / admin audit
+ */
+async function getOTPLogs(limit = 100) {
+  try {
+    const { data, error } = await requireSupabase()
+      .from('otp_codes')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[Supabase] Error getting OTP logs:', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('[Supabase] getOTPLogs error:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Purge expired and used OTP records
+ */
+async function purgeExpiredOTPs() {
+  try {
+    const now = new Date().toISOString();
+    const { data, error } = await requireSupabase()
+      .from('otp_codes')
+      .delete()
+      .or(`used.eq.true,expires_at.lt.${now}`)
+      .select();
+
+    if (error) {
+      console.error('[Supabase] Error purging OTPs:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true, deleted: data ? data.length : 0 };
+  } catch (err) {
+    console.error('[Supabase] purgeExpiredOTPs error:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Get aggregated financial summary from rides/payments for Moolre overview
+ */
+async function getPaymentFinancials() {
+  try {
+    const { data: rides, error: ridesErr } = await requireSupabase()
+      .from('rides')
+      .select('id, estimated_fare, actual_fare, status, requested_at, completed_at, passenger_id, rider_id')
+      .order('requested_at', { ascending: false });
+
+    if (ridesErr) {
+      console.error('[Supabase] Error getting rides for financials:', ridesErr);
+    }
+
+    const allRides = rides || [];
+    const completed = allRides.filter(r => r.status === 'completed');
+    const pendingRides = allRides.filter(r => r.status === 'requested' || r.status === 'accepted' || r.status === 'in_progress');
+    const failedRides = allRides.filter(r => r.status === 'cancelled');
+
+    const totalCollected = completed.reduce((sum, r) => sum + parseFloat(r.actual_fare || r.estimated_fare || 0), 0);
+    const totalCommission = totalCollected * 0.10; // 10% platform fee
+    const totalDisbursed = totalCollected * 0.90;  // 90% rider payout
+
+    return {
+      success: true,
+      total_collected: totalCollected,
+      total_commission: totalCommission,
+      total_disbursed: totalDisbursed,
+      completed_count: completed.length,
+      pending_payments: pendingRides.length,
+      failed_payments: failedRides.length,
+      total_trips: allRides.length
+    };
+  } catch (err) {
+    console.error('[Supabase] getPaymentFinancials error:', err.message);
+    return {
+      success: false,
+      total_collected: 0,
+      total_commission: 0,
+      total_disbursed: 0,
+      completed_count: 0,
+      pending_payments: 0,
+      failed_payments: 0,
+      total_trips: 0
+    };
+  }
+}
+
 // ─── RIDER APPLICATION OPERATIONS ───
 
 /**
@@ -414,7 +507,6 @@ const ALLOWED_RIDE_COLUMNS = new Set([
   'pickup_address', 'pickup_latitude', 'pickup_longitude', 'pickup_landmark',
   'dropoff_address', 'dropoff_latitude', 'dropoff_longitude', 'dropoff_landmark',
   'distance_km', 'estimated_duration_minutes', 'estimated_fare', 'actual_fare',
-  'payment_method', 'ride_type',
   'status', 'requested_at', 'accepted_at', 'arrived_at', 'started_at',
   'completed_at', 'cancelled_at', 'cancelled_by', 'cancellation_reason',
   'passenger_notes', 'rider_notes'
@@ -1252,6 +1344,8 @@ module.exports = {
   storeOTP,
   verifyOTP,
   cleanupExpiredOTPs,
+  getOTPLogs,
+  purgeExpiredOTPs,
 
   // Rider application operations
   createRiderApplication,
@@ -1285,6 +1379,7 @@ module.exports = {
   // Payment operations
   createPayment,
   updatePaymentStatus,
+  getPaymentFinancials,
 
   // Notification operations
   createNotification,

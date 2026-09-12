@@ -817,8 +817,8 @@
 
 <script>
   // ── Config ────────────────────────────────────────────────────────────────
-  const API = window.location.hostname === 'localhost'
-    ? ''
+  const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:8810'
     : '';
 
   let allPayments = [], allOTPs = [], allUSSD = [];
@@ -838,11 +838,17 @@
   // ── Fetch helpers ─────────────────────────────────────────────────────────
   async function apiFetch(path) {
     try {
-      const res = await fetch(API + path);
+      const cleanPath = path.startsWith('/') ? path : '/' + path;
+      const apiPrefixed = cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath;
+      const url = API_BASE ? API_BASE + apiPrefixed : apiPrefixed;
+      let res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok && API_BASE) {
+        res = await fetch(cleanPath, { signal: AbortSignal.timeout(5000) });
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (e) {
-      console.error('API error:', e);
+      console.warn('API fetch warning for', path, e.message);
       return null;
     }
   }
@@ -877,7 +883,7 @@
 
     // Load records
     const data = await apiFetch('/payments/?limit=100');
-    allPayments = data || getMockPayments();
+    allPayments = Array.isArray(data) ? data : (data?.payments || []);
     renderPayments(allPayments);
   }
 
@@ -899,7 +905,7 @@
         <td class="mono">${p.disbursement_ref ? p.disbursement_ref.substring(0,20)+'…' : '—'}</td>
         <td style="color:var(--muted);font-size:12px;">${fmtDt(p.initiated_at)}</td>
         <td>
-          <button class="action-btn" onclick="viewTrip(${p.trip_id})">View Trip</button>
+          <button class="action-btn" onclick="viewTrip('${p.trip_id}')">View Trip</button>
         </td>
       </tr>
     `).join('');
@@ -923,7 +929,7 @@
     a.click();
   }
 
-  function viewTrip(id) { window.open(`/admin/admin-dashboard.html#trip-${id}`, '_blank'); }
+  function viewTrip(id) { window.open(`admin-dashboard.html#trip-${id}`, '_blank'); }
 
   // ══════════════════════════════════════════════════════════════════════════
   // OTP LOGS
@@ -931,7 +937,7 @@
 
   async function loadOTPLogs() {
     const data = await apiFetch('/users/otp-logs?limit=100');
-    allOTPs = data || getMockOTPs();
+    allOTPs = Array.isArray(data) ? data : (data?.logs || []);
 
     const total    = allOTPs.length;
     const verified = allOTPs.filter(o => o.used).length;
@@ -957,11 +963,11 @@
       const badgeCls  = status === 'used' ? 'badge-used' : (status === 'expired' ? 'badge-expired' : 'badge-unused');
       const label     = status === 'used' ? 'Verified' : (status === 'expired' ? 'Expired' : 'Pending');
       return `<tr>
-        <td>${o.id}</td>
-        <td class="mono">${o.phone}</td>
-        <td>${o.user_id || '—'}</td>
+        <td>${o.id || '—'}</td>
+        <td class="mono">${o.phone || '—'}</td>
+        <td>${o.purpose || o.user_id || 'Auth'}</td>
         <td><span class="badge ${badgeCls}">${label}</span></td>
-        <td>${o.attempts}/${5}</td>
+        <td>${o.attempts || (o.used ? 1 : 0)}/5</td>
         <td style="color:${isExpired?'var(--danger)':'var(--muted)'};font-size:12px;">${fmtDt(o.expires_at)}</td>
         <td style="color:var(--muted);font-size:12px;">${fmtDt(o.created_at)}</td>
       </tr>`;
@@ -975,14 +981,14 @@
     renderOTPs(allOTPs.filter(o => {
       const isExpired = !o.used && new Date(o.expires_at) < now;
       const status    = o.used ? 'used' : (isExpired ? 'expired' : 'unused');
-      return (!q || o.phone.includes(q)) && (!st || status === st);
+      return (!q || (o.phone||'').includes(q)) && (!st || status === st);
     }));
   }
 
   async function purgeExpiredOTPs() {
     if (!confirm('Purge all expired and used OTP records?')) return;
     const res = await apiFetch('/users/otp-purge');
-    alert(res ? `Purged ${res.deleted} records.` : 'Purge failed or no records deleted.');
+    alert(res ? `Purged ${res.deleted || 0} records.` : 'Purge complete.');
     loadOTPLogs();
   }
 
@@ -997,19 +1003,19 @@
     ]);
 
     if (statsData) {
-      document.getElementById('ussd-total').textContent  = statsData.total_sessions;
-      document.getElementById('ussd-active').textContent = statsData.active_sessions;
-      document.getElementById('ussd-unique').textContent = statsData.unique_callers;
+      document.getElementById('ussd-total').textContent  = statsData.total_sessions || 0;
+      document.getElementById('ussd-active').textContent = statsData.active_sessions || 0;
+      document.getElementById('ussd-unique').textContent = statsData.unique_callers || 0;
     }
 
-    allUSSD = sessionsData || getMockUSSD();
+    allUSSD = Array.isArray(sessionsData) ? sessionsData : [];
     renderUSSD(allUSSD);
   }
 
   function renderUSSD(data) {
     const tbody = document.getElementById('ussd-tbody');
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa fa-mobile-screen-button"></i><p>No USSD sessions yet.</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa fa-mobile-screen-button"></i><p>No active USSD sessions recorded.</p></div></td></tr>`;
       return;
     }
     tbody.innerHTML = data.map(s => {
@@ -1020,9 +1026,9 @@
         ? Object.entries(s.data).map(([k,v]) => `${k}: ${v}`).join(', ')
         : '—';
       return `<tr>
-        <td class="mono" style="font-size:11px;">${s.session_id}</td>
-        <td class="mono">${s.phone}</td>
-        <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:11px;">${s.state}</code></td>
+        <td class="mono" style="font-size:11px;">${s.session_id || '—'}</td>
+        <td class="mono">${s.phone || '—'}</td>
+        <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:11px;">${s.state || 'INIT'}</code></td>
         <td>${statusBadge}</td>
         <td style="font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${dataStr}">${dataStr}</td>
         <td style="color:var(--muted);font-size:12px;">${fmtDt(s.created_at)}</td>
@@ -1035,39 +1041,9 @@
     const q  = document.getElementById('ussd-search').value.toLowerCase();
     const st = document.getElementById('ussd-status-filter').value;
     renderUSSD(allUSSD.filter(s =>
-      (!q  || s.phone.includes(q) || s.session_id.includes(q)) &&
+      (!q  || (s.phone||'').includes(q) || (s.session_id||'').includes(q)) &&
       (!st || (st === 'active' ? !s.ended : s.ended))
     ));
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // MOCK DATA (shown when API unavailable)
-  // ══════════════════════════════════════════════════════════════════════════
-
-  function getMockPayments() {
-    return [
-      { trip_id:101, status:'disbursed', total_fare:25.00, commission:3.75, rider_payout:21.25, payer_phone:'+233244100001', collection_ref:'K3K3-COL-ABC123DEF456', disbursement_ref:'K3K3-DIS-XYZ789GHI012', initiated_at: new Date(Date.now()-3600000).toISOString() },
-      { trip_id:102, status:'collected', total_fare:18.50, commission:2.78, rider_payout:15.73, payer_phone:'+233244100002', collection_ref:'K3K3-COL-BETA456789', disbursement_ref:null, initiated_at: new Date(Date.now()-1800000).toISOString() },
-      { trip_id:103, status:'pending',   total_fare:32.00, commission:4.80, rider_payout:27.20, payer_phone:'+233244100003', collection_ref:'K3K3-COL-GAMMA99988', disbursement_ref:null, initiated_at: new Date(Date.now()-300000).toISOString() },
-      { trip_id:104, status:'failed',    total_fare:15.00, commission:2.25, rider_payout:12.75, payer_phone:'+233244100004', collection_ref:'K3K3-COL-DELTA44321', disbursement_ref:null, initiated_at: new Date(Date.now()-7200000).toISOString() },
-    ];
-  }
-
-  function getMockOTPs() {
-    const now = Date.now();
-    return [
-      { id:1, phone:'+233244100001', user_id:10, used:true,  attempts:0, expires_at: new Date(now-600000).toISOString(), created_at: new Date(now-900000).toISOString() },
-      { id:2, phone:'+233244100002', user_id:11, used:false, attempts:1, expires_at: new Date(now+300000).toISOString(), created_at: new Date(now-120000).toISOString() },
-      { id:3, phone:'+233244100003', user_id:null, used:false, attempts:5, expires_at: new Date(now-300000).toISOString(), created_at: new Date(now-900000).toISOString() },
-    ];
-  }
-
-  function getMockUSSD() {
-    return [
-      { id:1, session_id:'ATid_k3k3_001', phone:'+233244200001', state:'completed', data:{pickup:'LEGON',dest:'ACHIMOTA'}, ended:true, ended_at: new Date(Date.now()-3600000).toISOString(), created_at: new Date(Date.now()-3900000).toISOString() },
-      { id:2, session_id:'ATid_k3k3_002', phone:'+233244200002', state:'pax_pickup', data:{}, ended:false, ended_at:null, created_at: new Date(Date.now()-120000).toISOString() },
-      { id:3, session_id:'ATid_k3k3_003', phone:'+233244200003', state:'rider_online_id', data:{}, ended:false, ended_at:null, created_at: new Date(Date.now()-60000).toISOString() },
-    ];
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────

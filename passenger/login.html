@@ -1165,7 +1165,39 @@
                     const realFullName = data.user.fullName || (data.user.firstName ? `${data.user.firstName} ${data.user.lastName || ''}`.trim() : '') || signupName || '';
                     const realFirstName = data.user.firstName || (realFullName ? realFullName.split(' ')[0] : '') || '';
                     const realLastName = data.user.lastName || (realFullName ? realFullName.split(' ').slice(1).join(' ') : '') || '';
-                    const displayName = realFirstName || realFullName || data.user.phone || 'Member';
+                    const isRider = data.user?.role === 'rider' || data.user?.role_type === 'rider' || data.isRider;
+                    if (isRider) {
+                        try {
+                            const riderSession = {
+                                riderId: data.user.id,
+                                id: data.user.id,
+                                dbRiderId: data.user.id,
+                                userId: data.user.id,
+                                phone: data.user.phone,
+                                firstName: realFirstName || 'Rider',
+                                lastName: realLastName || '',
+                                fullName: realFullName || displayName,
+                                email: data.user.email || '',
+                                token: data.token,
+                                loginTime: new Date().toISOString(),
+                                status: data.user.status || data.status || 'approved',
+                                role: 'rider'
+                            };
+                            localStorage.setItem('riderSession', JSON.stringify(riderSession));
+                            sessionStorage.setItem('riderSession', JSON.stringify(riderSession));
+                            localStorage.setItem('k3k3_user_type', 'rider');
+                            localStorage.setItem('k3k3_token', data.token);
+                            sessionStorage.removeItem('k3k3_signup_name');
+                        } catch (err) {
+                            console.warn('Rider storage error:', err);
+                        }
+
+                        showToast(`Welcome Rider ${displayName}! Taking you to your Rider Dashboard.`, 'success');
+                        setTimeout(() => {
+                            window.location.href = '../rider/dashboard.html';
+                        }, 900);
+                        return;
+                    }
 
                     try {
                         localStorage.setItem('k3k3_user', JSON.stringify({

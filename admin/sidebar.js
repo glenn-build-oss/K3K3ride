@@ -27,6 +27,7 @@
       { href: 'rider-management.html',   icon: 'fa-id-card',    label: 'Rider Management'   },
       { href: 'live-riders.html',        icon: 'fa-motorcycle', label: 'Live Riders'        },
       { href: 'payment-management.html', icon: 'fa-credit-card',label: 'Payments'           },
+      { href: 'moolre-overview.html',    icon: 'fa-bolt',       label: 'Moolre Overview'    },
     ]},
     { group: 'SYSTEM', items: [
       { href: 'system-settings.html',    icon: 'fa-cog',        label: 'Settings'           },

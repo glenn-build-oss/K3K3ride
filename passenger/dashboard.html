@@ -5562,7 +5562,8 @@
      JAVASCRIPT
 ═══════════════════════════════════════ -->
   <script>
-    const API = '/api';
+    const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8810' : '';
+    const API = API_BASE ? `${API_BASE}/api` : '/api';
 
     /* ─── State ─── */
     let currentSection = 'home';
@@ -5837,6 +5838,30 @@
        Init
     ══════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', () => {
+      // Role Guard: If logged-in user is a rider, redirect directly to rider dashboard!
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('k3k3_user') || sessionStorage.getItem('k3k3_user') || '{}');
+        const userType = localStorage.getItem('k3k3_user_type') || sessionStorage.getItem('k3k3_user_type');
+        const riderSession = JSON.parse(localStorage.getItem('riderSession') || sessionStorage.getItem('riderSession') || '{}');
+        if (storedUser.role === 'rider' || storedUser.role_type === 'rider' || userType === 'rider' || riderSession.role === 'rider' || riderSession.riderId) {
+          const synthRiderSession = {
+            riderId: riderSession.riderId || storedUser.id,
+            id: riderSession.id || storedUser.id,
+            phone: riderSession.phone || storedUser.phone,
+            firstName: riderSession.firstName || storedUser.fname || storedUser.first_name || 'Rider',
+            lastName: riderSession.lastName || storedUser.lname || storedUser.last_name || '',
+            email: riderSession.email || storedUser.email || '',
+            token: riderSession.token || localStorage.getItem('k3k3_token') || sessionStorage.getItem('k3k3_token'),
+            status: 'approved',
+            role: 'rider'
+          };
+          localStorage.setItem('riderSession', JSON.stringify(synthRiderSession));
+          sessionStorage.setItem('riderSession', JSON.stringify(synthRiderSession));
+          window.location.replace('../rider/dashboard.html');
+          return;
+        }
+      } catch (_) {}
+
       loadUserFromAPI();
       loadSettings();
       renderDrivers();
@@ -6815,7 +6840,7 @@
       if (passengerSocket && passengerSocket.connected) return;
 
       try {
-        passengerSocket = io({
+        passengerSocket = io(API_BASE, {
           path: '/socket.io',
           transports: ['websocket', 'polling'],
           reconnection: true,
@@ -6896,15 +6921,22 @@
       const aVeh  = document.getElementById('assignedRiderVehicle');
       const aCall = document.getElementById('assignedRiderCall');
       const aAva  = document.getElementById('assignedRiderAvatar');
+      const aEta  = document.getElementById('assignedRiderETA');
+      const hEta  = document.getElementById('homeAtETA');
       if (aName) aName.textContent = riderName;
       if (aVeh)  aVeh.textContent  = vehicle;
       if (aCall) aCall.href = phone ? `tel:${phone}` : 'javascript:void(0)';
       if (aAva)  aAva.textContent  = riderName.charAt(0).toUpperCase();
 
+      // Display immediate arrival ETA
+      const initialEta = data.etaText || (data.etaMinutes ? `~${data.etaMinutes} min` : '~3 min');
+      if (aEta) aEta.textContent = initialEta;
+      if (hEta) hEta.textContent = initialEta;
+
       // Render Home Active Trip Card
       renderHomeActiveTrip(data);
 
-      showToast(`Rider ${riderName} assigned! Keke is en route.`, 'success');
+      showToast(`Rider ${riderName} assigned! Arriving in ${initialEta}.`, 'success');
     }
 
     function handleRiderLocationPing(coords) {
@@ -6968,6 +7000,10 @@
       document.getElementById('homeAtFare').textContent    = '₵' + fare;
       document.getElementById('homeAtAvatar').textContent  = name.charAt(0).toUpperCase();
       document.getElementById('homeAtCall').href          = r.phone ? `tel:${r.phone}` : 'javascript:void(0)';
+
+      const initialEta = tripData.etaText || (tripData.etaMinutes ? `~${tripData.etaMinutes} min` : '~3 min');
+      const hEta = document.getElementById('homeAtETA');
+      if (hEta) hEta.textContent = initialEta;
 
       card.style.display = 'block';
     }

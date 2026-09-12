@@ -2376,7 +2376,8 @@
   }
 </script>
 <script>
-const API  = '';
+const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8810' : '';
+const API  = API_BASE ? `${API_BASE}/api` : '';
 const GOAL = 300; // daily earnings target in GH₵
 
 /* ── State ─────────────────────────────── */
@@ -2417,6 +2418,29 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadSession() {
   try { session = JSON.parse(sessionStorage.getItem('riderSession') || localStorage.getItem('riderSession') || 'null'); }
   catch(e) { session = null; }
+
+  // Fallback: If authenticated user in k3k3_user has rider role, automatically synthesize session
+  if (!session) {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('k3k3_user') || sessionStorage.getItem('k3k3_user') || 'null');
+      if (storedUser && (storedUser.role === 'rider' || storedUser.role_type === 'rider')) {
+        session = {
+          riderId: storedUser.id,
+          id: storedUser.id,
+          dbRiderId: storedUser.id,
+          phone: storedUser.phone,
+          firstName: storedUser.fname || storedUser.first_name || 'Rider',
+          lastName: storedUser.lname || storedUser.last_name || '',
+          email: storedUser.email || '',
+          token: localStorage.getItem('k3k3_token') || sessionStorage.getItem('k3k3_token'),
+          status: 'approved',
+          role: 'rider'
+        };
+        localStorage.setItem('riderSession', JSON.stringify(session));
+        sessionStorage.setItem('riderSession', JSON.stringify(session));
+      }
+    } catch (_) {}
+  }
 
   // Approval gate: If rider account is pending review, redirect to pending landing page
   if (session && (session.status === 'pending' || session.status === 'under_review' || session.status === 'pending_review')) {
@@ -2815,7 +2839,7 @@ function connectWS() {
   if (typeof io !== 'undefined') {
     if (wsConn && wsConn.connected) return;
     try {
-      wsConn = io({
+      wsConn = io(API_BASE, {
         path: '/socket.io',
         transports: ['websocket', 'polling'],
         reconnection: true,

@@ -74,6 +74,15 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Admin joins management room for live fleet & trip telemetry
+  socket.on('admin:join', () => {
+    socket.join('admin');
+    socket.emit('admin:joined', {
+      onlineCount: dispatchService.getOnlineCount(),
+      riders: dispatchService.getAvailableRidersSummary()
+    });
+  });
+
   // Client subscribes to trip updates
   socket.on('trip:join', (data) => {
     if (data?.tripId) {
@@ -209,6 +218,10 @@ app.use('/trips', tripsRoutes);
 app.use('/', adminRoutes);
 
 // ─── Root endpoint ───
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'K3K3 Backend API', timestamp: new Date().toISOString() });
+});
+
 app.get('/', (req, res) => {
   res.json({
     service: 'K3K3 Backend API',

@@ -81,9 +81,14 @@ class DispatchService {
 
     console.log(`[Dispatch] Rider ${riderId} (${riderState.name}) is ONLINE. (Total online: ${this.riders.size})`);
 
-    // Broadcast updated online count to all connected clients
+    // Broadcast updated online count to all connected clients & admin channel
     if (this.io) {
       this.io.emit('riders:pool_update', {
+        onlineCount: this.getOnlineCount(),
+        riders: this.getAvailableRidersSummary()
+      });
+      this.io.to('admin').emit('admin:fleet_update', {
+        rider: riderState,
         onlineCount: this.getOnlineCount(),
         riders: this.getAvailableRidersSummary()
       });
@@ -157,6 +162,11 @@ class DispatchService {
         onlineCount: this.getOnlineCount(),
         riders: this.getAvailableRidersSummary()
       });
+      this.io.to('admin').emit('admin:fleet_update', {
+        offlineRiderId: riderId,
+        onlineCount: this.getOnlineCount(),
+        riders: this.getAvailableRidersSummary()
+      });
     }
 
     return true;
@@ -201,6 +211,7 @@ class DispatchService {
       list.push({
         riderId: rider.riderId,
         name: rider.name,
+        phone: rider.phone,
         lat: rider.lat,
         lng: rider.lng,
         heading: rider.heading,
@@ -210,6 +221,21 @@ class DispatchService {
       });
     }
     return list;
+  }
+
+  /**
+   * Get map of online riders with ID and normalized phone indexing
+   */
+  getOnlineRidersMap() {
+    const map = new Map();
+    for (const [id, r] of this.riders.entries()) {
+      map.set(String(id), r);
+      if (r.phone) {
+        const norm = String(r.phone).replace(/\D/g, '').slice(-9);
+        if (norm) map.set(norm, r);
+      }
+    }
+    return map;
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -478,14 +504,24 @@ class DispatchService {
       rider.status = 'busy';
     }
 
+    // Calculate real-time arrival ETA using Haversine formula
+    const pLat = typeof updatedRide?.pickup_latitude === 'number' ? updatedRide.pickup_latitude : (typeof cascade?.ride?.pickup_latitude === 'number' ? cascade.ride.pickup_latitude : DEFAULT_CAMPUS_LAT);
+    const pLng = typeof updatedRide?.pickup_longitude === 'number' ? updatedRide.pickup_longitude : (typeof cascade?.ride?.pickup_longitude === 'number' ? cascade.ride.pickup_longitude : DEFAULT_CAMPUS_LNG);
+    const distKm = this.calculateDistanceKm(rider.lat, rider.lng, pLat, pLng);
+    const etaMinutes = Math.max(1, Math.round((distKm / 20) * 60) + 1); // 20 km/h keke speed + 1 min prep
+    const etaText = `~${etaMinutes} min`;
+
     // 3. Emit real-time updates via Socket.io
     if (this.io) {
       const passengerId = cascade?.ride?.passenger_id || updatedRide?.passenger_id;
 
-      // Notify passenger that rider has been assigned
+      // Notify passenger that rider has been assigned with live arrival ETA
       const passengerPayload = {
         tripId,
         status: 'accepted',
+        etaMinutes,
+        etaText,
+        distanceKm: Math.round(distKm * 10) / 10,
         rider: {
           riderId: rider.riderId,
           name: rider.name,
@@ -520,6 +556,23 @@ class DispatchService {
 
       // Dismiss card for any other riders
       this.io.to('riders:online').emit('trip:offer_taken', { tripId });
+
+      // Notify admin system of live accepted trip
+      this.io.to('admin').emit('admin:trip_update', {
+        type: 'trip_accepted',
+        tripId,
+        status: 'accepted',
+        rider: {
+          riderId: rider.riderId,
+          name: rider.name,
+          phone: rider.phone
+        },
+        pickup: passengerPayload.pickup,
+        drop: passengerPayload.drop,
+        fare: passengerPayload.fare,
+        etaText,
+        acceptedAt: new Date().toISOString()
+      });
 
       // Broadcast updated pool availability
       this.io.emit('riders:pool_update', {
@@ -570,6 +623,16 @@ class DispatchService {
         status: 'completed',
         actualFare
       });
+
+      // Notify admin system of completed trip & revenue update
+      this.io.to('admin').emit('admin:trip_update', {
+        type: 'trip_completed',
+        tripId,
+        status: 'completed',
+        actualFare: actualFare || updatedRide?.actual_fare || updatedRide?.estimated_fare || 0,
+        completedAt: new Date().toISOString()
+      });
+
       if (rider) {
         this.io.emit('riders:pool_update', {
           onlineCount: this.getOnlineCount(),

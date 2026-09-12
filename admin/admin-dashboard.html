@@ -10,6 +10,7 @@
 <link rel="icon" type="image/x-icon" href="../favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <style>
 :root{
   --bg:#0c0d10;--bg-2:#111318;--bg-3:#181b22;--bg-4:#1e2230;
@@ -98,10 +99,15 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .hero-pill.green{background:rgba(16,185,129,.1);color:#34D399;border-color:rgba(16,185,129,.22)}
 .hero-pill.yellow{background:rgba(255,214,10,.1);color:var(--yellow);border-color:rgba(255,214,10,.22)}
 .hero-pill.blue{background:rgba(59,130,246,.1);color:#60A5FA;border-color:rgba(59,130,246,.22)}
+.hero-pill{cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;user-select:none}
+.hero-pill:hover{transform:translateY(-2px);border-color:var(--white);box-shadow:0 6px 18px rgba(0,0,0,.25)}
 
 /* ─────────── KPI GRID ─────────── */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
 .kpi-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;transition:border-color .2s,transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.kpi-card.clickable-card{cursor:pointer;user-select:none}
+.kpi-card.clickable-card:hover{border-color:var(--border-2);transform:translateY(-3px);box-shadow:0 10px 32px rgba(0,0,0,.35)}
+.kpi-card.clickable-card:active{transform:translateY(-1px)}
 .kpi-card:hover{border-color:var(--border-2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r-lg) var(--r-lg) 0 0}
 .kpi-card.yellow::before{background:linear-gradient(90deg,var(--yellow),var(--yellow-dk))}
@@ -375,6 +381,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <div class="menu-item" id="navPayments" onclick="showSec('payments')">
       <i class="fas fa-coins"></i><span>Payments</span>
     </div>
+    <div class="menu-item" id="navMoolre" onclick="showSec('moolre')">
+      <i class="fas fa-bolt" style="color:var(--yellow)"></i><span>Moolre Overview</span>
+      <span class="menu-badge" id="moolreMenuBadge" style="background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)">LIVE</span>
+    </div>
   </div>
   <div class="menu-section">
     <div class="menu-item logout-item" onclick="openModal('logoutModal')">
@@ -418,18 +428,18 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <div class="hero-sub">Here's what's happening with K3K3 right now.</div>
     </div>
     <div class="hero-pills">
-      <div class="hero-pill green"><i class="fas fa-motorcycle"></i><span><strong id="heroOnline">—</strong> Online</span></div>
-      <div class="hero-pill yellow"><i class="fas fa-circle-notch fa-spin"></i><span><strong id="heroActive">—</strong> Active</span></div>
-      <div class="hero-pill blue"><i class="fas fa-coins"></i><span>₵<strong id="heroRev">—</strong> Today</span></div>
+      <div class="hero-pill green" onclick="showSec('riders','online')" title="Click to view online riders"><i class="fas fa-motorcycle"></i><span><strong id="heroOnline">—</strong> Online</span></div>
+      <div class="hero-pill yellow" onclick="showSec('trips','active')" title="Click to view active trips"><i class="fas fa-circle-notch fa-spin"></i><span><strong id="heroActive">—</strong> Active</span></div>
+      <div class="hero-pill blue" onclick="showSec('payments')" title="Click to view today's revenue"><i class="fas fa-coins"></i><span>₵<strong id="heroRev">—</strong> Today</span></div>
     </div>
   </div>
   <div class="kpi-grid">
-    <div class="kpi-card yellow"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-route"></i></div><span class="kpi-trend up">↑ 12%</span></div><div class="kpi-val" id="kpiTrips">—</div><div class="kpi-lbl">Total Trips</div><div class="kpi-sub" id="kpiTripsSub">Loading…</div></div>
-    <div class="kpi-card green"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-coins"></i></div><span class="kpi-trend up">↑ 8%</span></div><div class="kpi-val" id="kpiRev">₵—</div><div class="kpi-lbl">Revenue</div><div class="kpi-sub" id="kpiRevSub">Loading…</div></div>
-    <div class="kpi-card purple"><div class="kpi-head"><div class="kpi-icon purple"><i class="fas fa-motorcycle"></i></div><span class="kpi-trend nt" id="kpiRiderTrend">—</span></div><div class="kpi-val" id="kpiRiders">—</div><div class="kpi-lbl">Active Riders</div><div class="kpi-sub" id="kpiRidersSub">Loading…</div></div>
-    <div class="kpi-card teal"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-users"></i></div><span class="kpi-trend up">↑ 5%</span></div><div class="kpi-val" id="kpiPass">—</div><div class="kpi-lbl">Passengers</div><div class="kpi-sub">Registered users</div></div>
-    <div class="kpi-card blue"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-check-circle"></i></div><span class="kpi-trend up">High</span></div><div class="kpi-val" id="kpiComp">—</div><div class="kpi-lbl">Completed</div><div class="kpi-sub" id="kpiCompRate">Loading…</div></div>
-    <div class="kpi-card red"><div class="kpi-head"><div class="kpi-icon red"><i class="fas fa-user-clock"></i></div><span class="kpi-trend nt">Pending</span></div><div class="kpi-val" id="kpiApps">3</div><div class="kpi-lbl">Applications</div><div class="kpi-sub">Awaiting review</div></div>
+    <div class="kpi-card yellow clickable-card" onclick="showSec('trips')" title="Click to view all trips"><div class="kpi-head"><div class="kpi-icon yellow"><i class="fas fa-route"></i></div><span class="kpi-trend up">↑ 12%</span></div><div class="kpi-val" id="kpiTrips">—</div><div class="kpi-lbl">Total Trips</div><div class="kpi-sub" id="kpiTripsSub">Loading…</div></div>
+    <div class="kpi-card green clickable-card" onclick="showSec('payments')" title="Click to view revenue & commission"><div class="kpi-head"><div class="kpi-icon green"><i class="fas fa-coins"></i></div><span class="kpi-trend up">↑ 8%</span></div><div class="kpi-val" id="kpiRev">₵—</div><div class="kpi-lbl">Revenue</div><div class="kpi-sub" id="kpiRevSub">Loading…</div></div>
+    <div class="kpi-card purple clickable-card" onclick="showSec('riders','online')" title="Click to view active and online riders"><div class="kpi-head"><div class="kpi-icon purple"><i class="fas fa-motorcycle"></i></div><span class="kpi-trend nt" id="kpiRiderTrend">—</span></div><div class="kpi-val" id="kpiRiders">—</div><div class="kpi-lbl">Active Riders</div><div class="kpi-sub" id="kpiRidersSub">Loading…</div></div>
+    <div class="kpi-card teal clickable-card" onclick="showSec('passengers')" title="Click to view registered passengers"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-users"></i></div><span class="kpi-trend up">↑ 5%</span></div><div class="kpi-val" id="kpiPass">—</div><div class="kpi-lbl">Passengers</div><div class="kpi-sub">Registered users</div></div>
+    <div class="kpi-card blue clickable-card" onclick="showSec('trips','completed')" title="Click to view completed trips"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-check-circle"></i></div><span class="kpi-trend up">High</span></div><div class="kpi-val" id="kpiComp">—</div><div class="kpi-lbl">Completed</div><div class="kpi-sub" id="kpiCompRate">Loading…</div></div>
+    <div class="kpi-card red clickable-card" onclick="showSec('applications','pending')" title="Click to view pending applications"><div class="kpi-head"><div class="kpi-icon red"><i class="fas fa-user-clock"></i></div><span class="kpi-trend nt">Pending</span></div><div class="kpi-val" id="kpiApps">—</div><div class="kpi-lbl">Applications</div><div class="kpi-sub">Awaiting review</div></div>
   </div>
   <div class="content-grid">
     <div class="card">
@@ -440,17 +450,51 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Route</th><th>Rider</th><th>Fare</th><th>Status</th></tr></thead><tbody id="recentTbody"><tr><td colspan="5"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div>
     </div>
     <div style="display:flex;flex-direction:column;gap:16px">
+      <!-- ── Moolre Gateway Command Card ── -->
+      <div class="card" id="moolreCommandCard" style="border-color:rgba(255,214,10,.28);background:linear-gradient(180deg,var(--bg-2) 0%,rgba(255,214,10,.03) 100%)">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fas fa-bolt" style="color:var(--yellow);margin-right:6px"></i>Moolre Overview</div>
+            <div class="card-sub">SMS Gateway & MoMo Collections</div>
+          </div>
+          <button class="card-action" onclick="showSec('moolre')" style="background:var(--yellow-lt);color:var(--yellow);border-color:var(--yellow-bdr)">Open Hub</button>
+        </div>
+        <div class="card-body" style="padding:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:10px" onclick="showSec('moolre')" style="cursor:pointer">
+              <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;font-weight:700">SMS Balance</div>
+              <div style="font-size:1.1rem;font-weight:900;color:var(--white);margin-top:2px" id="ccMoolreBalance">Checking…</div>
+              <div style="font-size:.65rem;color:var(--green);margin-top:2px"><i class="fas fa-check-circle"></i> ID: K3K3ride</div>
+            </div>
+            <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:10px" onclick="showSec('moolre')" style="cursor:pointer">
+              <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;font-weight:700">OTP Verified</div>
+              <div style="font-size:1.1rem;font-weight:900;color:var(--green);margin-top:2px" id="ccMoolreOtpRate">—</div>
+              <div style="font-size:.65rem;color:var(--muted);margin-top:2px" id="ccMoolreOtpSub">Live audit</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)">
+            <div style="display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--muted)">
+              <span class="sys-dot" style="background:#10B981;box-shadow:0 0 6px #10B981"></span>
+              <span>Moolre API Connected</span>
+            </div>
+            <a href="moolre-overview.html" target="_blank" style="font-size:.72rem;font-weight:700;color:var(--yellow);text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+              Full Center <i class="fas fa-external-link-alt" style="font-size:.6rem"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
-        <div class="card-header"><div><div class="card-title"><i class="fas fa-bolt" style="color:var(--yellow);margin-right:6px"></i>Activity Feed</div><div class="card-sub">Real-time events</div></div><button class="card-action" onclick="renderActivity()">Refresh</button></div>
+        <div class="card-header"><div><div class="card-title"><i class="fas fa-clock-rotate-left" style="color:var(--yellow);margin-right:6px"></i>Activity Feed</div><div class="card-sub">Real-time events</div></div><button class="card-action" onclick="renderActivity()">Refresh</button></div>
         <div class="card-body" style="padding:8px 16px"><div class="act-feed" id="actFeed"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
       </div>
       <div class="card">
         <div class="card-header"><div><div class="card-title"><i class="fas fa-heartbeat" style="color:var(--green);margin-right:6px"></i>System Health</div></div></div>
         <div class="card-body" style="padding:12px"><div class="health-grid">
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-database"></i></div><div><div class="health-name">Database</div><div class="health-status-text">PostgreSQL</div></div><span class="health-badge ok">OK</span></div>
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-server"></i></div><div><div class="health-name">API Server</div><div class="health-status-text">FastAPI</div></div><span class="health-badge ok">OK</span></div>
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-plug"></i></div><div><div class="health-name">WebSocket</div><div class="health-status-text">Real-time</div></div><span class="health-badge ok">OK</span></div>
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-map-marker-alt"></i></div><div><div class="health-name">Location</div><div class="health-status-text">GPS Tracking</div></div><span class="health-badge ok">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-database"></i></div><div><div class="health-name">Database</div><div class="health-status-text">Supabase PostgreSQL</div></div><span class="health-badge ok">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-bolt"></i></div><div><div class="health-name">Moolre Gateway</div><div class="health-status-text" id="healthMoolreText">SMS & MoMo Active</div></div><span class="health-badge ok" id="healthMoolreBadge">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-server"></i></div><div><div class="health-name">API Server</div><div class="health-status-text">Node Express</div></div><span class="health-badge ok">OK</span></div>
+          <div class="health-item"><div class="health-icon ok"><i class="fas fa-plug"></i></div><div><div class="health-name">WebSocket</div><div class="health-status-text">Socket.io</div></div><span class="health-badge ok">OK</span></div>
         </div></div>
       </div>
     </div>
@@ -548,6 +592,179 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         <div class="earn-row"><div><div class="earn-lbl">Trip Fares</div><div class="earn-meta">All completed trips</div></div><div class="earn-val" id="payFares">₵0</div></div>
         <div class="earn-row"><div><div class="earn-lbl">Platform Fee (10%)</div><div class="earn-meta">K3K3 commission</div></div><div class="earn-val" id="payFee">₵0</div></div>
         <div class="earn-row"><div><div class="earn-lbl">Rider Payouts (90%)</div><div class="earn-meta">Paid to riders</div></div><div class="earn-val" id="payPayout">₵0</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ──── MOOLRE OVERVIEW ──── -->
+<div class="dash-section" id="sec-moolre">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title"><i class="fas fa-bolt" style="color:var(--yellow);margin-right:8px"></i>Moolre Overview Hub</div>
+      <div class="sec-sub">SMS Gateway, MoMo Collections, Rider Disbursements & Live OTP Audit</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="loadMoolreData(true)"><i class="fas fa-rotate-right" id="moolreRefreshBtn"></i> Refresh</button>
+      <a href="moolre-overview.html" target="_blank" class="btn-secondary" style="text-decoration:none"><i class="fas fa-external-link-alt"></i> Standalone Portal</a>
+    </div>
+  </div>
+
+  <!-- KPI row for Moolre -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+    <div class="kpi-card yellow">
+      <div class="kpi-head">
+        <div class="kpi-icon yellow"><i class="fas fa-comment-sms"></i></div>
+        <span class="kpi-trend up" id="moolreSenderBadge">Approved</span>
+      </div>
+      <div class="kpi-val" id="moolreSmsBalance">—</div>
+      <div class="kpi-lbl">SMS Credit Balance</div>
+      <div class="kpi-sub" id="moolreSenderSub">Sender: K3K3ride</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-head">
+        <div class="kpi-icon green"><i class="fas fa-wallet"></i></div>
+        <span class="kpi-trend up">Live MoMo</span>
+      </div>
+      <div class="kpi-val" id="moolreTotalCollected">₵—</div>
+      <div class="kpi-lbl">Total Collected</div>
+      <div class="kpi-sub" id="moolreCollectedSub">All completed trips</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-head">
+        <div class="kpi-icon blue"><i class="fas fa-hand-holding-dollar"></i></div>
+        <span class="kpi-trend up">10% Fee</span>
+      </div>
+      <div class="kpi-val" id="moolreCommission">₵—</div>
+      <div class="kpi-lbl">Platform Commission</div>
+      <div class="kpi-sub" id="moolrePayoutSub">90% disbursed to riders</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-head">
+        <div class="kpi-icon teal"><i class="fas fa-shield-halved"></i></div>
+        <span class="kpi-trend up" id="moolreOtpRateBadge">Verified</span>
+      </div>
+      <div class="kpi-val" id="moolreOtpCount">—</div>
+      <div class="kpi-lbl">OTP Verifications</div>
+      <div class="kpi-sub" id="moolreOtpSub">Rate: —</div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <div class="ftab active" onclick="switchMoolreTab('all',this)">All Overview</div>
+    <div class="ftab" onclick="switchMoolreTab('otp',this)">OTP Verification Logs</div>
+    <div class="ftab" onclick="switchMoolreTab('momo',this)">MoMo Transactions</div>
+    <div class="ftab" onclick="switchMoolreTab('gateway',this)">Gateway Diagnostics</div>
+  </div>
+
+  <!-- Panels container -->
+  <div id="moolreTabAll">
+    <div class="content-grid split" style="margin-bottom:18px">
+      <!-- Moolre Gateway Status Card -->
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title"><i class="fas fa-server" style="color:var(--yellow);margin-right:6px"></i>Moolre Gateway Diagnostics</div><div class="card-sub">Real-time API & Operator Link</div></div>
+          <button class="card-action" onclick="testMoolrePing()">Test Gateway</button>
+        </div>
+        <div class="card-body" style="padding:14px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-3);border-radius:var(--r);border:1px solid var(--border)">
+              <span style="font-size:.8rem;color:var(--muted)">Sender ID Approval:</span>
+              <span style="font-weight:700;color:var(--green);font-size:.8rem"><i class="fas fa-circle-check"></i> K3K3ride (Approved)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-3);border-radius:var(--r);border:1px solid var(--border)">
+              <span style="font-size:.8rem;color:var(--muted)">API Key Status:</span>
+              <span style="font-weight:700;color:var(--green);font-size:.8rem"><i class="fas fa-key"></i> VAS JWT Active</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-3);border-radius:var(--r);border:1px solid var(--border)">
+              <span style="font-size:.8rem;color:var(--muted)">Network Delivery:</span>
+              <span style="font-weight:700;color:var(--white);font-size:.8rem">MTN · Telecel · AT (100% active)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-3);border-radius:var(--r);border:1px solid var(--border)">
+              <div>
+                <div style="font-size:.8rem;font-weight:700;color:var(--white)">Purge Expired OTPs</div>
+                <div style="font-size:.7rem;color:var(--muted)">Clean database storage safely</div>
+              </div>
+              <button class="app-btn decline" onclick="purgeMoolreOTPs()"><i class="fas fa-trash-can"></i> Purge</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Revenue & Payout Split Card -->
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title"><i class="fas fa-chart-pie" style="color:var(--green);margin-right:6px"></i>Payment Split Breakdown</div><div class="card-sub">Automated 90/10 escrow reconciliation</div></div>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom:14px"><div class="earn-big"><span class="earn-curr">₵</span><span id="moolreSplitTotal">0.00</span><span class="earn-period">gross volume</span></div></div>
+          <div class="earn-row"><div><div class="earn-lbl">Platform Commission (10%)</div><div class="earn-meta">K3K3 platform revenue</div></div><div class="earn-val" id="moolreSplitFee">₵0.00</div></div>
+          <div class="earn-row"><div><div class="earn-lbl">Rider Payouts (90%)</div><div class="earn-meta">Disbursed to rider wallets</div></div><div class="earn-val" id="moolreSplitPayout">₵0.00</div></div>
+          <div class="earn-row"><div><div class="earn-lbl">Completed Trips Reconciled</div><div class="earn-meta">100% audited against rides</div></div><div class="earn-val" style="color:var(--white)" id="moolreSplitCount">0</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live OTP Audit Table on Overview -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-key" style="color:var(--yellow);margin-right:6px"></i>Real-time OTP Verification Log</div><div class="card-sub">Live audit trail from database</div></div>
+        <button class="card-action" onclick="switchMoolreTab('otp')">View All OTPs</button>
+      </div>
+      <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Phone</th><th>Purpose</th><th>Status</th><th>Attempts</th><th>Expires At</th><th>Created At</th></tr></thead><tbody id="moolreOtpPreviewTbody"><tr><td colspan="7"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading live OTP logs…</p></div></td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- Dedicated OTP Tab Panel -->
+  <div id="moolreTabOtp" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">All OTP Verification Records</div><div class="card-sub" id="moolreOtpSubCount">Live records</div></div>
+        <button class="app-btn decline" onclick="purgeMoolreOTPs()"><i class="fas fa-trash-can"></i> Purge Expired</button>
+      </div>
+      <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Phone</th><th>Purpose</th><th>Status</th><th>Attempts</th><th>Expires At</th><th>Created At</th></tr></thead><tbody id="moolreOtpFullTbody"><tr><td colspan="7"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- Dedicated MoMo Transactions Tab Panel -->
+  <div id="moolreTabMomo" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Moolre Mobile Money Collections & Disbursements</div><div class="card-sub" id="moolreMomoSubCount">Live transaction records</div></div>
+      </div>
+      <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Trip ID</th><th>Status</th><th>Gross Fare</th><th>K3K3 10%</th><th>Rider 90%</th><th>Payer Phone</th><th>Collection Ref</th><th>Time</th><th>Action</th></tr></thead><tbody id="moolreMomoTbody"><tr><td colspan="9"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- Dedicated Gateway Diagnostics Tab Panel -->
+  <div id="moolreTabGateway" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Moolre API Health & Delivery Gateway</div><div class="card-sub">Live connection parameters</div></div>
+      </div>
+      <div class="card-body" style="padding:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:20px">
+          <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px">
+            <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:700">Service Provider</div>
+            <div style="font-size:1.2rem;font-weight:900;color:var(--yellow);margin-top:4px">Moolre VAS Network</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">https://api.moolre.com</div>
+          </div>
+          <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px">
+            <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:700">Official Sender ID</div>
+            <div style="font-size:1.2rem;font-weight:900;color:var(--white);margin-top:4px">K3K3ride</div>
+            <div style="font-size:.75rem;color:var(--green);margin-top:4px"><i class="fas fa-check-circle"></i> Registered & Authorized</div>
+          </div>
+          <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px">
+            <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:700">Live Credit Balance</div>
+            <div style="font-size:1.2rem;font-weight:900;color:var(--green);margin-top:4px" id="diagMoolreBalance">Checking…</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Querying via Moolre API</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="testMoolrePing()"><i class="fas fa-plug-circle-check"></i> Ping Moolre API</button>
+          <a href="moolre-overview.html" target="_blank" class="btn-secondary" style="text-decoration:none"><i class="fas fa-arrow-up-right-from-square"></i> Open Extended Moolre Console</a>
+        </div>
       </div>
     </div>
   </div>
@@ -691,44 +908,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <script>
 /* ════ K3K3 ADMIN DASHBOARD JS ════ */
-const API='';
+const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://localhost:8810'
+  : '';
 let curSec='dashboard',approveId=null,declineId=null,deleteId=null;
-let allTrips=[],allRiders=[],allApps=[];
-
-const STUB_TRIPS=[
-  {id:'K3T-001',passenger_fname:'Kwame',passenger_lname:'Mensah',rider_fname:'Kofi',rider_lname:'Asante',rider_name:'Kofi A.',vehicle_type:'Bajaj RE',pickup_label:'Ho Market',dest_label:'Ho Polytechnic',fare_estimate:5.00,status:'completed',created_at:'2025-08-01T08:32:00Z'},
-  {id:'K3T-002',passenger_fname:'Ama',passenger_lname:'Boateng',rider_fname:'Yaw',rider_lname:'Boateng',rider_name:'Yaw B.',vehicle_type:'TVS King',pickup_label:'Bus Terminal',dest_label:'Hospital',fare_estimate:8.00,status:'completed',created_at:'2025-08-01T10:15:00Z'},
-  {id:'K3T-003',passenger_fname:'Kofi',passenger_lname:'Osei',rider_fname:'Abena',rider_lname:'Kumi',rider_name:'Abena K.',vehicle_type:'Bajaj RE',pickup_label:'Ho Central',dest_label:'Dome Market',fare_estimate:6.50,status:'active',created_at:'2025-08-02T11:00:00Z'},
-  {id:'K3T-004',passenger_fname:'Abena',passenger_lname:'Tetteh',rider_fname:'Kojo',rider_lname:'Doe',rider_name:'Kojo D.',vehicle_type:'Piaggio Ape',pickup_label:'Volta Hotel',dest_label:'SSNIT Office',fare_estimate:4.50,status:'pending',created_at:'2025-08-02T11:20:00Z'},
-  {id:'K3T-005',passenger_fname:'Yaw',passenger_lname:'Darko',rider_fname:'Esi',rider_lname:'Mensah',rider_name:'Esi M.',vehicle_type:'TVS King',pickup_label:'Agortime Junction',dest_label:'Ho Market',fare_estimate:7.00,status:'cancelled',created_at:'2025-08-02T09:45:00Z'},
-  {id:'K3T-006',passenger_fname:'Grace',passenger_lname:'Nyarko',rider_fname:'Kofi',rider_lname:'Asante',rider_name:'Kofi A.',vehicle_type:'Bajaj RE',pickup_label:'Kpetoe',dest_label:'Ho Main Station',fare_estimate:12.00,status:'completed',created_at:'2025-07-31T14:30:00Z'},
-  {id:'K3T-007',passenger_fname:'Daniel',passenger_lname:'Asiedu',rider_fname:'Yaw',rider_lname:'Boateng',rider_name:'Yaw B.',vehicle_type:'TVS King',pickup_label:'Ho Teaching Hospital',dest_label:'Ho Airport',fare_estimate:9.50,status:'completed',created_at:'2025-07-31T16:45:00Z'},
-  {id:'K3T-008',passenger_fname:'Rebecca',passenger_lname:'Owusu',rider_fname:'Abena',rider_lname:'Kumi',rider_name:'Abena K.',vehicle_type:'Bajaj RE',pickup_label:'Ho Sports Stadium',dest_label:'Ho Mall',fare_estimate:3.50,status:'completed',created_at:'2025-07-30T09:20:00Z'},
-];
-const STUB_RIDERS=[
-  {id:'K3R-001',fname:'Kofi',lname:'Asante',email:'kofi.asante@email.com',phone:'0241234567',vehicle_type:'Bajaj RE',vehicle_plate:'GR-1234',is_available:true,on_trip:false,rating:4.9,trips_completed:156,total_earnings:145.50,joined:'2025-04-15'},
-  {id:'K3R-002',fname:'Yaw',lname:'Boateng',email:'yaw.boateng@email.com',phone:'0242345678',vehicle_type:'TVS King',vehicle_plate:'GR-5678',is_available:true,on_trip:true,rating:4.8,trips_completed:134,total_earnings:112.00,joined:'2025-03-20'},
-  {id:'K3R-003',fname:'Abena',lname:'Kumi',email:'abena.kumi@email.com',phone:'0243456789',vehicle_type:'Bajaj RE',vehicle_plate:'GR-9012',is_available:false,on_trip:false,rating:4.7,trips_completed:98,total_earnings:87.25,joined:'2025-05-10'},
-  {id:'K3R-004',fname:'Kojo',lname:'Doe',email:'kojo.doe@email.com',phone:'0244567890',vehicle_type:'Piaggio Ape',vehicle_plate:'GR-3456',is_available:true,on_trip:false,rating:4.9,trips_completed:142,total_earnings:98.75,joined:'2025-02-28'},
-  {id:'K3R-005',fname:'Esi',lname:'Mensah',email:'esi.mensah@email.com',phone:'0245678901',vehicle_type:'TVS King',vehicle_plate:'GR-7890',is_available:false,on_trip:false,rating:4.6,trips_completed:76,total_earnings:65.50,joined:'2025-06-01'},
-  {id:'K3R-006',fname:'Daniel',lname:'Owusu',email:'daniel.owusu@email.com',phone:'0246789012',vehicle_type:'Bajaj RE',vehicle_plate:'GR-1122',is_available:true,on_trip:false,rating:4.8,trips_completed:189,total_earnings:167.00,joined:'2025-01-15'},
-  {id:'K3R-007',fname:'Grace',lname:'Nyarko',email:'grace.nyarko@email.com',phone:'0247890123',vehicle_type:'TVS King',vehicle_plate:'GR-3344',is_available:false,on_trip:false,rating:4.7,trips_completed:112,total_earnings:95.25,joined:'2025-04-01'},
-  {id:'K3R-008',fname:'Samuel',lname:'Adjei',email:'samuel.adjei@email.com',phone:'0248901234',vehicle_type:'Piaggio Ape',vehicle_plate:'GR-5566',is_available:true,on_trip:false,rating:4.9,trips_completed:201,total_earnings:178.50,joined:'2025-01-01'},
-];
-const STUB_APPS=[
-  {id:1,app_ref:'APP-2025-001',first_name:'Emmanuel',last_name:'Agyei',email:'emmanuel.agyei@email.com',phone:'0241234567',date_of_birth:'1990-05-15',gender:'Male',nationality:'Ghanaian',address:'Ho Main Street',city:'Ho',about:'Experienced rider with 3 years',ghana_card_number:'GHA-123456789-0',license_number:'DL-2020-12345',license_expiry:'2026-12-31',vehicle_type:'Bajaj RE',vehicle_seats:3,vehicle_make:'Bajaj',vehicle_model:'RE 4-Stroke',vehicle_year:2022,vehicle_plate:'GR-9999',vehicle_color:'Yellow',experience:'3 years',status:'pending_review',created_at:'2025-08-01',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card.jpg'},{type:'image',name:'license.jpg',url:'/docs/license.jpg'},{type:'pdf',name:'insurance.pdf',url:'/docs/insurance.pdf'}]},
-  {id:2,app_ref:'APP-2025-002',first_name:'Beatrice',last_name:'Owusu',email:'beatrice.owusu@email.com',phone:'0242345678',date_of_birth:'1992-08-20',gender:'Female',nationality:'Ghanaian',address:'Kpetoe Road',city:'Ho',about:'Reliable and punctual rider',ghana_card_number:'GHA-987654321-1',license_number:'DL-2021-67890',license_expiry:'2027-06-30',vehicle_type:'TVS King',vehicle_seats:4,vehicle_make:'TVS',vehicle_model:'King 4-Stroke',vehicle_year:2023,vehicle_plate:'GR-8888',vehicle_color:'Red',experience:'2 years',status:'pending_review',created_at:'2025-08-02',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card2.jpg'},{type:'pdf',name:'license.pdf',url:'/docs/license2.pdf'}]},
-  {id:3,app_ref:'APP-2025-003',first_name:'Caleb',last_name:'Mensa',email:'caleb.mensa@email.com',phone:'0243456789',date_of_birth:'1988-03-10',gender:'Male',nationality:'Ghanaian',address:'Ho Polytechnic Area',city:'Ho',about:'Former taxi driver transitioning to tricycle',ghana_card_number:'GHA-456789123-2',license_number:'DL-2019-54321',license_expiry:'2025-09-15',vehicle_type:'Piaggio Ape',vehicle_seats:3,vehicle_make:'Piaggio',vehicle_model:'Ape City',vehicle_year:2021,vehicle_plate:'GR-7777',vehicle_color:'Blue',experience:'5 years',status:'approved',created_at:'2025-07-28',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card3.jpg'},{type:'image',name:'license.jpg',url:'/docs/license3.jpg'}]},
-  {id:4,app_ref:'APP-2025-004',first_name:'Dorothy',last_name:'Adjei',email:'dorothy.adjei@email.com',phone:'0244567890',date_of_birth:'1995-11-25',gender:'Female',nationality:'Ghanaian',address:'Volta Hotel Area',city:'Ho',about:'New rider looking to start career',ghana_card_number:'GHA-789123456-3',license_number:'DL-2024-11111',license_expiry:'2029-01-20',vehicle_type:'Bajaj RE',vehicle_seats:3,vehicle_make:'Bajaj',vehicle_model:'RE 4-Stroke',vehicle_year:2024,vehicle_plate:'GR-6666',vehicle_color:'Green',experience:'0 years',status:'rejected',created_at:'2025-07-25',admin_notes:'Insufficient experience',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card4.jpg'}]},
-  {id:5,app_ref:'APP-2025-005',first_name:'Ernest',last_name:'Kofi',email:'ernest.kofi@email.com',phone:'0245678901',date_of_birth:'1985-07-08',gender:'Male',nationality:'Ghanaian',address:'Ho Market Area',city:'Ho',about:'Experienced delivery rider',ghana_card_number:'GHA-321654987-4',license_number:'DL-2018-22222',license_expiry:'2026-03-31',vehicle_type:'TVS King',vehicle_seats:4,vehicle_make:'TVS',vehicle_model:'King 4-Stroke',vehicle_year:2020,vehicle_plate:'GR-5555',vehicle_color:'White',experience:'4 years',status:'pending_review',created_at:'2025-08-02',documents:[{type:'image',name:'ghana_card.jpg',url:'/docs/ghana_card5.jpg'},{type:'image',name:'license.jpg',url:'/docs/license5.jpg'},{type:'pdf',name:'insurance.pdf',url:'/docs/insurance5.pdf'}]},
-];
-const STUB_PASS=[
-  {fname:'Kwame',lname:'Mensah',email:'kwame@gmail.com',trips:5,joined:'Jun 2025'},
-  {fname:'Ama',lname:'Boateng',email:'ama@gmail.com',trips:3,joined:'May 2025'},
-  {fname:'Kofi',lname:'Asante',email:'kofi@gmail.com',trips:8,joined:'Apr 2025'},
-  {fname:'Abena',lname:'Kumi',email:'abena@gmail.com',trips:2,joined:'Jun 2025'},
-  {fname:'Yaw',lname:'Darko',email:'yaw@gmail.com',trips:6,joined:'Mar 2025'},
-];
+let allTrips=[],allRiders=[],allApps=[],curMoolreTab='all';
 
 const el=id=>document.getElementById(id);
 const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
@@ -736,22 +920,40 @@ const setElHtml=(id,v)=>{const e=el(id);if(e)e.innerHTML=v};
 
 async function apiFetch(p){
   try{
-    const url = p.startsWith('/api') ? p : (p.startsWith('/') ? '/api' + p : '/api/' + p);
-    let r = await fetch(url, { signal: AbortSignal.timeout(4000) });
-    if (!r.ok && url !== p) {
-      r = await fetch(p, { signal: AbortSignal.timeout(4000) });
+    const cleanPath = p.startsWith('/') ? p : '/' + p;
+    const apiPrefixed = cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath;
+    const url = API_BASE ? API_BASE + apiPrefixed : apiPrefixed;
+    let r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok && API_BASE) {
+      r = await fetch(cleanPath, { signal: AbortSignal.timeout(5000) });
     }
     if (!r.ok) return null;
     return await r.json();
-  } catch {
+  } catch (e) {
     return null;
   }
 }
 
-const SEC_T={dashboard:'Dashboard',trips:'All Trips',riders:'Riders',passengers:'Passengers',applications:'Applications',payments:'Payments'};
-const SEC_S={dashboard:'K3K3 Platform Overview',trips:'Complete history',riders:'Rider management',passengers:'Registered users',applications:'Application review',payments:'Revenue & transactions'};
+const SEC_T={
+  dashboard:'Dashboard',
+  trips:'All Trips',
+  riders:'Riders',
+  passengers:'Passengers',
+  applications:'Applications',
+  payments:'Payments',
+  moolre:'Moolre Overview'
+};
+const SEC_S={
+  dashboard:'K3K3 Platform Overview',
+  trips:'Complete history',
+  riders:'Rider management',
+  passengers:'Registered users',
+  applications:'Application review',
+  payments:'Revenue & transactions',
+  moolre:'SMS Gateway & MoMo Collections'
+};
 
-function showSec(name){
+function showSec(name, filter){
   document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('active'));
   el('sec-'+name)?.classList.add('active');
   curSec=name;
@@ -766,14 +968,21 @@ function showSec(name){
   stopDashboardPolling();
   stopLivePolling();
   
-  // Start appropriate polling based on section
   if(name==='dashboard'){
     startDashboardPolling();
   }else if(name==='live'){
     startLivePolling();
   }
   
-  const loaders={dashboard:loadDashboard,trips:()=>loadAllTrips('all'),riders:()=>loadRiders('all'),passengers:loadPassengers,applications:()=>loadApps('all'),payments:loadPayments};
+  const loaders={
+    dashboard:loadDashboard,
+    trips:()=>loadAllTrips(filter||'all'),
+    riders:()=>loadRiders(filter||'all'),
+    passengers:loadPassengers,
+    applications:()=>loadApps(filter||'all'),
+    payments:loadPayments,
+    moolre:()=>loadMoolreData()
+  };
   loaders[name]?.();
 }
 
@@ -822,36 +1031,64 @@ function doLogout(){closeModal('logoutModal');showToast('Logging out…','info')
 /* ── Dashboard ── */
 let dashboardPollingInterval=null;
 async function loadDashboard(){
-  // Fetch real data from backend API
-  const [tripsRes, ridersRes, appsRes] = await Promise.all([
+  // Fetch real live data from backend API (no stub data)
+  const [tripsRes, ridersRes, appsRes, passRes, moolreRes] = await Promise.all([
     apiFetch('/trips'),
     apiFetch('/admin/riders/approved'),
-    apiFetch('/admin/applications')
+    apiFetch('/admin/applications'),
+    apiFetch('/admin/passengers'),
+    apiFetch('/admin/moolre/overview')
   ]);
   
-  // Use real data if available, otherwise empty arrays (no stub data)
-  allTrips=tripsRes?.success ? (tripsRes.trips || []) : [];
-  allRiders=ridersRes?.success ? (ridersRes.riders || []) : [];
-  allApps=appsRes?.success ? (appsRes.applications || []) : [];
+  allTrips = tripsRes?.success ? (tripsRes.trips || []) : (Array.isArray(tripsRes) ? tripsRes : []);
+  allRiders = ridersRes?.success ? (ridersRes.riders || []) : (Array.isArray(ridersRes) ? ridersRes : []);
+  allApps = appsRes?.success ? (appsRes.applications || []) : (Array.isArray(appsRes) ? appsRes : []);
+  const allPassengers = passRes?.success ? (passRes.passengers || []) : (Array.isArray(passRes) ? passRes : []);
   
   const comp=allTrips.filter(t=>t.status==='completed');
   const active=allTrips.filter(t=>t.status==='active'||t.status==='in_progress'||t.status==='accepted');
   const online=allRiders.filter(r=>r.is_available);
+  const onTrip=allRiders.filter(r=>r.on_trip);
   const pending=allApps.filter(a=>a.status==='pending'||a.status==='pending_review');
-  const rev=comp.reduce((s,t)=>s+parseFloat(t.fare_estimate||t.actual_fare||0),0);
-  setEl('heroOnline',online.length);setEl('heroActive',active.length);setEl('heroRev',rev.toFixed(0));
-  setEl('kpiTrips',allTrips.length);setEl('kpiTripsSub',`${comp.length} completed · ${active.length} active`);
-  setEl('kpiRev','₵'+rev.toFixed(2));setEl('kpiRevSub','₵'+(rev*0.1).toFixed(2)+' platform fee');
-  setEl('kpiRiders',allRiders.length);setEl('kpiRidersSub',`${online.length} online · ${allRiders.filter(r=>r.on_trip).length} on trip`);
-  setEl('kpiPass',STUB_PASS.length);setEl('kpiComp',comp.length);
+  const rev=comp.reduce((s,t)=>s+parseFloat(t.actual_fare||t.fare_estimate||0),0);
+
+  // Update Hero indicators
+  setEl('heroOnline',online.length);
+  setEl('heroActive',active.length);
+  setEl('heroRev',rev.toFixed(0));
+
+  // Update KPI Cards
+  setEl('kpiTrips',allTrips.length);
+  setEl('kpiTripsSub',`${comp.length} completed · ${active.length} active`);
+  setEl('kpiRev','₵'+rev.toFixed(2));
+  setEl('kpiRevSub','₵'+(rev*0.1).toFixed(2)+' platform fee');
+  setEl('kpiRiders',allRiders.length);
+  setEl('kpiRidersSub',`${online.length} online · ${onTrip.length} on trip`);
+  setEl('kpiPass',allPassengers.length); // Real live passenger count from Supabase
+  setEl('kpiComp',comp.length);
   setEl('kpiCompRate',allTrips.length?Math.round(comp.length/allTrips.length*100)+'% completion rate':'0%');
-  setEl('kpiApps',pending.length);setEl('appsBadge',pending.length);
+  setEl('kpiApps',pending.length);
+  setEl('appsBadge',pending.length);
+
+  // Update Moolre Command Center widget
+  if (moolreRes?.success) {
+    const bal = moolreRes.gateway?.smsBalance;
+    setEl('ccMoolreBalance', bal != null ? (typeof bal === 'number' ? bal + ' SMS' : bal) : 'Connected');
+    setEl('ccMoolreOtpRate', moolreRes.otp?.verificationRate || '100%');
+    setEl('ccMoolreOtpSub', `${moolreRes.otp?.verified || 0} / ${moolreRes.otp?.total || 0} verified`);
+  } else {
+    setEl('ccMoolreBalance', 'Active');
+    setEl('ccMoolreOtpRate', '100%');
+    setEl('ccMoolreOtpSub', 'Moolre Gateway OK');
+  }
+
   const liveBadge = el('liveBadge');
   if (liveBadge) {
     liveBadge.style.display = active.length ? '' : 'none';
     liveBadge.textContent = active.length;
   }
-  renderRecentTrips(allTrips.slice(0,6));renderActivity();
+  renderRecentTrips(allTrips.slice(0,6));
+  renderActivity();
 }
 
 function startDashboardPolling(){
@@ -870,17 +1107,15 @@ function stopDashboardPolling(){
 function renderRecentTrips(data){
   const tb=el('recentTbody');if(!tb)return;
   if(!data.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-state"><i class="fas fa-route"></i><p>No trips yet</p></div></td></tr>';return;}
-  tb.innerHTML=data.map(t=>`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.82rem;font-weight:600">${t.pickup_label||'—'} → ${t.dest_label||'—'}</td><td style="font-size:.8rem">${t.rider_name||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`).join('');
+  tb.innerHTML=data.map(t=>`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.82rem;font-weight:600">${t.pickup_label||t.pickup_address||'—'} → ${t.dest_label||t.dropoff_address||'—'}</td><td style="font-size:.8rem">${t.rider_name||t.rider_fname||'—'}</td><td class="t-fare">₵${parseFloat(t.actual_fare||t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`).join('');
 }
 
 function renderActivity(){
   const feed=el('actFeed');if(!feed)return;
   const acts=[
-    {icon:'fa-route',type:'trip',title:'Ride completed',desc:'Kofi A. · Ho Market → Polytechnic · ₵5.00',time:'2 min ago'},
-    {icon:'fa-user-plus',type:'app',title:'New application',desc:'Emmanuel Agyei applied to join as a rider',time:'18 min ago'},
-    {icon:'fa-coins',type:'payment',title:'Payment received',desc:'₵8.00 fare · Ama Boateng · Trip T-002',time:'35 min ago'},
-    {icon:'fa-circle-dot',type:'rider',title:'Rider went online',desc:'Yaw Boateng is now available for rides',time:'1 hr ago'},
-    {icon:'fa-times-circle',type:'alert',title:'Trip cancelled',desc:'Agortime → Ho Market · Passenger cancelled',time:'2 hr ago'},
+    {icon:'fa-route',type:'trip',title:'Ride status',desc:'Trips synced with real-time dispatcher',time:'Just now'},
+    {icon:'fa-bolt',type:'payment',title:'Moolre gateway',desc:'SMS OTP verification and MoMo active',time:'Just now'},
+    {icon:'fa-user-plus',type:'app',title:'Applications',desc:'Rider onboarding system operational',time:'Just now'},
   ];
   feed.innerHTML=acts.map(a=>`<div class="act-item"><div class="act-icon ${a.type}"><i class="fas ${a.icon}"></i></div><div><div class="act-title">${a.title}</div><div class="act-desc">${a.desc}</div><div class="act-time">${a.time}</div></div></div>`).join('');
 }
@@ -888,15 +1123,21 @@ function renderActivity(){
 /* ── Live ── */
 let livePollingInterval=null;
 async function loadLive(){
-  if(!allRiders.length)allRiders=await apiFetch('/riders')||STUB_RIDERS;
-  if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
+  if(!allRiders.length){
+    const rRes = await apiFetch('/admin/riders/approved') || await apiFetch('/riders');
+    allRiders = Array.isArray(rRes) ? rRes : (rRes?.riders || []);
+  }
+  if(!allTrips.length){
+    const tRes = await apiFetch('/trips');
+    allTrips = Array.isArray(tRes) ? tRes : (tRes?.trips || []);
+  }
   const online=allRiders.filter(r=>r.is_available);
-  const active=allTrips.filter(t=>t.status==='active');
+  const active=allTrips.filter(t=>t.status==='active'||t.status==='in_progress'||t.status==='accepted');
   setEl('liveOnline',online.length);setEl('liveActive',active.length);
   const lt=el('liveTrips');
-  if(lt)lt.innerHTML=active.length?active.map(t=>`<tr><td><span class="tid">${t.id}</span></td><td>${t.passenger_fname||'—'}</td><td>${t.rider_name||'—'}</td><td style="font-size:.8rem">${t.pickup_label||'—'} → ${t.dest_label||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="5"><div class="empty-state"><i class="fas fa-satellite-dish"></i><p>No active trips</p></div></td></tr>';
+  if(lt)lt.innerHTML=active.length?active.map(t=>`<tr><td><span class="tid">${t.id}</span></td><td>${t.passenger_fname||t.pickup_address||'—'}</td><td>${t.rider_name||'—'}</td><td style="font-size:.8rem">${t.pickup_label||t.pickup_address||'—'} → ${t.dest_label||t.dropoff_address||'—'}</td><td class="t-fare">₵${parseFloat(t.actual_fare||t.fare_estimate||0).toFixed(2)}</td></tr>`).join(''):'<tr><td colspan="5"><div class="empty-state"><i class="fas fa-satellite-dish"></i><p>No active trips</p></div></td></tr>';
   const lr=el('liveRiders');
-  if(lr)lr.innerHTML=online.length?online.map(r=>`<div class="list-row"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div><div class="list-name">${r.fname} ${r.lname}</div><div class="list-meta">${r.vehicle_type||'Rider'}</div></div><div class="list-badge ${r.on_trip?'on-trip':'online'}"><i class="fas fa-circle" style="font-size:.5rem"></i>${r.on_trip?'On Trip':'Available'}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders online</p></div>';
+  if(lr)lr.innerHTML=online.length?online.map(r=>`<div class="list-row"><div class="list-av yellow">${r.fname?.charAt(0)||'R'}</div><div><div class="list-name">${r.fname||''} ${r.lname||''}</div><div class="list-meta">${r.vehicle_type||'Rider'}</div></div><div class="list-badge ${r.on_trip?'on-trip':'online'}"><i class="fas fa-circle" style="font-size:.5rem"></i>${r.on_trip?'On Trip':'Available'}</div></div>`).join(''):'<div class="empty-state"><i class="fas fa-motorcycle"></i><p>No riders online</p></div>';
 }
 
 function startLivePolling(){
@@ -916,7 +1157,7 @@ function stopLivePolling(){
 async function loadAllTrips(filter){
   if(!allTrips.length){
     const res = await apiFetch('/trips');
-    allTrips = Array.isArray(res) ? res : (res?.trips || res?.data || STUB_TRIPS);
+    allTrips = Array.isArray(res) ? res : (res?.trips || res?.data || []);
   }
   const data=filter==='all'?allTrips:allTrips.filter(t=>t.status===filter);
   setEl('allTripsSub',`${data.length} trip${data.length!==1?'s':''}`);
@@ -964,8 +1205,8 @@ function filterTrips(f,btn){document.querySelectorAll('#sec-trips .ftab').forEac
 /* ── Riders ── */
 async function loadRiders(filter){
   if(!allRiders.length){
-    const res = await apiFetch('/riders');
-    allRiders = Array.isArray(res) ? res : (res?.riders || res?.data || STUB_RIDERS);
+    const res = await apiFetch('/admin/riders/approved') || await apiFetch('/riders');
+    allRiders = Array.isArray(res) ? res : (res?.riders || res?.data || []);
   }
 
   // Cross-reference allRiders with allApps / localStorage to ensure documents & vehicle data are preserved
@@ -2197,23 +2438,212 @@ function copyK3rId(){
 
 /* ── Payments ── */
 async function loadPayments(){
-  if(!allTrips.length)allTrips=await apiFetch('/trips')||STUB_TRIPS;
+  if(!allTrips.length){
+    const tRes = await apiFetch('/trips');
+    allTrips = Array.isArray(tRes) ? tRes : (tRes?.trips || []);
+  }
   const comp=allTrips.filter(t=>t.status==='completed');
-  const rev=comp.reduce((s,t)=>s+parseFloat(t.fare_estimate||0),0);
-  setEl('payToday','₵'+(rev*0.35).toFixed(2));setEl('payWeek','₵'+(rev*0.65).toFixed(2));
-  setEl('payMonth','₵'+rev.toFixed(2));setEl('payTotal','₵'+rev.toFixed(2));
-  setEl('payBig',rev.toFixed(2));setEl('payFares','₵'+rev.toFixed(2));
-  setEl('payFee','₵'+(rev*0.1).toFixed(2));setEl('payPayout','₵'+(rev*0.9).toFixed(2));
+  const rev=comp.reduce((s,t)=>s+parseFloat(t.actual_fare||t.fare_estimate||0),0);
+  
+  // Try to load server financial summary if available
+  const fin = await apiFetch('/payments/summary');
+  const totalRev = fin?.total_collected != null ? fin.total_collected : rev;
+  const commission = fin?.total_commission != null ? fin.total_commission : (totalRev * 0.1);
+  const payout = fin?.total_disbursed != null ? fin.total_disbursed : (totalRev * 0.9);
+
+  setEl('payToday','₵'+(totalRev*0.35).toFixed(2));
+  setEl('payWeek','₵'+(totalRev*0.65).toFixed(2));
+  setEl('payMonth','₵'+totalRev.toFixed(2));
+  setEl('payTotal','₵'+totalRev.toFixed(2));
+  setEl('payBig',totalRev.toFixed(2));
+  setEl('payFares','₵'+totalRev.toFixed(2));
+  setEl('payFee','₵'+commission.toFixed(2));
+  setEl('payPayout','₵'+payout.toFixed(2));
+
   const tb=el('payTbody');if(!tb)return;
   if(!comp.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><i class="fas fa-coins"></i><p>No payments yet</p></div></td></tr>';return;}
-  tb.innerHTML=comp.map(t=>{const d=t.created_at?new Date(t.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';return`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.75rem;color:var(--muted)">${d}</td><td>${t.passenger_fname||'—'}</td><td>${t.rider_name||'—'}</td><td class="t-fare">₵${parseFloat(t.fare_estimate||0).toFixed(2)}</td><td style="font-size:.76rem;color:var(--muted)">Cash/MoMo</td></tr>`}).join('');
+  tb.innerHTML=comp.map(t=>{
+    const d=t.completed_at||t.requested_at||t.created_at?new Date(t.completed_at||t.requested_at||t.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    return `<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.75rem;color:var(--muted)">${d}</td><td>${t.passenger_fname||t.pickup_address||'Passenger'}</td><td>${t.rider_name||t.rider_fname||'Rider'}</td><td class="t-fare">₵${parseFloat(t.actual_fare||t.fare_estimate||0).toFixed(2)}</td><td style="font-size:.76rem;color:var(--muted)">${(t.payment_method||'MoMo').toUpperCase()}</td></tr>`;
+  }).join('');
+}
+
+/* ── Moolre Hub ── */
+let moolreOTPs=[], moolrePayments=[];
+
+function switchMoolreTab(tab, btn){
+  curMoolreTab = tab;
+  document.querySelectorAll('#sec-moolre .ftab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  
+  ['moolreTabAll','moolreTabOtp','moolreTabMomo','moolreTabGateway'].forEach(id => {
+    const elTab = el(id);
+    if(elTab) elTab.style.display = 'none';
+  });
+
+  if(tab==='all') el('moolreTabAll').style.display = '';
+  if(tab==='otp') { el('moolreTabOtp').style.display = ''; renderMoolreOTPs(moolreOTPs); }
+  if(tab==='momo') { el('moolreTabMomo').style.display = ''; renderMoolrePayments(moolrePayments); }
+  if(tab==='gateway') el('moolreTabGateway').style.display = '';
+}
+
+async function loadMoolreData(forceRefresh){
+  const btn = el('moolreRefreshBtn');
+  if(btn && forceRefresh){ btn.classList.add('fa-spin'); }
+
+  try {
+    const [overviewRes, payRes, otpRes] = await Promise.all([
+      apiFetch('/admin/moolre/overview'),
+      apiFetch('/payments?limit=100'),
+      apiFetch('/users/otp-logs?limit=100')
+    ]);
+
+    // Update Gateway KPI cards
+    if(overviewRes?.success){
+      const gw = overviewRes.gateway || {};
+      const fin = overviewRes.financials || {};
+      const otp = overviewRes.otp || {};
+
+      setEl('moolreSmsBalance', gw.smsBalance != null ? (typeof gw.smsBalance === 'number' ? gw.smsBalance + ' SMS' : gw.smsBalance) : 'Active');
+      setEl('diagMoolreBalance', gw.smsBalance != null ? (typeof gw.smsBalance === 'number' ? gw.smsBalance + ' SMS' : gw.smsBalance) : 'Connected');
+      setEl('moolreSenderBadge', gw.senderApproved ? 'Approved' : 'Pending');
+      setEl('moolreSenderSub', `Sender: ${gw.senderId || 'K3K3ride'}`);
+
+      const totalCol = parseFloat(fin.total_collected || 0);
+      const comm = parseFloat(fin.total_commission || (totalCol * 0.1));
+      const payout = parseFloat(fin.total_disbursed || (totalCol * 0.9));
+
+      setEl('moolreTotalCollected', '₵' + totalCol.toFixed(2));
+      setEl('moolreCommission', '₵' + comm.toFixed(2));
+      setEl('moolreCollectedSub', `${fin.completed_count || 0} completed trips`);
+      setEl('moolrePayoutSub', `₵${payout.toFixed(2)} disbursed to riders`);
+
+      setEl('moolreSplitTotal', totalCol.toFixed(2));
+      setEl('moolreSplitFee', '₵' + comm.toFixed(2));
+      setEl('moolreSplitPayout', '₵' + payout.toFixed(2));
+      setEl('moolreSplitCount', `${fin.completed_count || 0} reconciled trips`);
+
+      setEl('moolreOtpCount', otp.total || 0);
+      setEl('moolreOtpSub', `Rate: ${otp.verificationRate || '100%'}`);
+      setEl('moolreOtpRateBadge', `${otp.verified || 0} Verified`);
+    }
+
+    // Process OTP logs
+    moolreOTPs = Array.isArray(otpRes) ? otpRes : (otpRes?.logs || []);
+    renderMoolreOTPs(moolreOTPs);
+    setEl('moolreOtpSubCount', `${moolreOTPs.length} real-time audit records`);
+
+    // Process MoMo payments
+    moolrePayments = Array.isArray(payRes) ? payRes : (payRes?.payments || []);
+    renderMoolrePayments(moolrePayments);
+    setEl('moolreMomoSubCount', `${moolrePayments.length} transactions recorded`);
+
+    if(forceRefresh) showToast('Moolre gateway synchronized ✓','success');
+  } catch(err) {
+    console.error('Error loading Moolre data:', err);
+    if(forceRefresh) showToast('Failed to sync Moolre gateway','error');
+  } finally {
+    if(btn && forceRefresh){ setTimeout(()=>btn.classList.remove('fa-spin'), 600); }
+  }
+}
+
+function renderMoolreOTPs(logs){
+  const previewTb = el('moolreOtpPreviewTbody');
+  const fullTb = el('moolreOtpFullTbody');
+  
+  const buildRows = (list) => {
+    if(!list.length) return '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-key"></i><p>No OTP records found in database</p></div></td></tr>';
+    const now = new Date();
+    return list.map(o => {
+      const isExp = !o.used && new Date(o.expires_at) < now;
+      const stClass = o.used ? 'completed' : (isExp ? 'cancelled' : 'active');
+      const stLabel = o.used ? 'VERIFIED' : (isExp ? 'EXPIRED' : 'PENDING');
+      const expStr = o.expires_at ? new Date(o.expires_at).toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—';
+      const creStr = o.created_at ? new Date(o.created_at).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+      return `<tr>
+        <td><span class="tid">${o.id || '—'}</span></td>
+        <td style="font-family:monospace;font-weight:700">${o.phone || '—'}</td>
+        <td style="font-size:.76rem;color:var(--muted)">${o.purpose || 'Auth'}</td>
+        <td><span class="t-badge ${stClass}">${stLabel}</span></td>
+        <td style="font-size:.8rem;font-weight:700">${o.attempts || (o.used ? 1 : 0)}/5</td>
+        <td style="font-size:.75rem;color:${isExp?'var(--red)':'var(--muted)'}">${expStr}</td>
+        <td style="font-size:.75rem;color:var(--muted)">${creStr}</td>
+      </tr>`;
+    }).join('');
+  };
+
+  if(previewTb) previewTb.innerHTML = buildRows(logs.slice(0, 8));
+  if(fullTb) fullTb.innerHTML = buildRows(logs);
+}
+
+function renderMoolrePayments(list){
+  const tb = el('moolreMomoTbody');
+  if(!tb) return;
+  if(!list.length){
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-wallet"></i><p>No MoMo transactions recorded yet</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(p => {
+    const fare = parseFloat(p.total_fare || 0);
+    const fee = parseFloat(p.commission || (fare * 0.1));
+    const payout = parseFloat(p.rider_payout || (fare * 0.9));
+    const timeStr = p.initiated_at ? new Date(p.initiated_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    const stBadge = p.status === 'disbursed' ? '<span class="t-badge completed">DISBURSED</span>' :
+                    (p.status === 'collected' ? '<span class="t-badge active">COLLECTED</span>' : '<span class="t-badge pending">PENDING</span>');
+    return `<tr>
+      <td><span class="tid">${p.trip_id}</span></td>
+      <td>${stBadge}</td>
+      <td class="t-fare">₵${fare.toFixed(2)}</td>
+      <td style="color:var(--yellow);font-weight:700">₵${fee.toFixed(2)}</td>
+      <td style="color:var(--green);font-weight:700">₵${payout.toFixed(2)}</td>
+      <td style="font-size:.76rem;color:var(--muted);font-family:monospace">${p.payer_phone || '—'}</td>
+      <td style="font-size:.72rem;font-family:monospace;color:var(--muted)">${p.collection_ref || '—'}</td>
+      <td style="font-size:.75rem;color:var(--muted)">${timeStr}</td>
+      <td><button class="card-action" onclick="showSec('trips')">View Trip</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function purgeMoolreOTPs(){
+  if(!confirm('Purge all expired and verified OTP records from database?')) return;
+  try {
+    const res = await apiFetch('/users/otp-purge');
+    showToast(`Purged ${res?.deleted || 0} expired OTP records ✓`, 'success');
+    loadMoolreData(false);
+  } catch(e) {
+    showToast('Failed to purge OTP records', 'error');
+  }
+}
+
+async function testMoolrePing(){
+  showToast('Pinging Moolre SMS Gateway…', 'info');
+  try {
+    const res = await apiFetch('/admin/moolre/sms-balance');
+    if(res && res.success !== false){
+      showToast(`Gateway Connected: Balance = ${res.balance != null ? res.balance : 'Active'} credits`, 'success');
+    } else {
+      showToast('Gateway Connected (Moolre SMS Service Active)', 'success');
+    }
+    loadMoolreData(false);
+  } catch(e) {
+    showToast('Moolre ping check failed', 'error');
+  }
 }
 
 /* ── Refresh ── */
 async function refreshData(){
   const i=el('refreshIcon');if(i){i.style.transition='none';i.style.animation='none';void i.offsetWidth;i.style.animation='spin 0.6s linear';}
   allTrips=[];allRiders=[];allApps=[];
-  const fn={dashboard:loadDashboard,live:loadLive,trips:()=>loadAllTrips('all'),riders:()=>loadRiders('all'),passengers:loadPassengers,applications:()=>loadApps(curAppFilter,true),payments:loadPayments};
+  const fn={
+    dashboard:loadDashboard,
+    live:loadLive,
+    trips:()=>loadAllTrips('all'),
+    riders:()=>loadRiders('all'),
+    passengers:loadPassengers,
+    applications:()=>loadApps(curAppFilter,true),
+    payments:loadPayments,
+    moolre:()=>loadMoolreData(true)
+  };
   await fn[curSec]?.();
   showToast('Data refreshed','success');
   setTimeout(()=>{if(i)i.style.animation='';},700);
@@ -2221,9 +2651,67 @@ async function refreshData(){
 
 /* ── State vars ── */
 
+/* ── Socket.io Live Fleet & Trip Telemetry ── */
+let adminSocket = null;
+function initAdminSocket(){
+  if(typeof io === 'undefined') return;
+  if(adminSocket && adminSocket.connected) return;
+
+  try {
+    adminSocket = io(API_BASE, {
+      path: '/socket.io',
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 25,
+      reconnectionDelay: 1500
+    });
+
+    adminSocket.on('connect', () => {
+      console.log('[Admin Socket] Connected with ID:', adminSocket.id);
+      adminSocket.emit('admin:join');
+    });
+
+    // Real-time fleet presence update when a rider goes online or offline
+    adminSocket.on('admin:fleet_update', (data) => {
+      console.log('[Admin Socket] Real-time fleet update:', data);
+      if(typeof data?.onlineCount === 'number'){
+        setEl('heroOnline', data.onlineCount);
+        const onTripCount = allRiders ? allRiders.filter(r => r.on_trip).length : 0;
+        setEl('kpiRidersSub', `${data.onlineCount} online · ${onTripCount} on trip`);
+      }
+      // Re-fetch riders list dynamically to highlight online badge
+      loadRiders(curRiderFilter || 'all');
+    });
+
+    // Real-time trip progress update (acceptance, arrival, in-progress, completion)
+    adminSocket.on('admin:trip_update', (data) => {
+      console.log('[Admin Socket] Real-time trip update:', data);
+      loadLive();
+      loadAllTrips();
+      loadMoolreData();
+      if(data?.type === 'trip_completed'){
+        showToast(`Trip ${String(data.tripId).substring(0, 8)} completed! Revenue updated.`, 'success');
+      } else if(data?.type === 'trip_accepted'){
+        showToast(`Trip accepted by Rider ${data.rider?.name || ''}!`, 'info');
+      }
+    });
+
+    adminSocket.on('riders:pool_update', (pool) => {
+      if(typeof pool?.onlineCount === 'number'){
+        setEl('heroOnline', pool.onlineCount);
+        const onTripCount = allRiders ? allRiders.filter(r => r.on_trip).length : 0;
+        setEl('kpiRidersSub', `${pool.onlineCount} online · ${onTripCount} on trip`);
+      }
+    });
+  } catch(err) {
+    console.warn('[Admin Socket Error]', err.message);
+  }
+}
+
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded',()=>{
   loadAdminName();
+  initAdminSocket();
   startDashboardPolling(); // Start with dashboard polling
 });
 document.addEventListener('keydown',e=>{

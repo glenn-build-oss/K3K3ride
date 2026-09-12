@@ -249,6 +249,32 @@ router.post('/passenger/verify-otp', async (req, res) => {
       });
     }
 
+    // If phone exists as a rider, log them into their rider account seamlessly!
+    const riderUser = allUsers.find(u => u.role === 'rider');
+    if (riderUser) {
+      await updateUserLastLogin(riderUser.id);
+      const token = generateToken(riderUser);
+      const computedFullName = riderUser.full_name || `${riderUser.first_name || ''} ${riderUser.last_name || ''}`.trim();
+      return res.json({
+        success: true,
+        message: 'Login successful',
+        token,
+        status: riderUser.status || 'approved',
+        isRider: true,
+        user: {
+          id: riderUser.id,
+          phone: riderUser.phone,
+          firstName: riderUser.first_name,
+          lastName: riderUser.last_name,
+          fullName: computedFullName,
+          email: riderUser.email,
+          role: 'rider',
+          status: riderUser.status || 'approved',
+          isNew: false
+        }
+      });
+    }
+
     // If phone exists with other role, show error
     if (otherRoles.length > 0) {
       return res.status(400).json({
