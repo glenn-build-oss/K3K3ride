@@ -3,8 +3,9 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>K3K3 | Premium Ride Service</title>
-  <!-- Force unregister old service workers to fix cache issues -->
+  <title>K3K3 | Fast, Safe & Affordable Campus & Urban Rides</title>
+  
+  <!-- Force unregister old service workers to prevent cache issues -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
@@ -15,376 +16,517 @@
       });
     }
   </script>
+
   <link rel="icon" type="image/png" href="assets/k3k3.png">
   <link rel="shortcut icon" href="favicon.ico">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f1c40f">
+  <meta name="theme-color" content="#0A0A0E">
   <link rel="apple-touch-icon" href="assets/k3k3.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <link rel="stylesheet" href="about.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <!-- Additional mobile optimizations -->
-  <meta name="format-detection" content="telephone=no">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="K3K3">
-  <meta name="application-name" content="K3K3">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="Move smarter with K3K3. Fast, safe and affordable rides on demand.">
+  <meta name="keywords" content="K3K3, Campus Rides, UG Legon, KNUST, Tricycle, Kɛkɛ, Accra rides, student transport">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="K3K3 | Fast, Safe & Affordable Campus Rides">
+  <meta property="og:description" content="Beat the heat. Catch a K3K3. Fast, safe rides on demand.">
+  <meta property="og:image" content="assets/k3k3.png">
+  <meta property="og:type" content="website">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/campusride-k3k3.css?v=20260912">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .mobile-drawer { display: none; }
+  </style>
 </head>
 
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">
-      <img src="assets/k3k3 - wobbly.png" alt="K3K3 Logo" class="logo-img">
-      <span class="logo-text">...Ride With Us !</span>
 
+  <!-- ==========================================================================
+       HEADER & NAVIGATION BAR
+       ========================================================================== -->
+  <header class="header">
+    <div class="container">
+      <div class="nav-inner">
+        <!-- Brand Logo -->
+        <div class="brand-group">
+          <a href="index.html" class="logo-link">
+            <img src="assets/k3k3 - wobbly.png" alt="K3K3 Logo" class="logo-img">
+          </a>
+        </div>
+
+        <!-- Desktop Navigation Links -->
+        <nav>
+          <ul class="nav-links">
+            <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          </ul>
+        </nav>
+
+        <!-- Desktop Action Buttons -->
+        <div class="nav-actions">
+          <a href="rider/rider-auth.html" class="btn-driver-pill">
+            <i class="fas fa-motorcycle"></i>
+            <span>Driver Portal</span>
+          </a>
+          <a href="passenger/login.html#login" class="btn-login-ghost">Login</a>
+          <a href="passenger/login.html#signup" class="btn-signup-solid">
+            <span>Sign Up</span>
+            <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i>
+          </a>
+        </div>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
     </div>
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
-      <i class="fas fa-bars"></i>
-    </button>
-    <nav>
-      <ul>
-        <li><a href="rider/rider-auth.html" class="btn" style="background:rgba(255,214,10,0.15);border:1px solid rgba(255,214,10,0.4);color:#FFD60A"><i class="fas fa-motorcycle" style="margin-right:6px"></i>Driver Portal</a></li>
-        <li><a href="passenger/login.html#login" class="btn">Login</a></li>
-        <li><a href="passenger/login.html#signup" class="signup">Sign Up</a></li>
-      </ul>
-    </nav>
   </header>
 
-  <!-- Hero Section -->
-  <section class="about-modern">
-    <div class="about-content">
-      <div class="about-text">
-        <h2 id="hero-title">Reimagining Urban Transport</h2>
-        <p id="hero-subtitle" class="hero-subtitle">Move Smarter. Ride Kɛkɛ.</p>
-        <p id="hero-description" class="hero-description">Experience premium ride-hailing services designed for the modern urban commuter. Safe, reliable, and always on time.</p>
-        <div class="hero-buttons">
-          <a href="passenger/login.html#login" class="btn-primary" id="start-riding-btn">
-            <i class="fas fa-car"></i>
-            <span id="start-riding-label">Book a ride</span>
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <a href="#how-it-works" class="nav-link mobile-nav-item">How It Works</a>
+    <div class="mobile-drawer-actions">
+      <a href="rider/rider-auth.html" class="btn-driver-pill" style="justify-content:center; padding: 12px;">
+        <i class="fas fa-motorcycle"></i>
+        <span>Driver Portal</span>
+      </a>
+      <a href="passenger/login.html#login" class="btn-secondary-hero" style="justify-content:center; text-align:center;">Login</a>
+      <a href="passenger/login.html#signup" class="btn-primary-hero" style="justify-content:center; text-align:center;">Sign Up</a>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       HERO SECTION
+       ========================================================================== -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-grid">
+        <!-- Left Hero Text -->
+        <div class="hero-content">
+          <h1 class="hero-title" id="hero-title" style="margin-bottom: 28px;">
+            Beat the heat.<br>
+            Catch a <span class="accent-gold">K3K3</span>.
+          </h1>
+
+          <div class="hero-cta-group">
+            <a href="passenger/login.html#login" class="btn-primary-hero" id="start-riding-btn">
+              <i class="fas fa-bolt"></i>
+              <span id="start-riding-label">Book a Ride</span>
+              <i class="fas fa-arrow-right" style="font-size:0.85rem"></i>
+            </a>
+            <a href="rider/rider-auth.html" class="btn-secondary-hero" id="become-driver-btn">
+              <i class="fas fa-motorcycle" style="color:var(--k3k3-gold)"></i>
+              <span id="start-earning-label">Drive &amp; Earn</span>
+            </a>
+          </div>
+
+          <div class="hero-feature-pills">
+            <div class="feature-pill-item">
+              <i class="fas fa-check-circle"></i>
+              <span>20+ Campus Stations</span>
+            </div>
+            <div class="feature-pill-item">
+              <i class="fas fa-check-circle"></i>
+              <span>Instant Driver Match</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero: Redesigned K3K3 Smartphone Mockup -->
+        <div class="hero-mockup-wrapper">
+          <div class="phone-mockup">
+            <!-- Dynamic Island Notch -->
+            <div class="phone-notch">
+              <div class="notch-camera"></div>
+              <div class="notch-sensor"></div>
+            </div>
+
+            <!-- Inside Phone Screen -->
+            <div class="phone-screen">
+              <!-- App Bar -->
+              <div class="phone-app-bar">
+                <div class="phone-brand-mark">
+                  <i class="fas fa-bolt" style="color:var(--k3k3-gold)"></i>
+                  <span>K3K3</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; font-size:0.72rem; color:var(--text-muted); font-weight:600;">
+                  <span class="status-dot-pulse"></span>
+                  <span>Online</span>
+                </div>
+              </div>
+
+              <!-- Route Card -->
+              <div class="phone-route-box">
+                <div class="route-step">
+                  <div class="route-dot-green"></div>
+                  <div>
+                    <div class="route-label">Pick up</div>
+                    <div class="route-name">Night Market &middot; Gate</div>
+                  </div>
+                </div>
+                <div class="route-connector"></div>
+                <div class="route-step">
+                  <div class="route-dot-gold"></div>
+                  <div>
+                    <div class="route-label">Drop off</div>
+                    <div class="route-name">Pentagon Hostels &middot; Block C</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected Ride Option -->
+              <div class="ride-tier-card">
+                <div class="tier-info">
+                  <div class="tier-icon-wrap">
+                    <i class="fas fa-motorcycle"></i>
+                  </div>
+                  <div>
+                    <div class="tier-title">Kɛkɛ Express</div>
+                    <div class="tier-eta">&bull; 2 mins away &bull; Fast pickup</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="tier-price">GHS 5.00</div>
+                  <div class="tier-fare-label">Flat Fare</div>
+                </div>
+              </div>
+
+              <!-- Active Driver Match Card -->
+              <div class="driver-preview-card">
+                <div class="driver-detail">
+                  <div class="driver-avatar-circle">
+                    <i class="fas fa-user-check"></i>
+                  </div>
+                  <div>
+                    <div class="driver-name">Kwame M. <span class="driver-rating">&starf; 4.9</span></div>
+                    <div class="driver-tag-keke">Yellow Kɛkɛ &middot; GR-4819-24</div>
+                  </div>
+                </div>
+                <div style="text-align:right">
+                  <span style="font-size:0.65rem; color:#10B981; font-weight:700;">Arriving in 90s</span>
+                </div>
+              </div>
+
+              <!-- Action Confirmation Button -->
+              <a href="passenger/login.html#login" class="phone-cta-btn">
+                <span>Confirm K3K3 Ride</span>
+                <i class="fas fa-arrow-right" style="font-size:0.75rem"></i>
+              </a>
+
+              <div style="text-align:center; font-size:0.68rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:6px;">
+                <i class="fas fa-shield-halved" style="color:var(--k3k3-gold)"></i>
+                <span>Cash or MTN MoMo &middot; Verified Drivers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       INFINITE MARQUEE TICKER
+       ========================================================================== -->
+  <div class="ticker-container" aria-hidden="true">
+    <div class="ticker-track">
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>Legon &amp; KNUST Zones</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>GHS 5 Flat Rates</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>Zero Surge Pricing</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>Instant Driver Dispatch</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>MTN MoMo &amp; Cash</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>100% Verified Drivers</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>24/7 Safety First</span></div>
+
+      <!-- Duplicate for infinite seamless loop -->
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>Legon &amp; KNUST Zones</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>GHS 5 Flat Rates</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>Zero Surge Pricing</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>Instant Driver Dispatch</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>MTN MoMo &amp; Cash</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>100% Verified Drivers</span></div>
+      <div class="ticker-item"><i class="fas fa-bolt"></i><span>24/7 Safety First</span></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       "RIDING MADE SIMPLE" DUAL WORKFLOW
+       ========================================================================== -->
+  <section class="workflow-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" id="workflow-tag">Simple &middot; Fast &middot; Reliable</span>
+        <h2 class="section-title" id="workflow-title">Riding made simple.</h2>
+        <p class="section-desc" id="workflow-desc">
+          Move quickly across campus or turn your wheels into daily income.
+        </p>
+      </div>
+
+      <div class="workflow-grid">
+        <!-- Passenger Track -->
+        <div class="workflow-card" id="for-passengers">
+          <div class="card-role-header">
+            <div class="role-title-group">
+              <div class="role-icon-box">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h3 class="role-title" id="p-role-title">For Passengers</h3>
+                <div style="font-size:0.82rem; color:var(--text-muted);" id="p-role-subtitle">Fast pickups on demand</div>
+              </div>
+            </div>
+            <span class="role-badge-tag">Rider</span>
+          </div>
+
+          <div class="steps-list">
+            <div class="step-item">
+              <div class="step-num">01</div>
+              <div class="step-content">
+                <h4 id="p-step1-title">Set Pickup</h4>
+                <p id="p-step1-desc">Select your station, hall, or hostel gate.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">02</div>
+              <div class="step-content">
+                <h4 id="p-step2-title">Instant Match</h4>
+                <p id="p-step2-desc">Nearby verified driver arrives in minutes.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">03</div>
+              <div class="step-content">
+                <h4 id="p-step3-title">Ride &amp; Pay</h4>
+                <p id="p-step3-desc">Pay flat fares via MoMo or cash. Zero stress.</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="passenger/login.html#login" class="card-action-link">
+            <span id="p-cta-link">Book a Ride Now</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <!-- Driver Track -->
+        <div class="workflow-card" id="for-drivers">
+          <div class="card-role-header">
+            <div class="role-title-group">
+              <div class="role-icon-box">
+                <i class="fas fa-motorcycle"></i>
+              </div>
+              <div>
+                <h3 class="role-title" id="d-role-title">For Drivers</h3>
+                <div style="font-size:0.82rem; color:var(--text-muted);" id="d-role-subtitle">Drive on your schedule</div>
+              </div>
+            </div>
+            <span class="role-badge-tag">Partner</span>
+          </div>
+
+          <div class="steps-list">
+            <div class="step-item">
+              <div class="step-num">01</div>
+              <div class="step-content">
+                <h4 id="d-step1-title">Go Online</h4>
+                <p id="d-step1-desc">Drive whenever you want. Total control.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">02</div>
+              <div class="step-content">
+                <h4 id="d-step2-title">High Demand</h4>
+                <p id="d-step2-desc">Non-stop ride requests across all hubs.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-num">03</div>
+              <div class="step-content">
+                <h4 id="d-step3-title">Instant Payouts</h4>
+                <p id="d-step3-desc">Low commissions. Direct cashouts to MoMo.</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="rider/rider-auth.html" class="card-action-link">
+            <span id="d-cta-link">Join as a Driver</span>
+            <i class="fas fa-arrow-right"></i>
           </a>
         </div>
       </div>
-      <div class="hero-image">
-        <div class="hero-visual">
-          <i class="fas fa-route hero-icon"></i>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       KEY METRICS HIGHLIGHT BAR
+       ========================================================================== -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">20+</div>
+          <div class="stat-label">Campus Stations</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">&lt; 3 min</div>
+          <div class="stat-label">Average Pickup Speed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Verified Drivers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">4.9 &starf;</div>
+          <div class="stat-label">Community Rating</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Core Values Section -->
-  <section class="values">
-    <div class="values-header">
-      <h2 id="values-title">Our Core Values</h2>
-    </div>
-    <div class="values-grid">
-      <div class="value-card animate-in">
-        <div class="value-icon">
-          <i class="fas fa-shield-alt"></i>
+  <!-- ==========================================================================
+       BOTTOM CTA BANNER
+       ========================================================================== -->
+  <section class="cta-banner-section">
+    <div class="container">
+      <div class="cta-banner-box">
+        <h2 class="cta-heading" id="apply-title">Ready to ride?</h2>
+        <p class="cta-subtext" id="apply-text">
+          Move smarter with K3K3 today.
+        </p>
+        <div class="cta-btn-row">
+          <a href="passenger/login.html#login" class="btn-primary-hero">
+            <i class="fas fa-bolt"></i>
+            <span>Book a Ride Now</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+          <a href="rider/rider-auth.html" class="btn-secondary-hero">
+            <i class="fas fa-motorcycle" style="color:var(--k3k3-gold)"></i>
+            <span>Drive with K3K3</span>
+          </a>
         </div>
-        <h3 id="safety-title">Safety First</h3>
-        <p id="safety-text">Your safety is our top priority. We implement rigorous driver verification, real-time
-          tracking, and emergency features to ensure every journey is secure.</p>
-      </div>
-      <div class="value-card animate-in">
-        <div class="value-icon">
-          <i class="fas fa-bolt"></i>
-        </div>
-        <h3 id="speed-title">Speed & Reliability</h3>
-        <p id="speed-text">Quick pickups and efficient routes. Our smart matching algorithm ensures you get the fastest
-          ride to your destination.</p>
-      </div>
-      <div class="value-card animate-in">
-        <div class="value-icon">
-          <i class="fas fa-users"></i>
-        </div>
-        <h3 id="community-title">Community Focus</h3>
-        <p id="community-text">We're building more than just a ride service. We're creating a community of riders and
-          drivers who support each other.</p>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="cta">
-    <div class="cta-content">
-      <h2 id="apply-title">Ready to Join the Movement?</h2>
-      <p id="apply-text">Whether you're looking to ride or drive, K3K3 offers opportunities for everyone. Be part of
-        Ghana's transportation revolution.</p>
-      <div class="cta-buttons">
-        <a href="rider/rider-auth.html" class="cta-btn">
-          <i class="fas fa-motorcycle"></i>
-          <div>
-            <div id="start-earning-label">Ride & Earn</div>
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="footer-main">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Brand Info -->
+        <div class="footer-brand-col">
+          <img src="assets/k3k3 - wobbly.png" alt="K3K3 Logo" class="logo-img">
+          <p class="footer-brand-text">
+            Fast, affordable, and safe rides across campus and town.
+          </p>
+          <div style="font-size:0.85rem; font-weight:700; color:var(--k3k3-gold);">
+            ...Ride With Us!
           </div>
-        </a>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-col">
+          <h4 id="footer-company-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="passenger/login.html#login">Book a Ride</a></li>
+            <li><a href="passenger/login.html#signup">Create Passenger Account</a></li>
+            <li><a href="rider/rider-auth.html">Driver Portal</a></li>
+            <li><a href="rider/apply-to-ride.html">Apply as Driver</a></li>
+          </ul>
+        </div>
+
+        <!-- Support Links (Integrated with WhatsApp Business) -->
+        <div class="footer-col">
+          <h4 id="footer-support-title">Support &amp; Safety</h4>
+          <ul class="footer-links">
+            <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%2C%20I%20need%20assistance%20from%20the%20Help%20Center." target="_blank" rel="noopener noreferrer" id="footer-help" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support, I need assistance from the Help Center.')"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:6px;"></i>Help Center</a></li>
+            <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Safety%20Team%2C%20I%20have%20a%20safety%20inquiry%20to%20report." target="_blank" rel="noopener noreferrer" id="footer-safety" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Safety Team, I have a safety inquiry to report.')"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:6px;"></i>Safety Team</a></li>
+            <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%2C%20I%20would%20like%20to%20contact%20support." target="_blank" rel="noopener noreferrer" id="footer-contact" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business, I would like to contact support.')"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:6px;"></i>Contact Us</a></li>
+            <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%2C%20I%20have%20a%20frequently%20asked%20question." target="_blank" rel="noopener noreferrer" id="footer-faqs" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support, I have a frequently asked question.')"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:6px;"></i>FAQs</a></li>
+            <li style="margin-top:4px;">
+              <a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%2C%20I%20need%20assistance." target="_blank" rel="noopener noreferrer" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support, I need assistance.')" style="color:var(--k3k3-gold); font-weight:600; font-size:0.84rem;">
+                <i class="fab fa-whatsapp" style="color:#25D366; margin-right:6px;"></i>+233 50 484 2974
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Legal & Admin -->
+        <div class="footer-col">
+          <h4 id="footer-legal-title">Legal &amp; Admin</h4>
+          <ul class="footer-links">
+            <li><a href="legal/terms-of-service.html" id="footer-terms">Terms of Service</a></li>
+            <li><a href="legal/privacy-policy.html" id="footer-privacy">Privacy Policy</a></li>
+            <li><a href="legal/cookie-policy.html" id="footer-cookies">Cookie Policy</a></li>
+            <li>
+              <a href="admin/adminlogin.html" id="admin-login-label" class="footer-admin-link">
+                <i class="fas fa-lock" style="font-size:0.75rem;"></i>
+                <span>Admin Login</span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
-  </section>
 
-
-
-
-  <!-- Footer -->
-  <footer>
-    <div class="footer-content">
-      <div class="footer-section">
-        <h4 id="footer-support-title">Support</h4>
-        <ul>
-          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%20(%40k3k3rideservice)%2C%20I%20need%20assistance%20from%20the%20Help%20Center." target="_blank" rel="noopener noreferrer" id="footer-help" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support (@k3k3rideservice), I need assistance from the Help Center.')">Help Center</a></li>
-          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Safety%20Team%20(%40k3k3rideservice)%2C%20I%20have%20a%20safety%20inquiry%20or%20incident%20to%20report." target="_blank" rel="noopener noreferrer" id="footer-safety" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Safety Team (@k3k3rideservice), I have a safety inquiry or incident to report.')">Safety</a></li>
-          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20(%40k3k3rideservice)%2C%20I%20would%20like%20to%20contact%20support." target="_blank" rel="noopener noreferrer" id="footer-contact" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business (@k3k3rideservice), I would like to contact support.')">Contact Us</a></li>
-          <li><a href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%20(%40k3k3rideservice)%2C%20I%20have%20a%20frequently%20asked%20question." target="_blank" rel="noopener noreferrer" id="footer-faqs" onclick="openWhatsAppBusiness(event, 'Hello K3K3 Ride Business Support (@k3k3rideservice), I have a frequently asked question.')">FAQs</a></li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h4 id="footer-legal-title">Legal</h4>
-        <ul>
-          <li><a href="legal/terms-of-service.html" id="footer-terms">Terms of Service</a></li>
-          <li><a href="legal/privacy-policy.html" id="footer-privacy">Privacy Policy</a></li>
-          <li><a href="legal/cookie-policy.html" id="footer-cookies">Cookie Policy</a></li>
-          <li><a href="admin/adminlogin.html" id="admin-login-label">Admin</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p id="footer-text">© 2026 K3K3 Rides. All Rights Reserved.</p>
-      <div class="footer-language">
-        <label for="languageSelect" id="language-label">Language:</label>
-        <select class="language-select" id="languageSelect">
-          <option value="en">English</option>
-          <option value="fr">French</option>
-          <option value="tw">Twi</option>
-          <option value="ee">Ewe</option>
-        </select>
+      <!-- Bottom Bar with Multi-Language Selector -->
+      <div class="footer-bottom-bar">
+        <p id="footer-text">&copy; 2026 K3K3 Rides. All Rights Reserved.</p>
+        
+        <div class="footer-lang-picker">
+          <label for="languageSelect" id="language-label" style="font-size:0.85rem; color:var(--text-muted);">Language:</label>
+          <select class="lang-select-box" id="languageSelect">
+            <option value="en">English</option>
+            <option value="fr">Fran&ccedil;ais</option>
+            <option value="tw">Twi</option>
+            <option value="ee">Ewe</option>
+          </select>
+        </div>
       </div>
     </div>
   </footer>
 
-  <!-- Translation Script -->
+  <!-- ==========================================================================
+       SCRIPTS: WhatsApp, Language Translations, Navigation & PWA
+       ========================================================================== -->
   <script>
-    const translations = {
-      en: {
-        "hero-title": "Reimagining Urban Transport",
-        "hero-subtitle": "Move Smarter. Ride Kɛkɛ.",
-        "hero-description": "Experience premium ride-hailing services designed for the modern urban commuter. Safe, reliable, and always on time.",
-        "hero-text": "",
-        "values-title": "Our Core Values",
-        "safety-title": "Safety First",
-        "safety-text": "Your safety is our top priority. We implement rigorous driver verification, real-time tracking, and emergency features to ensure every journey is secure.",
-        "speed-title": "Speed & Reliability",
-        "speed-text": "Quick pickups and efficient routes. Our smart matching algorithm ensures you get the fastest ride to your destination.",
-        "community-title": "Community Focus",
-        "community-text": "We're building more than just a ride service. We're creating a community of riders and drivers who support each other.",
-        "apply-title": "Ready to Join the Movement?",
-        "apply-text": "Whether you're looking to ride or drive, K3K3 offers opportunities for everyone. Be part of Ghana's transportation revolution.",
-        "start-riding-label": "Start Riding",
-        "become-rider-label": "Become a Rider",
-        "download-app-label": "Download App",
-        "start-earning-label": "Ride & Earn",
-        "drive-with-k3k3-label": "Drive with K3K3",
-        "admin-title": "Administrator Access",
-        "admin-text": "Secure login for K3K3 administrators to manage operations and monitor the transportation network.",
-        "admin-login-label": "Admin Login",
-        "footer-company-title": "K3K3",
-        "footer-about": "About Us",
-        "footer-mission": "Mission",
-        "footer-careers": "Careers",
-        "footer-press": "Press",
-        "footer-services-title": "Services",
-        "footer-k3k3-go": "K3K3 Go",
-        "footer-k3k3-xl": "K3K3 XL",
-        "footer-k3k3-premium": "K3K3 Premium",
-        "footer-k3k3-boda": "K3K3 Boda",
-        "footer-support-title": "Support",
-        "footer-help": "Help Center",
-        "footer-safety": "Safety",
-        "footer-contact": "Contact Us",
-        "footer-faqs": "FAQs",
-        "footer-legal-title": "Legal",
-        "footer-terms": "Terms of Service",
-        "footer-privacy": "Privacy Policy",
-        "footer-cookies": "Cookie Policy",
-        "footer-text": "© 2026 K3K3 Rides. All Rights Reserved.",
-        "language-label": "Language:"
-      },
-      fr: {
-        "hero-title": "Réinventer le transport urbain",
-        "hero-subtitle": "Bougez plus intelligemment. Roulez avec Kɛkɛ.",
-        "hero-description": "Découvrez des services de covoiturage premium conçus pour le navetteur urbain moderne. Sécurisé, fiable et toujours à l'heure.",
-        "hero-text": "",
-        "values-title": "Nos Valeurs Fondamentales",
-        "safety-title": "Sécurité d'Abord",
-        "safety-text": "Votre sécurité est notre priorité absolue. Nous mettons en œuvre une vérification rigoureuse des conducteurs, un suivi en temps réel et des fonctionnalités d'urgence pour garantir que chaque trajet soit sécurisé.",
-        "speed-title": "Rapidité & Fiabilité",
-        "speed-text": "Prises en charge rapides et itinéraires efficaces. Notre algorithme de correspondance intelligent garantit que vous obtenez le trajet le plus rapide vers votre destination.",
-        "community-title": "Focus Communautaire",
-        "community-text": "Nous construisons plus qu'un simple service de transport. Nous créons une communauté de passagers et de conducteurs qui se soutiennent mutuellement.",
-        "apply-title": "Prêt à rejoindre le mouvement ?",
-        "apply-text": "Que vous cherchiez à faire du vélo ou à conduire, K3K3 offre des opportunités pour tous. Faites partie de la révolution des transports au Ghana.",
-        "start-riding-label": "Commencer à Rouler",
-        "become-rider-label": "Devenir un Conducteur",
-        "download-app-label": "Télécharger l'App",
-        "start-earning-label": "Ride & Earn",
-        "drive-with-k3k3-label": "Conduire avec K3K3",
-        "admin-title": "Accès Administrateur",
-        "admin-text": "Connexion sécurisée pour les administrateurs K3K3 afin de gérer les opérations et de surveiller le réseau de transport.",
-        "admin-login-label": "Connexion Admin",
-        "footer-company-title": "K3K3",
-        "footer-about": "À Propos",
-        "footer-mission": "Mission",
-        "footer-careers": "Carrières",
-        "footer-press": "Presse",
-        "footer-services-title": "Services",
-        "footer-k3k3-go": "K3K3 Go",
-        "footer-k3k3-xl": "K3K3 XL",
-        "footer-k3k3-premium": "K3K3 Premium",
-        "footer-k3k3-boda": "K3K3 Boda",
-        "footer-support-title": "Support",
-        "footer-help": "Centre d'Aide",
-        "footer-safety": "Sécurité",
-        "footer-contact": "Nous Contacter",
-        "footer-faqs": "FAQ",
-        "footer-legal-title": "Légal",
-        "footer-terms": "Conditions d'Utilisation",
-        "footer-privacy": "Politique de Confidentialité",
-        "footer-cookies": "Politique de Cookies",
-        "footer-text": "© 2026 K3K3 Rides. Tous droits réservés.",
-        "language-label": "Langue:"
-      },
-      tw: {
-        "hero-title": "Urban Transport Hoɔden Noɔmu",
-        "hero-subtitle": "Yɛn Akwan a Ɛyɛ Pa. Kɔ Kɛkɛ.",
-        "hero-description": "Hyɛ aseɛ akwan a ɛyɛ pɛ wɔ nnipa a wɔte kuayɛ mu a nnɛ. Ahobammɔ, yie, ne bere nyinaa.",
-        "hero-text": "",
-        "values-title": "Yɛn Nsɛm a Ɛho Hia",
-        "safety-title": "Ahobammɔ Di Kan",
-        "safety-text": "Wo ahobammɔ yɛ yɛn pɛneɛ a ɛsen biara. Yɛde akyɛdefo ho hwehwɛ a ɛyɛ den, real-time tracking ne ahobammɔ nneɛma di dwuma de hwɛ hu sɛ akwan biara yɛ bɔkɔɔ.",
-        "speed-title": "Ntɛm & Ntɛm Pa",
-        "speed-text": "Ntɛm mu kɔfa ne akwan a ɛyɛ pɛ. Yɛn smart matching algorithm hwɛ hu sɛ wo nya akwan a ɛwarent sen biara kɔ wo baabi a ɛrekɔ.",
-        "community-title": "Nkurɔfo Ho Adwuma",
-        "community-text": "Yɛ reyɛ adeɛ bɛne akwan a wɔde kɔ faa. Yɛ rebɔ nkurɔfoɔ kuo a ɛfa nnipa ne akyɛdefo a wɔboa wɔn ho wɔn.",
-        "apply-title": "Wo Bere Te Sɛ Wo Bɛbɔ Ho?",
-        "apply-text": "Sɛ wo rehwehwɛ sɛ wo bɛkɔ anaasɛ wo bɛdi akwan, K3K3 ma wo ho kwan wɔ nkorɔfo biara ho. Fa wo ho ka Ghana transport mu nsakrae no ho.",
-        "start-riding-label": "Hyɛ ase Kɔ",
-        "become-rider-label": "Yɛ Akyɛdefo",
-        "download-app-label": "Twe App",
-        "start-earning-label": "Ride & Earn",
-        "drive-with-k3k3-label": "Di K3K3 Akwan",
-        "admin-title": "Admin Kwan",
-        "admin-text": "Safe login ma K3K3 admin sɛ wɔbɛyɛ adwuma na wɔhwɛ transport network no.",
-        "admin-login-label": "Admin Login",
-        "footer-company-title": "K3K3",
-        "footer-about": "Yɛn Ho Nsɛm",
-        "footer-mission": "Yɛn Adwuma",
-        "footer-careers": "Adwuma",
-        "footer-press": "Nsɛm Ho",
-        "footer-services-title": "Adwuma",
-        "footer-k3k3-go": "K3K3 Go",
-        "footer-k3k3-xl": "K3K3 XL",
-        "footer-k3k3-premium": "K3K3 Premium",
-        "footer-k3k3-boda": "K3K3 Boda",
-        "footer-support-title": "Boa",
-        "footer-help": "Help Center",
-        "footer-safety": "Ahobammɔ",
-        "footer-contact": "Contact Us",
-        "footer-faqs": "FAQs",
-        "footer-legal-title": "Mmara",
-        "footer-terms": "Terms of Service",
-        "footer-privacy": "Privacy Policy",
-        "footer-cookies": "Cookie Policy",
-        "footer-text": "© 2026 K3K3 Rides. Nsɛm nyinaa wɔ hɔ.",
-        "language-label": "Kasa:"
-      },
-      ee: {
-        "hero-title": "Ɖeɖe ŋlɔ̃ ƒe ŋkeke ɖoɖo ƒe gblɔ",
-        "hero-subtitle": "Ɖeɖe ŋlɔ̃ ƒe gɔmeɖeɖe. Kɔ Kɛkɛ.",
-        "hero-description": "Trɔ ŋkeke ɖoɖo ƒe gɔmeɖeɖe sia le ame bubuwo ƒe gblɔme. ŋlɔ̃, ɖoɖo nyuie, kple ŋkeke ɖoɖo ƒe gɔmeɖeɖe.",
-        "hero-text": "Kɛkɛ le dzɔdzɔ ɖeɖeŋu ɖo amedɔdɔ ɖeɖeŋu ɖo ɖe Ghana.",
-        "values-title": "Yɚa ƒe Nɔnɔmɔ̃wo",
-        "safety-title": "ŋlɔ̃ ƒe Dziƒo",
-        "safety-text": "ŋlɔ̃ ƒe dziɖuɖu le yɚa dzi ɖe kɛkɛ. Míe lɔ̃ amedɔdɔ ɖeɖeŋu ɖo, míe lɔ̃ akpa ɖeɖeŋu ɖo kple míe lɔ̃ ŋlɔ̃ ƒe nɔnɔmɔ̃wo le ɖoɖo nu.",
-        "speed-title": "ŋusẽkpɔƒa & ŋlɔ̃ƒoƒo",
-        "speed-text": "Ɖeɖe ɖoɖo nu le vɔ̌ vɔ̌ kple akpa ɖeɖeŋu ɖo. Mía ƒe smart matching algorithm le dzɔdzɔ le se ɖe ɖo ɖeɖeŋu ɖo.",
-        "community-title": "Lãmeɖoƒewo ƒe Dɔwɔna",
-        "community-text": "Míe me ɖo ɖoɖo nu gɔ̃ɔ̃, míe me ɖo amedɔdɔ ɖeɖeŋu ɖo. Míe me lɔ̃ lãmeɖoƒe si me do ɖo amedɔdɔ kple ɖɔkta si me tɔn ɖo wo ƒe ŋkeke ɖoɖo.",
-        "apply-title": "Wo ŋlɔ̃ ƒe Ɖeɖe ŋlɔ̃?",
-        "apply-text": "Sɔŋɔ le wo ɖoɖo nu le ɖoɖo ɖeɖeŋu ɖo, K3K3 ma wo ɖoɖo nu le ame bubuwo ƒe ŋkeke ɖoɖo. Fa wo ho kpe ɖe Ghana ƒe akpa ɖeɖeŋu ɖo.",
-        "start-riding-label": "Ɖe ɖoɖo Nu",
-        "become-rider-label": "Wu ɖɔkta",
-        "download-app-label": "Twe App",
-        "start-earning-label": "Ride & Earn",
-        "drive-with-k3k3-label": "Ɖe Akple K3K3",
-        "admin-title": "Admin ƒe Ɩɖo",
-        "admin-text": "Safe login ma K3K3 admin sɛ wɔbɛyɛ dɔwɔna kple wɔhwɛ akpa ɖeɖeŋu ɖo.",
-        "admin-login-label": "Admin Login",
-        "footer-company-title": "K3K3",
-        "footer-about": "Yɚa ŋkeke ɖoɖo",
-        "footer-mission": "Yɚa Dɔwɔna",
-        "footer-careers": "Dɔwɔna",
-        "footer-press": "ŋlɔ̃ƒoƒo",
-        "footer-services-title": "Dɔwɔna",
-        "footer-k3k3-go": "K3K3 Go",
-        "footer-k3k3-xl": "K3K3 XL",
-        "footer-k3k3-premium": "K3K3 Premium",
-        "footer-k3k3-boda": "K3K3 Boda",
-        "footer-support-title": "Dzɔdzɔenyenye",
-        "footer-help": "Help Center",
-        "footer-safety": "ŋlɔ̃ ƒe Dziƒo",
-        "footer-contact": "Contact Us",
-        "footer-faqs": "FAQs",
-        "footer-legal-title": "Mɔ̃ɖãwo",
-        "footer-terms": "Terms of Service",
-        "footer-privacy": "Privacy Policy",
-        "footer-cookies": "Cookie Policy",
-        "footer-text": "© 2026 K3K3 Rides. ŋlɔ̃ ƒe Gblɔmɔ̃.",
-        "language-label": "Gbɔgbɔ:"
+    // WhatsApp Business Direct Chat Handler
+    function openWhatsAppBusiness(event, message) {
+      if (event && event.preventDefault) {
+        event.preventDefault();
       }
-    };
-
-    // Language change functionality
-    document.addEventListener('DOMContentLoaded', function () {
-      const langSelect = document.getElementById('languageSelect');
-
-      langSelect.addEventListener('change', (e) => {
-        const selectedLang = e.target.value;
-        const texts = translations[selectedLang];
-
-        // Update all translatable elements
-        for (const id in texts) {
-          const el = document.getElementById(id);
-          if (el) el.innerText = texts[id];
-        }
-
-        // Store language preference
-        localStorage.setItem('selectedLanguage', selectedLang);
-      });
-
-      // Load saved language preference
-      const savedLang = localStorage.getItem('selectedLanguage');
-      if (savedLang && translations[savedLang]) {
-        langSelect.value = savedLang;
-        langSelect.dispatchEvent(new Event('change'));
+      const phone = '233504842974';
+      const text = encodeURIComponent(message || 'Hello K3K3 Ride Business Support, I need assistance.');
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Deep-link directly into WhatsApp application
+        window.location.href = `whatsapp://send?phone=${phone}&text=${text}`;
+        setTimeout(() => {
+          window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
+        }, 1200);
+      } else {
+        // Open WhatsApp Web directly with chat open
+        window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
       }
-    });
+    }
 
-  </script>
-  <script>
-    // Mobile menu toggle functionality
+    // Mobile Navigation Drawer Toggle
     document.addEventListener('DOMContentLoaded', function () {
-      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-      const navMenu = document.querySelector('.header nav');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      const navItems = document.querySelectorAll('.mobile-nav-item');
 
-      if (mobileMenuToggle && navMenu) {
-        mobileMenuToggle.addEventListener('click', function () {
-          navMenu.classList.toggle('active');
-          const icon = mobileMenuToggle.querySelector('i');
-          if (navMenu.classList.contains('active')) {
+      if (mobileToggle && mobileDrawer) {
+        mobileToggle.addEventListener('click', function () {
+          mobileDrawer.classList.toggle('active');
+          const icon = mobileToggle.querySelector('i');
+          if (mobileDrawer.classList.contains('active')) {
             icon.classList.remove('fa-bars');
             icon.classList.add('fa-times');
           } else {
@@ -393,33 +535,213 @@
           }
         });
 
-        // Close menu when clicking outside
-        document.addEventListener('click', function (event) {
-          if (!navMenu.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
-            navMenu.classList.remove('active');
-            const icon = mobileMenuToggle.querySelector('i');
+        // Close drawer when link clicked
+        navItems.forEach(item => {
+          item.addEventListener('click', () => {
+            mobileDrawer.classList.remove('active');
+            const icon = mobileToggle.querySelector('i');
             icon.classList.remove('fa-times');
             icon.classList.add('fa-bars');
-          }
+          });
         });
       }
     });
 
-    function openWhatsAppBusiness(event, message) {
-      const phone = '233504842974';
-      const encodedText = encodeURIComponent(message || 'Hello K3K3 Ride Business Support (@k3k3rideservice)');
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      if (isAndroid) {
-        // Try opening WhatsApp Business app directly on Android, with fallback to web link
-        const intentUrl = `intent://send?phone=${phone}&text=${encodedText}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`;
-        const fallbackUrl = `https://wa.me/${phone}?text=${encodedText}`;
-        const timeout = setTimeout(() => { window.open(fallbackUrl, '_blank'); }, 1200);
-        window.location.href = intentUrl;
+    // Concise Multilingual Translation Engine
+    const translations = {
+      en: {
+        "hero-title": "Beat the heat.<br>Catch a <span class=\"accent-gold\">K3K3</span>.",
+        "start-riding-label": "Book a Ride",
+        "start-earning-label": "Drive & Earn",
+        "workflow-tag": "Simple · Fast · Reliable",
+        "workflow-title": "Riding made simple.",
+        "workflow-desc": "Move quickly across campus or turn your wheels into daily income.",
+        "p-role-title": "For Passengers",
+        "p-role-subtitle": "Fast pickups on demand",
+        "p-step1-title": "Set Pickup",
+        "p-step1-desc": "Select your station, hall, or hostel gate.",
+        "p-step2-title": "Instant Match",
+        "p-step2-desc": "Nearby verified driver arrives in minutes.",
+        "p-step3-title": "Ride & Pay",
+        "p-step3-desc": "Pay flat fares via MoMo or cash. Zero stress.",
+        "p-cta-link": "Book a Ride Now",
+        "d-role-title": "For Drivers",
+        "d-role-subtitle": "Drive on your schedule",
+        "d-step1-title": "Go Online",
+        "d-step1-desc": "Drive whenever you want. Total control.",
+        "d-step2-title": "High Demand",
+        "d-step2-desc": "Non-stop ride requests across all campus hubs.",
+        "d-step3-title": "Instant Payouts",
+        "d-step3-desc": "Low commissions. Direct cashouts to MoMo.",
+        "d-cta-link": "Join as a Driver",
+        "apply-title": "Ready to ride?",
+        "apply-text": "Move smarter with K3K3 today.",
+        "admin-login-label": "Admin Login",
+        "footer-company-title": "Quick Links",
+        "footer-support-title": "Support & Safety",
+        "footer-legal-title": "Legal & Admin",
+        "footer-help": "Help Center",
+        "footer-safety": "Safety Team",
+        "footer-contact": "Contact Us",
+        "footer-faqs": "FAQs",
+        "footer-terms": "Terms of Service",
+        "footer-privacy": "Privacy Policy",
+        "footer-cookies": "Cookie Policy",
+        "footer-text": "© 2026 K3K3 Rides. All Rights Reserved.",
+        "language-label": "Language:"
+      },
+      fr: {
+        "hero-title": "Évitez la chaleur.<br>Prenez un <span class=\"accent-gold\">K3K3</span>.",
+        "start-riding-label": "Réserver un trajet",
+        "start-earning-label": "Conduire et gagner",
+        "workflow-tag": "Simple · Rapide · Fiable",
+        "workflow-title": "Se déplacer en toute simplicité.",
+        "workflow-desc": "Déplacez-vous rapidement ou gagnez de l'argent selon votre emploi du temps.",
+        "p-role-title": "Pour Passagers",
+        "p-role-subtitle": "Prises en charge rapides sur demande",
+        "p-step1-title": "Point de départ",
+        "p-step1-desc": "Choisissez votre hall, résidence ou arrêt.",
+        "p-step2-title": "Mise en relation",
+        "p-step2-desc": "Votre chauffeur vérifié arrive en quelques minutes.",
+        "p-step3-title": "Trajet & Paiement",
+        "p-step3-desc": "Tarifs fixes par MoMo ou espèces. Sans stress.",
+        "p-cta-link": "Réserver un trajet",
+        "d-role-title": "Pour Chauffeurs",
+        "d-role-subtitle": "Roulez selon votre horaire",
+        "d-step1-title": "Passez en ligne",
+        "d-step1-desc": "Roulez quand vous le souhaitez. Totale liberté.",
+        "d-step2-title": "Forte demande",
+        "d-step2-desc": "Des demandes continues sur tous les campus.",
+        "d-step3-title": "Paiements rapides",
+        "d-step3-desc": "Faibles commissions. Versements directs sur MoMo.",
+        "d-cta-link": "Devenir chauffeur",
+        "apply-title": "Prêt à partir ?",
+        "apply-text": "Bougez plus intelligemment avec K3K3 dès aujourd'hui.",
+        "admin-login-label": "Connexion Admin",
+        "footer-company-title": "Liens Rapides",
+        "footer-support-title": "Support & Sécurité",
+        "footer-legal-title": "Légal & Admin",
+        "footer-help": "Centre d'Aide",
+        "footer-safety": "Équipe de Sécurité",
+        "footer-contact": "Nous Contacter",
+        "footer-faqs": "FAQ",
+        "footer-terms": "Conditions d'Utilisation",
+        "footer-privacy": "Politique de Confidentialité",
+        "footer-cookies": "Politique de Cookies",
+        "footer-text": "© 2026 K3K3 Rides. Tous droits réservés.",
+        "language-label": "Langue:"
+      },
+      tw: {
+        "hero-title": "Gyae awia mu nantew.<br>Fa <span class=\"accent-gold\">K3K3</span>.",
+        "start-riding-label": "Kɔ Kwan So",
+        "start-earning-label": "Ka Kɛkɛ & Nya Sika",
+        "workflow-tag": "Mmerɛw · Ntɛm · Nokware",
+        "workflow-title": "Akwantuo a ɛyɛ mmerɛw.",
+        "workflow-desc": "Tu kwan ntɛm wɔ campus anaa nya sika da biara.",
+        "p-role-title": "Ma Akwantufoɔ",
+        "p-role-subtitle": "Ntɛm so kɔfa baabiara",
+        "p-step1-title": "Fa Wo Baabi",
+        "p-step1-desc": "Fa wo hall, kwan ano anaa hostel gate.",
+        "p-step2-title": "Ntɛm Matching",
+        "p-step2-desc": "Drayva pa bɛba wo nkyɛn simma kakraa bi mu.",
+        "p-step3-title": "Kɔ & Tua Sika",
+        "p-step3-desc": "Tua boɔ koro pɛ fa MoMo anaa cash. Haw biara nni mu.",
+        "p-cta-link": "Kɔ Kwan So Seesei",
+        "d-role-title": "Ma Akyɛdefo",
+        "d-role-subtitle": "Ka kɛkɛ bere a wopɛ",
+        "d-step1-title": "Kɔ Online",
+        "d-step1-desc": "Ka bere a woanya kwan. Wone wo wura.",
+        "d-step2-title": "Nnipa Dodoɔ",
+        "d-step2-desc": "Nkorɔfo pii rehwehwɛ akwan wɔ campus mmeae nyinaa.",
+        "d-step3-title": "Nya Wo Sika Ntɛm",
+        "d-step3-desc": "Commission ketewaa, sika kɔ wo MoMo ntɛm.",
+        "d-cta-link": "Bɛka Ho Sɛ Drayva",
+        "apply-title": "Woasiesie wo ho sɛ wobɛkɔ?",
+        "apply-text": "Fa K3K3 tu kwan mmerɛw so nnɛ.",
+        "admin-login-label": "Admin Login",
+        "footer-company-title": "Links a Ɛho Hia",
+        "footer-support-title": "Boa & Ahobammɔ",
+        "footer-legal-title": "Mmara",
+        "footer-help": "Mmoa Bea",
+        "footer-safety": "Ahobammɔ Kuo",
+        "footer-contact": "Kasa Kyerɛ Yɛn",
+        "footer-faqs": "Nsɛmmisa",
+        "footer-terms": "Terms of Service",
+        "footer-privacy": "Privacy Policy",
+        "footer-cookies": "Cookie Policy",
+        "footer-text": "© 2026 K3K3 Rides. Nsɛm nyinaa yɛ K3K3 dea.",
+        "language-label": "Kasa:"
+      },
+      ee: {
+        "hero-title": "Ɖe ŋdɔ ƒe zɔzɔ ɖa.<br>Ɖo <span class=\"accent-gold\">K3K3</span>.",
+        "start-riding-label": "Bia Mɔzɔzɔ",
+        "start-earning-label": "Ku Kɛkɛ & Kpɔ Ga",
+        "workflow-tag": "Bɔbɔe · Kabakaba · Dedie",
+        "workflow-title": "Mɔzɔzɔ le bɔbɔe me.",
+        "workflow-desc": "Zɔ kabakaba le suku alo kpɔ ga to wò kɛkɛ me.",
+        "p-role-title": "Na Mɔzɔlawo",
+        "p-role-subtitle": "Kpɔ mɔzɔzɔ kabakaba enumake",
+        "p-step1-title": "Tia Afisi Nàtso",
+        "p-step1-desc": "Tia wò hall, agbo alo mɔtoƒe.",
+        "p-step2-title": "Dɔwɔla Enumake",
+        "p-step2-desc": "Kula nyui aɖo gbɔwò le aɖabaƒoƒo ʋee aɖewo me.",
+        "p-step3-title": "Zɔ Mɔ & Xe Fe",
+        "p-step3-desc": "Xe fe bɔbɔe to MoMo alo ga me.",
+        "p-cta-link": "Bia Mɔzɔzɔ Fifia",
+        "d-role-title": "Na Kulawo",
+        "d-role-subtitle": "Ku kɛkɛ le wò ɣeyiɣi me",
+        "d-step1-title": "Yi Online",
+        "d-step1-desc": "Ku kɛkɛ ne èkpɔ vovo. Wò ŋutɔ ƒe dɔ.",
+        "d-step2-title": "Mɔzɔla Geɖewo",
+        "d-step2-desc": "Mɔzɔzɔ bibiawo geɖe le teƒe ɖesiaɖe.",
+        "d-step3-title": "Ga Kpɔkpɔ Kabakaba",
+        "d-step3-desc": "Xɔ wò ga tẽe yi wò MoMo me.",
+        "d-cta-link": "Zu Kula",
+        "apply-title": "Èdzra ɖo be yeaɖo mɔ?",
+        "apply-text": "Zɔ mɔ nyuie kple K3K3 egbe.",
+        "admin-login-label": "Admin Geɖeƒe",
+        "footer-company-title": "Kadodowo",
+        "footer-support-title": "Kpekpeɖeŋu & Dedienɔnɔ",
+        "footer-legal-title": "Se Nuwo",
+        "footer-help": "Kpekpeɖeŋuxɔ",
+        "footer-safety": "Dedienɔnɔ Habɔbɔ",
+        "footer-contact": "Ka Mía Gbɔ",
+        "footer-faqs": "Biabiawo",
+        "footer-terms": "Se Nuwo",
+        "footer-privacy": "Ameŋunya Se",
+        "footer-cookies": "Cookie Se",
+        "footer-text": "© 2026 K3K3 Rides. Gome nyinaa le mía si.",
+        "language-label": "Gbe:"
       }
-    }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const langSelect = document.getElementById('languageSelect');
+      if (!langSelect) return;
+
+      langSelect.addEventListener('change', (e) => {
+        const selectedLang = e.target.value;
+        const texts = translations[selectedLang];
+        if (!texts) return;
+
+        for (const id in texts) {
+          const el = document.getElementById(id);
+          if (el) {
+            el.innerHTML = texts[id];
+          }
+        }
+        localStorage.setItem('selectedLanguage', selectedLang);
+      });
+
+      // Restore saved language preference
+      const savedLang = localStorage.getItem('selectedLanguage');
+      if (savedLang && translations[savedLang]) {
+        langSelect.value = savedLang;
+        langSelect.dispatchEvent(new Event('change'));
+      }
+    });
   </script>
+
   <script src="about.js"></script>
-
 </body>
-
 </html>
