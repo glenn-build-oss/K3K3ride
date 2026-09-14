@@ -385,6 +385,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <i class="fas fa-bolt" style="color:var(--yellow)"></i><span>Moolre Overview</span>
       <span class="menu-badge" id="moolreMenuBadge" style="background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)">LIVE</span>
     </div>
+    <div class="menu-item" id="navMessages" onclick="showSec('messages')">
+      <i class="fas fa-paper-plane" style="color:#60A5FA"></i><span>Messaging &amp; SMS</span>
+    </div>
   </div>
   <div class="menu-section">
     <div class="menu-item logout-item" onclick="openModal('logoutModal')">
@@ -770,6 +773,98 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   </div>
 </div>
 
+<!-- ══════════ SECTION: MESSAGING & SMS ══════════ -->
+<div class="dash-section" id="sec-messages">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">Messaging &amp; Announcements</div>
+      <div class="sec-sub">Send direct SMS notifications and broadcast fleet updates to riders or passengers via Moolre</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="hero-pill green" id="msgSmsBalancePill" title="Live SMS Credits">
+        <i class="fas fa-coins"></i>
+        <span>Credits: <strong id="msgSmsCredits">—</strong></span>
+      </div>
+      <button class="btn-secondary" onclick="loadMessageHistory()"><i class="fas fa-sync-alt"></i> Refresh Logs</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:20px;margin-bottom:24px;">
+    <!-- Compose Card -->
+    <div class="card" style="padding:22px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-size:1.05rem;font-weight:800;color:var(--white);"><i class="fas fa-paper-plane" style="color:var(--yellow);margin-right:8px;"></i> Compose SMS</div>
+        <span style="font-size:0.75rem;padding:3px 10px;border-radius:var(--r-full);background:rgba(255,214,10,0.1);color:var(--yellow);font-weight:700;">Sender: K3K3ride</span>
+      </div>
+
+      <!-- Recipient Type -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block;">Recipient Target</label>
+        <select id="msgTargetType" onchange="onMsgTargetChange()" style="width:100%;padding:10px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-family:inherit;font-size:0.85rem;">
+          <option value="single_rider">Single Rider (Select from Fleet)</option>
+          <option value="single_passenger">Single Passenger (Select from Users)</option>
+          <option value="all_riders">Broadcast: All Active Riders</option>
+          <option value="all_passengers">Broadcast: All Registered Passengers</option>
+          <option value="custom">Custom Phone Number</option>
+        </select>
+      </div>
+
+      <!-- Single Rider / Passenger Dropdown Container -->
+      <div id="msgSelectWrap" style="margin-bottom:16px;">
+        <label id="msgSelectLabel" style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block;">Select Rider</label>
+        <select id="msgRecipientSelect" onchange="onMsgRecipientSelectChange()" style="width:100%;padding:10px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-family:inherit;font-size:0.85rem;">
+          <option value="">Loading recipients…</option>
+        </select>
+      </div>
+
+      <!-- Target Phone (displayed or editable) -->
+      <div id="msgPhoneWrap" style="margin-bottom:16px;">
+        <label style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block;">Recipient Phone (Ghana)</label>
+        <input type="text" id="msgTargetPhone" placeholder="e.g. 024XXXXXXX" style="width:100%;box-sizing:border-box;padding:10px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-family:inherit;font-size:0.85rem;">
+      </div>
+
+      <!-- Quick Template Presets -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block;">Quick Message Templates</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" class="ftab" onclick="applyMsgTemplate('high_demand')">🔥 High Demand</button>
+          <button type="button" class="ftab" onclick="applyMsgTemplate('rain_surge')">🌧️ Weather Advisory</button>
+          <button type="button" class="ftab" onclick="applyMsgTemplate('doc_reminder')">📄 Document Notice</button>
+          <button type="button" class="ftab" onclick="applyMsgTemplate('promo')">🎉 Promo / Announcement</button>
+        </div>
+      </div>
+
+      <!-- Message Textarea -->
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;">Message Text</label>
+          <span id="msgCharCount" style="font-size:0.72rem;color:var(--muted);font-weight:600;">0 / 160 (1 SMS)</span>
+        </div>
+        <textarea id="msgBody" oninput="onMsgBodyInput()" rows="4" placeholder="Type your SMS message here…" style="width:100%;box-sizing:border-box;padding:12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);color:var(--white);font-family:inherit;font-size:0.88rem;resize:vertical;"></textarea>
+      </div>
+
+      <!-- Action Button -->
+      <button id="msgSendBtn" class="modal-btn primary" onclick="sendAdminMessage()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.95rem;padding:12px;">
+        <i class="fas fa-paper-plane"></i> Send SMS Dispatches
+      </button>
+    </div>
+
+    <!-- History / Logs Card -->
+    <div class="card" style="padding:22px;">
+      <div style="font-size:1.05rem;font-weight:800;color:var(--white);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+        <span><i class="fas fa-history" style="color:var(--green);margin-right:8px;"></i> Recent Dispatches</span>
+        <span id="msgHistoryCount" style="font-size:0.72rem;color:var(--muted);font-weight:600;">0 logs</span>
+      </div>
+
+      <div id="msgHistoryList" style="max-height:460px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+        <div class="empty-state" style="padding:30px 10px;">
+          <i class="fas fa-inbox" style="font-size:1.8rem;color:var(--muted-2);margin-bottom:8px;"></i>
+          <p style="font-size:0.8rem;color:var(--muted);">No messages sent yet this session.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </main>
 
@@ -941,7 +1036,8 @@ const SEC_T={
   passengers:'Passengers',
   applications:'Applications',
   payments:'Payments',
-  moolre:'Moolre Overview'
+  moolre:'Moolre Overview',
+  messages:'Messaging & SMS'
 };
 const SEC_S={
   dashboard:'K3K3 Platform Overview',
@@ -950,7 +1046,8 @@ const SEC_S={
   passengers:'Registered users',
   applications:'Application review',
   payments:'Revenue & transactions',
-  moolre:'SMS Gateway & MoMo Collections'
+  moolre:'SMS Gateway & MoMo Collections',
+  messages:'Direct SMS & fleet announcements'
 };
 
 function showSec(name, filter){
@@ -981,7 +1078,8 @@ function showSec(name, filter){
     passengers:loadPassengers,
     applications:()=>loadApps(filter||'all'),
     payments:loadPayments,
-    moolre:()=>loadMoolreData()
+    moolre:()=>loadMoolreData(),
+    messages:()=>loadMessagesSec()
   };
   loaders[name]?.();
 }
@@ -2706,6 +2804,203 @@ function initAdminSocket(){
   } catch(err) {
     console.warn('[Admin Socket Error]', err.message);
   }
+}
+
+/* ── Messaging & SMS ── */
+let msgRidersList = [];
+let msgPassengersList = [];
+
+async function loadMessagesSec() {
+  // 1. Fetch live balance
+  try {
+    const balRes = await apiFetch('/moolre/sms-balance');
+    if (balRes && balRes.balance !== undefined) {
+      setEl('msgSmsCredits', balRes.balance);
+    }
+  } catch(_) {}
+
+  // 2. Load riders and passengers for target selection
+  try {
+    const [ridersRes, passRes] = await Promise.all([
+      apiFetch('/riders'),
+      apiFetch('/passengers')
+    ]);
+    msgRidersList = ridersRes?.riders || ridersRes || [];
+    msgPassengersList = passRes?.passengers || passRes || [];
+  } catch(_) {}
+
+  onMsgTargetChange();
+  loadMessageHistory();
+}
+
+function onMsgTargetChange() {
+  const targetType = el('msgTargetType')?.value || 'single_rider';
+  const selWrap = el('msgSelectWrap');
+  const selLabel = el('msgSelectLabel');
+  const sel = el('msgRecipientSelect');
+  const phoneWrap = el('msgPhoneWrap');
+  const phoneInput = el('msgTargetPhone');
+
+  if (targetType === 'single_rider') {
+    if (selWrap) selWrap.style.display = 'block';
+    if (selLabel) selLabel.textContent = 'Select Rider from Fleet';
+    if (phoneWrap) phoneWrap.style.display = 'block';
+    if (sel) {
+      sel.innerHTML = msgRidersList.length
+        ? `<option value="">-- Choose Rider --</option>` + msgRidersList.map(r => `<option value="${r.phone}" data-name="${r.name || r.full_name || 'Rider'}">${r.name || r.full_name || 'Rider'} (${r.phone || 'No phone'}) - ${r.station || 'Ho'}</option>`).join('')
+        : `<option value="">No active riders found</option>`;
+    }
+    if (phoneInput) phoneInput.readOnly = false;
+  } else if (targetType === 'single_passenger') {
+    if (selWrap) selWrap.style.display = 'block';
+    if (selLabel) selLabel.textContent = 'Select Passenger';
+    if (phoneWrap) phoneWrap.style.display = 'block';
+    if (sel) {
+      sel.innerHTML = msgPassengersList.length
+        ? `<option value="">-- Choose Passenger --</option>` + msgPassengersList.map(p => `<option value="${p.phone}" data-name="${p.full_name || (p.first_name + ' ' + (p.last_name || '')) || 'User'}">${p.full_name || p.first_name || 'User'} (${p.phone || 'No phone'})</option>`).join('')
+        : `<option value="">No registered passengers found</option>`;
+    }
+    if (phoneInput) phoneInput.readOnly = false;
+  } else if (targetType === 'all_riders') {
+    if (selWrap) selWrap.style.display = 'none';
+    if (phoneWrap) phoneWrap.style.display = 'none';
+  } else if (targetType === 'all_passengers') {
+    if (selWrap) selWrap.style.display = 'none';
+    if (phoneWrap) phoneWrap.style.display = 'none';
+  } else if (targetType === 'custom') {
+    if (selWrap) selWrap.style.display = 'none';
+    if (phoneWrap) phoneWrap.style.display = 'block';
+    if (phoneInput) {
+      phoneInput.value = '';
+      phoneInput.readOnly = false;
+      phoneInput.focus();
+    }
+  }
+}
+
+function onMsgRecipientSelectChange() {
+  const sel = el('msgRecipientSelect');
+  const phoneInput = el('msgTargetPhone');
+  if (sel && phoneInput && sel.value) {
+    phoneInput.value = sel.value;
+  }
+}
+
+function onMsgBodyInput() {
+  const body = el('msgBody')?.value || '';
+  const len = body.length;
+  const segments = Math.ceil(len / 160) || 1;
+  setEl('msgCharCount', `${len} / ${segments * 160} (${segments} SMS)`);
+}
+
+function applyMsgTemplate(type) {
+  const templates = {
+    high_demand: 'K3K3 Alert: High rider demand around HTU and Cedi Auditorium. Go online now to maximize your earnings with flat fares!',
+    rain_surge: 'K3K3 Advisory: Rain alert in Ho. Stay safe on the road. Flat fares with zero surge remain active for all campus passengers.',
+    doc_reminder: "Hello from K3K3! Please sign in to update your driver's license (format: DEL-XXXXXXXX-XXXXX) to complete your rider verification.",
+    promo: 'Welcome to K3K3! Move smarter with fast, safe, and affordable campus rides in Ho. Book your next keke ride at k3k3ride.com!'
+  };
+  const body = el('msgBody');
+  if (body && templates[type]) {
+    body.value = templates[type];
+    onMsgBodyInput();
+    body.focus();
+  }
+}
+
+async function sendAdminMessage() {
+  const targetType = el('msgTargetType')?.value || 'single_rider';
+  const phone = el('msgTargetPhone')?.value.trim();
+  const message = el('msgBody')?.value.trim();
+  const sel = el('msgRecipientSelect');
+  const selName = sel?.selectedOptions?.[0]?.getAttribute('data-name') || '';
+
+  if (!message) {
+    showToast('Please enter message text.', 'error');
+    el('msgBody')?.focus();
+    return;
+  }
+
+  if ((targetType === 'single_rider' || targetType === 'single_passenger' || targetType === 'custom') && !phone) {
+    showToast('Please provide a recipient phone number.', 'error');
+    el('msgTargetPhone')?.focus();
+    return;
+  }
+
+  const btn = el('msgSendBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dispatching SMS…';
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/send-message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        targetType,
+        phone,
+        message,
+        recipientName: selName
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✓ ${data.message || 'SMS dispatched successfully!'}`, 'success');
+      if (el('msgBody')) el('msgBody').value = '';
+      onMsgBodyInput();
+      loadMessageHistory();
+      // refresh credits
+      apiFetch('/moolre/sms-balance').then(b => {
+        if (b && b.balance !== undefined) setEl('msgSmsCredits', b.balance);
+      });
+    } else {
+      showToast(data.error || 'Failed to send SMS.', 'error');
+    }
+  } catch (err) {
+    showToast('Network error sending message: ' + err.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send SMS Dispatches';
+    }
+  }
+}
+
+async function loadMessageHistory() {
+  try {
+    const res = await apiFetch('/admin/messages-log');
+    const logs = res?.logs || [];
+    setEl('msgHistoryCount', `${logs.length} logged`);
+    const hl = el('msgHistoryList');
+    if (!hl) return;
+    if (logs.length === 0) {
+      hl.innerHTML = `
+        <div class="empty-state" style="padding:30px 10px;">
+          <i class="fas fa-inbox" style="font-size:1.8rem;color:var(--muted-2);margin-bottom:8px;"></i>
+          <p style="font-size:0.8rem;color:var(--muted);">No messages dispatched yet this session.</p>
+        </div>
+      `;
+      return;
+    }
+    hl.innerHTML = logs.map(l => `
+      <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:0.82rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <strong style="color:var(--white);">${escapeHtml(l.recipientLabel || 'Recipient')}</strong>
+          <span style="font-size:0.68rem;padding:2px 8px;border-radius:var(--r-full);background:${l.status === 'delivered' ? 'rgba(16,185,129,0.15)' : 'rgba(249,115,22,0.15)'};color:${l.status === 'delivered' ? '#34D399' : '#FB923C'};font-weight:700;text-transform:uppercase;">
+            ${l.status}
+          </span>
+        </div>
+        <div style="color:var(--muted-2);margin-bottom:8px;line-height:1.4;word-break:break-word;">
+          ${escapeHtml(l.message)}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.68rem;color:var(--muted);">
+          <span><i class="fas fa-check-double"></i> Sent to ${l.sentCount} number(s)</span>
+          <span>${new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (_) {}
 }
 
 /* ── Init ── */

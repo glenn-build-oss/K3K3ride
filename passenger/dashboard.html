@@ -5863,6 +5863,37 @@
         }
       } catch (_) {}
 
+      // Real-time backend check: ensure an approved rider is not stuck on passenger dashboard
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('k3k3_user') || sessionStorage.getItem('k3k3_user') || '{}');
+        const phone = storedUser.phone || localStorage.getItem('lastRiderPhone');
+        if (phone) {
+          fetch(`/api/auth/rider/status?phone=${encodeURIComponent(phone)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.success && (data.isApproved || data.status === 'approved')) {
+                console.log('[K3K3] Approved rider detected in passenger view. Redirecting to driver dashboard…');
+                const synthRiderSession = {
+                  riderId: storedUser.id,
+                  id: storedUser.id,
+                  phone: phone,
+                  firstName: data.first_name || storedUser.fname || 'Rider',
+                  lastName: data.last_name || storedUser.lname || '',
+                  email: storedUser.email || '',
+                  token: localStorage.getItem('k3k3_token'),
+                  status: 'approved',
+                  role: 'rider'
+                };
+                localStorage.setItem('riderSession', JSON.stringify(synthRiderSession));
+                sessionStorage.setItem('riderSession', JSON.stringify(synthRiderSession));
+                localStorage.setItem('k3k3_user_type', 'rider');
+                window.location.replace('../rider/dashboard.html');
+              }
+            })
+            .catch(() => {});
+        }
+      } catch (_) {}
+
       loadUserFromAPI();
       loadSettings();
       renderDrivers();

@@ -794,7 +794,17 @@
           body: JSON.stringify({ phone, otp })
         });
         const data = await res.json();
-        if (data.success) { return { ok: true, token: data.token || null, user: data.user }; }
+        if (data.success) {
+          const userStatus = data.status || data.user?.status || '';
+          const isApproved = data.isApproved || userStatus === 'approved' || userStatus === 'active';
+          return {
+            ok: true,
+            token: data.token || null,
+            user: data.user,
+            status: isApproved ? 'approved' : (userStatus || 'pending'),
+            isApproved
+          };
+        }
         return { ok: false, msg: data.error || 'Invalid code. Please try again.' };
       } catch(e) {
         return { ok: false, msg: 'Cannot reach server. Please try again.' };
@@ -844,24 +854,30 @@
 
       const result = await verifyOtpWithBackend(siPhone, otp);
       if (result.ok) {
-        const isApproved = result.status === 'approved';
-        const finalStatus = isApproved ? 'approved' : 'pending';
+        const isApproved = result.isApproved || result.status === 'approved' || result.user?.status === 'approved' || result.user?.status === 'active';
+        const finalStatus = isApproved ? 'approved' : (result.status || 'pending');
 
         try {
           const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
-          localStorage.setItem('riderSession', JSON.stringify({
+          const riderSessionData = {
+            riderId: result.user?.id || existingSession.riderId || existingSession.id || null,
+            id: result.user?.id || existingSession.id || null,
             phone: siPhone,
             firstName: result.user?.firstName || existingSession.firstName || '',
             lastName: result.user?.lastName || existingSession.lastName || '',
             email: result.user?.email || existingSession.email || '',
             token: result.token,
             loginTime: new Date().toISOString(),
-            status: finalStatus
-          }));
+            status: finalStatus,
+            role: 'rider'
+          };
+          localStorage.setItem('riderSession', JSON.stringify(riderSessionData));
+          sessionStorage.setItem('riderSession', JSON.stringify(riderSessionData));
+          localStorage.setItem('k3k3_user_type', 'rider');
           localStorage.setItem('lastRiderPhone', siPhone);
         } catch(e) {}
 
-        showToast(isApproved ? 'Signed in! Opening Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
+        showToast(isApproved ? 'Signed in! Opening Rider Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
 
         setTimeout(() => {
           if (finalStatus === 'approved') {
@@ -869,7 +885,7 @@
           } else {
             window.location.href = 'pending.html';
           }
-        }, 900);
+        }, 800);
       } else {
         showErr('siOtpError', 'siOtpErrorText', result.msg);
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify &amp; Sign In';

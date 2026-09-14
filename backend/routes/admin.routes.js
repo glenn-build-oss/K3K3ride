@@ -911,8 +911,101 @@ router.get(['/ussd/stats', '/api/ussd/stats'], (req, res) => {
   });
 });
 
-router.get(['/ussd/sessions', '/api/ussd/sessions'], (req, res) => {
-  res.json([]);
+// In-memory admin message history
+const adminMessageLogs = [];
+
+/**
+ * POST /api/admin/send-message
+ * Send SMS message to single rider, single passenger, all riders, all passengers, or custom phone
+ */
+router.post(['/send-message', '/api/admin/send-message'], async (req, res) => {
+  try {
+    const { targetType, phone, message, recipientName } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ success: false, error: 'Message text is required' });
+    }
+
+    let targetPhones = [];
+    let recipientLabel = '';
+
+    if (targetType === 'all_riders') {
+      const riders = await getApprovedRiders();
+      targetPhones = (riders || []).map(r => r.phone).filter(Boolean);
+      recipientLabel = `All Riders (${targetPhones.length})`;
+    } else if (targetType === 'all_passengers') {
+      const passengers = await getRegisteredPassengers();
+      targetPhones = (passengers || []).map(p => p.phone).filter(Boolean);
+      recipientLabel = `All Passengers (${targetPhones.length})`;
+    } else {
+      if (!phone || !phone.trim()) {
+        return res.status(400).json({ success: false, error: 'Phone number is required' });
+      }
+      targetPhones = [phone.trim()];
+      recipientLabel = recipientName ? `${recipientName} (${phone.trim()})` : phone.trim();
+    }
+
+    // Deduplicate
+    targetPhones = [...new Set(targetPhones)];
+
+    if (targetPhones.length === 0) {
+      return res.status(400).json({ success: false, error: 'No valid phone numbers found for this recipient group' });
+    }
+
+    let sentCount = 0;
+    let failedCount = 0;
+    const errors = [];
+
+    for (const rawPhone of targetPhones) {
+      try {
+        let cleanPhone;
+        try {
+          cleanPhone = normalizePhone(rawPhone);
+        } catch (_) {
+          cleanPhone = rawPhone.replace(/\s+/g, '');
+        }
+        const ref = `admin_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        await sendSMS(cleanPhone, message.trim(), ref);
+        sentCount++;
+      } catch (err) {
+        failedCount++;
+        errors.push({ phone: rawPhone, error: err.message });
+      }
+    }
+
+    const logEntry = {
+      id: 'MSG-' + Date.now(),
+      targetType,
+      recipientLabel,
+      message: message.trim(),
+      sentCount,
+      failedCount,
+      timestamp: new Date().toISOString(),
+      status: failedCount === 0 ? 'delivered' : (sentCount > 0 ? 'partial' : 'failed')
+    };
+
+    adminMessageLogs.unshift(logEntry);
+    if (adminMessageLogs.length > 100) adminMessageLogs.pop();
+
+    res.json({
+      success: true,
+      sentCount,
+      failedCount,
+      message: `Message dispatched successfully to ${sentCount} recipient(s).`,
+      logEntry
+    });
+  } catch (err) {
+    console.error('[Admin] Send message error:', err);
+    res.status(500).json({ success: false, error: 'Failed to send message: ' + err.message });
+  }
+});
+
+/**
+ * GET /api/admin/messages-log
+ * Get recent sent messages history
+ */
+router.get(['/messages-log', '/api/admin/messages-log'], (req, res) => {
+  res.json({ success: true, logs: adminMessageLogs });
 });
 
 module.exports = router;
+
