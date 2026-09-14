@@ -557,7 +557,8 @@ router.post('/rider/verify-otp', async (req, res) => {
     if (riderUser) {
       await updateUserLastLogin(riderUser.id);
       const token = generateToken(riderUser);
-      const isApproved = (riderUser.status === 'active' || riderUser.status === 'approved') || (app && app.status === 'approved');
+      const isAppPending = app && (app.status === 'pending' || app.status === 'pending_review' || app.status === 'under_review');
+      const isApproved = !isAppPending && ((app && app.status === 'approved') || riderUser.status === 'approved');
       const riderStatus = isApproved ? 'approved' : 'pending';
 
       return res.json({
@@ -670,7 +671,8 @@ router.get('/rider/status', async (req, res) => {
       });
     }
 
-    const isApproved = (appStatus === 'approved') || (userStatus === 'active' || userStatus === 'approved');
+    const isAppPending = appStatus === 'pending' || appStatus === 'pending_review' || appStatus === 'under_review';
+    const isApproved = !isAppPending && ((appStatus === 'approved') || (!appStatus && (userStatus === 'active' || userStatus === 'approved')));
     const finalStatus = isApproved ? 'approved' : (appStatus || userStatus || 'pending');
 
     res.json({

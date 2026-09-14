@@ -546,10 +546,21 @@
 
             // Notify and navigate to dashboard
             const badge = document.querySelector('.status-card-sub');
-            if (badge) badge.innerHTML = '<strong style="color:var(--green)">Account Approved!</strong> Redirecting to your Rider Dashboard…';
+            if (badge) badge.innerHTML = '<strong style="color:var(--green)">Congratulations! Application Approved!</strong> Redirecting to your Rider Dashboard…';
             setTimeout(() => {
               window.location.href = 'dashboard.html';
-            }, 1000);
+            }, 1200);
+          } else if (data.status === 'declined' || data.status === 'rejected') {
+            const badge = document.querySelector('.status-card-sub');
+            if (badge) badge.innerHTML = '<strong style="color:#ef4444">Application Not Approved.</strong> Please contact K3K3 Support for assistance.';
+            const step2 = document.querySelector('.status-step.active');
+            if (step2) {
+              step2.classList.remove('active');
+              const dot = step2.querySelector('.step-dot');
+              if (dot) dot.style.background = '#ef4444';
+              const desc = step2.querySelector('.step-desc');
+              if (desc) desc.textContent = 'Your application was reviewed and could not be approved at this time.';
+            }
           }
         } catch(_) {}
       }

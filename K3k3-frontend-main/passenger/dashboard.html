@@ -4784,7 +4784,8 @@
             <div class="apply-form-grid">
               <div class="form-field">
                 <label class="form-label" for="applyLicenceNumber">Driver's Licence Number *</label>
-                <input type="text" class="form-input" id="applyLicenceNumber" placeholder="DL-XXXXXXXX">
+                <input type="text" class="form-input" id="applyLicenceNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" maxlength="18" style="text-transform:uppercase;">
+                <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">Format: DEL-XXXXXXXX-XXXXX</div>
               </div>
               <div class="form-field">
                 <label class="form-label" for="applyLicenceExpiry">Licence Expiry Date *</label>

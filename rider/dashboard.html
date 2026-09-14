@@ -2419,7 +2419,7 @@ function loadSession() {
   try { session = JSON.parse(sessionStorage.getItem('riderSession') || localStorage.getItem('riderSession') || 'null'); }
   catch(e) { session = null; }
 
-  // Fallback: If authenticated user in k3k3_user has rider role, automatically synthesize session
+  // Fallback: If authenticated user in k3k3_user has rider role, synthesize session
   if (!session) {
     try {
       const storedUser = JSON.parse(localStorage.getItem('k3k3_user') || sessionStorage.getItem('k3k3_user') || 'null');
@@ -2433,7 +2433,7 @@ function loadSession() {
           lastName: storedUser.lname || storedUser.last_name || '',
           email: storedUser.email || '',
           token: localStorage.getItem('k3k3_token') || sessionStorage.getItem('k3k3_token'),
-          status: 'approved',
+          status: storedUser.status || 'pending',
           role: 'rider'
         };
         localStorage.setItem('riderSession', JSON.stringify(session));
@@ -2442,14 +2442,20 @@ function loadSession() {
     } catch (_) {}
   }
 
+  // If no session exists at all, redirect to login
+  if (!session || !session.phone) {
+    window.location.href = 'rider-auth.html';
+    return;
+  }
+
   // Approval gate: If rider account is pending review, redirect to pending landing page
-  if (session && (session.status === 'pending' || session.status === 'under_review' || session.status === 'pending_review')) {
+  if (session.status === 'pending' || session.status === 'under_review' || session.status === 'pending_review') {
     window.location.href = 'pending.html';
     return;
   }
 
   // Suspension gate: If rider account is suspended, inform and log out
-  if (session && session.status === 'suspended') {
+  if (session.status === 'suspended') {
     alert('Your rider account has been suspended by administration. Please contact K3K3 Support.');
     try {
       sessionStorage.removeItem('riderSession');
@@ -2458,6 +2464,29 @@ function loadSession() {
     window.location.href = '../index.html';
     return;
   }
+
+  // Live server status check: ensure account is verified approved on backend
+  fetch(`/api/auth/rider/status?phone=${encodeURIComponent(session.phone)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.success) {
+        if (data.status === 'suspended' || data.isSuspended) {
+          alert('Your rider account has been suspended by administration. Please contact K3K3 Support.');
+          localStorage.removeItem('riderSession');
+          sessionStorage.removeItem('riderSession');
+          window.location.href = '../index.html';
+        } else if (data.status === 'pending' || !data.isApproved) {
+          session.status = 'pending';
+          localStorage.setItem('riderSession', JSON.stringify(session));
+          sessionStorage.setItem('riderSession', JSON.stringify(session));
+          window.location.href = 'pending.html';
+        } else if (data.isApproved || data.status === 'approved') {
+          session.status = 'approved';
+          localStorage.setItem('riderSession', JSON.stringify(session));
+        }
+      }
+    })
+    .catch(() => {});
 
   renderRiderProfile(session);
   loadRiderProfileFromAPI();

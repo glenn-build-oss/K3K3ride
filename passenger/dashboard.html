@@ -5080,7 +5080,8 @@
             <div class="apply-form-grid">
               <div class="form-field">
                 <label class="form-label" for="applyLicenceNumber">Driver's Licence Number *</label>
-                <input type="text" class="form-input" id="applyLicenceNumber" placeholder="DL-XXXXXXXX">
+                <input type="text" class="form-input" id="applyLicenceNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" maxlength="18" style="text-transform:uppercase;">
+                <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">Format: DEL-XXXXXXXX-XXXXX</div>
               </div>
               <div class="form-field">
                 <label class="form-label" for="applyLicenceExpiry">Licence Expiry Date *</label>
@@ -7226,6 +7227,63 @@
       if (applyCurrentStep === applyTotalSteps) buildApplyReview();
     }
 
+    const passengerUploadedDocs = {};
+
+    function handlePassengerDocUpload(key, input) {
+      if (!input || !input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const maxSize = key === 'passportPhoto' ? 10 * 1024 * 1024 : 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showToast(`File is too large (max ${key === 'passportPhoto' ? '10MB' : '20MB'})`, 'error');
+        input.value = '';
+        return;
+      }
+      const allowed = key === 'passportPhoto'
+        ? ['image/jpeg', 'image/png', 'image/jpg']
+        : ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (!allowed.includes(file.type)) {
+        showToast('Invalid file format. Please upload JPG, PNG or PDF.', 'error');
+        input.value = '';
+        return;
+      }
+
+      passengerUploadedDocs[key] = file;
+      const zone = document.getElementById('pzone-' + key);
+      if (zone) {
+        zone.classList.add('has-file');
+        const textEl = zone.querySelector('.upload-text');
+        const subEl = zone.querySelector('.upload-sub');
+        if (textEl) textEl.textContent = file.name;
+        if (subEl) subEl.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB ✓`;
+      }
+      showToast(`${file.name} uploaded ✓`, 'success');
+    }
+
+    function clearPassengerDoc(e, key) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      delete passengerUploadedDocs[key];
+      const input = document.getElementById('pfile-' + key);
+      if (input) input.value = '';
+      const zone = document.getElementById('pzone-' + key);
+      if (zone) {
+        zone.classList.remove('has-file');
+        const textEl = zone.querySelector('.upload-text');
+        const subEl = zone.querySelector('.upload-sub');
+        if (textEl) textEl.textContent = 'Tap to choose file';
+        if (subEl) subEl.textContent = key === 'passportPhoto' ? 'PNG, JPG · max 10MB' : 'Photo, PDF · max 20MB';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.upload-zone[id^="pzone-"]').forEach(zone => {
+        zone.addEventListener('click', (e) => {
+          if (e.target.closest('.remove-file-btn') || e.target.tagName === 'INPUT') return;
+          const fileInput = zone.querySelector('input[type="file"]');
+          if (fileInput) fileInput.click();
+        });
+      });
+    });
+
     function applyValidateStep() {
       const required = {
         1: ['applyFName', 'applyDOB', 'applyGender', 'applyPhone', 'applyAddress'],
@@ -7246,6 +7304,35 @@
           showToast(`Please enter: ${labels[id] || id}`, 'error'); return false;
         }
       }
+
+      if (applyCurrentStep === 3) {
+        const licInput = document.getElementById('applyLicenceNumber');
+        const licVal = (licInput ? licInput.value : '').trim().toUpperCase();
+        if (licInput) licInput.value = licVal;
+        const licRegex = /^DEL-[A-Z0-9]{8}-[A-Z0-9]{5}$/;
+        if (licVal && !licRegex.test(licVal)) {
+          showToast("Driver's License must follow format: DEL-XXXXXXXX-XXXXX (e.g. DEL-12345678-12345)", 'error');
+          licInput && licInput.focus();
+          return false;
+        }
+
+        const reqDocs = [
+          { key: 'riderLicense', name: "Rider's License" },
+          { key: 'vehicleRegistration', name: "Vehicle Registration" },
+          { key: 'idCardFront', name: "National ID (Front)" },
+          { key: 'idCardBack', name: "National ID (Back)" },
+          { key: 'passportPhoto', name: "Passport Photo" }
+        ];
+        for (const doc of reqDocs) {
+          if (!passengerUploadedDocs[doc.key]) {
+            showToast(`Please upload your ${doc.name}. All 5 documents are required.`, 'error');
+            const zone = document.getElementById('pzone-' + doc.key);
+            if (zone) zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          }
+        }
+      }
+
       if (applyCurrentStep === 4 && !document.getElementById('applyTermsCheck').checked) {
         showToast('Please agree to the Terms of Service', 'error'); return false;
       }
@@ -7281,6 +7368,7 @@
         'ID Number': document.getElementById('applyIdNumber').value,
         "Driver's Licence": document.getElementById('applyLicenceNumber').value,
         'Licence Expiry': document.getElementById('applyLicenceExpiry').value,
+        'Documents': `${Object.keys(passengerUploadedDocs).length} of 5 uploaded ✓`
       };
       const rc = document.getElementById('applyReviewContent');
       if (!rc) return;
@@ -7294,6 +7382,39 @@
     async function submitRiderApplication() {
       const btn = document.getElementById('applyNextBtn');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…'; }
+
+      // Convert passengerUploadedDocs to base64
+      const documentsPayload = {};
+      for (const [key, file] of Object.entries(passengerUploadedDocs)) {
+        if (file) {
+          try {
+            const dataUrl = await new Promise((res) => {
+              const r = new FileReader();
+              r.onload = ev => res(ev.target.result);
+              r.onerror = () => res(null);
+              r.readAsDataURL(file);
+            });
+            if (dataUrl) {
+              documentsPayload[key] = {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: dataUrl
+              };
+            }
+          } catch (_) {}
+        }
+      }
+
+      const reqDocs = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
+      const missing = reqDocs.filter(k => !documentsPayload[k]);
+      if (missing.length > 0) {
+        showToast('All 5 documents are strictly required before submitting.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application'; }
+        applyCurrentStep = 3;
+        applyRenderStep();
+        return;
+      }
 
       const userId = getUserId();
       const payload = {
@@ -7318,21 +7439,42 @@
         experience: document.getElementById('applyExperience').value,
         extra: document.getElementById('applyExtra').value.trim(),
         status: 'pending',
+        documents: documentsPayload
       };
 
       try {
         const headers = { 'Content-Type': 'application/json' };
         const token = getAuthToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
-        await fetch(`${API}/applications/`, { method: 'POST', headers, body: JSON.stringify(payload) });
-      } catch (err) { console.warn('Application submission note:', err.message); }
-
-      document.querySelectorAll('.apply-form-step').forEach(s => s.classList.remove('active-step'));
-      const success = document.getElementById('applySuccess');
-      if (success) success.classList.add('show');
-      document.getElementById('applyFormFooter').style.display = 'none';
-      document.getElementById('applyStepper').style.display = 'none';
-      if (btn) { btn.disabled = false; }
+        const res = await fetch(`${API}/applications/`, { method: 'POST', headers, body: JSON.stringify(payload) });
+        if (res.ok) {
+          const result = await res.json();
+          const appRef = result.app_ref || ('K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase());
+          try {
+            localStorage.setItem('lastRiderApplication', JSON.stringify({
+              firstName: payload.fname,
+              lastName: payload.lname,
+              phone: payload.phone,
+              appRef: appRef
+            }));
+            localStorage.setItem('lastApplicationRef', appRef);
+          } catch(_) {}
+          showToast('Application submitted! Taking you to your status page…', 'success');
+          setTimeout(() => {
+            window.location.href = '../rider/pending.html';
+          }, 1200);
+          return;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.error || errData.detail || 'Failed to submit application', 'error');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application'; }
+          return;
+        }
+      } catch (err) {
+        console.warn('Application submission note:', err.message);
+        showToast('Network error submitting application. Please try again.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application'; }
+      }
     }
 
     /* ══════════════════════════════════════════

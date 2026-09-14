@@ -134,7 +134,7 @@ function enrichApplication(app) {
   ];
 
   for (const std of standardDocs) {
-    if (std.url && (std.url.startsWith('http') || std.url.startsWith('/uploads/'))) {
+    if (std.url && (std.url.startsWith('http') || std.url.startsWith('/uploads/') || std.url.startsWith('data:'))) {
       if (!enriched.documents.some(d => d.key === std.key || d.url === std.url)) {
         const isPdf = typeof std.url === 'string' && std.url.toLowerCase().endsWith('.pdf');
         enriched.documents.push({
@@ -197,6 +197,31 @@ router.post('/applications', async (req, res) => {
       { key: 'idCardBack', aliases: ['id_card_back', 'national_id_back', 'ghana_card_back'], label: "National ID — Back", targetCol: 'insurance_url' },
       { key: 'passportPhoto', aliases: ['passport_photo', 'photo'], label: "Passport Photo", targetCol: 'passport_photo_url' }
     ];
+
+    // Mandatory document check: verify all 5 documents are present
+    const missingDocs = [];
+    for (const def of docDefs) {
+      let docData = docsInput[def.key];
+      if (!docData) {
+        for (const alias of def.aliases) {
+          if (docsInput[alias]) {
+            docData = docsInput[alias];
+            break;
+          }
+        }
+      }
+      const hasDirectUrl = body[def.targetCol] && typeof body[def.targetCol] === 'string' && (body[def.targetCol].startsWith('http') || body[def.targetCol].startsWith('/uploads/'));
+      if (!hasDirectUrl && (!docData || (!docData.data && !docData.url && typeof docData !== 'string'))) {
+        missingDocs.push(def.label);
+      }
+    }
+
+    if (missingDocs.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `All 5 required documents must be uploaded. Missing: ${missingDocs.join(', ')}.`
+      });
+    }
 
     for (const def of docDefs) {
       let docData = docsInput[def.key];
@@ -408,6 +433,18 @@ router.patch('/applications/:id/status', async (req, res) => {
     
     if (!result.success) {
       return res.status(400).json({ success: false, error: result.error });
+    }
+
+    // Send notification SMS to rider if application is declined
+    if (result.application && result.application.phone) {
+      const riderName = result.application.first_name || 'Applicant';
+      const appRef = result.application.id ? `APP-${result.application.id.substring(0, 8).toUpperCase()}` : '';
+      const message = `Hello ${riderName}, your K3K3 rider application (${appRef}) has been reviewed. Unfortunately, we could not approve it at this time (${rejectionReason}). For support, please contact K3K3.`;
+      try {
+        await sendSMS(result.application.phone, message, `decline_${id}`);
+      } catch (smsErr) {
+        console.warn('[Admin] SMS send error on decline:', smsErr.message);
+      }
     }
 
     res.json({ success: true, message: 'Application status updated', application: result.application });

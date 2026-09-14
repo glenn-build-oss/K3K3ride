@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Apply to Ride - K3K3</title>
+  <title>Apply to Ride | K3K3 Driver Onboarding - Ho, Volta Region</title>
+  <meta name="description" content="Apply to drive and earn with K3K3 in Ho, Volta Region. Flexible hours, fair commissions, and instant mobile money payouts.">
+  <meta name="keywords" content="K3K3 driver, apply to ride, keke driver Ho, tricycle driver Volta Region, HTU, UHAS, drive and earn Ghana">
+  <link rel="canonical" href="https://k3k3ride.com/rider/apply-to-ride.html">
   <link rel="icon" type="image/png" href="../assets/k3k3.png">
   <link rel="shortcut icon" href="../favicon.ico">
   <link rel="icon" type="image/x-icon" href="../favicon.ico">
@@ -860,7 +863,8 @@
           <div class="form-row">
             <div class="form-group">
               <label for="licenseNumber">Rider License Number <span class="req">*</span></label>
-              <input type="text" id="licenseNumber" name="licenseNumber" placeholder="e.g. KWA-1234567890123">
+              <input type="text" id="licenseNumber" name="licenseNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" maxlength="18" style="text-transform:uppercase;">
+              <span class="field-hint" style="font-size:0.75rem;color:var(--k3k3-gray-400);margin-top:4px;display:block;">Format: DEL-XXXXXXXX-XXXXX</span>
             </div>
             <div class="form-group">
               <label for="licenseExpiry">License Expiry <span class="req">*</span></label>
@@ -1061,6 +1065,13 @@
     document.getElementById('nextBtn').addEventListener('click', nextStep);
     document.getElementById('prevBtn').addEventListener('click', prevStep);
 
+    const licInputEl = document.getElementById('licenseNumber');
+    if (licInputEl) {
+      licInputEl.addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+      });
+    }
+
     // ── Validation ───────────────────────────────────
     function validateStep(step) {
       if (step === 1) {
@@ -1089,12 +1100,29 @@
             return false;
           }
         }
+        const licInput = document.getElementById('licenseNumber');
+        const licVal = (licInput ? licInput.value : '').trim().toUpperCase();
+        if (licInput) licInput.value = licVal;
+        const licRegex = /^DEL-[A-Z0-9]{8}-[A-Z0-9]{5}$/;
+        if (!licRegex.test(licVal)) {
+          toast("Driver's License must follow format: DEL-XXXXXXXX-XXXXX (e.g. DEL-12345678-12345)", 'error');
+          licInput && licInput.focus();
+          return false;
+        }
       }
       if (step === 3) {
-        const required = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
-        for (const name of required) {
-          if (!uploadedFiles[name]) {
-            toast('Please upload all required documents. Both front and back of National ID are required.', 'error');
+        const required = [
+          { key: 'riderLicense', name: "Rider's License" },
+          { key: 'vehicleRegistration', name: "Vehicle Registration" },
+          { key: 'idCardFront', name: "National ID — Front" },
+          { key: 'idCardBack', name: "National ID — Back" },
+          { key: 'passportPhoto', name: "Passport Photo" }
+        ];
+        for (const doc of required) {
+          if (!uploadedFiles[doc.key]) {
+            toast(`Please upload your ${doc.name}. All 5 documents are strictly required.`, 'error');
+            const zone = document.getElementById('zone-' + doc.key);
+            if (zone) zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return false;
           }
         }
@@ -1286,7 +1314,15 @@
     // ── Form Submit ──────────────────────────────────
     document.getElementById('applyForm').addEventListener('submit', async e => {
       e.preventDefault();
-      if (!validateStep(4)) return;
+      if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) return;
+
+      const requiredDocKeys = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
+      const missingDocs = requiredDocKeys.filter(k => !uploadedFiles[k]);
+      if (missingDocs.length > 0) {
+        toast('All 5 documents are strictly required. Please upload the missing documents.', 'error');
+        showStep(3);
+        return;
+      }
 
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
@@ -1510,7 +1546,7 @@
             localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
           } catch(e) {}
           toast('Application submitted!', 'success');
-          setTimeout(() => { window.location.href = 'rider-pending.html'; }, 1200);
+          setTimeout(() => { window.location.href = 'pending.html'; }, 1200);
           return;
         }
         toast('Error: ' + err.message, 'error');

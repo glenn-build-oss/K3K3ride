@@ -1,0 +1,22 @@
+# K3K3ride Robots Configuration
+User-agent: *
+Allow: /
+Allow: /passenger/
+Allow: /passenger/login.html
+Allow: /rider/
+Allow: /rider/rider-auth.html
+Allow: /rider/apply-to-ride.html
+Allow: /legal/
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+
+# Disallow Private & Administrative Paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /backend/
+Disallow: /node_modules/
+Disallow: /uploads/
+
+# XML Sitemap
+Sitemap: https://k3k3ride.com/sitemap.xml
