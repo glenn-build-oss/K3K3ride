@@ -682,7 +682,8 @@ router.get('/rider/status', async (req, res) => {
       application_ref: app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null,
       first_name: app?.first_name || user?.first_name || '',
       last_name: app?.last_name || user?.last_name || '',
-      phone: normalizedPhone
+      phone: normalizedPhone,
+      admin_notes: app?.admin_notes || null
     });
   } catch (err) {
     console.error('[Auth] Error in rider/status:', err);

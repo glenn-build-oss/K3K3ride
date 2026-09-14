@@ -863,8 +863,8 @@
           <div class="form-row">
             <div class="form-group">
               <label for="licenseNumber">Rider License Number <span class="req">*</span></label>
-              <input type="text" id="licenseNumber" name="licenseNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" maxlength="18" style="text-transform:uppercase;">
-              <span class="field-hint" style="font-size:0.75rem;color:var(--k3k3-gray-400);margin-top:4px;display:block;">Format: DEL-XXXXXXXX-XXXXX</span>
+              <input type="text" id="licenseNumber" name="licenseNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" minlength="18" maxlength="18" style="text-transform:uppercase;">
+              <span class="field-hint" style="font-size:0.75rem;color:var(--k3k3-gray-400);margin-top:4px;display:block;">Format: DEL-XXXXXXXX-XXXXX (exactly 18 characters)</span>
             </div>
             <div class="form-group">
               <label for="licenseExpiry">License Expiry <span class="req">*</span></label>
