@@ -75,6 +75,38 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .tb-icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.05);color:var(--muted-2);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;position:relative}
 .tb-icon-btn:hover{background:rgba(255,255,255,.1);color:var(--white)}
 .badge-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg-2)}
+/* Notification Drawer / Popover */
+.notif-dropdown{position:absolute;top:calc(100% + 10px);right:0;width:390px;max-width:calc(100vw - 32px);background:var(--bg-2);border:1px solid var(--border-2);border-radius:var(--r-lg);box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.05);display:none;flex-direction:column;z-index:1000;overflow:hidden;animation:notifFadeIn .18s var(--ease)}
+.notif-dropdown.show{display:flex}
+@keyframes notifFadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.notif-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-3)}
+.notif-count-pill{font-size:.65rem;font-weight:800;background:var(--yellow);color:var(--bg);padding:2px 7px;border-radius:var(--r-full)}
+.notif-clear-btn{background:none;border:none;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;transition:color .15s}
+.notif-clear-btn:hover{color:var(--yellow)}
+.notif-tabs{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.25)}
+.notif-tab{background:none;border:1px solid transparent;color:var(--muted);font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:var(--r-full);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.notif-tab:hover{color:var(--white);background:rgba(255,255,255,.05)}
+.notif-tab.active{background:var(--yellow-lt);border-color:var(--yellow-bdr);color:var(--yellow)}
+.notif-list{max-height:380px;overflow-y:auto;padding:4px 0}
+.notif-item{display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .15s}
+.notif-item:hover{background:rgba(255,255,255,.04)}
+.notif-item.unread{background:rgba(255,214,10,.04)}
+.notif-icon-box{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.notif-icon-box.sms{background:rgba(59,130,246,.15);color:#60A5FA;border:1px solid rgba(59,130,246,.3)}
+.notif-icon-box.whatsapp{background:rgba(37,211,102,.15);color:#25D366;border:1px solid rgba(37,211,102,.3)}
+.notif-icon-box.app{background:rgba(245,158,11,.15);color:#FBBF24;border:1px solid rgba(245,158,11,.3)}
+.notif-icon-box.ride{background:rgba(16,185,129,.15);color:#34D399;border:1px solid rgba(16,185,129,.3)}
+.notif-item-body{flex:1;min-width:0}
+.notif-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.notif-item-title{font-size:.8rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif-item-time{font-size:.65rem;color:var(--muted);white-space:nowrap;margin-left:8px}
+.notif-item-desc{font-size:.73rem;color:var(--muted-2);line-height:1.35;word-break:break-word}
+.notif-item-footer{display:flex;align-items:center;gap:8px;margin-top:4px}
+.notif-tag{font-size:.62rem;font-weight:700;text-transform:uppercase;padding:1px 6px;border-radius:var(--r-full)}
+.notif-tag.sms{background:rgba(59,130,246,.15);color:#93C5FD}
+.notif-tag.whatsapp{background:rgba(37,211,102,.15);color:#86EFAC}
+.notif-tag.app{background:rgba(245,158,11,.15);color:#FCD34D}
+.notif-tag.ride{background:rgba(16,185,129,.15);color:#6EE7B7}
 .tb-admin-pill{display:flex;align-items:center;gap:9px;padding:5px 13px 5px 5px;background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r-full);cursor:pointer;transition:all .2s}
 .tb-admin-pill:hover{border-color:var(--yellow-bdr);background:rgba(255,214,10,.06)}
 .tb-admin-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0}
@@ -411,8 +443,36 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   </div>
   <div class="topbar-right">
     <div class="sys-badge"><span class="sys-dot"></span><span>System Online</span></div>
-    <button class="tb-icon-btn" onclick="refreshData()" title="Refresh"><i class="fas fa-rotate-right" id="refreshIcon"></i></button>
-    <button class="tb-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span class="badge-dot"></span></button>
+    <div class="notif-wrapper" style="position:relative">
+      <button class="tb-icon-btn" id="tbNotifBtn" onclick="toggleNotifDrawer(event)" title="Notifications & Dispatches">
+        <i class="fas fa-bell"></i>
+        <span class="badge-dot" id="notifBadgeDot"></span>
+      </button>
+      
+      <!-- Notification Dropdown / Drawer -->
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <div style="display:flex;align-items:center;gap:8px">
+            <i class="fas fa-bell" style="color:var(--yellow)"></i>
+            <span style="font-weight:700;font-size:.9rem;color:var(--white)">Notifications</span>
+            <span class="notif-count-pill" id="notifCountPill">0</span>
+          </div>
+          <button class="notif-clear-btn" onclick="markAllNotifsRead(event)">Mark all read</button>
+        </div>
+        <div class="notif-tabs">
+          <button class="notif-tab active" onclick="filterNotifDrawer('all', this)">All</button>
+          <button class="notif-tab" onclick="filterNotifDrawer('sms', this)"><i class="fas fa-comment-sms"></i> SMS</button>
+          <button class="notif-tab" onclick="filterNotifDrawer('whatsapp', this)"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button class="notif-tab" onclick="filterNotifDrawer('app', this)"><i class="fas fa-id-card"></i> Apps</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div class="empty-state" style="padding:28px 12px">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading notifications…</p>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="tb-admin-pill">
       <div class="tb-admin-av" id="topAdminAv">A</div>
       <div class="tb-admin-name" id="topAdminName">Admin</div>
@@ -488,16 +548,16 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       </div>
 
       <div class="card">
-        <div class="card-header"><div><div class="card-title"><i class="fas fa-clock-rotate-left" style="color:var(--yellow);margin-right:6px"></i>Activity Feed</div><div class="card-sub">Real-time events</div></div><button class="card-action" onclick="renderActivity()">Refresh</button></div>
+        <div class="card-header"><div><div class="card-title"><i class="fas fa-clock-rotate-left" style="color:var(--yellow);margin-right:6px"></i>Activity Feed</div><div class="card-sub">Live platform events</div></div></div>
         <div class="card-body" style="padding:8px 16px"><div class="act-feed" id="actFeed"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
       </div>
       <div class="card">
-        <div class="card-header"><div><div class="card-title"><i class="fas fa-heartbeat" style="color:var(--green);margin-right:6px"></i>System Health</div></div></div>
-        <div class="card-body" style="padding:12px"><div class="health-grid">
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-database"></i></div><div><div class="health-name">Database</div><div class="health-status-text">Supabase PostgreSQL</div></div><span class="health-badge ok">OK</span></div>
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-bolt"></i></div><div><div class="health-name">Moolre Gateway</div><div class="health-status-text" id="healthMoolreText">SMS & MoMo Active</div></div><span class="health-badge ok" id="healthMoolreBadge">OK</span></div>
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-server"></i></div><div><div class="health-name">API Server</div><div class="health-status-text">Node Express</div></div><span class="health-badge ok">OK</span></div>
-          <div class="health-item"><div class="health-icon ok"><i class="fas fa-plug"></i></div><div><div class="health-name">WebSocket</div><div class="health-status-text">Socket.io</div></div><span class="health-badge ok">OK</span></div>
+        <div class="card-header"><div><div class="card-title"><i class="fas fa-heartbeat" style="color:var(--green);margin-right:6px"></i>System Health</div><div class="card-sub">Live subsystem telemetry</div></div></div>
+        <div class="card-body" style="padding:12px"><div class="health-grid" id="systemHealthGrid">
+          <div class="health-item" id="healthDbItem"><div class="health-icon ok" id="healthDbIcon"><i class="fas fa-database"></i></div><div><div class="health-name">Database</div><div class="health-status-text" id="healthDbText">Testing Supabase…</div></div><span class="health-badge ok" id="healthDbBadge">CHECKING</span></div>
+          <div class="health-item" id="healthMoolreItem"><div class="health-icon ok" id="healthMoolreIcon"><i class="fas fa-bolt"></i></div><div><div class="health-name">Moolre Gateway</div><div class="health-status-text" id="healthMoolreText">Checking SMS &amp; MoMo…</div></div><span class="health-badge ok" id="healthMoolreBadge">CHECKING</span></div>
+          <div class="health-item" id="healthApiItem"><div class="health-icon ok" id="healthApiIcon"><i class="fas fa-server"></i></div><div><div class="health-name">API Server</div><div class="health-status-text" id="healthApiText">Node Express</div></div><span class="health-badge ok" id="healthApiBadge">ONLINE</span></div>
+          <div class="health-item" id="healthWsItem"><div class="health-icon ok" id="healthWsIcon"><i class="fas fa-plug"></i></div><div><div class="health-name">WebSocket</div><div class="health-status-text" id="healthWsText">Socket.io</div></div><span class="health-badge ok" id="healthWsBadge">CONNECTING</span></div>
         </div></div>
       </div>
     </div>
@@ -1128,6 +1188,22 @@ function doLogout(){closeModal('logoutModal');showToast('Logging out…','info')
 
 /* ── Dashboard ── */
 let dashboardPollingInterval=null;
+const escapeHtml=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+function formatRelativeTime(dateStr){
+  if(!dateStr)return 'Just now';
+  const diff=Date.now()-new Date(dateStr).getTime();
+  if(isNaN(diff)||diff<0)return 'Just now';
+  const secs=Math.floor(diff/1000);
+  if(secs<60)return 'Just now';
+  const mins=Math.floor(secs/60);
+  if(mins<60)return `${mins}m ago`;
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return `${hrs}h ago`;
+  const days=Math.floor(hrs/24);
+  return `${days}d ago`;
+}
+
 async function loadDashboard(){
   // Fetch real live data from backend API (no stub data)
   const [tripsRes, ridersRes, appsRes, passRes, moolreRes] = await Promise.all([
@@ -1142,6 +1218,7 @@ async function loadDashboard(){
   allRiders = ridersRes?.success ? (ridersRes.riders || []) : (Array.isArray(ridersRes) ? ridersRes : []);
   allApps = appsRes?.success ? (appsRes.applications || []) : (Array.isArray(appsRes) ? appsRes : []);
   const allPassengers = passRes?.success ? (passRes.passengers || []) : (Array.isArray(passRes) ? passRes : []);
+  window.lastMoolreOverview = moolreRes;
   
   const comp=allTrips.filter(t=>t.status==='completed');
   const active=allTrips.filter(t=>t.status==='active'||t.status==='in_progress'||t.status==='accepted');
@@ -1155,20 +1232,20 @@ async function loadDashboard(){
   setEl('heroActive',active.length);
   setEl('heroRev',rev.toFixed(0));
 
-  // Update KPI Cards
+  // Update KPI Cards with real live data
   setEl('kpiTrips',allTrips.length);
   setEl('kpiTripsSub',`${comp.length} completed · ${active.length} active`);
   setEl('kpiRev','₵'+rev.toFixed(2));
   setEl('kpiRevSub','₵'+(rev*0.1).toFixed(2)+' platform fee');
   setEl('kpiRiders',allRiders.length);
   setEl('kpiRidersSub',`${online.length} online · ${onTrip.length} on trip`);
-  setEl('kpiPass',allPassengers.length); // Real live passenger count from Supabase
+  setEl('kpiPass',allPassengers.length);
   setEl('kpiComp',comp.length);
   setEl('kpiCompRate',allTrips.length?Math.round(comp.length/allTrips.length*100)+'% completion rate':'0%');
   setEl('kpiApps',pending.length);
   setEl('appsBadge',pending.length);
 
-  // Update Moolre Command Center widget
+  // Update Moolre Command Center widget with live Moolre API metrics
   if (moolreRes?.success) {
     const bal = moolreRes.gateway?.smsBalance;
     setEl('ccMoolreBalance', bal != null ? (typeof bal === 'number' ? bal + ' SMS' : bal) : 'Connected');
@@ -1187,6 +1264,8 @@ async function loadDashboard(){
   }
   renderRecentTrips(allTrips.slice(0,6));
   renderActivity();
+  checkSystemHealth();
+  loadNotifications();
 }
 
 function startDashboardPolling(){
@@ -1204,18 +1283,243 @@ function stopDashboardPolling(){
 
 function renderRecentTrips(data){
   const tb=el('recentTbody');if(!tb)return;
-  if(!data.length){tb.innerHTML='<tr><td colspan="5"><div class="empty-state"><i class="fas fa-route"></i><p>No trips yet</p></div></td></tr>';return;}
-  tb.innerHTML=data.map(t=>`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.82rem;font-weight:600">${t.pickup_label||t.pickup_address||'—'} → ${t.dest_label||t.dropoff_address||'—'}</td><td style="font-size:.8rem">${t.rider_name||t.rider_fname||'—'}</td><td class="t-fare">₵${parseFloat(t.actual_fare||t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`).join('');
+  if(!data.length){
+    tb.innerHTML='<tr><td colspan="5"><div class="empty-state" style="padding:28px 10px"><i class="fas fa-route" style="font-size:1.6rem;color:var(--muted);margin-bottom:8px"></i><p style="color:var(--muted);font-size:.85rem;margin:0">No trips recorded yet. Dispatching live rides as passengers book.</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML=data.map(t=>`<tr><td><span class="tid">${t.id||'—'}</span></td><td style="font-size:.82rem;font-weight:600">${escapeHtml(t.pickup_label||t.pickup_address||'—')} → ${escapeHtml(t.dest_label||t.dropoff_address||'—')}</td><td style="font-size:.8rem">${escapeHtml(t.rider_name||t.rider_fname||'—')}</td><td class="t-fare">₵${parseFloat(t.actual_fare||t.fare_estimate||0).toFixed(2)}</td><td><span class="t-badge ${t.status}">${(t.status||'').toUpperCase()}</span></td></tr>`).join('');
 }
 
 function renderActivity(){
   const feed=el('actFeed');if(!feed)return;
-  const acts=[
-    {icon:'fa-route',type:'trip',title:'Ride status',desc:'Trips synced with real-time dispatcher',time:'Just now'},
-    {icon:'fa-bolt',type:'payment',title:'Moolre gateway',desc:'SMS OTP verification and MoMo active',time:'Just now'},
-    {icon:'fa-user-plus',type:'app',title:'Applications',desc:'Rider onboarding system operational',time:'Just now'},
-  ];
-  feed.innerHTML=acts.map(a=>`<div class="act-item"><div class="act-icon ${a.type}"><i class="fas ${a.icon}"></i></div><div><div class="act-title">${a.title}</div><div class="act-desc">${a.desc}</div><div class="act-time">${a.time}</div></div></div>`).join('');
+  const realActs=[];
+
+  // 1. Live Trips events
+  if (Array.isArray(allTrips) && allTrips.length > 0) {
+    allTrips.slice(0, 4).forEach(t => {
+      const fare = parseFloat(t.actual_fare || t.fare_estimate || 0).toFixed(2);
+      const isComp = t.status === 'completed';
+      realActs.push({
+        icon: isComp ? 'fa-circle-check' : 'fa-route',
+        type: 'trip',
+        title: isComp ? `Trip Completed · ₵${fare}` : `Trip ${t.status || 'Active'}`,
+        desc: `${t.pickup_label || 'Campus'} → ${t.dest_label || 'Station'} (${t.rider_name || t.rider_fname || 'Assigned rider'})`,
+        time: formatRelativeTime(t.completed_at || t.created_at),
+        timestamp: new Date(t.completed_at || t.created_at || 0).getTime()
+      });
+    });
+  }
+
+  // 2. Driver Onboarding events
+  if (Array.isArray(allApps) && allApps.length > 0) {
+    allApps.slice(0, 4).forEach(a => {
+      const name = `${a.first_name || a.fname || ''} ${a.last_name || a.lname || ''}`.trim() || 'Driver';
+      const isAppr = a.status === 'approved';
+      realActs.push({
+        icon: isAppr ? 'fa-id-badge' : 'fa-user-plus',
+        type: 'app',
+        title: isAppr ? `Driver Approved: ${name}` : `Driver Application: ${name}`,
+        desc: `Vehicle: ${a.vehicle_type || 'Motorcycle'} · Ref ${a.app_ref || (a.id ? String(a.id).substring(0, 8) : 'Pending')}`,
+        time: formatRelativeTime(a.created_at),
+        timestamp: new Date(a.created_at || 0).getTime()
+      });
+    });
+  }
+
+  // 3. Moolre SMS Gateway & OTP audit
+  if (window.lastMoolreOverview?.otp) {
+    const verified = window.lastMoolreOverview.otp.verified || 0;
+    const total = window.lastMoolreOverview.otp.total || 0;
+    realActs.push({
+      icon: 'fa-shield-halved',
+      type: 'payment',
+      title: 'Moolre Gateway Verified',
+      desc: `${verified} of ${total} OTP texts verified on official Sender ID K3K3ride`,
+      time: 'Live status',
+      timestamp: Date.now()
+    });
+  }
+
+  realActs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+  if (realActs.length === 0) {
+    feed.innerHTML = `
+      <div class="empty-state" style="padding:24px 8px;">
+        <i class="fas fa-satellite-dish" style="font-size:1.6rem;color:var(--muted);margin-bottom:8px;"></i>
+        <p style="font-size:0.8rem;color:var(--muted);margin:0;">No events recorded yet. Ready for live dispatches.</p>
+      </div>
+    `;
+    return;
+  }
+
+  feed.innerHTML = realActs.slice(0, 5).map(a => `
+    <div class="act-item">
+      <div class="act-icon ${a.type}"><i class="fas ${a.icon}"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="act-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(a.title)}</div>
+        <div class="act-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(a.desc)}</div>
+        <div class="act-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── Real System Health Checker ── */
+async function checkSystemHealth(){
+  try {
+    const health = await apiFetch('/admin/health') || await apiFetch('/health');
+
+    // 1. Database (Supabase PostgreSQL)
+    const dbSub = health?.subsystems?.database;
+    const dbOk = dbSub?.status === 'ok' || (health?.status === 'ok' && !dbSub);
+    const dbLatency = dbSub?.latencyMs ? ` · ${dbSub.latencyMs}ms` : '';
+    setEl('healthDbText', dbOk ? `Supabase PostgreSQL${dbLatency}` : (dbSub?.message || 'Database Disconnected'));
+    const dbBadge = el('healthDbBadge');
+    const dbIcon = el('healthDbIcon');
+    if (dbBadge) {
+      dbBadge.className = `health-badge ${dbOk ? 'ok' : 'err'}`;
+      dbBadge.textContent = dbOk ? 'OK' : 'ERROR';
+    }
+    if (dbIcon) dbIcon.className = `health-icon ${dbOk ? 'ok' : 'err'}`;
+
+    // 2. Moolre Gateway
+    const moolreSub = health?.subsystems?.moolre;
+    const moolreOk = moolreSub?.status === 'ok' || moolreSub?.status === 'connected';
+    const moolreBal = (moolreSub?.balance !== null && moolreSub?.balance !== undefined) ? `${moolreSub.balance} SMS Units` : 'SMS & MoMo Active';
+    setEl('healthMoolreText', moolreOk ? `${moolreBal} · K3K3ride` : 'Moolre Gateway Inactive');
+    const mBadge = el('healthMoolreBadge');
+    const mIcon = el('healthMoolreIcon');
+    if (mBadge) {
+      mBadge.className = `health-badge ${moolreOk ? 'ok' : 'warn'}`;
+      mBadge.textContent = moolreOk ? 'OK' : 'DEGRADED';
+    }
+    if (mIcon) mIcon.className = `health-icon ${moolreOk ? 'ok' : 'warn'}`;
+
+    // 3. API Server (Node Express)
+    const apiSub = health?.subsystems?.apiServer;
+    const apiOk = !!health;
+    setEl('healthApiText', apiSub?.message || (apiOk ? 'Node Express · Active' : 'API Server Offline'));
+    const apiBadge = el('healthApiBadge');
+    const apiIcon = el('healthApiIcon');
+    if (apiBadge) {
+      apiBadge.className = `health-badge ${apiOk ? 'ok' : 'err'}`;
+      apiBadge.textContent = apiOk ? 'OK' : 'OFFLINE';
+    }
+    if (apiIcon) apiIcon.className = `health-icon ${apiOk ? 'ok' : 'err'}`;
+
+    // 4. WebSocket (Socket.io)
+    const wsConnected = Boolean(adminSocket && adminSocket.connected);
+    setEl('healthWsText', wsConnected ? 'Socket.io · Live Dispatcher' : 'Socket.io · Reconnecting');
+    const wsBadge = el('healthWsBadge');
+    const wsIcon = el('healthWsIcon');
+    if (wsBadge) {
+      wsBadge.className = `health-badge ${wsConnected ? 'ok' : 'warn'}`;
+      wsBadge.textContent = wsConnected ? 'OK' : 'CONNECTING';
+    }
+    if (wsIcon) wsIcon.className = `health-icon ${wsConnected ? 'ok' : 'warn'}`;
+  } catch (err) {
+    console.warn('[Health Check] Error:', err.message);
+  }
+}
+
+/* ── Live Notifications Drawer (SMS, WhatsApp, Driver Apps, Trips) ── */
+let allNotifs = [];
+let curNotifFilter = 'all';
+
+async function loadNotifications(){
+  try {
+    const res = await apiFetch('/admin/notifications');
+    allNotifs = res?.notifications || [];
+    
+    // Update badge dot and count pill
+    const countPill = el('notifCountPill');
+    const badgeDot = el('notifBadgeDot');
+    if (countPill) countPill.textContent = allNotifs.length;
+    if (badgeDot) badgeDot.style.display = allNotifs.length > 0 ? '' : 'none';
+
+    renderNotifsList(filterNotifsArray(curNotifFilter));
+  } catch (err) {
+    console.warn('[Notifications] Error loading notifications:', err.message);
+  }
+}
+
+function filterNotifsArray(type){
+  if (type === 'all') return allNotifs;
+  return allNotifs.filter(n => n.type === type);
+}
+
+function filterNotifDrawer(type, btn){
+  curNotifFilter = type;
+  document.querySelectorAll('.notif-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderNotifsList(filterNotifsArray(type));
+}
+
+function toggleNotifDrawer(e){
+  if (e) e.stopPropagation();
+  const dropdown = el('notifDropdown');
+  if (!dropdown) return;
+  const isShown = dropdown.classList.toggle('show');
+  if (isShown) {
+    loadNotifications();
+  }
+}
+
+function closeNotifDrawer(){
+  el('notifDropdown')?.classList.remove('show');
+}
+
+function markAllNotifsRead(e){
+  if (e) e.stopPropagation();
+  const badgeDot = el('notifBadgeDot');
+  const countPill = el('notifCountPill');
+  if (badgeDot) badgeDot.style.display = 'none';
+  if (countPill) countPill.textContent = '0';
+  document.querySelectorAll('.notif-item').forEach(item => item.classList.remove('unread'));
+  showToast('All notifications marked as read', 'info');
+}
+
+function renderNotifsList(data){
+  const list = el('notifList');
+  if (!list) return;
+  if (!data || data.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state" style="padding:28px 12px">
+        <i class="fas fa-bell-slash" style="font-size:1.6rem;color:var(--muted);margin-bottom:8px"></i>
+        <p style="font-size:0.8rem;color:var(--muted);margin:0">No notifications in this category</p>
+      </div>
+    `;
+    return;
+  }
+  list.innerHTML = data.map(n => `
+    <div class="notif-item unread" onclick="handleNotifClick('${n.type}', '${n.id}')">
+      <div class="notif-icon-box ${n.type}">
+        <i class="${n.type === 'whatsapp' ? 'fab' : 'fas'} ${n.icon}"></i>
+      </div>
+      <div class="notif-item-body">
+        <div class="notif-item-head">
+          <div class="notif-item-title">${escapeHtml(n.title)}</div>
+          <div class="notif-item-time">${formatRelativeTime(n.time)}</div>
+        </div>
+        <div class="notif-item-desc">${escapeHtml(n.body)}</div>
+        <div class="notif-item-footer">
+          <span class="notif-tag ${n.type}">${n.channel}</span>
+          <span style="font-size:0.62rem;color:var(--muted);"><i class="fas fa-circle-check" style="font-size:0.55rem;color:var(--green);margin-right:2px"></i> ${escapeHtml(n.badge || 'Delivered')}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleNotifClick(type, id){
+  closeNotifDrawer();
+  if (type === 'app') {
+    showSec('applications');
+  } else if (type === 'ride') {
+    showSec('trips');
+  } else if (type === 'sms') {
+    showSec('messages');
+  }
 }
 
 /* ── Live ── */
@@ -1874,13 +2178,16 @@ async function loadApps(filter,force){
     const res = await apiFetch('/applications');
     allApps = Array.isArray(res) ? res : (res?.applications || res?.data || []);
     
-    // Fallback to localStorage for rider form submissions only
-    if(!allApps.length){
-      try{
-        const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
-        if(localApps.length)allApps=localApps;
-      }catch(e){}
-    }
+    // Merge locally stored applications (e.g. from apply-to-ride submissions)
+    try{
+      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
+      localApps.forEach(la => {
+        if(!allApps.some(a => (a.id && la.id && a.id === la.id) || (a.app_ref && la.app_ref && a.app_ref === la.app_ref) || (a.phone && la.phone && a.phone.replace(/\D/g,'').slice(-9) === la.phone.replace(/\D/g,'').slice(-9)))) {
+          allApps.unshift(la);
+        }
+      });
+      if(!allApps.length && localApps.length) allApps = localApps;
+    }catch(e){}
   }
 
   // Load stats - always calculate from current data
@@ -3009,12 +3316,20 @@ document.addEventListener('DOMContentLoaded',()=>{
   initAdminSocket();
   startDashboardPolling(); // Start with dashboard polling
 });
+document.addEventListener('click',e=>{
+  const dd=el('notifDropdown');
+  const btn=el('tbNotifBtn');
+  if(dd&&btn&&dd.classList.contains('show')&&!dd.contains(e.target)&&!btn.contains(e.target)){
+    closeNotifDrawer();
+  }
+});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     ['logoutModal','approveModal','declineModal','deleteAppModal','k3rModal','riderDetailModal','suspendRiderModal','unsuspendRiderModal','removeRiderModal','imgLightbox'].forEach(id=>{
       const m=el(id);if(m){m.style.display='';m.classList.remove('show');}
     });
     closeMenu();
+    closeNotifDrawer();
   }
 });
 </script>

@@ -595,9 +595,11 @@ router.post('/rider/verify-otp', async (req, res) => {
         user: {
           id: riderUser.id,
           phone: riderUser.phone,
-          firstName: riderUser.first_name || app?.first_name || 'Rider',
+          firstName: riderUser.first_name || app?.first_name || '',
           lastName: riderUser.last_name || app?.last_name || '',
           email: riderUser.email || app?.email || '',
+          app_ref: app?.app_ref || app?.application_ref || null,
+          applicationRef: app?.app_ref || app?.application_ref || null,
           role: riderUser.role,
           status: riderStatus,
           isNew: false
@@ -641,9 +643,11 @@ router.post('/rider/verify-otp', async (req, res) => {
       user: {
         id: user.id,
         phone: user.phone,
-        firstName: user.first_name || app?.first_name || 'Rider',
+        firstName: user.first_name || app?.first_name || '',
         lastName: user.last_name || app?.last_name || '',
         email: user.email || app?.email || '',
+        app_ref: app?.app_ref || app?.application_ref || null,
+        applicationRef: app?.app_ref || app?.application_ref || null,
         role: user.role,
         status: riderStatus,
         isNew
@@ -689,8 +693,8 @@ router.get('/rider/status', async (req, res) => {
         status: 'suspended',
         isApproved: false,
         isSuspended: true,
-        message: 'Your rider account is currently suspended. Please contact K3K3 support.',
-        application_ref: app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null,
+        application_ref: app?.app_ref || (app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null),
+        app_ref: app?.app_ref || (app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null),
         first_name: app?.first_name || user?.first_name || '',
         last_name: app?.last_name || user?.last_name || '',
         phone: normalizedPhone
@@ -704,8 +708,8 @@ router.get('/rider/status', async (req, res) => {
     res.json({
       success: true,
       status: finalStatus,
-      isApproved,
-      application_ref: app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null,
+      application_ref: app?.app_ref || (app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null),
+      app_ref: app?.app_ref || (app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null),
       first_name: app?.first_name || user?.first_name || '',
       last_name: app?.last_name || user?.last_name || '',
       phone: normalizedPhone,

@@ -248,34 +248,21 @@
         .phone-field-wrap {
             display: flex;
             gap: 0;
+            width: 100%;
             border: 2px solid var(--border);
             border-radius: var(--r);
             overflow: hidden;
-            transition: border-color 0.2s;
+            background: var(--surface);
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .phone-field-wrap:focus-within {
             border-color: var(--yellow-dk);
-        }
-
-        .phone-prefix {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 0 14px;
-            background: var(--surface);
-            border: none;
-            border-right: 2px solid var(--border);
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text);
-            white-space: nowrap;
-            user-select: none;
-            min-width: 90px;
+            background: #ffffff;
         }
 
         .phone-number-input {
+            width: 100%;
             flex: 1;
             border: none;
             outline: none;
@@ -872,7 +859,6 @@
                             <div class="field-group">
                                 <label class="field-label" for="phoneInput">Phone Number</label>
                                 <div class="phone-field-wrap">
-                                    <div class="phone-prefix">🇬🇭 +233</div>
                                     <input
                                         type="tel"
                                         id="phoneInput"
@@ -880,7 +866,7 @@
                                         placeholder="024 123 4567"
                                         autocomplete="tel"
                                         inputmode="numeric"
-                                        maxlength="15"
+                                        maxlength="10"
                                     >
                                 </div>
                             </div>
@@ -971,7 +957,6 @@
                         <div class="field-group">
                             <label class="field-label" for="signupPhone">Phone Number</label>
                             <div class="phone-field-wrap">
-                                <div class="phone-prefix">🇬🇭 +233</div>
                                 <input
                                     type="tel"
                                     id="signupPhone"
@@ -979,7 +964,7 @@
                                     placeholder="024 123 4567"
                                     autocomplete="tel"
                                     inputmode="numeric"
-                                    maxlength="15"
+                                    maxlength="10"
                                     required
                                 >
                             </div>
@@ -1068,9 +1053,10 @@
         async function handleSendOTP(e) {
             e.preventDefault();
             const phone = document.getElementById('phoneInput').value.trim();
+            const cleanPhone = phone.replace(/\D/g, '');
 
-            if (!phone || phone.replace(/\D/g, '').length < 9) {
-                showToast('Please enter a valid phone number.', 'error');
+            if (!cleanPhone || cleanPhone.length !== 10) {
+                showToast('Please enter a valid 10-digit phone number (e.g. 024 123 4567).', 'error');
                 return;
             }
 
@@ -1115,6 +1101,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            ['phoneInput', 'signupPhone'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                    });
+                }
+            });
+
             const digits = document.querySelectorAll('.otp-digit');
             digits.forEach((inp, i) => {
                 inp.addEventListener('input', () => {
@@ -1271,8 +1266,9 @@
                 showToast('Please enter your full name.', 'error');
                 return;
             }
-            if (!phone || phone.replace(/\D/g, '').length < 9) {
-                showToast('Please enter a valid phone number.', 'error');
+            const cleanPhone = phone.replace(/\D/g, '');
+            if (!cleanPhone || cleanPhone.length !== 10) {
+                showToast('Please enter a valid 10-digit phone number (e.g. 024 123 4567).', 'error');
                 return;
             }
 

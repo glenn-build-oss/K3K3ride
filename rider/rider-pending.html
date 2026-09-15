@@ -468,22 +468,38 @@
         const raw = localStorage.getItem('riderSession') || sessionStorage.getItem('riderSession');
         if (raw) {
           const d = JSON.parse(raw);
-          firstName = d.firstName || '';
-          lastName  = d.lastName  || '';
-          phone     = d.phone     || '';
+          firstName = d.firstName || d.first_name || '';
+          lastName  = d.lastName  || d.last_name  || '';
+          phone     = d.phone     || d.phoneNumber || '';
+          appRef    = d.appRef    || d.app_ref    || d.applicationRef || d.application_ref || '';
         }
       } catch(e) {}
 
       // Try apply-to-ride submission data
-      if (!firstName) {
+      if (!firstName || !appRef) {
         try {
           const raw = localStorage.getItem('lastRiderApplication');
           if (raw) {
             const d = JSON.parse(raw);
-            firstName = d.firstName || '';
-            lastName  = d.lastName  || '';
-            phone     = d.phone     || '';
-            appRef    = d.appRef    || '';
+            firstName = firstName || d.firstName || d.first_name || '';
+            lastName  = lastName  || d.lastName  || d.last_name  || '';
+            phone     = phone     || d.phone     || '';
+            appRef    = appRef    || d.appRef    || d.app_ref    || d.applicationRef || '';
+          }
+        } catch(e) {}
+      }
+
+      // Search applications array in localStorage
+      if (!firstName || !appRef) {
+        try {
+          const apps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+          const targetPhone = (phone || localStorage.getItem('lastRiderPhone') || '').replace(/\D/g, '').slice(-9);
+          const matched = targetPhone ? apps.find(a => a.phone && a.phone.replace(/\D/g, '').slice(-9) === targetPhone) : apps[0];
+          if (matched) {
+            firstName = firstName || matched.first_name || matched.firstName || '';
+            lastName  = lastName  || matched.last_name  || matched.lastName  || '';
+            phone     = phone     || matched.phone      || '';
+            appRef    = appRef    || matched.app_ref    || matched.appRef    || '';
           }
         } catch(e) {}
       }
@@ -494,9 +510,9 @@
           const raw = sessionStorage.getItem('riderRegPrefill');
           if (raw) {
             const d = JSON.parse(raw);
-            firstName = d.firstName || '';
-            lastName  = d.lastName  || '';
-            phone     = d.fullPhone || (d.countryCode + d.phone) || '';
+            firstName = d.firstName || d.first_name || '';
+            lastName  = d.lastName  || d.last_name  || '';
+            phone     = phone     || d.phone      || d.fullPhone || '';
           }
         } catch(e) {}
       }
@@ -504,6 +520,11 @@
       // Fallback: lastApplicationRef
       if (!appRef) {
         try { appRef = localStorage.getItem('lastApplicationRef') || ''; } catch(e) {}
+      }
+
+      // Fallback: last phone
+      if (!phone) {
+        try { phone = localStorage.getItem('lastRiderPhone') || ''; } catch(e) {}
       }
 
       // If already marked as approved, redirect straight to dashboard
@@ -519,8 +540,8 @@
       } catch(_) {}
 
       // Render details
-      const name = [firstName, lastName].filter(Boolean).join(' ') || 'Rider';
-      document.getElementById('riderName').textContent = firstName || 'Rider';
+      const displayName = firstName || 'Driver';
+      document.getElementById('riderName').textContent = displayName;
       document.getElementById('detailFirstName').textContent = firstName || '—';
       document.getElementById('detailLastName').textContent  = lastName  || '—';
       document.getElementById('detailPhone').textContent     = phone      || '—';
@@ -533,6 +554,21 @@
           const res = await fetch(`/api/auth/rider/status?phone=${encodeURIComponent(phone)}`);
           if (!res.ok) return;
           const data = await res.json();
+
+          // Sync incoming profile data if initially blank
+          if (data.first_name && !firstName) {
+            firstName = data.first_name;
+            document.getElementById('riderName').textContent = firstName;
+            document.getElementById('detailFirstName').textContent = firstName;
+          }
+          if (data.last_name && !lastName) {
+            lastName = data.last_name;
+            document.getElementById('detailLastName').textContent = lastName;
+          }
+          if ((data.app_ref || data.application_ref) && !appRef) {
+            appRef = data.app_ref || data.application_ref;
+            document.getElementById('detailRef').textContent = appRef;
+          }
           if (data.success && (data.status === 'approved' || data.isApproved)) {
             // Update stored session
             try {

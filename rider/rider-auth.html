@@ -15,6 +15,7 @@
   <style>
     :root {
       --black:    #111111;
+      --black-2:  #222222;
       --yellow:   #FFD60A;
       --yellow-dk:#E6C000;
       --yellow-lt:rgba(255,214,10,0.1);
@@ -30,6 +31,7 @@
       --r-lg:     18px;
       --r-xl:     24px;
       --r-full:   999px;
+      --ease:     cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -196,25 +198,16 @@
     }
 
     .phone-field-wrap {
-      display: flex; gap: 0;
+      display: flex; gap: 0; width: 100%;
       border: 2px solid var(--border);
       border-radius: var(--r); overflow: hidden;
-      transition: border-color 0.2s;
+      background: var(--surface);
+      transition: border-color 0.2s, background-color 0.2s;
     }
-    .phone-field-wrap:focus-within { border-color: var(--yellow-dk); }
-
-    .phone-prefix {
-      display: flex; align-items: center; gap: 6px;
-      padding: 0 14px; background: var(--surface);
-      border: none; border-right: 2px solid var(--border);
-      font-family: inherit; font-size: 0.875rem;
-      font-weight: 600; color: var(--text);
-      white-space: nowrap; user-select: none;
-      min-width: 90px;
-    }
+    .phone-field-wrap:focus-within { border-color: var(--yellow-dk); background: #ffffff; }
 
     .phone-number-input {
-      flex: 1; border: none; outline: none;
+      width: 100%; flex: 1; border: none; outline: none;
       padding: 14px 16px; font-family: inherit;
       font-size: 1rem; font-weight: 500; color: var(--text);
       background: transparent;
@@ -234,21 +227,21 @@
     /* ─── Buttons - Professional Uber/Bolt Style ─── */
     .otp-btn {
       width: 100%; padding: 14px 24px;
-      background: var(--black); color: var(--white);
+      background: #111111; color: #ffffff;
       border: none; border-radius: 24px;
       font-family: inherit; font-size: 1rem; font-weight: 600;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       gap: 10px; transition: all 0.2s var(--ease); margin-top: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .otp-btn:hover { background: var(--black-2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .otp-btn:hover { background: #222222; color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .otp-btn:active { transform: translateY(0); }
     .otp-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
     .otp-btn.dark-btn {
-      background: var(--black); color: var(--white);
+      background: #111111; color: #ffffff;
     }
-    .otp-btn.dark-btn:hover { background: var(--black-2); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .otp-btn.dark-btn:hover { background: #222222; color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
 
     /* ─── Switch banner ─── */
     .auth-switch-banner {
@@ -260,14 +253,14 @@
     .auth-switch-banner p { font-size: 0.875rem; color: var(--text-2); font-weight: 500; }
     .auth-switch-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      background: var(--black); color: var(--white);
+      background: #111111; color: #ffffff;
       border: none; border-radius: 20px;
       padding: 8px 18px; font-family: inherit;
       font-size: 0.82rem; font-weight: 600; cursor: pointer;
       transition: all 0.2s var(--ease); white-space: nowrap; text-decoration: none;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .auth-switch-btn:hover { background: var(--black-2); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .auth-switch-btn:hover { background: #222222; color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
     /* ─── Terms ─── */
     .terms-note {
@@ -467,19 +460,19 @@
           <img src="../assets/k3k3.png" alt="K3K3" class="brand-logo" onerror="this.style.display='none'">
           <div>
             <div class="brand-name">K3K3</div>
-            <div class="brand-tagline">Rider Portal</div>
+            <div class="brand-tagline">Driver Portal</div>
           </div>
         </div>
 
         <div class="left-hero">
-          <div class="left-badge"><i class="fas fa-motorcycle"></i> Ride &amp; Earn</div>
+          <div class="left-badge"><i class="fas fa-motorcycle"></i> Drive &amp; Earn</div>
           <h2 class="left-title">Drive.<br>Earn.<br><span>Repeat.</span></h2>
           <p class="left-sub">Join K3K3 and start earning on your schedule. Fast pickups, real income, full flexibility across Ghana.</p>
 
           <div class="trust-pills">
             <div class="trust-pill">
               <i class="fas fa-shield-alt"></i>
-              <span>Verified, approved rider accounts</span>
+              <span>Verified, approved driver accounts</span>
             </div>
             <div class="trust-pill">
               <i class="fas fa-coins"></i>
@@ -487,11 +480,11 @@
             </div>
             <div class="trust-pill">
               <i class="fas fa-star"></i>
-              <span>4.8&#9733; average rider rating</span>
+              <span>4.8&#9733; average driver rating</span>
             </div>
             <div class="trust-pill">
               <i class="fas fa-clock"></i>
-              <span>Set your own hours, ride on demand</span>
+              <span>Set your own hours, drive on demand</span>
             </div>
           </div>
         </div>
@@ -517,7 +510,7 @@
 
           <!-- Step 1: Phone Number -->
           <div id="siPhoneStep">
-            <div class="form-eyebrow"><i class="fas fa-sign-in-alt"></i>&nbsp; Rider Sign In</div>
+            <div class="form-eyebrow"><i class="fas fa-sign-in-alt"></i>&nbsp; Driver Sign In</div>
             <h1 class="form-title">Welcome back</h1>
             <p class="form-subtitle">Enter your registered phone number to receive a one-time verification code.</p>
 
@@ -530,9 +523,8 @@
               <div class="field-group">
                 <label class="field-label" for="siPhone">Phone Number</label>
                 <div class="phone-field-wrap">
-                  <div class="phone-prefix">🇬🇭 +233</div>
                   <input type="tel" id="siPhone" class="phone-number-input"
-                    placeholder="024 123 4567" autocomplete="tel" inputmode="numeric" maxlength="15">
+                    placeholder="024 123 4567" autocomplete="tel" inputmode="numeric" maxlength="10">
                 </div>
               </div>
 
@@ -608,8 +600,8 @@
             </button>
 
             <div class="form-eyebrow"><i class="fas fa-user-plus"></i>&nbsp; Create Account</div>
-            <h1 class="form-title">Become a Rider</h1>
-            <p class="form-subtitle">Tell us about yourself. After verification you'll complete your full rider application.</p>
+            <h1 class="form-title">Become a Driver</h1>
+            <p class="form-subtitle">Tell us about yourself. After verification you'll complete your full driver application.</p>
 
             <div class="error-box" id="suError">
               <i class="fas fa-exclamation-circle"></i>
@@ -634,9 +626,8 @@
             <div class="field-group">
               <label class="field-label" for="suPhone">Phone Number</label>
               <div class="phone-field-wrap">
-                <div class="phone-prefix">🇬🇭 +233</div>
                 <input type="tel" id="suPhone" class="phone-number-input"
-                  placeholder="024 123 4567" inputmode="numeric" maxlength="15">
+                  placeholder="024 123 4567" inputmode="numeric" maxlength="10">
               </div>
             </div>
 
@@ -646,7 +637,7 @@
 
             <div class="admin-note">
               <i class="fas fa-shield-check"></i>
-              <p><strong>Rider accounts require admin approval</strong> before your first ride. You will be notified once your application has been reviewed and approved.</p>
+              <p><strong>Driver accounts require admin approval</strong> before your first ride. You will be notified once your application has been reviewed and approved.</p>
             </div>
 
             <div class="auth-switch-banner" style="margin-top:16px;">
@@ -817,20 +808,20 @@
     async function handleSendOTP(e) {
       e.preventDefault();
       hideErr('siPhoneError');
-      const phone = document.getElementById('siPhone').value.trim().replace(/\s/g, '');
+      const rawPhone = document.getElementById('siPhone').value.trim().replace(/\D/g, '');
 
-      if (!phone) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter your phone number.'); return; }
-      if (!/^\d{9,15}$/.test(phone.replace(/^0/, ''))) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter a valid phone number.'); return; }
+      if (!rawPhone) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter your phone number.'); return; }
+      if (rawPhone.length !== 10) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter a valid 10-digit phone number (e.g. 024 123 4567).'); return; }
 
-      siPhone = phone;
+      siPhone = rawPhone;
       const btn = document.getElementById('siSendBtn');
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
 
-      await sendOtpToPhone(phone);
+      await sendOtpToPhone(rawPhone);
 
       document.getElementById('siPhoneStep').style.display = 'none';
       document.getElementById('siOtpStep').classList.add('show');
-      document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + phone.replace(/^0/, '') + '. Enter it below to sign in.';
+      document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + rawPhone.replace(/^0/, '') + '. Enter it below to sign in.';
       initOtpInputs(siIds);
 
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
@@ -857,15 +848,46 @@
         const isApproved = result.isApproved || result.status === 'approved' || result.user?.status === 'approved' || result.user?.status === 'active';
         const finalStatus = isApproved ? 'approved' : (result.status || 'pending');
 
+        let firstName = result.user?.firstName || result.user?.first_name || '';
+        let lastName  = result.user?.lastName  || result.user?.last_name  || '';
+        let appRef    = result.user?.app_ref   || result.user?.applicationRef || result.user?.appRef || '';
+
+        // Match against existing applications in localStorage if missing from backend
+        try {
+          const apps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+          const cleanPhone = siPhone.replace(/\D/g, '').slice(-9);
+          const matched = apps.find(a => a.phone && a.phone.replace(/\D/g, '').slice(-9) === cleanPhone);
+          if (matched) {
+            firstName = firstName || matched.first_name || matched.firstName || '';
+            lastName  = lastName  || matched.last_name  || matched.lastName  || '';
+            appRef    = appRef    || matched.app_ref    || matched.appRef    || '';
+          }
+        } catch(e) {}
+
+        try {
+          const lastApp = JSON.parse(localStorage.getItem('lastRiderApplication') || '{}');
+          if (lastApp.phone && lastApp.phone.replace(/\D/g, '').slice(-9) === siPhone.replace(/\D/g, '').slice(-9)) {
+            firstName = firstName || lastApp.firstName || '';
+            lastName  = lastName  || lastApp.lastName  || '';
+            appRef    = appRef    || lastApp.appRef    || '';
+          }
+        } catch(e) {}
+
+        if (!appRef) {
+          try { appRef = localStorage.getItem('lastApplicationRef') || ''; } catch(e) {}
+        }
+
         try {
           const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
           const riderSessionData = {
             riderId: result.user?.id || existingSession.riderId || existingSession.id || null,
             id: result.user?.id || existingSession.id || null,
             phone: siPhone,
-            firstName: result.user?.firstName || existingSession.firstName || '',
-            lastName: result.user?.lastName || existingSession.lastName || '',
+            firstName: firstName || existingSession.firstName || '',
+            lastName: lastName || existingSession.lastName || '',
             email: result.user?.email || existingSession.email || '',
+            applicationRef: appRef || existingSession.applicationRef || existingSession.appRef || '',
+            appRef: appRef || existingSession.appRef || existingSession.applicationRef || '',
             token: result.token,
             loginTime: new Date().toISOString(),
             status: finalStatus,
@@ -875,9 +897,10 @@
           sessionStorage.setItem('riderSession', JSON.stringify(riderSessionData));
           localStorage.setItem('k3k3_user_type', 'rider');
           localStorage.setItem('lastRiderPhone', siPhone);
+          if (appRef) localStorage.setItem('lastApplicationRef', appRef);
         } catch(e) {}
 
-        showToast(isApproved ? 'Signed in! Opening Rider Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
+        showToast(isApproved ? 'Signed in! Opening Driver Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
 
         setTimeout(() => {
           if (finalStatus === 'approved') {
@@ -900,12 +923,12 @@
       const firstName = document.getElementById('suFirstName').value.trim();
       const lastName  = document.getElementById('suLastName').value.trim();
       const email     = document.getElementById('suEmail').value.trim();
-      const phone     = document.getElementById('suPhone').value.trim().replace(/\s/g, '');
+      const phone     = document.getElementById('suPhone').value.trim().replace(/\D/g, '');
 
       if (!firstName) { showErr('suError', 'suErrorText', 'Please enter your first name.'); document.getElementById('suFirstName').focus(); return; }
       if (!lastName)  { showErr('suError', 'suErrorText', 'Please enter your last name.'); document.getElementById('suLastName').focus(); return; }
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('suError', 'suErrorText', 'Please enter a valid email address.'); document.getElementById('suEmail').focus(); return; }
-      if (!phone || !/^\d{9,15}$/.test(phone.replace(/^0/, ''))) { showErr('suError', 'suErrorText', 'Please enter a valid phone number.'); document.getElementById('suPhone').focus(); return; }
+      if (!phone || phone.length !== 10) { showErr('suError', 'suErrorText', 'Please enter a valid 10-digit phone number (e.g. 024 123 4567).'); document.getElementById('suPhone').focus(); return; }
 
       suPhone = phone;
 
@@ -983,7 +1006,15 @@
       }
     }
 
-    /* ── Clear errors on input ── */
+    /* ── Phone 10-digit filter and error clear on input ── */
+    ['siPhone', 'suPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', function () {
+          this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+      }
+    });
     document.getElementById('siPhone').addEventListener('input', () => hideErr('siPhoneError'));
     ['suFirstName','suLastName','suEmail','suPhone'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => hideErr('suError'));

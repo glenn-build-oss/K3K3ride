@@ -753,10 +753,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="phone">Phone Number <span class="req">*</span></label>
-              <div class="phone-row">
-                <div style="display:flex;align-items:center;gap:6px;padding:0 14px;background:#f7f8fa;border:1.5px solid #e5e7eb;border-right:none;border-radius:12px 0 0 12px;font-size:0.92rem;font-weight:600;color:#111827;white-space:nowrap;user-select:none;">🇬🇭 +233</div>
-                <input type="tel" id="phone" name="phone" placeholder="024 123 4567">
-              </div>
+              <input type="tel" id="phone" name="phone" placeholder="024 123 4567" maxlength="10" inputmode="numeric">
             </div>
             <div class="form-group">
               <label for="dateOfBirth">Date of Birth <span class="req">*</span></label>
@@ -785,14 +782,14 @@
           <div class="form-row full">
             <div class="form-group">
               <label for="ghanaCardNumber">Ghana Card Number</label>
-              <input type="text" id="ghanaCardNumber" name="ghanaCardNumber" placeholder="e.g. GHA-000000000-0">
-              <span class="field-hint">Optional but recommended</span>
+              <input type="text" id="ghanaCardNumber" name="ghanaCardNumber" placeholder="GHA-000000000-0" maxlength="15" style="text-transform:uppercase;">
+              <span class="field-hint">Format: GHA-XXXXXXXXX-X (auto-formatted)</span>
             </div>
           </div>
 
           <div class="form-row full">
             <div class="form-group">
-              <label for="about">About Yourself <span class="req">*</span></label>
+              <label for="about">About Yourself <span class="field-hint" style="font-size:0.75rem;color:var(--k3k3-gray-400);font-weight:normal;margin-left:4px;">(Optional)</span></label>
               <textarea id="about" name="about" placeholder="Tell us about your experience and why you want to ride with K3K3..."></textarea>
             </div>
           </div>
@@ -1065,17 +1062,52 @@
     document.getElementById('nextBtn').addEventListener('click', nextStep);
     document.getElementById('prevBtn').addEventListener('click', prevStep);
 
+    // ── Input Formatters & Limits ─────────────────────
+    function formatGhanaCard(val) {
+      if (!val) return '';
+      let clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      let body = clean.startsWith('GHA') ? clean.slice(3) : clean;
+      body = body.slice(0, 10);
+      if (!body) return clean.startsWith('G') ? clean.slice(0, 3) : '';
+      if (body.length <= 9) return 'GHA-' + body;
+      return 'GHA-' + body.slice(0, 9) + '-' + body.slice(9, 10);
+    }
+
+    function formatLicenseNumber(val) {
+      if (!val) return '';
+      let clean = val.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      let body = clean.startsWith('DEL') ? clean.slice(3) : clean;
+      body = body.slice(0, 13);
+      if (!body) return clean.startsWith('D') ? clean.slice(0, 3) : '';
+      if (body.length <= 8) return 'DEL-' + body;
+      return 'DEL-' + body.slice(0, 8) + '-' + body.slice(8, 13);
+    }
+
+    const phoneEl = document.getElementById('phone');
+    if (phoneEl) {
+      phoneEl.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+      });
+    }
+
+    const ghanaCardEl = document.getElementById('ghanaCardNumber');
+    if (ghanaCardEl) {
+      ghanaCardEl.addEventListener('input', function () {
+        this.value = formatGhanaCard(this.value);
+      });
+    }
+
     const licInputEl = document.getElementById('licenseNumber');
     if (licInputEl) {
       licInputEl.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();
+        this.value = formatLicenseNumber(this.value);
       });
     }
 
     // ── Validation ───────────────────────────────────
     function validateStep(step) {
       if (step === 1) {
-        const required = ['firstName', 'lastName', 'email', 'gender', 'phone', 'dateOfBirth', 'nationality', 'city', 'address', 'about'];
+        const required = ['firstName', 'lastName', 'email', 'gender', 'phone', 'dateOfBirth', 'nationality', 'city', 'address'];
         for (const id of required) {
           const el = document.getElementById(id);
           if (!el || !el.value.trim()) {
@@ -1083,6 +1115,12 @@
             el && el.focus();
             return false;
           }
+        }
+        const phoneVal = (document.getElementById('phone').value || '').replace(/\D/g, '');
+        if (phoneVal.length !== 10) {
+          toast('Please enter a valid 10-digit phone number (e.g. 0241234567).', 'error');
+          document.getElementById('phone').focus();
+          return false;
         }
         const email = document.getElementById('email').value;
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -1261,8 +1299,6 @@
     // ── Review Page ──────────────────────────────────
     function populateReview() {
       const get = id => (document.getElementById(id) || {}).value || 'N/A';
-      const countryCodeEl = document.getElementById('countryCode');
-      const countryCode = countryCodeEl ? countryCodeEl.value : '+233';
       const phone = get('phone');
 
       document.getElementById('reviewPersonal').innerHTML = `
@@ -1270,7 +1306,7 @@
         <div class="review-grid">
           <div class="review-item"><span class="label">Full Name</span><span class="value">${get('firstName')} ${get('lastName')}</span></div>
           <div class="review-item"><span class="label">Email</span><span class="value">${get('email')}</span></div>
-          <div class="review-item"><span class="label">Phone</span><span class="value">${countryCode} ${phone}</span></div>
+          <div class="review-item"><span class="label">Phone</span><span class="value">${phone}</span></div>
           <div class="review-item"><span class="label">Gender</span><span class="value">${get('gender')}</span></div>
           <div class="review-item"><span class="label">Date of Birth</span><span class="value">${get('dateOfBirth')}</span></div>
           <div class="review-item"><span class="label">Nationality</span><span class="value">${get('nationality')}</span></div>
@@ -1330,10 +1366,8 @@
 
       try {
         const get = id => (document.getElementById(id) || {}).value || '';
-        const countryCodeEl = document.getElementById('countryCode');
-        const countryCode = countryCodeEl ? countryCodeEl.value : '+233';
-        let rawPhone = get('phone').trim();
-        let fullPhone = rawPhone.startsWith('+') ? rawPhone : (countryCode + (rawPhone.startsWith('0') ? rawPhone.substring(1) : rawPhone));
+        let rawPhone = get('phone').trim().replace(/\D/g, '');
+        let fullPhone = rawPhone.startsWith('+') ? rawPhone : ('+233' + (rawPhone.startsWith('0') ? rawPhone.substring(1) : rawPhone));
 
         // Read all uploaded document files as Base64 data URLs
         const documentsPayload = {};
@@ -1425,7 +1459,8 @@
           localStorage.setItem('lastRiderApplication', JSON.stringify({
             firstName: get('firstName'),
             lastName:  get('lastName'),
-            phone:     fullPhone,
+            phone:     rawPhone,
+            fullPhone: fullPhone,
             email:     get('email'),
             appRef:    appRef
           }));
@@ -1441,7 +1476,8 @@
             first_name: get('firstName'),
             last_name: get('lastName'),
             email: get('email'),
-            phone: fullPhone,
+            phone: rawPhone,
+            full_phone: fullPhone,
             date_of_birth: get('dateOfBirth') || null,
             gender: get('gender') || null,
             nationality: get('nationality') || null,
@@ -1473,85 +1509,91 @@
         // Update rider session status to pending
         try {
           const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
-          if (riderSession.phone) {
-            riderSession.status = 'pending';
-            riderSession.applicationRef = appRef;
-            localStorage.setItem('riderSession', JSON.stringify(riderSession));
-          }
+          riderSession.status = 'pending';
+          riderSession.phone = rawPhone;
+          riderSession.firstName = get('firstName');
+          riderSession.lastName = get('lastName');
+          riderSession.email = get('email');
+          riderSession.applicationRef = appRef;
+          riderSession.appRef = appRef;
+          localStorage.setItem('riderSession', JSON.stringify(riderSession));
+          sessionStorage.setItem('riderSession', JSON.stringify(riderSession));
         } catch(e) {}
 
         toast('Application submitted successfully! Our team will review within 24–48 hours.', 'success');
         setTimeout(() => { window.location.href = 'pending.html'; }, 1500);
 
       } catch (err) {
-        // Dev fallback: if backend is unavailable, save what we have and redirect
-        if (err.message && (err.message.includes('fetch') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-          const get2 = id => (document.getElementById(id) || {}).value || '';
-          const genRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
-          const fallbackPhone = fullPhone || (get2('countryCode') + get2('phone')).trim() || '';
-          try {
-            localStorage.setItem('lastRiderApplication', JSON.stringify({
-              firstName: get2('firstName'),
-              lastName:  get2('lastName'),
-              phone:     fallbackPhone,
-              email:     get2('email'),
-              appRef:    genRef
-            }));
-            localStorage.setItem('lastApplicationRef', genRef);
+        // Fallback: save locally for admin and redirect to pending
+        const get2 = id => (document.getElementById(id) || {}).value || '';
+        const fallbackPhone = (get2('phone') || '').trim().replace(/\D/g, '');
+        const genRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
+        try {
+          localStorage.setItem('lastRiderApplication', JSON.stringify({
+            firstName: get2('firstName'),
+            lastName:  get2('lastName'),
+            phone:     fallbackPhone,
+            email:     get2('email'),
+            appRef:    genRef
+          }));
+          localStorage.setItem('lastApplicationRef', genRef);
 
-            // Update rider session status to pending
-            try {
-              const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
-              if (riderSession.phone) {
-                riderSession.status = 'pending';
-                riderSession.applicationRef = genRef;
-                localStorage.setItem('riderSession', JSON.stringify(riderSession));
-              }
-            } catch(e) {}
+          // Update rider session
+          const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+          riderSession.status = 'pending';
+          riderSession.phone = fallbackPhone;
+          riderSession.firstName = get2('firstName');
+          riderSession.lastName = get2('lastName');
+          riderSession.email = get2('email');
+          riderSession.applicationRef = genRef;
+          riderSession.appRef = genRef;
+          localStorage.setItem('riderSession', JSON.stringify(riderSession));
+          sessionStorage.setItem('riderSession', JSON.stringify(riderSession));
 
-            // Save application to localStorage for admin dashboard (fallback)
-            const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
-            const newApp = {
-              id: Date.now(),
-              app_ref: genRef,
-              first_name: get2('firstName'),
-              last_name: get2('lastName'),
-              email: get2('email'),
-              phone: (get2('countryCode') + get2('phone')).trim(),
-              date_of_birth: get2('dateOfBirth') || null,
-              gender: get2('gender') || null,
-              nationality: get2('nationality') || null,
-              address: get2('address') || null,
-              city: get2('city') || null,
-              about: get2('about') || null,
-              ghana_card_number: get2('ghanaCardNumber') || null,
-              license_number: get2('licenseNumber') || null,
-              license_expiry: get2('licenseExpiry') || null,
-              vehicle_type: get2('vehicleType') || null,
-              vehicle_seats: get2('vehicleSeats') || null,
-              vehicle_make: get2('vehicleMake') || null,
-              vehicle_model: get2('vehicleModel') || null,
-              vehicle_year: get2('vehicleYear') || null,
-              vehicle_plate: get2('vehiclePlate') || null,
-              vehicle_color: get2('vehicleColor') || null,
-              experience: get2('experience') || null,
-              status: 'pending_review',
-              created_at: new Date().toISOString().split('T')[0],
-              documents: Object.keys(uploadedFiles).map(key => ({
-                type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
-                name: uploadedFiles[key].name
-              }))
-            };
-            existingApps.push(newApp);
-            localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
-          } catch(e) {}
-          toast('Application submitted!', 'success');
+          // Save application to localStorage for admin dashboard (fallback)
+          const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+          const newApp = {
+            id: Date.now(),
+            app_ref: genRef,
+            first_name: get2('firstName'),
+            last_name: get2('lastName'),
+            email: get2('email'),
+            phone: fallbackPhone,
+            date_of_birth: get2('dateOfBirth') || null,
+            gender: get2('gender') || null,
+            nationality: get2('nationality') || null,
+            address: get2('address') || null,
+            city: get2('city') || null,
+            about: get2('about') || null,
+            ghana_card_number: get2('ghanaCardNumber') || null,
+            license_number: get2('licenseNumber') || null,
+            license_expiry: get2('licenseExpiry') || null,
+            vehicle_type: get2('vehicleType') || null,
+            vehicle_seats: get2('vehicleSeats') || null,
+            vehicle_make: get2('vehicleMake') || null,
+            vehicle_model: get2('vehicleModel') || null,
+            vehicle_year: get2('vehicleYear') || null,
+            vehicle_plate: get2('vehiclePlate') || null,
+            vehicle_color: get2('vehicleColor') || null,
+            experience: get2('experience') || null,
+            status: 'pending',
+            created_at: new Date().toISOString(),
+            documents: Object.keys(uploadedFiles).map(key => ({
+              type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
+              name: uploadedFiles[key].name
+            }))
+          };
+          existingApps.unshift(newApp);
+          localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
+
+          toast('Application submitted successfully!', 'success');
           setTimeout(() => { window.location.href = 'pending.html'; }, 1200);
           return;
+        } catch(e) {
+          toast('Error: ' + err.message, 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
         }
-        toast('Error: ' + err.message, 'error');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
       }
     });
 
