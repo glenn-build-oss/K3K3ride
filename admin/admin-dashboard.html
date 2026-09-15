@@ -1051,11 +1051,18 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- Image lightbox -->
 <div class="modal-backdrop" id="imgLightbox" onclick="closeLightbox()" style="align-items:center;justify-content:center;display:none">
-  <div style="max-width:95vw;max-height:95vh;position:relative;padding:20px" onclick="event.stopPropagation()">
+  <div style="max-width:95vw;max-height:95vh;position:relative;padding:20px;display:flex;flex-direction:column;align-items:center" onclick="event.stopPropagation()">
     <button onclick="closeLightbox()" style="position:absolute;top:-10px;right:-10px;width:36px;height:36px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border-2);color:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:10"><i class="fas fa-times"></i></button>
-    <button onclick="closeLightbox()" style="position:absolute;top:-10px;left:-10px;width:36px;height:36px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border-2);color:var(--white);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:10"><i class="fas fa-arrow-left"></i></button>
-    <img id="lightboxImg" src="" alt="Document" style="max-width:100%;max-height:90vh;border-radius:var(--r-lg);display:block;object-fit:contain">
+    <img id="lightboxImg" src="" alt="Document" style="max-width:100%;max-height:80vh;border-radius:var(--r-lg);display:block;object-fit:contain;box-shadow:0 8px 32px rgba(0,0,0,0.6)">
     <div id="lightboxCaption" style="text-align:center;margin-top:12px;font-size:.85rem;color:var(--muted-2);word-break:break-word"></div>
+    <div style="margin-top:12px;display:flex;gap:10px">
+      <a id="lightboxExtBtn" href="#" target="_blank" download style="background:var(--yellow);color:var(--bg);padding:7px 18px;border-radius:20px;font-size:0.75rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+        <i class="fas fa-external-link-alt"></i> Open Full / Download
+      </a>
+      <button onclick="closeLightbox()" style="background:var(--bg-3);color:var(--white);border:1px solid var(--border);padding:7px 18px;border-radius:20px;font-size:0.75rem;font-weight:600;cursor:pointer">
+        Close
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1063,7 +1070,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <script>
 /* ════ K3K3 ADMIN DASHBOARD JS ════ */
-const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:'))
   ? 'http://localhost:8810'
   : '';
 const API = API_BASE;
@@ -1075,19 +1082,32 @@ const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
 const setElHtml=(id,v)=>{const e=el(id);if(e)e.innerHTML=v};
 
 async function apiFetch(p){
-  try{
-    const cleanPath = p.startsWith('/') ? p : '/' + p;
-    const apiPrefixed = cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath;
-    const url = API_BASE ? API_BASE + apiPrefixed : apiPrefixed;
-    let r = await fetch(url, { signal: AbortSignal.timeout(5000) });
-    if (!r.ok && API_BASE) {
-      r = await fetch(cleanPath, { signal: AbortSignal.timeout(5000) });
+  const cleanPath = p.startsWith('/') ? p : '/' + p;
+  const apiPrefixed = cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath;
+  const backend = API_BASE || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:') ? 'http://localhost:8810' : '');
+
+  const candidates = [];
+  if (backend) {
+    candidates.push(backend + apiPrefixed);
+    candidates.push(backend + cleanPath);
+    if (backend.includes('localhost')) {
+      candidates.push(backend.replace('localhost', '127.0.0.1') + apiPrefixed);
+      candidates.push(backend.replace('localhost', '127.0.0.1') + cleanPath);
     }
-    if (!r.ok) return null;
-    return await r.json();
-  } catch (e) {
-    return null;
+  } else {
+    candidates.push(apiPrefixed);
+    candidates.push(cleanPath);
   }
+
+  for (const url of candidates) {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(5000), headers: { 'Accept': 'application/json' } });
+      if (r.ok) {
+        return await r.json();
+      }
+    } catch (_) {}
+  }
+  return null;
 }
 
 const SEC_T={
@@ -1706,15 +1726,27 @@ function showRiderDetail(riderId){
   }
 
   const resolveDocUrl = url => {
-    if (!url) return '';
-    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
-    if (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\'))) {
-      return `/uploads/applications/${url}`;
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return trimmed;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+
+    const isDocFile = trimmed.includes('/') || trimmed.includes('\\') || trimmed.startsWith('app_') || /\.(png|jpg|jpeg|webp|pdf|svg)$/i.test(trimmed);
+    if (!isDocFile) return '';
+
+    let clean = trimmed;
+    if (clean.startsWith('app_') || (!clean.includes('/') && !clean.includes('\\'))) {
+      clean = `/uploads/applications/${clean}`;
+    } else if (clean.startsWith('uploads/')) {
+      clean = `/${clean}`;
     }
-    if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
-      return url.startsWith('/') ? url : `/${url}`;
-    }
-    return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
+
+    const backendOrigin = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:'))
+      ? 'http://localhost:8810'
+      : (API_BASE || '');
+
+    return backendOrigin ? `${backendOrigin}${clean}` : clean;
   };
 
   const REQUIRED_DOCS = [
@@ -2340,21 +2372,77 @@ function showAppDetail(appId){
     rawDocs = Object.entries(app.documents).map(([key, val]) => ({
       key,
       name: (val && val.name) || key,
-      type: (val && val.type) || ((val && (val.data || val.url) && typeof (val.data || val.url) === 'string' && (val.data || val.url).includes('image/')) ? 'image' : 'image'),
+      type: (val && val.type) || ((val && (val.data || val.url) && typeof (val.data || val.url) === 'string' && (val.data || val.url).includes('application/pdf')) ? 'pdf' : 'image'),
       url: (val && (val.url || val.data)) || ''
     }));
+  } else if (typeof app.documents === 'string') {
+    try {
+      const parsed = JSON.parse(app.documents);
+      if (Array.isArray(parsed)) rawDocs = parsed;
+      else if (parsed && typeof parsed === 'object') {
+        rawDocs = Object.entries(parsed).map(([key, val]) => ({
+          key,
+          name: (val && val.name) || key,
+          type: (val && val.type) || ((val && (val.data || val.url) && typeof (val.data || val.url) === 'string' && (val.data || val.url).includes('application/pdf')) ? 'pdf' : 'image'),
+          url: (val && (val.url || val.data)) || ''
+        }));
+      }
+    } catch (_) {}
   }
 
+  // Document file validator — distinguishes actual file paths/data from license strings
+  const isDocFile = (val) => {
+    if (!val || typeof val !== 'string') return false;
+    const trimmed = val.trim();
+    if (!trimmed) return false;
+    if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return true;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return true;
+    if (trimmed.startsWith('/uploads/') || trimmed.startsWith('uploads/')) return true;
+    if (trimmed.startsWith('app_') && (trimmed.includes('.') || trimmed.includes('_'))) return true;
+    if (/\.(png|jpg|jpeg|webp|pdf|svg)$/i.test(trimmed)) return true;
+    return false;
+  };
+
   const resolveDocUrl = url => {
-    if (!url) return '';
-    if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
-    if (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\'))) {
-      return `/uploads/applications/${url}`;
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return trimmed;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+
+    if (!isDocFile(trimmed)) return '';
+
+    let clean = trimmed;
+    if (clean.startsWith('app_') || (!clean.includes('/') && !clean.includes('\\'))) {
+      clean = `/uploads/applications/${clean}`;
+    } else if (clean.startsWith('uploads/')) {
+      clean = `/${clean}`;
     }
-    if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
-      return url.startsWith('/') ? url : `/${url}`;
+
+    const backendOrigin = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:'))
+      ? 'http://localhost:8810'
+      : (API_BASE || '');
+
+    return backendOrigin ? `${backendOrigin}${clean}` : clean;
+  };
+
+  // Helper to extract uploaded document URL from rawDocs first, then direct table columns
+  const findDocUrl = (keys, fallbackCol) => {
+    // 1. Search rawDocs by key or name
+    for (const k of keys) {
+      const d = rawDocs.find(x => x.key === k || (x.name && x.name.toLowerCase().includes(k.toLowerCase())));
+      if (d && isDocFile(d.url)) return d.url;
     }
-    return `${API}${url.startsWith('/') ? '' : '/'}${url}`;
+    // 2. Search direct column if it's a valid document file (not a license number string)
+    if (fallbackCol && isDocFile(app[fallbackCol])) {
+      return app[fallbackCol];
+    }
+    // 3. Search other direct columns
+    for (const k of keys) {
+      if (isDocFile(app[k])) return app[k];
+      if (isDocFile(app[k + '_url'])) return app[k + '_url'];
+    }
+    return '';
   };
 
   // 5 Standard Required Documents
@@ -2364,49 +2452,47 @@ function showAppDetail(appId){
       name: "Rider License",
       icon: 'fa-id-badge',
       sub: 'Driver Authorization',
-      url: app.driver_license_url || (rawDocs.find(d => d.key === 'riderLicense' || (d.name && d.name.toLowerCase().includes('license')))?.url)
+      url: findDocUrl(['riderLicense', 'driver_license', 'license'], 'driver_license_url')
     },
     {
       key: 'vehicleRegistration',
       name: "Vehicle Registration",
       icon: 'fa-file-invoice',
       sub: 'DVLA Logbook / Cert',
-      url: app.vehicle_registration_url || (rawDocs.find(d => d.key === 'vehicleRegistration' || (d.name && d.name.toLowerCase().includes('registration')))?.url)
+      url: findDocUrl(['vehicleRegistration', 'vehicle_registration', 'registration'], 'vehicle_registration_url')
     },
     {
       key: 'idCardFront',
       name: "National ID — Front",
       icon: 'fa-address-card',
       sub: 'Ghana Card Front side',
-      url: app.ghana_card_url || (rawDocs.find(d => d.key === 'idCardFront' || (d.name && d.name.toLowerCase().includes('front')))?.url)
+      url: findDocUrl(['idCardFront', 'id_card_front', 'ghana_card_front', 'idFront'], 'ghana_card_url')
     },
     {
       key: 'idCardBack',
       name: "National ID — Back",
       icon: 'fa-address-card',
       sub: 'Ghana Card Back side',
-      url: app.insurance_url || (rawDocs.find(d => d.key === 'idCardBack' || (d.name && d.name.toLowerCase().includes('back')))?.url)
+      url: findDocUrl(['idCardBack', 'id_card_back', 'ghana_card_back', 'idBack'], 'insurance_url')
     },
     {
       key: 'passportPhoto',
       name: "Passport Photo",
       icon: 'fa-user-circle',
       sub: 'Recent Portrait Photo',
-      url: app.passport_photo_url || (rawDocs.find(d => d.key === 'passportPhoto' || (d.name && d.name.toLowerCase().includes('passport')))?.url)
+      url: findDocUrl(['passportPhoto', 'passport_photo', 'photo'], 'passport_photo_url')
     }
   ];
 
   // Resolve URLs & determine if image or pdf
   const processedRequiredDocs = REQUIRED_DOCS.map(def => {
-    let url = def.url;
-    if (url && (url.startsWith('app_') || (!url.includes('/') && !url.includes('\\')))) {
-      url = `/uploads/applications/${url}`;
-    }
-    const isPdf = url && (url.toLowerCase().includes('.pdf') || url.startsWith('data:application/pdf'));
+    const rawUrl = def.url;
+    const resolved = resolveDocUrl(rawUrl);
+    const isPdf = rawUrl && (rawUrl.toLowerCase().includes('.pdf') || rawUrl.startsWith('data:application/pdf'));
     return {
       ...def,
-      resolvedUrl: resolveDocUrl(url),
-      hasDoc: !!url,
+      resolvedUrl: resolved,
+      hasDoc: !!resolved,
       isPdf: isPdf
     };
   });
@@ -2448,7 +2534,8 @@ function showAppDetail(appId){
                     <div style="font-size:.65rem;font-weight:600;color:var(--white);margin-top:4px">View PDF</div>
                   </div>
                 ` : `
-                  <img src="${doc.resolvedUrl}" alt="${escapeHtml(doc.name)}" style="width:100%;height:84px;object-fit:cover;display:block">
+                  <img src="${doc.resolvedUrl}" alt="${escapeHtml(doc.name)}" style="width:100%;height:84px;object-fit:cover;display:block"
+                    onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\'padding:12px;text-align:center;font-size:0.62rem;color:var(--muted);\\'><i class=\\'fas fa-file-image\\' style=\\'color:var(--yellow);font-size:1.4rem;margin-bottom:4px;display:block;\\'></i>Document preview</div>';">
                   <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0'">
                     <i class="fas fa-search-plus" style="color:white;font-size:1.2rem"></i>
                   </div>
@@ -2493,7 +2580,8 @@ function showAppDetail(appId){
                   ${isPdf ? `
                     <i class="fas fa-file-pdf" style="font-size:1.5rem;color:var(--red)"></i>
                   ` : `
-                    <img src="${resUrl}" style="width:100%;height:60px;object-fit:cover;border-radius:4px;display:block">
+                    <img src="${resUrl}" style="width:100%;height:60px;object-fit:cover;border-radius:4px;display:block"
+                      onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\\'padding:8px;font-size:0.6rem;color:var(--muted);\\'><i class=\\'fas fa-file-image\\'></i></div>';">
                   `}
                   <div style="font-size:.62rem;color:var(--white);font-weight:600;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(d.name || 'Document')}</div>
                 </div>
@@ -2707,8 +2795,20 @@ async function confirmApprove(){
   if(!approveId)return;
   showToast('Processing approval…','info');
   try{
-    const res=await fetch(`${API}/applications/${approveId}/approve`,{method:'POST'});
-    if(!res.ok)throw new Error(await res.text());
+    const backend = API_BASE || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:') ? 'http://localhost:8810' : '');
+    const approveCandidates = [
+      `${backend}/api/admin/applications/${approveId}/approve`,
+      `${backend}/applications/${approveId}/approve`,
+      `${backend}/api/applications/${approveId}/approve`
+    ];
+    let res = null;
+    for (const url of approveCandidates) {
+      try {
+        const r = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json' } });
+        if (r.ok) { res = r; break; }
+      } catch (_) {}
+    }
+    if(!res)throw new Error('Could not reach approval endpoint on backend');
     const data=await res.json();
     // Show K3R ID modal
     setEl('k3rIdDisplay',data.rider_id||'K3R-??????');
@@ -2777,7 +2877,22 @@ async function confirmDecline(){
   closeModal('declineModal');
   if(!declineId)return;
   try{
-    await fetch(`${API}/applications/${declineId}/status`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'rejected',admin_notes:'Declined by admin',reviewed_by:'Admin'})});
+    const backend = API_BASE || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:') ? 'http://localhost:8810' : '');
+    const declineCandidates = [
+      `${backend}/api/admin/applications/${declineId}/status`,
+      `${backend}/applications/${declineId}/status`,
+      `${backend}/api/applications/${declineId}/status`
+    ];
+    for (const url of declineCandidates) {
+      try {
+        const r = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ status: 'rejected', admin_notes: 'Declined by admin', reviewed_by: 'Admin' })
+        });
+        if (r.ok) break;
+      } catch (_) {}
+    }
     const a=allApps.find(x=>x.id===declineId);
     if(a)a.status='rejected';
     loadApps(curAppFilter);
@@ -2794,10 +2909,17 @@ async function confirmDelete(){
   showToast('Deleting application…', 'info');
 
   try{
-    // Try primary DELETE route, with fallback to /api/admin/applications/:id
-    let res = await fetch(`${API_BASE}/applications/${targetId}`, { method: 'DELETE' });
-    if (!res.ok) {
-      res = await fetch(`${API_BASE}/api/admin/applications/${targetId}`, { method: 'DELETE' });
+    const backend = API_BASE || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:') ? 'http://localhost:8810' : '');
+    const deleteCandidates = [
+      `${backend}/api/admin/applications/${targetId}`,
+      `${backend}/applications/${targetId}`,
+      `${backend}/api/applications/${targetId}`
+    ];
+    for (const dUrl of deleteCandidates) {
+      try {
+        const r = await fetch(dUrl, { method: 'DELETE', headers: { 'Accept': 'application/json' } });
+        if (r.ok) break;
+      } catch (_) {}
     }
 
     // Animate out and remove card from DOM immediately
@@ -2863,8 +2985,16 @@ async function confirmDelete(){
 function openLightbox(src,caption){
   const lb=el('imgLightbox');
   if(!lb)return;
-  el('lightboxImg').src=src;
-  setEl('lightboxCaption',caption);
+  const img=el('lightboxImg');
+  if (img) {
+    img.src=src;
+  }
+  setEl('lightboxCaption',caption || 'Document Preview');
+  const extBtn = el('lightboxExtBtn');
+  if (extBtn) {
+    extBtn.href = src;
+    extBtn.style.display = src ? 'inline-flex' : 'none';
+  }
   lb.style.display='flex';
 }
 
@@ -2872,8 +3002,11 @@ function closeLightbox(){
   const lb=el('imgLightbox');
   if(!lb)return;
   lb.style.display='none';
-  el('lightboxImg').src='';
+  const img=el('lightboxImg');
+  if (img) img.src='';
   setEl('lightboxCaption','');
+  const extBtn = el('lightboxExtBtn');
+  if (extBtn) extBtn.href = '#';
 }
 
 function copyK3rId(){

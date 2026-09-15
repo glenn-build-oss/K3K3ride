@@ -156,7 +156,7 @@ function enrichApplication(app) {
  * POST /api/admin/applications
  * Submit a new rider application (from passenger dashboard or rider apply form)
  */
-router.post('/applications', async (req, res) => {
+router.post(['/applications', '/api/admin/applications', '/api/applications'], async (req, res) => {
   try {
     const body = req.body || {};
     const rawPhone = body.phone || '';
@@ -361,7 +361,7 @@ router.post('/applications', async (req, res) => {
  * GET /api/admin/applications
  * Get all rider applications
  */
-router.get('/applications', async (req, res) => {
+router.get(['/applications', '/api/admin/applications', '/api/applications'], async (req, res) => {
   try {
     const rawApps = await getRiderApplications();
     const applications = (rawApps || []).map(enrichApplication);
@@ -376,7 +376,7 @@ router.get('/applications', async (req, res) => {
  * GET /api/admin/applications/pending
  * Get pending rider applications
  */
-router.get('/applications/pending', async (req, res) => {
+router.get(['/applications/pending', '/api/admin/applications/pending', '/api/applications/pending'], async (req, res) => {
   try {
     const rawApps = await getRiderApplications();
     const applications = (rawApps || []).map(enrichApplication);
@@ -392,7 +392,7 @@ router.get('/applications/pending', async (req, res) => {
  * GET /api/admin/applications/stats/summary
  * Summary for sidebar badge
  */
-router.get('/applications/stats/summary', async (req, res) => {
+router.get(['/applications/stats/summary', '/api/admin/applications/stats/summary', '/api/applications/stats/summary'], async (req, res) => {
   try {
     const applications = await getRiderApplications();
     const pending = applications.filter(app => app.status === 'pending_review' || app.status === 'pending').length;
@@ -403,10 +403,39 @@ router.get('/applications/stats/summary', async (req, res) => {
 });
 
 /**
+ * GET /api/admin/applications/:id
+ * Get single application by ID, app_ref, or phone
+ */
+router.get(['/applications/:id', '/api/admin/applications/:id', '/api/applications/:id'], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cleanId = String(id || '').trim();
+    const rawApps = await getRiderApplications();
+    const cleanMatch = cleanId.replace(/^APP-|^K3PA-/i, '').toLowerCase();
+    const digitsOnly = cleanId.replace(/\D/g, '');
+
+    const found = (rawApps || []).find(a => 
+      a.id === cleanId || 
+      (a.id && a.id.toLowerCase().startsWith(cleanMatch)) ||
+      (a.phone && digitsOnly.length >= 7 && a.phone.replace(/\D/g, '').includes(digitsOnly.slice(-7)))
+    );
+
+    if (!found) {
+      return res.status(404).json({ success: false, error: `Application ${id} not found` });
+    }
+
+    res.json({ success: true, application: enrichApplication(found) });
+  } catch (error) {
+    console.error('[Admin] Error fetching application by ID:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch application' });
+  }
+});
+
+/**
  * POST /api/admin/applications/:id/approve
  * Approve a rider application
  */
-router.post('/applications/:id/approve', async (req, res) => {
+router.post(['/applications/:id/approve', '/api/admin/applications/:id/approve', '/api/applications/:id/approve'], async (req, res) => {
   try {
     const { id } = req.params;
     const result = await approveRiderApplication(id);
@@ -446,7 +475,7 @@ router.post('/applications/:id/approve', async (req, res) => {
  * PATCH /api/admin/applications/:id/status
  * Update application status (e.g. decline / reject)
  */
-router.patch('/applications/:id/status', async (req, res) => {
+router.patch(['/applications/:id/status', '/api/admin/applications/:id/status', '/api/applications/:id/status'], async (req, res) => {
   try {
     const { id } = req.params;
     const { status, admin_notes, reason } = req.body;
@@ -481,7 +510,7 @@ router.patch('/applications/:id/status', async (req, res) => {
  * DELETE /api/admin/applications/:id
  * Permanently delete a rider application and its uploaded documents
  */
-router.delete(['/applications/:id', '/api/admin/applications/:id'], async (req, res) => {
+router.delete(['/applications/:id', '/api/admin/applications/:id', '/api/applications/:id'], async (req, res) => {
   try {
     const { id } = req.params;
     const result = await deleteRiderApplication(id);
@@ -531,7 +560,7 @@ router.delete(['/applications/:id', '/api/admin/applications/:id'], async (req, 
  * POST /api/admin/applications/:id/reject
  * Reject a rider application
  */
-router.post('/applications/:id/reject', async (req, res) => {
+router.post(['/applications/:id/reject', '/api/admin/applications/:id/reject', '/api/applications/:id/reject'], async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
