@@ -1081,6 +1081,16 @@ const el=id=>document.getElementById(id);
 const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
 const setElHtml=(id,v)=>{const e=el(id);if(e)e.innerHTML=v};
 
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function escapeJs(str){
+  if(!str) return '';
+  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
 async function apiFetch(p){
   const cleanPath = p.startsWith('/') ? p : '/' + p;
   const apiPrefixed = cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath;
@@ -1209,7 +1219,6 @@ function doLogout(){closeModal('logoutModal');showToast('Logging out…','info')
 
 /* ── Dashboard ── */
 let dashboardPollingInterval=null;
-const escapeHtml=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
 function formatRelativeTime(dateStr){
   if(!dateStr)return 'Just now';
@@ -2172,16 +2181,6 @@ const APP_CSS=`
 }
 `;
 (function injectAppCss(){const s=document.createElement('style');s.textContent=APP_CSS;document.head.appendChild(s);})();
-
-function escapeHtml(str){
-  if(!str) return '';
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-function escapeJs(str){
-  if(!str) return '';
-  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
 
 /* ── Applications ── */
 let curAppFilter='all';
