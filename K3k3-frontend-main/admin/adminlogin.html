@@ -635,38 +635,78 @@
 
                 <form id="adminLoginForm">
 
-                    <div class="field">
-                        <label for="username">Email Address</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-envelope field-icon"></i>
-                            <input type="email" id="username" name="username" required
-                                   placeholder="admin@k3k3.com" autocomplete="email">
+                    <!-- Step 1: Email + Password -->
+                    <div id="credentialsStep">
+                        <div class="field">
+                            <label for="username">Email Address</label>
+                            <div class="field-wrap">
+                                <i class="fas fa-envelope field-icon"></i>
+                                <input type="email" id="username" name="username" required
+                                       placeholder="Enter your email address" autocomplete="email">
+                            </div>
                         </div>
+
+                        <div class="field">
+                            <label for="password">Password</label>
+                            <div class="field-wrap">
+                                <i class="fas fa-lock field-icon"></i>
+                                <input type="password" id="password" name="password" required
+                                       placeholder="Enter your password" autocomplete="current-password">
+                                <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Toggle password visibility">
+                                    <i class="fas fa-eye" id="pwdIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+
+
+                        <div class="error-message" id="errorMessage">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <span id="errorText"></span>
+                        </div>
+
+                        <button type="submit" id="loginSubmitBtn" class="login-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login to Admin Panel
+                        </button>
                     </div>
 
-                    <div class="field">
-                        <label for="password">Password</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-lock field-icon"></i>
-                            <input type="password" id="password" name="password" required
-                                   placeholder="Enter your password" autocomplete="current-password">
-                            <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Toggle password visibility">
-                                <i class="fas fa-eye" id="pwdIcon"></i>
+                    <!-- Step 2: OTP Verification (hidden initially) -->
+                    <div id="otpStep" style="display:none;">
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="width:56px;height:56px;border-radius:14px;background:var(--yellow-lt);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                                <i class="fas fa-shield-halved" style="font-size:1.5rem;color:var(--yellow-dk)"></i>
+                            </div>
+                            <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Two-Factor Authentication</p>
+                            <p id="otpMsg" style="font-size:0.82rem;color:var(--text-2);line-height:1.5;">A 6-digit verification code has been sent to your registered phone.</p>
+                        </div>
+
+                        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+                            <input type="text" class="otp-digit-input" id="a1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" style="width:48px;height:56px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;font-family:inherit;">
+                            <input type="text" class="otp-digit-input" id="a2" maxlength="1" inputmode="numeric" style="width:48px;height:56px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;font-family:inherit;">
+                            <input type="text" class="otp-digit-input" id="a3" maxlength="1" inputmode="numeric" style="width:48px;height:56px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;font-family:inherit;">
+                            <input type="text" class="otp-digit-input" id="a4" maxlength="1" inputmode="numeric" style="width:48px;height:56px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;font-family:inherit;">
+                            <input type="text" class="otp-digit-input" id="a5" maxlength="1" inputmode="numeric" style="width:48px;height:56px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;font-family:inherit;">
+                            <input type="text" class="otp-digit-input" id="a6" maxlength="1" inputmode="numeric" style="width:48px;height:56px;text-align:center;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;font-family:inherit;">
+                        </div>
+
+                        <div class="error-message" id="otpErrorMessage">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <span id="otpErrorText"></span>
+                        </div>
+
+                        <button type="button" id="verifyOtpBtn" class="login-btn" onclick="verifyAdminOTP()">
+                            <i class="fas fa-check-circle"></i>
+                            Verify & Login
+                        </button>
+
+                        <div style="text-align:center;margin-top:14px;">
+                            <button type="button" onclick="backToCredentials()" style="background:none;border:none;color:var(--text-2);font-size:0.82rem;cursor:pointer;font-family:inherit;">
+                                <i class="fas fa-arrow-left"></i> Back to login
                             </button>
                         </div>
                     </div>
 
-
-
-                    <div class="error-message" id="errorMessage">
-                        <i class="fas fa-circle-exclamation"></i>
-                        <span id="errorText"></span>
-                    </div>
-
-                    <button type="submit" id="loginSubmitBtn" class="login-btn">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Login to Admin Panel
-                    </button>
                 </form>
 
                 <div class="back-link-wrap">
@@ -680,6 +720,9 @@
     </div>
 
     <script>
+        const API_BASE = '';
+        let adminEmail = '';
+
         // ── Toast ──
         function showToast(msg, type = 'info') {
             const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
@@ -722,36 +765,153 @@
         function hideError() {
             document.getElementById('errorMessage').classList.remove('show');
         }
+        function showOtpError(msg) {
+            const box = document.getElementById('otpErrorMessage');
+            document.getElementById('otpErrorText').textContent = msg;
+            box.classList.add('show');
+        }
+        function hideOtpError() {
+            document.getElementById('otpErrorMessage').classList.remove('show');
+        }
 
-        // ── Admin login — bypass credentials, goes directly to dashboard ──
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+        // ── OTP digit auto-advance ──
+        const adminOtpIds = ['a1','a2','a3','a4','a5','a6'];
+        adminOtpIds.forEach((id, i) => {
+            const inp = document.getElementById(id);
+            inp.addEventListener('input', () => {
+                inp.value = inp.value.replace(/\D/, '');
+                if (inp.value && i < adminOtpIds.length - 1) document.getElementById(adminOtpIds[i + 1]).focus();
+                if (adminOtpIds.every(oid => document.getElementById(oid).value)) {
+                    setTimeout(verifyAdminOTP, 300);
+                }
+            });
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !inp.value && i > 0) document.getElementById(adminOtpIds[i - 1]).focus();
+            });
+            inp.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+                [...paste].forEach((ch, j) => {
+                    const target = document.getElementById(adminOtpIds[i + j]);
+                    if (target) target.value = ch;
+                });
+            });
+        });
+
+        // ── Step 1: Admin login → send OTP for 2FA ──
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             hideError();
 
+            const email = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email) { showError('Please enter your email.'); return; }
+            if (!password) { showError('Please enter your password.'); return; }
+
             const btn = document.getElementById('loginSubmitBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
-            // Store admin session and redirect directly to dashboard (no credentials required)
-            setTimeout(function() {
-                const email = (document.getElementById('username').value || 'admin@k3k3.com').trim();
-                try {
-                    localStorage.setItem('k3k3_admin_token', 'admin_' + Date.now());
-                    localStorage.setItem('current_admin', JSON.stringify({
-                        id: 1,
-                        name: email.includes('@') ? email.split('@')[0] : 'Admin',
-                        email: email || 'admin@k3k3.com',
-                        role: 'admin',
-                        loginTime: new Date().toISOString()
-                    }));
-                } catch(err) { console.warn('Storage error:', err); }
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
 
-                showToast('Welcome back! Redirecting to dashboard...', 'success');
-                setTimeout(function() {
-                    window.location.href = 'admin-dashboard.html';
-                }, 1000);
-            }, 800);
+                if (data.success && data.requires2FA) {
+                    adminEmail = email;
+                    try { sessionStorage.setItem('k3k3_pending_admin_email', email); } catch (_) {}
+                    document.getElementById('otpMsg').textContent =
+                        `A 6-digit code has been sent to your phone ending in ${data.phoneMask || '****'}. Enter it below.`;
+                    document.getElementById('credentialsStep').style.display = 'none';
+                    document.getElementById('otpStep').style.display = '';
+                    document.getElementById('a1').focus();
+                    showToast('Verification code sent to your phone', 'success');
+                } else if (data.success) {
+                    // No 2FA required (shouldn't happen normally)
+                    storeAdminSession(data);
+                } else {
+                    showError(data.error || 'Invalid credentials.');
+                }
+            } catch (err) {
+                console.error('Admin login error:', err);
+                showError('Cannot reach server. Please try again.');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Admin Panel';
         });
+
+        // ── Step 2: Verify OTP ──
+        async function verifyAdminOTP() {
+            hideOtpError();
+            const otp = adminOtpIds.map(id => document.getElementById(id).value).join('');
+
+            if (otp.length < 6) {
+                showOtpError('Please enter the complete 6-digit code.');
+                return;
+            }
+
+            const targetEmail = adminEmail || sessionStorage.getItem('k3k3_pending_admin_email') || document.getElementById('username')?.value?.trim();
+            if (!targetEmail) {
+                showOtpError('Session missing. Please go back and enter your email again.');
+                return;
+            }
+
+            const btn = document.getElementById('verifyOtpBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/admin/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail, otp: otp.trim() })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    storeAdminSession(data);
+                } else {
+                    showOtpError(data.error || 'Invalid or expired code.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
+                }
+            } catch (err) {
+                console.error('OTP verify error:', err);
+                showOtpError('Cannot reach server. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
+            }
+        }
+
+        function storeAdminSession(data) {
+            try {
+                localStorage.setItem('k3k3_admin_token', data.token || 'admin_' + Date.now());
+                localStorage.setItem('current_admin', JSON.stringify({
+                    id: data.user ? data.user.id : 1,
+                    name: data.user ? data.user.name : adminEmail.split('@')[0],
+                    email: data.user ? data.user.email : adminEmail,
+                    role: 'admin',
+                    loginTime: new Date().toISOString()
+                }));
+            } catch(err) { console.warn('Storage error:', err); }
+
+            showToast('Welcome back! Redirecting to dashboard...', 'success');
+            setTimeout(function() {
+                window.location.href = 'admin-dashboard.html';
+            }, 1000);
+        }
+
+        function backToCredentials() {
+            document.getElementById('otpStep').style.display = 'none';
+            document.getElementById('credentialsStep').style.display = '';
+            adminOtpIds.forEach(id => { document.getElementById(id).value = ''; });
+            hideOtpError();
+        }
 
         // ── Clear error on input ──
         ['username', 'password'].forEach(function(id) {

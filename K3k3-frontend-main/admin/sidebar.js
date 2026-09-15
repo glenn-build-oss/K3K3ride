@@ -11,7 +11,9 @@
 
   /* ── Config ── */
   const LOGOUT_URL = 'adminlogin.html';
-  const API_BASE   = 'http://localhost:8810';
+  const API_BASE   = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+    ? 'http://localhost:8810'
+    : '';
 
   /* ── Sidebar HTML ── */
   const NAV_LINKS = [
@@ -27,6 +29,7 @@
       { href: 'rider-management.html',   icon: 'fa-id-card',    label: 'Rider Management'   },
       { href: 'live-riders.html',        icon: 'fa-motorcycle', label: 'Live Riders'        },
       { href: 'payment-management.html', icon: 'fa-credit-card',label: 'Payments'           },
+      { href: 'moolre-overview.html',    icon: 'fa-bolt',       label: 'Moolre Overview'    },
     ]},
     { group: 'SYSTEM', items: [
       { href: 'system-settings.html',    icon: 'fa-cog',        label: 'Settings'           },
