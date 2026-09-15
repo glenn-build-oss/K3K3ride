@@ -823,6 +823,7 @@
 
                 if (data.success && data.requires2FA) {
                     adminEmail = email;
+                    try { sessionStorage.setItem('k3k3_pending_admin_email', email); } catch (_) {}
                     document.getElementById('otpMsg').textContent =
                         `A 6-digit code has been sent to your phone ending in ${data.phoneMask || '****'}. Enter it below.`;
                     document.getElementById('credentialsStep').style.display = 'none';
@@ -854,6 +855,12 @@
                 return;
             }
 
+            const targetEmail = adminEmail || sessionStorage.getItem('k3k3_pending_admin_email') || document.getElementById('username')?.value?.trim();
+            if (!targetEmail) {
+                showOtpError('Session missing. Please go back and enter your email again.');
+                return;
+            }
+
             const btn = document.getElementById('verifyOtpBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
@@ -862,14 +869,14 @@
                 const res = await fetch(`${API_BASE}/api/auth/admin/verify-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: adminEmail, otp })
+                    body: JSON.stringify({ email: targetEmail, otp: otp.trim() })
                 });
                 const data = await res.json();
 
                 if (data.success) {
                     storeAdminSession(data);
                 } else {
-                    showOtpError(data.error || 'Invalid code.');
+                    showOtpError(data.error || 'Invalid or expired code.');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
                 }

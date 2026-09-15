@@ -1031,28 +1031,48 @@ router.post('/admin/verify-otp', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Email and OTP are required' });
     }
 
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+
     // Check pending 2FA session
-    const session = pending2FA.get(email.toLowerCase());
+    let session = pending2FA.get(cleanEmail);
+    let admin = null;
+
+    // Resilient fallback: If session memory was cleared (e.g. server restart), look up admin in Supabase
+    if (!session) {
+      admin = await findUserByEmail(cleanEmail);
+      if (admin && admin.role === 'admin' && admin.phone) {
+        session = {
+          phone: admin.phone,
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 15 * 60 * 1000)
+        };
+        console.log(`[Auth] Recovered 2FA session from database for admin ${cleanEmail}`);
+      }
+    }
+
     if (!session) {
       return res.status(400).json({ success: false, error: 'No pending verification. Please log in again.' });
     }
 
     if (new Date() > session.expiresAt) {
-      pending2FA.delete(email.toLowerCase());
+      pending2FA.delete(cleanEmail);
       return res.status(400).json({ success: false, error: 'Verification session expired. Please log in again.' });
     }
 
-    // Verify OTP
-    const result = await dbVerifyOTP(session.phone, otp);
+    // Verify OTP code
+    const result = await dbVerifyOTP(session.phone, cleanOtp);
     if (!result.valid) {
-      return res.status(400).json({ success: false, error: result.error });
+      return res.status(400).json({ success: false, error: result.error || 'Invalid code. Please try again.' });
     }
 
     // Clean up 2FA session
-    pending2FA.delete(email.toLowerCase());
+    pending2FA.delete(cleanEmail);
 
     // Find admin and generate JWT
-    const admin = await findUserByEmail(email);
+    if (!admin) {
+      admin = await findUserByEmail(cleanEmail);
+    }
     if (!admin) {
       return res.status(401).json({ success: false, error: 'Admin not found' });
     }
@@ -1071,7 +1091,7 @@ router.post('/admin/verify-otp', async (req, res) => {
         email: admin.email,
         firstName: admin.first_name,
         lastName: admin.last_name,
-        name: `${admin.first_name} ${admin.last_name}`.trim(),
+        name: `${admin.first_name || ''} ${admin.last_name || ''}`.trim() || 'Admin',
         role: admin.role
       }
     });

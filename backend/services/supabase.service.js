@@ -213,18 +213,31 @@ async function storeOTP(phone, code, purpose, expiryMinutes = 5) {
  * Verify OTP code
  */
 async function verifyOTP(phone, code) {
-  const { data: otp, error } = await requireSupabase()
+  // Normalize phone variants (+233..., 050..., 233...) so format mismatches never block valid codes
+  const rawDigits = String(phone || '').replace(/\D/g, '');
+  const last9 = rawDigits.slice(-9);
+  const possiblePhones = [
+    phone,
+    `+233${last9}`,
+    `233${last9}`,
+    `0${last9}`
+  ].filter(Boolean);
+  const uniquePhones = [...new Set(possiblePhones)];
+  const cleanCode = String(code || '').trim();
+
+  const { data: otps, error } = await requireSupabase()
     .from('otp_codes')
     .select('*')
-    .eq('phone', phone)
-    .eq('code', code)
+    .in('phone', uniquePhones)
+    .eq('code', cleanCode)
     .eq('used', false)
     .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+    .limit(1);
+
+  const otp = otps && otps.length > 0 ? otps[0] : null;
 
   if (error || !otp) {
-    return { valid: false, error: 'No OTP found. Please request a new code.' };
+    return { valid: false, error: 'Invalid or expired verification code. Please check and try again.' };
   }
 
   // Check if expired
