@@ -321,6 +321,28 @@ router.post('/applications', async (req, res) => {
       );
     } catch (_) {}
 
+    // Broadcast real-time events to Admin Dashboard
+    try {
+      const io = req.app.get('io') || global.io;
+      if (io) {
+        io.emit('admin:new_application', app);
+        io.emit('admin:notification', {
+          id: `notif_app_${appId}`,
+          type: 'app',
+          channel: 'Driver App',
+          icon: 'fa-id-card',
+          title: `New Application: ${firstName} ${lastName}`.trim(),
+          body: `${firstName || 'Driver'} applied with vehicle ${app.vehicle_make || ''} ${app.vehicle_model || ''} (${app.license_plate || 'pending'}).`,
+          time: new Date().toISOString(),
+          status: 'pending',
+          badge: 'New Application',
+          data: app
+        });
+      }
+    } catch (wsErr) {
+      console.warn('[Admin] Socket broadcast warning:', wsErr.message);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
@@ -457,9 +479,9 @@ router.patch('/applications/:id/status', async (req, res) => {
 
 /**
  * DELETE /api/admin/applications/:id
- * Delete a rider application
+ * Permanently delete a rider application and its uploaded documents
  */
-router.delete('/applications/:id', async (req, res) => {
+router.delete(['/applications/:id', '/api/admin/applications/:id'], async (req, res) => {
   try {
     const { id } = req.params;
     const result = await deleteRiderApplication(id);
@@ -468,7 +490,37 @@ router.delete('/applications/:id', async (req, res) => {
       return res.status(400).json({ success: false, error: result.error });
     }
 
-    res.json({ success: true, message: 'Application deleted successfully' });
+    // Broadcast deletion event to Admin Dashboard
+    try {
+      const io = req.app.get('io') || global.io;
+      if (io) {
+        io.emit('admin:application_deleted', {
+          id,
+          app_ref: result.deletedApp?.id,
+          phone: result.deletedApp?.phone
+        });
+        io.emit('admin:notification', {
+          id: `del_${Date.now()}`,
+          type: 'app',
+          channel: 'System',
+          icon: 'fa-trash',
+          title: 'Application Deleted',
+          body: `Driver application ${id} and documents permanently removed.`,
+          time: new Date().toISOString(),
+          status: 'deleted',
+          badge: 'Deleted'
+        });
+      }
+    } catch (wsErr) {
+      console.warn('[Admin] Socket broadcast warning:', wsErr.message);
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Application and documents deleted permanently',
+      deletedApp: result.deletedApp,
+      filesDeleted: result.deletedFilesCount 
+    });
   } catch (error) {
     console.error('[Admin] Error deleting application:', error);
     res.status(500).json({ success: false, error: 'Failed to delete application' });

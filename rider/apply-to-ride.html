@@ -1006,7 +1006,9 @@
   <div id="toast-container"></div>
 
   <script>
-    const BACKEND = '';
+    const BACKEND = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+      ? 'http://localhost:8810'
+      : '';
     const TOTAL_STEPS = 4;
     let currentStep = 1;
     const uploadedFiles = {};
@@ -1418,15 +1420,38 @@
           documents: documentsPayload
         };
 
-        const res = await fetch(BACKEND + '/applications/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        let res = null;
+        const targetEndpoints = [
+          BACKEND ? `${BACKEND}/applications` : '/applications',
+          BACKEND ? `${BACKEND}/api/admin/applications` : '/api/admin/applications',
+          'http://localhost:8810/applications'
+        ];
 
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || err.error || 'Failed to submit application');
+        let lastFetchErr = null;
+        for (const url of targetEndpoints) {
+          try {
+            res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (res && (res.ok || res.status === 400)) {
+              break;
+            }
+          } catch (e) {
+            lastFetchErr = e;
+          }
+        }
+
+        if (!res || !res.ok) {
+          const err = res ? await res.json().catch(() => ({})) : {};
+          if (res && res.status === 400 && err.error) {
+            toast(err.error, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
+            return;
+          }
+          throw new Error(err.detail || err.error || lastFetchErr?.message || 'Failed to submit application to server');
         }
 
         const result = await res.json();

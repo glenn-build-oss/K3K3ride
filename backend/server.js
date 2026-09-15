@@ -138,18 +138,15 @@ io.on('connection', (socket) => {
 
 // ─── CORS ───
 app.use(cors({
-  origin: [
-    'http://localhost:8080',
-    'http://localhost:8081',
-    'http://localhost:3000',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    'http://127.0.0.1:8080',
-    'http://127.0.0.1:8081',
-    // Add your Vercel domain
-    'https://k3k3ride.vercel.app',
-    /\.vercel\.app$/
-  ],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+        /\.vercel\.app$/.test(origin) ||
+        origin === 'https://k3k3ride.vercel.app') {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

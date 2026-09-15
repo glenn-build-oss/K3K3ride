@@ -3,7 +3,9 @@
  * Fetches real data from 
  */
 
-const API = '';
+const API = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://localhost:8810'
+  : '';
 let currentPeriod = 'today';
 
 // ── Helpers ──

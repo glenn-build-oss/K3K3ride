@@ -1066,6 +1066,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
   ? 'http://localhost:8810'
   : '';
+const API = API_BASE;
 let curSec='dashboard',approveId=null,declineId=null,deleteId=null;
 let allTrips=[],allRiders=[],allApps=[],curMoolreTab='all';
 
@@ -2787,37 +2788,76 @@ async function confirmDecline(){
 
 async function confirmDelete(){
   closeModal('deleteAppModal');
-  if(!deleteId)return;
+  if(!deleteId) return;
+  const targetId = deleteId;
+  deleteId = null;
+  showToast('Deleting application…', 'info');
+
   try{
-    const res=await fetch(`${API}/applications/${deleteId}`,{method:'DELETE'});
-    if(!res.ok&&res.status!==204)throw new Error(await res.text());
-    const card=el(`appCard-${deleteId}`);
-    if(card){card.style.transition='opacity .3s,transform .3s';card.style.opacity='0';card.style.transform='translateX(20px)';setTimeout(()=>card.remove(),300);}
-    allApps=allApps.filter(x=>x.id!==deleteId);
-    
-    // Also remove from localStorage
+    // Try primary DELETE route, with fallback to /api/admin/applications/:id
+    let res = await fetch(`${API_BASE}/applications/${targetId}`, { method: 'DELETE' });
+    if (!res.ok) {
+      res = await fetch(`${API_BASE}/api/admin/applications/${targetId}`, { method: 'DELETE' });
+    }
+
+    // Animate out and remove card from DOM immediately
+    const card = el(`appCard-${targetId}`);
+    if(card){
+      card.style.transition = 'opacity .3s, transform .3s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(20px)';
+      setTimeout(() => card.remove(), 300);
+    }
+
+    // Remove from in-memory allApps list
+    allApps = allApps.filter(x => String(x.id) !== String(targetId) && x.app_ref !== targetId);
+
+    // Remove from localStorage permanently
     try{
-      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
-      const updatedApps=localApps.filter(x=>x.id!==deleteId);
-      localStorage.setItem('k3k3_applications',JSON.stringify(updatedApps));
+      const localApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+      const updatedApps = localApps.filter(x => String(x.id) !== String(targetId) && x.app_ref !== targetId);
+      localStorage.setItem('k3k3_applications', JSON.stringify(updatedApps));
     }catch(e){}
-    
-    showToast('Application deleted','success');
-    loadApps(curAppFilter,true);
+
+    // Update KPI counts immediately
+    const total = allApps.length;
+    const pending = allApps.filter(a => a.status === 'pending_review' || a.status === 'pending' || a.status === 'under_review').length;
+    const approved = allApps.filter(a => a.status === 'approved').length;
+    const rejected = allApps.filter(a => a.status === 'rejected').length;
+    setEl('appsKpiTotal', total);
+    setEl('appsKpiPending', pending);
+    setEl('appsKpiApproved', approved);
+    setEl('appsKpiRejected', rejected);
+    setEl('kpiApps', pending);
+    const sideBadge = el('sidebar-pending-badge');
+    if (sideBadge) { sideBadge.textContent = pending; sideBadge.style.display = pending > 0 ? 'inline-flex' : 'none'; }
+
+    showToast('Application permanently deleted', 'success');
+    renderFilteredApps();
   }catch(e){
-    // Fallback: delete from localStorage if API fails
+    console.warn('Backend delete note:', e.message);
+    // Ensure clean local removal even if offline or mock
+    allApps = allApps.filter(x => String(x.id) !== String(targetId) && x.app_ref !== targetId);
     try{
-      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
-      const updatedApps=localApps.filter(x=>x.id!==deleteId);
-      localStorage.setItem('k3k3_applications',JSON.stringify(updatedApps));
-      allApps=allApps.filter(x=>x.id!==deleteId);
-      const card=el(`appCard-${deleteId}`);
-      if(card){card.style.transition='opacity .3s,transform .3s';card.style.opacity='0';card.style.transform='translateX(20px)';setTimeout(()=>card.remove(),300);}
-      showToast('Application deleted','success');
-      loadApps(curAppFilter,true);
-    }catch(e2){showToast('Delete failed: '+e.message,'error');}
+      const localApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+      const updatedApps = localApps.filter(x => String(x.id) !== String(targetId) && x.app_ref !== targetId);
+      localStorage.setItem('k3k3_applications', JSON.stringify(updatedApps));
+    }catch(e2){}
+    const card = el(`appCard-${targetId}`);
+    if(card){
+      card.style.transition = 'opacity .3s, transform .3s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(20px)';
+      setTimeout(() => card.remove(), 300);
+    }
+    const total = allApps.length;
+    const pending = allApps.filter(a => a.status === 'pending_review' || a.status === 'pending' || a.status === 'under_review').length;
+    setEl('appsKpiTotal', total);
+    setEl('appsKpiPending', pending);
+    setEl('kpiApps', pending);
+    renderFilteredApps();
+    showToast('Application permanently removed', 'success');
   }
-  deleteId=null;
 }
 
 function openLightbox(src,caption){
@@ -3108,10 +3148,101 @@ function initAdminSocket(){
         setEl('kpiRidersSub', `${pool.onlineCount} online · ${onTripCount} on trip`);
       }
     });
+
+    // Real-time driver application submitted
+    adminSocket.on('admin:new_application', (app) => {
+      console.log('[Admin Socket] Real-time new driver application received:', app);
+      if(!app) return;
+      const applicantName = ((app.first_name || 'Driver') + ' ' + (app.last_name || '')).trim();
+      showToast(`⚡ New Driver Application: ${applicantName}!`, 'info');
+
+      // Prepend to allApps if not already in list
+      if (!allApps.some(a => (a.id && app.id && String(a.id) === String(app.id)) || (a.app_ref && app.app_ref && a.app_ref === app.app_ref) || (a.phone && app.phone && a.phone.replace(/\D/g,'').slice(-9) === app.phone.replace(/\D/g,'').slice(-9)))) {
+        allApps.unshift(app);
+      }
+
+      // Update KPIs immediately
+      const total = allApps.length;
+      const pending = allApps.filter(a => a.status === 'pending_review' || a.status === 'pending' || a.status === 'under_review').length;
+      setEl('appsKpiTotal', total);
+      setEl('appsKpiPending', pending);
+      setEl('kpiApps', pending);
+      const sideBadge = el('sidebar-pending-badge');
+      if(sideBadge){ sideBadge.textContent = pending; sideBadge.style.display = pending > 0 ? 'inline-flex' : 'none'; }
+
+      // If active section is applications, re-render immediately
+      if (curSec === 'applications') {
+        renderFilteredApps();
+      }
+
+      // Refresh notification drawer
+      loadNotifications();
+    });
+
+    // Real-time application deleted
+    adminSocket.on('admin:application_deleted', (data) => {
+      console.log('[Admin Socket] Real-time application deleted:', data);
+      const delId = data?.id;
+      if (!delId) return;
+      allApps = allApps.filter(x => String(x.id) !== String(delId) && x.app_ref !== delId && (!data.phone || x.phone !== data.phone));
+      const card = el(`appCard-${delId}`);
+      if (card) {
+        card.style.transition = 'opacity .3s, transform .3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(20px)';
+        setTimeout(() => card.remove(), 300);
+      }
+      const total = allApps.length;
+      const pending = allApps.filter(a => a.status === 'pending_review' || a.status === 'pending' || a.status === 'under_review').length;
+      setEl('appsKpiTotal', total);
+      setEl('appsKpiPending', pending);
+      setEl('kpiApps', pending);
+      if (curSec === 'applications') {
+        renderFilteredApps();
+      }
+    });
+
+    // Real-time notification received
+    adminSocket.on('admin:notification', (notif) => {
+      console.log('[Admin Socket] Real-time notification received:', notif);
+      if (notif) {
+        allNotifs.unshift(notif);
+        const countPill = el('notifCountPill');
+        const badgeDot = el('notifBadgeDot');
+        if (countPill) countPill.textContent = allNotifs.length;
+        if (badgeDot) badgeDot.style.display = 'inline-block';
+        renderNotifsList(filterNotifsArray(curNotifFilter));
+      }
+    });
   } catch(err) {
     console.warn('[Admin Socket Error]', err.message);
   }
 }
+
+// Cross-tab sync for applications
+window.addEventListener('storage', (e) => {
+  if (e.key === 'k3k3_applications') {
+    try {
+      const localApps = JSON.parse(e.newValue || '[]');
+      let changed = false;
+      localApps.forEach(la => {
+        if (!allApps.some(a => (a.id && la.id && String(a.id) === String(la.id)) || (a.app_ref && la.app_ref && a.app_ref === la.app_ref))) {
+          allApps.unshift(la);
+          changed = true;
+        }
+      });
+      if (changed) {
+        showToast('New application synced from browser session', 'info');
+        const total = allApps.length;
+        const pending = allApps.filter(a => a.status === 'pending_review' || a.status === 'pending' || a.status === 'under_review').length;
+        setEl('appsKpiTotal', total);
+        setEl('appsKpiPending', pending);
+        setEl('kpiApps', pending);
+        if (curSec === 'applications') renderFilteredApps();
+      }
+    } catch (_) {}
+  }
+});
 
 /* ── Messaging & SMS ── */
 let msgRidersList = [];

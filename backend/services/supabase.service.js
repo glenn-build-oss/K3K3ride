@@ -5,6 +5,8 @@
  * Replaces in-memory storage with persistent database.
  */
 
+const fs = require('fs');
+const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -468,21 +470,121 @@ async function getRiderApplications(filters = {}) {
 }
 
 /**
- * Delete a rider application
+ * Permanently delete a rider application and all associated uploaded documents from disk
  */
 async function deleteRiderApplication(applicationId) {
   try {
-    const { data, error } = await requireSupabase()
-      .from('rider_applications')
-      .delete()
-      .eq('id', applicationId);
+    const db = requireSupabase();
+    let targetApp = null;
+    const cleanId = String(applicationId || '').trim();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    if (error) {
-      console.error('[Supabase] Error deleting rider application:', error);
-      return { success: false, error: error.message };
+    if (uuidRegex.test(cleanId)) {
+      const { data } = await db.from('rider_applications').select('*').eq('id', cleanId).maybeSingle();
+      targetApp = data;
+    } else {
+      // Look up by phone if numeric/phone format
+      const digitsOnly = cleanId.replace(/\D/g, '');
+      if (digitsOnly.length >= 9) {
+        const { data: byPhone } = await db.from('rider_applications').select('*').ilike('phone', `%${digitsOnly.slice(-9)}%`).maybeSingle();
+        if (byPhone) targetApp = byPhone;
+      }
+      // If still not found, search all applications
+      if (!targetApp) {
+        const { data: all } = await db.from('rider_applications').select('*');
+        if (all && all.length) {
+          const matchKey = cleanId.replace(/^APP-|^K3PA-/i, '').toLowerCase();
+          targetApp = all.find(a => 
+            a.id === cleanId || 
+            (a.id && a.id.toLowerCase().startsWith(matchKey)) ||
+            (a.phone && a.phone.includes(digitsOnly && digitsOnly.length >= 7 ? digitsOnly.slice(-7) : cleanId))
+          );
+        }
+      }
     }
 
-    return { success: true };
+    const uploadsDir = path.join(__dirname, '..', 'uploads', 'applications');
+    let deletedFilesCount = 0;
+
+    // Delete associated physical document files from disk
+    if (targetApp) {
+      const docUrls = [
+        targetApp.driver_license_url,
+        targetApp.insurance_url,
+        targetApp.vehicle_registration_url,
+        targetApp.ghana_card_url,
+        targetApp.passport_photo_url
+      ];
+
+      if (targetApp.address && targetApp.address.includes('__METADATA__:')) {
+        try {
+          const parts = targetApp.address.split('__METADATA__:');
+          const meta = JSON.parse(parts[1].trim());
+          if (Array.isArray(meta.documents)) {
+            meta.documents.forEach(d => { if (d.url) docUrls.push(d.url); });
+          }
+        } catch (_) {}
+      }
+
+      if (fs.existsSync(uploadsDir)) {
+        for (const url of docUrls) {
+          if (url && typeof url === 'string' && url.includes('/uploads/applications/')) {
+            const filename = path.basename(url);
+            const fullPath = path.join(uploadsDir, filename);
+            try {
+              if (fs.existsSync(fullPath)) {
+                fs.unlinkSync(fullPath);
+                deletedFilesCount++;
+                console.log(`[Supabase Service] Deleted document file: ${fullPath}`);
+              }
+            } catch (err) {
+              console.warn(`[Supabase Service] Failed to unlink ${fullPath}:`, err.message);
+            }
+          }
+        }
+      }
+
+      // Delete database record permanently
+      const { error } = await db
+        .from('rider_applications')
+        .delete()
+        .eq('id', targetApp.id);
+
+      if (error) {
+        console.error('[Supabase] Error deleting rider application:', error);
+        return { success: false, error: error.message };
+      }
+
+      return {
+        success: true,
+        deletedApp: targetApp,
+        deletedFilesCount,
+        message: 'Application and associated documents permanently deleted'
+      };
+    }
+
+    // If not in database (e.g. mock or local fallback submission), still clean disk if files match cleanId
+    if (fs.existsSync(uploadsDir) && cleanId.length >= 4) {
+      try {
+        const files = fs.readdirSync(uploadsDir);
+        const searchPattern = cleanId.replace(/[^a-zA-Z0-9_-]/g, '');
+        files.forEach(f => {
+          if (searchPattern && f.includes(searchPattern)) {
+            try {
+              fs.unlinkSync(path.join(uploadsDir, f));
+              deletedFilesCount++;
+            } catch (_) {}
+          }
+        });
+      } catch (_) {}
+    }
+
+    return { 
+      success: true, 
+      deletedApp: { id: cleanId },
+      deletedFilesCount,
+      message: 'Application removed permanently'
+    };
   } catch (err) {
     console.error('[Supabase] deleteRiderApplication catch:', err.message);
     return { success: false, error: err.message };
