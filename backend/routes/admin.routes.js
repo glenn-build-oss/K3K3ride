@@ -135,17 +135,26 @@ function enrichApplication(app) {
   ];
 
   for (const std of standardDocs) {
-    if (std.url && (std.url.startsWith('http') || std.url.startsWith('/uploads/') || std.url.startsWith('data:'))) {
-      if (!enriched.documents.some(d => d.key === std.key || d.url === std.url)) {
-        const isPdf = typeof std.url === 'string' && std.url.toLowerCase().endsWith('.pdf');
-        enriched.documents.push({
-          key: std.key,
-          label: std.label,
-          name: std.label,
-          url: std.url,
-          type: isPdf ? 'pdf' : 'image'
-        });
+    const existingIndex = enriched.documents.findIndex(d => d.key === std.key);
+    const hasValidDirectData = std.url && typeof std.url === 'string' && (std.url.startsWith('data:') || std.url.startsWith('http://') || std.url.startsWith('https://'));
+    const isPdf = typeof std.url === 'string' && (std.url.toLowerCase().endsWith('.pdf') || std.url.includes('application/pdf'));
+
+    if (existingIndex !== -1) {
+      // If table column has direct Base64 data or hosted URL, prefer that over ephemeral local disk /uploads/ paths
+      if (hasValidDirectData) {
+        enriched.documents[existingIndex].url = std.url;
+        enriched.documents[existingIndex].dataUrl = std.url;
+        enriched.documents[existingIndex].type = isPdf ? 'pdf' : 'image';
       }
+    } else if (std.url && (std.url.startsWith('http') || std.url.startsWith('/uploads/') || std.url.startsWith('data:'))) {
+      enriched.documents.push({
+        key: std.key,
+        label: std.label,
+        name: std.label,
+        url: std.url,
+        dataUrl: hasValidDirectData ? std.url : undefined,
+        type: isPdf ? 'pdf' : 'image'
+      });
     }
   }
 
@@ -444,12 +453,16 @@ router.post(['/applications/:id/approve', '/api/admin/applications/:id/approve',
       return res.status(400).json({ success: false, error: result.error });
     }
 
-    // Send approval SMS to rider
+    // Send approval SMS to rider (non-fatal if SMS provider fails)
     if (result.application && result.application.phone) {
-      const riderName = result.application.first_name || 'Rider';
-      const riderPhone = result.application.phone;
-      const message = `Congratulations ${riderName}! Your K3K3 Rider application has been approved. Thank you for choosing K3K3. You can now log in to your account with your phone number (${riderPhone}) to start accepting rides. Welcome to K3K3!`;
-      await sendSMS(riderPhone, message, `approval_${id}`);
+      try {
+        const riderName = result.application.first_name || 'Rider';
+        const riderPhone = result.application.phone;
+        const message = `Congratulations ${riderName}! Your K3K3 Rider application has been approved. Thank you for choosing K3K3. You can now log in to your account with your phone number (${riderPhone}) to start accepting rides. Welcome to K3K3!`;
+        await sendSMS(riderPhone, message, `approval_${id}`);
+      } catch (smsErr) {
+        console.warn('[Admin] SMS notification on approval failed (non-fatal):', smsErr.message);
+      }
     }
 
     const riderId = 'K3R-' + (result.application?.phone ? result.application.phone.slice(-6) : Math.floor(100000 + Math.random() * 900000));

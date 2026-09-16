@@ -35,8 +35,10 @@ async function sendSMS(recipient, message, ref) {
   // Strip '+' from phone if present: +233... → 233...
   const cleanRecipient = recipient.replace(/^\+/, '');
 
-  // Generate ref if not provided
-  const msgRef = ref || `otp_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  // Always ensure ref has unique timestamp and random entropy to satisfy Moolre uniqueness requirement
+  const uniqueEntropy = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  const cleanRef = ref ? String(ref).replace(/[^a-zA-Z0-9_-]/g, '_') : 'k3';
+  const msgRef = `${cleanRef}_${uniqueEntropy}`;
 
   const payload = {
     type: 1,
@@ -64,7 +66,13 @@ async function sendSMS(recipient, message, ref) {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+    let data = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (_) {
+      data = { status: 0, code: 'RAW_RESPONSE', message: rawText };
+    }
 
     console.log(`[Moolre] Response status: ${response.status}`, JSON.stringify(data));
 

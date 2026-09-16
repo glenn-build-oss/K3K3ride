@@ -32,6 +32,9 @@ class DispatchService {
 
     // Start periodic background sweep for stale GPS heartbeats (every 15s)
     this.sweepInterval = setInterval(() => this._sweepStaleRiders(), 15000);
+    if (this.sweepInterval && typeof this.sweepInterval.unref === 'function') {
+      this.sweepInterval.unref();
+    }
   }
 
   /**

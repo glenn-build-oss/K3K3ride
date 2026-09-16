@@ -269,15 +269,20 @@ async function verifyOTP(phone, code) {
  * Clean up expired OTPs (run periodically)
  */
 async function cleanupExpiredOTPs() {
-  const { error } = await requireSupabase()
-    .from('otp_codes')
-    .delete()
-    .lt('expires_at', new Date(Date.now() - 10 * 60 * 1000).toISOString());
+  try {
+    if (!supabase) return;
+    const { error } = await supabase
+      .from('otp_codes')
+      .delete()
+      .lt('expires_at', new Date(Date.now() - 10 * 60 * 1000).toISOString());
 
-  if (error) {
-    console.error('[Supabase] Error cleaning up OTPs:', error);
-  } else {
-    console.log('[Supabase] Cleaned up expired OTPs');
+    if (error) {
+      console.error('[Supabase] Error cleaning up OTPs:', error);
+    } else {
+      console.log('[Supabase] Cleaned up expired OTPs');
+    }
+  } catch (err) {
+    console.warn('[Supabase] cleanupExpiredOTPs skipped:', err.message);
   }
 }
 
@@ -1511,8 +1516,15 @@ async function healthCheck() {
   }
 }
 
-// Schedule cleanup of expired OTPs every 5 minutes
-setInterval(cleanupExpiredOTPs, 5 * 60 * 1000);
+// Schedule cleanup of expired OTPs every 5 minutes (daemon/server only, not in serverless)
+if (process.env.VERCEL !== '1' && typeof setInterval !== 'undefined') {
+  const otpTimer = setInterval(() => {
+    cleanupExpiredOTPs().catch(() => {});
+  }, 5 * 60 * 1000);
+  if (otpTimer && typeof otpTimer.unref === 'function') {
+    otpTimer.unref();
+  }
+}
 
 module.exports = {
   // User operations

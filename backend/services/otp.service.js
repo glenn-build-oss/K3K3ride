@@ -112,7 +112,12 @@ function cleanupExpiredOTPs() {
 }
 
 // Run cleanup every 5 minutes
-setInterval(cleanupExpiredOTPs, 5 * 60 * 1000);
+if (process.env.VERCEL !== '1' && typeof setInterval !== 'undefined') {
+  const otpTimer = setInterval(cleanupExpiredOTPs, 5 * 60 * 1000);
+  if (otpTimer && typeof otpTimer.unref === 'function') {
+    otpTimer.unref();
+  }
+}
 
 /**
  * Get OTP stats (for admin/debugging).

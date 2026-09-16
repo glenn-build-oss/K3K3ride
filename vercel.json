@@ -16,6 +16,26 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/applications(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/riders(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/passengers(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/trips(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/admin/(applications|riders|passengers|trips|moolre|activity|audit|stats|health)(.*)",
+      "dest": "/api/index.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }

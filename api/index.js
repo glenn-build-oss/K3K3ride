@@ -6,7 +6,18 @@
  * Environment variables are set in Vercel project settings.
  */
 
-require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+
+// Ensure backend/node_modules is resolvable in all environments
+const backendNm = path.join(__dirname, '..', 'backend', 'node_modules');
+if (fs.existsSync(backendNm) && !module.paths.includes(backendNm)) {
+  module.paths.push(backendNm);
+}
+
+try {
+  require('dotenv').config();
+} catch (_) {}
 
 const express = require('express');
 const cors    = require('cors');
@@ -40,6 +51,26 @@ const tripsRoutes = require('../backend/routes/trips.routes');
 app.use('/api/auth',  authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/trips', tripsRoutes);
+
+// Compatibility aliases for legacy and direct frontend calls on Vercel
+app.use('/api/users', authRoutes);
+app.use('/api/applications', adminRoutes);
+app.use('/api/riders', adminRoutes);
+app.use('/api/passengers', adminRoutes);
+app.use('/api', adminRoutes);
+app.use('/api', tripsRoutes);
+app.use('/api', authRoutes);
+
+app.use('/admin', adminRoutes);
+app.use('/applications', adminRoutes);
+app.use('/riders', adminRoutes);
+app.use('/passengers', adminRoutes);
+app.use('/trips', tripsRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', authRoutes);
+app.use('/', adminRoutes);
+app.use('/', tripsRoutes);
+app.use('/', authRoutes);
 
 // ── Health / root ──
 app.get('/api', (req, res) => {

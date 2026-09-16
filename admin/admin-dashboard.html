@@ -603,9 +603,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- ──── APPLICATIONS ──── -->
 <div class="dash-section" id="sec-applications">
-  <div class="sec-header"><div><div class="sec-title">Rider Applications</div><div class="sec-sub">Review, approve and manage rider applications</div></div>
-    <button class="btn-primary" onclick="loadApps(curAppFilter,true)"><i class="fas fa-sync-alt"></i> Refresh</button>
-  </div>
+  <div class="sec-header"><div><div class="sec-title">Rider Applications</div><div class="sec-sub">Review, approve and manage rider applications</div></div></div>
 
   <!-- KPI mini row -->
   <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px" id="appsKpiRow">
@@ -2207,29 +2205,28 @@ async function loadApps(filter,force){
   const al=el('appsList');if(!al)return;
   if(!allApps.length||force){
     al.innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading applications…</p></div>';
-    const res = await apiFetch('/applications');
-    allApps = Array.isArray(res) ? res : (res?.applications || res?.data || []);
     
-    // Merge locally stored applications (e.g. from apply-to-ride submissions)
-    try{
-      const localApps=JSON.parse(localStorage.getItem('k3k3_applications')||'[]');
-      localApps.forEach(la => {
-        if(!allApps.some(a => (a.id && la.id && a.id === la.id) || (a.app_ref && la.app_ref && a.app_ref === la.app_ref) || (a.phone && la.phone && a.phone.replace(/\D/g,'').slice(-9) === la.phone.replace(/\D/g,'').slice(-9)))) {
-          allApps.unshift(la);
-        }
-      });
-      if(!allApps.length && localApps.length) allApps = localApps;
-    }catch(e){}
+    // Purge any stale mock applications from localStorage
+    try { localStorage.removeItem('k3k3_applications'); } catch (_) {}
+
+    // Fetch live applications directly from backend API (no mock data)
+    let res = await apiFetch('/api/admin/applications');
+    if (!res || (!res.success && !Array.isArray(res))) {
+      res = await apiFetch('/admin/applications');
+    }
+    if (!res || (!res.success && !Array.isArray(res))) {
+      res = await apiFetch('/applications');
+    }
+
+    allApps = Array.isArray(res) ? res : (res?.applications || res?.data || []);
   }
 
-  // Load stats - always calculate from current data
-  if(allApps.length){
-    const total=allApps.length;
-    const pending=allApps.filter(a=>a.status==='pending_review'||a.status==='pending'||a.status==='under_review').length;
-    const approved=allApps.filter(a=>a.status==='approved').length;
-    const rejected=allApps.filter(a=>a.status==='rejected').length;
-    setEl('appsKpiTotal',total);setEl('appsKpiPending',pending);setEl('appsKpiApproved',approved);setEl('appsKpiRejected',rejected);
-  }
+  // Load stats - always calculate directly from real live records
+  const total=allApps.length;
+  const pending=allApps.filter(a=>a.status==='pending_review'||a.status==='pending'||a.status==='under_review').length;
+  const approved=allApps.filter(a=>a.status==='approved').length;
+  const rejected=allApps.filter(a=>a.status==='rejected').length;
+  setEl('appsKpiTotal',total);setEl('appsKpiPending',pending);setEl('appsKpiApproved',approved);setEl('appsKpiRejected',rejected);
 
   renderFilteredApps();
 }
@@ -2425,18 +2422,41 @@ function showAppDetail(appId){
     return backendOrigin ? `${backendOrigin}${clean}` : clean;
   };
 
-  // Helper to extract uploaded document URL from rawDocs first, then direct table columns
+  // Helper to extract uploaded document URL from rawDocs and direct table columns (preferring direct Base64 data: URLs for universal rendering)
   const findDocUrl = (keys, fallbackCol) => {
-    // 1. Search rawDocs by key or name
+    // 1. If direct column in database has a data URL or hosted http URL, prefer that directly (guarantees images display on Vercel)
+    if (fallbackCol && app[fallbackCol] && typeof app[fallbackCol] === 'string') {
+      const colVal = app[fallbackCol].trim();
+      if (colVal.startsWith('data:') || colVal.startsWith('http://') || colVal.startsWith('https://')) {
+        return colVal;
+      }
+    }
+    // 2. Search direct keys on app object for data: or http URL
+    for (const k of keys) {
+      const v = app[k];
+      if (v && typeof v === 'string') {
+        const vt = v.trim();
+        if (vt.startsWith('data:') || vt.startsWith('http://') || vt.startsWith('https://')) return vt;
+      }
+      const vUrl = app[k + '_url'];
+      if (vUrl && typeof vUrl === 'string') {
+        const vUt = vUrl.trim();
+        if (vUt.startsWith('data:') || vUt.startsWith('http://') || vUt.startsWith('https://')) return vUt;
+      }
+    }
+    // 3. Search rawDocs by key or name
     for (const k of keys) {
       const d = rawDocs.find(x => x.key === k || (x.name && x.name.toLowerCase().includes(k.toLowerCase())));
-      if (d && isDocFile(d.url)) return d.url;
+      if (d) {
+        if (d.dataUrl && typeof d.dataUrl === 'string' && d.dataUrl.startsWith('data:')) return d.dataUrl;
+        if (d.data && typeof d.data === 'string' && d.data.startsWith('data:')) return d.data;
+        if (d.url && isDocFile(d.url)) return d.url;
+      }
     }
-    // 2. Search direct column if it's a valid document file (not a license number string)
+    // 4. Fallback to any file in fallbackCol
     if (fallbackCol && isDocFile(app[fallbackCol])) {
       return app[fallbackCol];
     }
-    // 3. Search other direct columns
     for (const k of keys) {
       if (isDocFile(app[k])) return app[k];
       if (isDocFile(app[k + '_url'])) return app[k + '_url'];
@@ -2451,35 +2471,35 @@ function showAppDetail(appId){
       name: "Rider License",
       icon: 'fa-id-badge',
       sub: 'Driver Authorization',
-      url: findDocUrl(['riderLicense', 'driver_license', 'license'], 'driver_license_url')
+      url: findDocUrl(['riderLicense', 'rider_license', 'driver_license', 'driver_license_url', 'license', 'license_doc'], 'driver_license_url')
     },
     {
       key: 'vehicleRegistration',
       name: "Vehicle Registration",
       icon: 'fa-file-invoice',
       sub: 'DVLA Logbook / Cert',
-      url: findDocUrl(['vehicleRegistration', 'vehicle_registration', 'registration'], 'vehicle_registration_url')
+      url: findDocUrl(['vehicleRegistration', 'vehicle_registration', 'registration', 'vehicle_registration_url', 'vehicle_reg'], 'vehicle_registration_url')
     },
     {
       key: 'idCardFront',
       name: "National ID — Front",
       icon: 'fa-address-card',
       sub: 'Ghana Card Front side',
-      url: findDocUrl(['idCardFront', 'id_card_front', 'ghana_card_front', 'idFront'], 'ghana_card_url')
+      url: findDocUrl(['idCardFront', 'id_card_front', 'ghana_card_front', 'ghana_card_url', 'ghana_card', 'idFront', 'id_front'], 'ghana_card_url')
     },
     {
       key: 'idCardBack',
       name: "National ID — Back",
       icon: 'fa-address-card',
       sub: 'Ghana Card Back side',
-      url: findDocUrl(['idCardBack', 'id_card_back', 'ghana_card_back', 'idBack'], 'insurance_url')
+      url: findDocUrl(['idCardBack', 'id_card_back', 'ghana_card_back', 'insurance_url', 'insurance', 'idBack', 'id_back'], 'insurance_url')
     },
     {
       key: 'passportPhoto',
       name: "Passport Photo",
       icon: 'fa-user-circle',
       sub: 'Recent Portrait Photo',
-      url: findDocUrl(['passportPhoto', 'passport_photo', 'photo'], 'passport_photo_url')
+      url: findDocUrl(['passportPhoto', 'passport_photo', 'passport_photo_url', 'passport', 'photo', 'portrait'], 'passport_photo_url')
     }
   ];
 
@@ -2797,18 +2817,28 @@ async function confirmApprove(){
     const backend = API_BASE || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:') ? 'http://localhost:8810' : '');
     const approveCandidates = [
       `${backend}/api/admin/applications/${approveId}/approve`,
-      `${backend}/applications/${approveId}/approve`,
-      `${backend}/api/applications/${approveId}/approve`
+      `${backend}/api/applications/${approveId}/approve`,
+      `${backend}/applications/${approveId}/approve`
     ];
     let res = null;
+    let lastError = null;
     for (const url of approveCandidates) {
       try {
         const r = await fetch(url, { method: 'POST', headers: { 'Accept': 'application/json' } });
-        if (r.ok) { res = r; break; }
-      } catch (_) {}
+        if (r.ok) {
+          res = r;
+          break;
+        } else {
+          const errData = await r.json().catch(() => ({}));
+          lastError = errData.error || errData.message || `Server returned status ${r.status}`;
+        }
+      } catch (fErr) {
+        lastError = fErr.message;
+      }
     }
-    if(!res)throw new Error('Could not reach approval endpoint on backend');
+    if(!res) throw new Error(lastError || 'Could not reach approval endpoint on backend');
     const data=await res.json();
+
     // Show K3R ID modal
     setEl('k3rIdDisplay',data.rider_id||'K3R-??????');
     setEl('k3rNameDisplay',`${data.first_name||''} ${data.last_name||''}`.trim());
@@ -2817,57 +2847,18 @@ async function confirmApprove(){
     window._lastK3rId=data.rider_id;
     openModal('k3rModal');
 
-    // Also update localStorage so offline/mock state stays in sync
-    try {
-      const localApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
-      const matchedApp = localApps.find(x => String(x.id) === String(approveId)) || allApps.find(x => String(x.id) === String(approveId));
-      if (matchedApp) {
-        matchedApp.status = 'approved';
-        localStorage.setItem('k3k3_applications', JSON.stringify(localApps));
-
-        // Create approved rider entry for localStorage.k3k3_riders
-        const localRiders = JSON.parse(localStorage.getItem('k3k3_riders') || '[]');
-        const newRider = {
-          id: data.rider_id || ('K3R-' + String(approveId).slice(-6)),
-          fname: data.first_name || matchedApp.first_name || matchedApp.fname || 'Rider',
-          lname: data.last_name || matchedApp.last_name || matchedApp.lname || '',
-          phone: matchedApp.phone,
-          email: matchedApp.email,
-          vehicle_type: matchedApp.vehicle_type || 'Tricycle',
-          vehicle_plate: matchedApp.license_plate || matchedApp.vehicle_plate || '—',
-          vehicle_make: matchedApp.vehicle_make || '',
-          vehicle_model: matchedApp.vehicle_model || '',
-          vehicle_color: matchedApp.vehicle_color || '',
-          driver_license_url: matchedApp.driver_license_url || matchedApp.license_front,
-          vehicle_registration_url: matchedApp.vehicle_registration_url || matchedApp.registration_doc,
-          ghana_card_url: matchedApp.ghana_card_url || matchedApp.id_front,
-          insurance_url: matchedApp.insurance_url || matchedApp.id_back,
-          passport_photo_url: matchedApp.passport_photo_url || matchedApp.passport_photo,
-          documents: matchedApp.documents,
-          rating: 5.0,
-          trips_completed: 0,
-          total_earnings: 0,
-          is_available: true,
-          on_trip: false,
-          joined: 'Today'
-        };
-        const existingIdx = localRiders.findIndex(r => r.id === newRider.id || (r.phone && r.phone === newRider.phone));
-        if (existingIdx >= 0) {
-          localRiders[existingIdx] = { ...localRiders[existingIdx], ...newRider };
-        } else {
-          localRiders.unshift(newRider);
-        }
-        localStorage.setItem('k3k3_riders', JSON.stringify(localRiders));
-      }
-    } catch(eLocal) {
-      console.warn('Error syncing localStorage on approve:', eLocal);
+    // Update in-memory record
+    const matchedApp = allApps.find(x => String(x.id) === String(approveId));
+    if (matchedApp) {
+      matchedApp.status = 'approved';
     }
 
-    allApps=[];// force reload
-    allRiders=[];// force reload riders list
-    showToast(`Rider ${data.rider_id} created!`,'success');
+    showToast(`Rider application approved successfully!`, 'success');
+    loadApps(curAppFilter, true);
+    loadDashboard();
   }catch(e){
-    showToast('Approval failed: '+e.message,'error');
+    console.error('Approval error:', e);
+    showToast('Approval failed: ' + e.message, 'error');
   }
   approveId=null;
 }

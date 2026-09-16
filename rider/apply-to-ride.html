@@ -1349,6 +1349,54 @@
       `;
     }
 
+    // ── Image Compressor (downscales large phone camera photos to max 1200px / ~80-120KB) ──
+    async function compressDocumentFile(file, maxWidth = 1200, maxHeight = 1200, quality = 0.82) {
+      if (!file) return null;
+      if (!file.type || !file.type.startsWith('image/')) {
+        // Return raw Base64 data URL for PDFs
+        return new Promise((res) => {
+          const r = new FileReader();
+          r.onload = ev => res(ev.target.result);
+          r.onerror = () => res(null);
+          r.readAsDataURL(file);
+        });
+      }
+
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+              if (width > height) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              } else {
+                width = Math.round((width * maxHeight) / height);
+                height = maxHeight;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedDataUrl);
+          };
+          img.onerror = () => resolve(e.target.result);
+          img.src = e.target.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
     // ── Form Submit ──────────────────────────────────
     document.getElementById('applyForm').addEventListener('submit', async e => {
       e.preventDefault();
@@ -1371,27 +1419,29 @@
         let rawPhone = get('phone').trim().replace(/\D/g, '');
         let fullPhone = rawPhone.startsWith('+') ? rawPhone : ('+233' + (rawPhone.startsWith('0') ? rawPhone.substring(1) : rawPhone));
 
-        // Read all uploaded document files as Base64 data URLs
+        // Read and compress all uploaded document files as Base64 data URLs
         const documentsPayload = {};
         for (const [key, file] of Object.entries(uploadedFiles)) {
           if (file) {
             try {
-              const dataUrl = await new Promise((res) => {
-                const r = new FileReader();
-                r.onload = ev => res(ev.target.result);
-                r.onerror = () => res(null);
-                r.readAsDataURL(file);
-              });
+              const dataUrl = await compressDocumentFile(file);
               if (dataUrl) {
                 documentsPayload[key] = {
                   name: file.name,
-                  type: file.type,
-                  size: file.size,
-                  data: dataUrl
+                  type: file.type || 'image/jpeg',
+                  size: dataUrl.length,
+                  data: dataUrl,
+                  url: dataUrl
                 };
               }
             } catch (_) {}
           }
+        }
+
+        // Verify all 5 documents compressed successfully
+        const missingCompressed = requiredDocKeys.filter(k => !documentsPayload[k]?.data);
+        if (missingCompressed.length > 0) {
+          throw new Error(`Failed to read documents: ${missingCompressed.join(', ')}. Please try re-uploading.`);
         }
 
         // Step 1: Submit form data with documents as JSON
@@ -1417,13 +1467,20 @@
           vehicle_plate: get('vehiclePlate') || null,
           vehicle_color: get('vehicleColor') || null,
           experience: get('experience') || null,
-          documents: documentsPayload
+          documents: documentsPayload,
+          driver_license_url: documentsPayload.riderLicense?.data || null,
+          vehicle_registration_url: documentsPayload.vehicleRegistration?.data || null,
+          ghana_card_url: documentsPayload.idCardFront?.data || null,
+          insurance_url: documentsPayload.idCardBack?.data || null,
+          passport_photo_url: documentsPayload.passportPhoto?.data || null
         };
 
         let res = null;
         const targetEndpoints = [
-          BACKEND ? `${BACKEND}/applications` : '/applications',
           BACKEND ? `${BACKEND}/api/admin/applications` : '/api/admin/applications',
+          BACKEND ? `${BACKEND}/api/applications` : '/api/applications',
+          BACKEND ? `${BACKEND}/applications` : '/applications',
+          'http://localhost:8810/api/admin/applications',
           'http://localhost:8810/applications'
         ];
 
@@ -1432,7 +1489,7 @@
           try {
             res = await fetch(url, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
               body: JSON.stringify(payload)
             });
             if (res && (res.ok || res.status === 400)) {
@@ -1463,22 +1520,6 @@
           appRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
         }
 
-        // Step 2: Upload documents if backend supports it
-        if (Object.keys(uploadedFiles).length > 0 && appId) {
-          try {
-            const formData = new FormData();
-            for (const [key, file] of Object.entries(uploadedFiles)) {
-              formData.append(key, file);
-            }
-            await fetch(`${BACKEND}/applications/${appId}/documents`, {
-              method: 'POST',
-              body: formData
-            });
-          } catch(docErr) {
-            console.warn('Document upload failed (non-critical):', docErr.message);
-          }
-        }
-
         // Save rider data for pending screen
         try {
           localStorage.setItem('lastRiderApplication', JSON.stringify({
@@ -1492,44 +1533,8 @@
           localStorage.setItem('lastApplicationRef', appRef);
         } catch(e) {}
 
-        // Save application to localStorage for admin dashboard
-        try {
-          const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
-          const newApp = {
-            id: appId || Date.now(),
-            app_ref: appRef,
-            first_name: get('firstName'),
-            last_name: get('lastName'),
-            email: get('email'),
-            phone: rawPhone,
-            full_phone: fullPhone,
-            date_of_birth: get('dateOfBirth') || null,
-            gender: get('gender') || null,
-            nationality: get('nationality') || null,
-            address: get('address') || null,
-            city: get('city') || null,
-            about: get('about') || null,
-            ghana_card_number: get('ghanaCardNumber') || null,
-            license_number: get('licenseNumber') || null,
-            license_expiry: get('licenseExpiry') || null,
-            vehicle_type: get('vehicleType') || null,
-            vehicle_seats: get('vehicleSeats') || null,
-            vehicle_make: get('vehicleMake') || null,
-            vehicle_model: get('vehicleModel') || null,
-            vehicle_year: get('vehicleYear') || null,
-            vehicle_plate: get('vehiclePlate') || null,
-            vehicle_color: get('vehicleColor') || null,
-            experience: get('experience') || null,
-            status: 'pending',
-            created_at: new Date().toISOString(),
-            documents: payload.documents || Object.keys(uploadedFiles).map(key => ({
-              name: uploadedFiles[key].name,
-              type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf'
-            }))
-          };
-          existingApps.unshift(newApp);
-          localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
-        } catch(e) {}
+        // Clear out any old mock applications from localStorage
+        try { localStorage.removeItem('k3k3_applications'); } catch (_) {}
 
         // Update rider session status to pending
         try {
@@ -1549,76 +1554,9 @@
         setTimeout(() => { window.location.href = 'pending.html'; }, 1500);
 
       } catch (err) {
-        // Fallback: save locally for admin and redirect to pending
-        const get2 = id => (document.getElementById(id) || {}).value || '';
-        const fallbackPhone = (get2('phone') || '').trim().replace(/\D/g, '');
-        const genRef = 'K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase();
-        try {
-          localStorage.setItem('lastRiderApplication', JSON.stringify({
-            firstName: get2('firstName'),
-            lastName:  get2('lastName'),
-            phone:     fallbackPhone,
-            email:     get2('email'),
-            appRef:    genRef
-          }));
-          localStorage.setItem('lastApplicationRef', genRef);
-
-          // Update rider session
-          const riderSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
-          riderSession.status = 'pending';
-          riderSession.phone = fallbackPhone;
-          riderSession.firstName = get2('firstName');
-          riderSession.lastName = get2('lastName');
-          riderSession.email = get2('email');
-          riderSession.applicationRef = genRef;
-          riderSession.appRef = genRef;
-          localStorage.setItem('riderSession', JSON.stringify(riderSession));
-          sessionStorage.setItem('riderSession', JSON.stringify(riderSession));
-
-          // Save application to localStorage for admin dashboard (fallback)
-          const existingApps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
-          const newApp = {
-            id: Date.now(),
-            app_ref: genRef,
-            first_name: get2('firstName'),
-            last_name: get2('lastName'),
-            email: get2('email'),
-            phone: fallbackPhone,
-            date_of_birth: get2('dateOfBirth') || null,
-            gender: get2('gender') || null,
-            nationality: get2('nationality') || null,
-            address: get2('address') || null,
-            city: get2('city') || null,
-            about: get2('about') || null,
-            ghana_card_number: get2('ghanaCardNumber') || null,
-            license_number: get2('licenseNumber') || null,
-            license_expiry: get2('licenseExpiry') || null,
-            vehicle_type: get2('vehicleType') || null,
-            vehicle_seats: get2('vehicleSeats') || null,
-            vehicle_make: get2('vehicleMake') || null,
-            vehicle_model: get2('vehicleModel') || null,
-            vehicle_year: get2('vehicleYear') || null,
-            vehicle_plate: get2('vehiclePlate') || null,
-            vehicle_color: get2('vehicleColor') || null,
-            experience: get2('experience') || null,
-            status: 'pending',
-            created_at: new Date().toISOString(),
-            documents: Object.keys(uploadedFiles).map(key => ({
-              type: uploadedFiles[key].type.startsWith('image/') ? 'image' : 'pdf',
-              name: uploadedFiles[key].name
-            }))
-          };
-          existingApps.unshift(newApp);
-          localStorage.setItem('k3k3_applications', JSON.stringify(existingApps));
-
-          toast('Application submitted successfully!', 'success');
-          setTimeout(() => { window.location.href = 'pending.html'; }, 1200);
-          return;
-        } catch(e) {
-          toast('Error: ' + err.message, 'error');
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
-        }
+        toast('Submission error: ' + err.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
       }
     });
 
