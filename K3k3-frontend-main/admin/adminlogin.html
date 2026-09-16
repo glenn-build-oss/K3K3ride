@@ -809,6 +809,9 @@
             if (!email) { showError('Please enter your email.'); return; }
             if (!password) { showError('Please enter your password.'); return; }
 
+            adminEmail = email;
+            try { sessionStorage.setItem('k3k3_pending_admin_email', email); } catch (_) {}
+
             const btn = document.getElementById('loginSubmitBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
@@ -822,8 +825,6 @@
                 const data = await res.json();
 
                 if (data.success && data.requires2FA) {
-                    adminEmail = email;
-                    try { sessionStorage.setItem('k3k3_pending_admin_email', email); } catch (_) {}
                     document.getElementById('otpMsg').textContent =
                         `A 6-digit code has been sent to your phone ending in ${data.phoneMask || '****'}. Enter it below.`;
                     document.getElementById('credentialsStep').style.display = 'none';
@@ -831,10 +832,10 @@
                     document.getElementById('a1').focus();
                     showToast('Verification code sent to your phone', 'success');
                 } else if (data.success) {
-                    // No 2FA required (shouldn't happen normally)
+                    // Direct login (OTP disabled)
                     storeAdminSession(data);
                 } else {
-                    showError(data.error || 'Invalid credentials.');
+                    showError(data.error || data.detail || 'Invalid credentials.');
                 }
             } catch (err) {
                 console.error('Admin login error:', err);
@@ -890,12 +891,17 @@
 
         function storeAdminSession(data) {
             try {
-                localStorage.setItem('k3k3_admin_token', data.token || 'admin_' + Date.now());
+                const token = data.token || 'admin_' + Date.now();
+                const user = data.user || {};
+                const userEmail = user.email || adminEmail || 'admin@k3k3.com';
+                const userName = user.name || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : userEmail.split('@')[0]) || 'Admin';
+
+                localStorage.setItem('k3k3_admin_token', token);
                 localStorage.setItem('current_admin', JSON.stringify({
-                    id: data.user ? data.user.id : 1,
-                    name: data.user ? data.user.name : adminEmail.split('@')[0],
-                    email: data.user ? data.user.email : adminEmail,
-                    role: 'admin',
+                    id: user.id || 1,
+                    name: userName,
+                    email: userEmail,
+                    role: user.role || user.role_type || 'admin',
                     loginTime: new Date().toISOString()
                 }));
             } catch(err) { console.warn('Storage error:', err); }
@@ -903,7 +909,7 @@
             showToast('Welcome back! Redirecting to dashboard...', 'success');
             setTimeout(function() {
                 window.location.href = 'admin-dashboard.html';
-            }, 1000);
+            }, 800);
         }
 
         function backToCredentials() {

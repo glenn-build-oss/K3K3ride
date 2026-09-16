@@ -109,23 +109,25 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(function(response) {
             if (response.ok) {
-                return response.json().then(function(user) {
-                    console.log('Admin login successful, id=' + user.id);
+                return response.json().then(function(data) {
+                    var user = data.user || data;
+                    var token = data.token || 'admin_session_' + Date.now();
+                    console.log('Admin login successful, id=' + (user.id || 'admin'));
 
-                    localStorage.setItem('k3k3_admin_token', 'admin_session_' + Date.now());
+                    localStorage.setItem('k3k3_admin_token', token);
                     localStorage.setItem('current_admin', JSON.stringify({
-                        id:        user.id,
-                        name:      user.name,
-                        email:     user.email,
-                        role:      user.role_type || 'admin',
+                        id:        user.id || 1,
+                        name:      user.name || 'Admin',
+                        email:     user.email || email,
+                        role:      user.role || user.role_type || 'admin',
                         loginTime: new Date().toISOString()
                     }));
 
                     showNotification('success', 'Welcome back, ' + (user.name || 'Admin') + '! Redirecting...', 'Login Successful');
 
                     setTimeout(function() {
-                        window.location.href = 'dashboard.html';
-                    }, 1500);
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
                 });
             } else {
                 return response.json().then(function(errData) {
