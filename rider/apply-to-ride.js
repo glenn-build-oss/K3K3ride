@@ -831,11 +831,19 @@ class RiderApplicationForm {
         }
 
         if (!dateOfBirth) {
-
             this.showToast('Please fill in the Date of Birth field', 'error');
-
             return false;
+        }
 
+        // Validate 18+ age requirement
+        const dob = new Date(dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+        if (isNaN(dob.getTime()) || age < 18) {
+            this.showToast('You must be at least 18 years old to apply as a K3K3 rider', 'error');
+            return false;
         }
 
         if (!nationality) {

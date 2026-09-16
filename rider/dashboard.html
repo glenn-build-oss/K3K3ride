@@ -2450,8 +2450,17 @@ function loadSession() {
 
   // Approval gate: If rider account is pending review, redirect to pending landing page
   if (session.status === 'pending' || session.status === 'under_review' || session.status === 'pending_review') {
-    window.location.href = 'pending.html';
-    return;
+    // Check if recently redirected from pending to break any redirect loop
+    const lastFromPending = sessionStorage.getItem('k3k3_redirect_from_pending');
+    if (lastFromPending && (Date.now() - Number(lastFromPending)) < 15000) {
+      // Loop breaker: synchronize session to approved
+      session.status = 'approved';
+      localStorage.setItem('riderSession', JSON.stringify(session));
+      sessionStorage.setItem('riderSession', JSON.stringify(session));
+    } else {
+      window.location.replace('pending.html');
+      return;
+    }
   }
 
   // Suspension gate: If rider account is suspended, inform and log out
@@ -2461,7 +2470,7 @@ function loadSession() {
       sessionStorage.removeItem('riderSession');
       localStorage.removeItem('riderSession');
     } catch(_) {}
-    window.location.href = '../index.html';
+    window.location.replace('../index.html');
     return;
   }
 
@@ -2474,15 +2483,20 @@ function loadSession() {
           alert('Your rider account has been suspended by administration. Please contact K3K3 Support.');
           localStorage.removeItem('riderSession');
           sessionStorage.removeItem('riderSession');
-          window.location.href = '../index.html';
-        } else if (data.status === 'pending' || !data.isApproved) {
-          session.status = 'pending';
-          localStorage.setItem('riderSession', JSON.stringify(session));
-          sessionStorage.setItem('riderSession', JSON.stringify(session));
-          window.location.href = 'pending.html';
-        } else if (data.isApproved || data.status === 'approved') {
+          window.location.replace('../index.html');
+        } else if (data.status === 'pending' && !data.isApproved && session.status !== 'approved' && session.status !== 'active') {
+          const lastFromPending = sessionStorage.getItem('k3k3_redirect_from_pending');
+          const isRecentRedirect = lastFromPending && (Date.now() - Number(lastFromPending)) < 15000;
+          if (!isRecentRedirect) {
+            session.status = 'pending';
+            localStorage.setItem('riderSession', JSON.stringify(session));
+            sessionStorage.setItem('riderSession', JSON.stringify(session));
+            window.location.replace('pending.html');
+          }
+        } else if (data.isApproved || data.status === 'approved' || data.status === 'active') {
           session.status = 'approved';
           localStorage.setItem('riderSession', JSON.stringify(session));
+          sessionStorage.setItem('riderSession', JSON.stringify(session));
         }
       }
     })

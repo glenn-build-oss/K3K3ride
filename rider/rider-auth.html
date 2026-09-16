@@ -730,16 +730,26 @@
     }
 
     /* ── OTP Input Helpers ── */
-    function initOtpInputs(ids) {
+    function initOtpInputs(ids, onComplete) {
       const inputs = ids.map(id => document.getElementById(id));
       inputs.forEach((inp, i) => {
         inp.value = '';
         inp.oninput = () => {
           inp.value = inp.value.replace(/[^0-9]/g, '').slice(-1);
           if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
+          const code = ids.map(id => document.getElementById(id)?.value || '').join('');
+          if (code.length === 6 && /^\d{6}$/.test(code)) {
+            setTimeout(() => {
+              if (typeof onComplete === 'function') onComplete();
+            }, 150);
+          }
         };
         inp.onkeydown = e => {
           if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus();
+          if (e.key === 'Enter') {
+            const code = ids.map(id => document.getElementById(id)?.value || '').join('');
+            if (code.length === 6 && typeof onComplete === 'function') onComplete();
+          }
         };
         inp.onpaste = e => {
           e.preventDefault();
@@ -747,6 +757,12 @@
           [...paste].slice(0, 6).forEach((ch, j) => { if (inputs[i + j]) inputs[i + j].value = ch; });
           const next = Math.min(i + paste.length, inputs.length - 1);
           inputs[next].focus();
+          const code = ids.map(id => document.getElementById(id)?.value || '').join('');
+          if (code.length === 6 && /^\d{6}$/.test(code)) {
+            setTimeout(() => {
+              if (typeof onComplete === 'function') onComplete();
+            }, 150);
+          }
         };
       });
       inputs[0].focus();
@@ -761,18 +777,20 @@
     const suIds = ['u1','u2','u3','u4','u5','u6'];
 
     /* ── Generic OTP send via K3K3 backend → Moolre SMS ── */
-    async function sendOtpToPhone(phone) {
+    async function sendOtpToPhone(phone, purpose = 'login') {
       try {
         const res = await fetch(`${API_BASE}/api/auth/rider/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone })
+          body: JSON.stringify({ phone, purpose, isRegister: purpose === 'signup' })
         });
         const data = await res.json();
-        if (data.success) { showToast('Verification code sent!', 'success'); return; }
+        if (data.success) { showToast('Verification code sent!', 'success'); return true; }
         showToast(data.error || 'Failed to send code.', 'error');
+        return false;
       } catch(e) {
         showToast('Cannot reach server. Please try again.', 'error');
+        return false;
       }
     }
 
@@ -822,7 +840,7 @@
       document.getElementById('siPhoneStep').style.display = 'none';
       document.getElementById('siOtpStep').classList.add('show');
       document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + rawPhone.replace(/^0/, '') + '. Enter it below to sign in.';
-      initOtpInputs(siIds);
+      initOtpInputs(siIds, verifySiOtp);
 
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
     }
@@ -950,18 +968,20 @@
         });
         const data = await res.json();
         if (!data.success) {
-          showErr('suError', 'suErrorText', data.error || 'Registration failed.');
+          showErr('suError', 'suErrorText', data.error || 'This phone number has already been used to register for a rider account. Please sign in instead.');
           btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
           return;
         }
       } catch(e) {
-        await sendOtpToPhone(phone); // fallback to just OTP
+        showErr('suError', 'suErrorText', 'Unable to reach server. Please check your internet connection and try again.');
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
+        return;
       }
 
       document.getElementById('suDetailsStep').style.display = 'none';
       document.getElementById('suOtpStep').classList.add('show');
       document.getElementById('suOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + phone.replace(/^0/, '') + '. Enter it to continue to your application.';
-      initOtpInputs(suIds);
+      initOtpInputs(suIds, verifySuOtp);
 
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
     }
@@ -972,7 +992,7 @@
       hideErr('suOtpError'); clearOtp(suIds);
     }
 
-    async function resendSuOtp() { clearOtp(suIds); await sendOtpToPhone(suPhone); }
+    async function resendSuOtp() { clearOtp(suIds); await sendOtpToPhone(suPhone, 'signup'); }
 
     async function verifySuOtp() {
       hideErr('suOtpError');

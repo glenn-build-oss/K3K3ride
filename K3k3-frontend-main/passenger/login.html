@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>K3K3 | Passenger Login & Sign Up</title>
-    <meta name="description" content="Login or create your K3K3 account — your premium keke ride-sharing service in Ho, Ghana.">
+    <title>K3K3 | Passenger Login & Sign Up - Ho, Volta Region</title>
+    <meta name="description" content="Login or create your K3K3 passenger account. Safe, fast and affordable tricycle rides across Ho, HTU, and UHAS campuses.">
+    <link rel="canonical" href="https://k3k3ride.com/passenger/login.html">
     <link rel="icon" type="image/png" href="../assets/k3k3.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -247,37 +248,21 @@
         .phone-field-wrap {
             display: flex;
             gap: 0;
+            width: 100%;
             border: 2px solid var(--border);
             border-radius: var(--r);
             overflow: hidden;
-            transition: border-color 0.2s;
+            background: var(--surface);
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .phone-field-wrap:focus-within {
             border-color: var(--yellow-dk);
-        }
-
-        .country-code-select {
-            appearance: none;
-            -webkit-appearance: none;
-            background: var(--surface);
-            border: none;
-            border-right: 2px solid var(--border);
-            padding: 0 14px;
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text);
-            cursor: pointer;
-            min-width: 90px;
-            outline: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            padding-right: 28px;
+            background: #ffffff;
         }
 
         .phone-number-input {
+            width: 100%;
             flex: 1;
             border: none;
             outline: none;
@@ -653,7 +638,7 @@
                 padding: 10px 12px;
             }
 
-            .country-code-select {
+            .phone-prefix {
                 font-size: 0.8rem;
                 padding: 0 10px;
                 min-width: 75px;
@@ -788,7 +773,7 @@
 
         /* Touch-friendly improvements */
         @media (pointer: coarse) {
-            .otp-btn, .auth-switch-btn, .country-code-select, .text-input, .phone-number-input {
+            .otp-btn, .auth-switch-btn, .phone-prefix, .text-input, .phone-number-input {
                 min-height: 48px;
                 min-width: 48px;
             }
@@ -874,26 +859,14 @@
                             <div class="field-group">
                                 <label class="field-label" for="phoneInput">Phone Number</label>
                                 <div class="phone-field-wrap">
-                                    <select class="country-code-select" id="countryCode" aria-label="Country code">
-                                        <option value="+233">🇬🇭 +233</option>
-                                        <option value="+234">🇳🇬 +234</option>
-                                        <option value="+254">🇰🇪 +254</option>
-                                        <option value="+255">🇹🇿 +255</option>
-                                        <option value="+256">🇺🇬 +256</option>
-                                        <option value="+27">🇿🇦 +27</option>
-                                        <option value="+44">🇬🇧 +44</option>
-                                        <option value="+1">🇺🇸 +1</option>
-                                        <option value="+49">🇩🇪 +49</option>
-                                        <option value="+33">🇫🇷 +33</option>
-                                    </select>
                                     <input
                                         type="tel"
                                         id="phoneInput"
                                         class="phone-number-input"
-                                        placeholder="024 000 0000"
+                                        placeholder="024 123 4567"
                                         autocomplete="tel"
                                         inputmode="numeric"
-                                        maxlength="15"
+                                        maxlength="10"
                                     >
                                 </div>
                             </div>
@@ -984,26 +957,14 @@
                         <div class="field-group">
                             <label class="field-label" for="signupPhone">Phone Number</label>
                             <div class="phone-field-wrap">
-                                <select class="country-code-select" id="signupCountryCode" aria-label="Country code">
-                                    <option value="+233">🇬🇭 +233</option>
-                                    <option value="+234">🇳🇬 +234</option>
-                                    <option value="+254">🇰🇪 +254</option>
-                                    <option value="+255">🇹🇿 +255</option>
-                                    <option value="+256">🇺🇬 +256</option>
-                                    <option value="+27">🇿🇦 +27</option>
-                                    <option value="+44">🇬🇧 +44</option>
-                                    <option value="+1">🇺🇸 +1</option>
-                                    <option value="+49">🇩🇪 +49</option>
-                                    <option value="+33">🇫🇷 +33</option>
-                                </select>
                                 <input
                                     type="tel"
                                     id="signupPhone"
                                     class="phone-number-input"
-                                    placeholder="024 000 0000"
+                                    placeholder="024 123 4567"
                                     autocomplete="tel"
                                     inputmode="numeric"
-                                    maxlength="15"
+                                    maxlength="10"
                                     required
                                 >
                             </div>
@@ -1041,25 +1002,38 @@
     </div>
 
     <script>
-        // ─── Toast ───
-        function showToast(msg, type = 'info') {
-            const iconMap = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+        const API_BASE = '';
+        let currentPhone = ''; 
+
+        function showToast(msg, type = 'success') {
+            const colors = {
+                success: 'linear-gradient(135deg, #059669, #10B981)',
+                error: 'linear-gradient(135deg, #DC2626, #EF4444)',
+                info: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)'
+            };
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
             const el = document.createElement('div');
-            el.className = `toast ${type}`;
+            el.style.cssText = `
+                display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:14px;
+                color:#fff;font-size:0.875rem;font-weight:600;pointer-events:all;
+                box-shadow:0 12px 32px rgba(0,0,0,0.22);min-width:280px;max-width:360px;
+                background:${colors[type] || colors.info};
+                animation:slideInToast .35s cubic-bezier(.34,1.56,.64,1);
+            `;
             el.innerHTML = `
-                <div class="toast-icon"><i class="fas ${iconMap[type] || 'fa-info-circle'}"></i></div>
-                <div class="toast-text">${msg}</div>
+                <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
+                </div>
+                <div style="flex:1;line-height:1.4">${msg}</div>
             `;
             document.getElementById('toast-container').appendChild(el);
-            setTimeout(() => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateX(20px)';
-                el.style.transition = 'all 0.35s ease';
-                setTimeout(() => el.remove(), 350);
-            }, 3800);
+            setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = 'all .35s'; setTimeout(() => el.remove(), 400); }, 3800);
         }
 
-        // ─── Section switches ───
         function showSignup() {
             document.getElementById('loginSection').classList.add('step-hidden');
             document.getElementById('signupSection').classList.remove('step-hidden');
@@ -1072,19 +1046,17 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Check URL hash for signup
         if (window.location.hash === '#signup') {
             showSignup();
         }
 
-        // ─── Send OTP Handler ───
-        function handleSendOTP(e) {
+        async function handleSendOTP(e) {
             e.preventDefault();
             const phone = document.getElementById('phoneInput').value.trim();
-            const countryCode = document.getElementById('countryCode').value;
+            const cleanPhone = phone.replace(/\D/g, '');
 
-            if (!phone || phone.replace(/\D/g, '').length < 6) {
-                showToast('Please enter a valid phone number.', 'error');
+            if (!cleanPhone || cleanPhone.length !== 10) {
+                showToast('Please enter a valid 10-digit phone number (e.g. 024 123 4567).', 'error');
                 return;
             }
 
@@ -1092,23 +1064,52 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
 
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/passenger/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                const data = await res.json();
 
-                const fullPhone = countryCode + ' ' + phone;
-                document.getElementById('otpSentMsg').textContent =
-                    `We sent a 6-digit code to ${fullPhone}. Enter it below.`;
-                document.getElementById('phoneStep').style.display = 'none';
-                document.getElementById('verifyStep').classList.add('show');
-                document.getElementById('d1').focus();
+                if (data.success) {
+                    currentPhone = phone;
+                    document.getElementById('phoneStep').style.display = 'none';
+                    document.getElementById('verifyStep').classList.add('show');
+                    document.getElementById('d1').focus();
 
-                showToast('OTP sent successfully!', 'success');
-            }, 1200);
+                    if (data._otp) {
+                        // SMS not working yet — show OTP directly on screen
+                        document.getElementById('otpSentMsg').innerHTML =
+                            `⚠️ SMS not active yet. Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${data._otp}</strong><br><small>Enter this code below to log in.</small>`;
+                        showToast(`Your OTP: ${data._otp}`, 'info');
+                    } else {
+                        document.getElementById('otpSentMsg').textContent =
+                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')}. Enter it below.`;
+                        showToast('Verification code sent!', 'success');
+                    }
+                } else {
+                    showToast(data.error || 'Failed to send OTP.', 'error');
+                }
+            } catch (err) {
+                console.error('Send OTP error:', err);
+                showToast('Cannot reach server. Please try again.', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
         }
 
-        // ─── OTP digit auto-advance ───
         document.addEventListener('DOMContentLoaded', () => {
+            ['phoneInput', 'signupPhone'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                    });
+                }
+            });
+
             const digits = document.querySelectorAll('.otp-digit');
             digits.forEach((inp, i) => {
                 inp.addEventListener('input', () => {
@@ -1129,38 +1130,107 @@
                     });
                     const next = digits[Math.min(i + paste.length, digits.length - 1)];
                     if (next) next.focus();
+                    if (Array.from(digits).every(d => d.value && d.value.length === 1)) {
+                        setTimeout(handleVerifyOTP, 200);
+                    }
                 });
             });
         });
 
-        // ─── Verify OTP — bypass auth, go straight to dashboard ───
-        function handleVerifyOTP() {
+        async function handleVerifyOTP() {
+            const digits = document.querySelectorAll('.otp-digit');
+            const otp = Array.from(digits).map(d => d.value).join('');
+
+            if (otp.length < 6) {
+                showToast('Please enter the complete 6-digit code.', 'error');
+                return;
+            }
+
             const btn = document.getElementById('verifyOtpBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
-            try {
-                localStorage.setItem('k3k3_user', JSON.stringify({
-                    fname: 'Passenger',
-                    lname: '',
-                    name: 'Passenger',
-                    email: '',
-                    phone: document.getElementById('phoneInput').value,
-                    id: 'guest',
-                    role_type: 'passenger'
-                }));
-                localStorage.setItem('k3k3_user_type', 'passenger');
-                localStorage.setItem('k3k3_user_name', 'Passenger');
-            } catch (err) {
-                console.warn('Storage error:', err);
-            }
+            const signupName = sessionStorage.getItem('k3k3_signup_name') || '';
 
-            setTimeout(() => {
-                showToast('Verified! Taking you to your dashboard.', 'success');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 900);
-            }, 1000);
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/passenger/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone, otp, fullName: signupName })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const realFullName = data.user.fullName || (data.user.firstName ? `${data.user.firstName} ${data.user.lastName || ''}`.trim() : '') || signupName || '';
+                    const realFirstName = data.user.firstName || (realFullName ? realFullName.split(' ')[0] : '') || '';
+                    const realLastName = data.user.lastName || (realFullName ? realFullName.split(' ').slice(1).join(' ') : '') || '';
+                    const isRider = data.user?.role === 'rider' || data.user?.role_type === 'rider' || data.isRider;
+                    if (isRider) {
+                        try {
+                            const riderSession = {
+                                riderId: data.user.id,
+                                id: data.user.id,
+                                dbRiderId: data.user.id,
+                                userId: data.user.id,
+                                phone: data.user.phone,
+                                firstName: realFirstName || 'Rider',
+                                lastName: realLastName || '',
+                                fullName: realFullName || displayName,
+                                email: data.user.email || '',
+                                token: data.token,
+                                loginTime: new Date().toISOString(),
+                                status: data.user.status || data.status || 'approved',
+                                role: 'rider'
+                            };
+                            localStorage.setItem('riderSession', JSON.stringify(riderSession));
+                            sessionStorage.setItem('riderSession', JSON.stringify(riderSession));
+                            localStorage.setItem('k3k3_user_type', 'rider');
+                            localStorage.setItem('k3k3_token', data.token);
+                            sessionStorage.removeItem('k3k3_signup_name');
+                        } catch (err) {
+                            console.warn('Rider storage error:', err);
+                        }
+
+                        showToast(`Welcome Rider ${displayName}! Taking you to your Rider Dashboard.`, 'success');
+                        setTimeout(() => {
+                            window.location.href = '../rider/dashboard.html';
+                        }, 900);
+                        return;
+                    }
+
+                    try {
+                        localStorage.setItem('k3k3_user', JSON.stringify({
+                            fname: realFirstName,
+                            lname: realLastName,
+                            name: realFullName || displayName,
+                            email: data.user.email || '',
+                            phone: data.user.phone,
+                            id: data.user.id,
+                            role_type: 'passenger'
+                        }));
+                        localStorage.setItem('k3k3_user_type', 'passenger');
+                        localStorage.setItem('k3k3_user_name', displayName);
+                        localStorage.setItem('k3k3_token', data.token);
+                        sessionStorage.removeItem('k3k3_signup_name');
+                    } catch (err) {
+                        console.warn('Storage error:', err);
+                    }
+
+                    showToast(`Welcome ${displayName}! Taking you to your dashboard.`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 900);
+                } else {
+                    showToast(data.error || 'Invalid code.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Continue';
+                }
+            } catch (err) {
+                console.error('Verify OTP error:', err);
+                showToast('Cannot reach server. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Continue';
+            }
         }
 
         function goBackToPhone() {
@@ -1169,26 +1239,39 @@
             document.querySelectorAll('.otp-digit').forEach(d => d.value = '');
         }
 
-        function resendOTP(e) {
+        async function resendOTP(e) {
             e.preventDefault();
-            showToast('New OTP sent!', 'success');
             document.querySelectorAll('.otp-digit').forEach(d => d.value = '');
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/passenger/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('New code sent!', 'success');
+                } else {
+                    showToast(data.error || 'Failed to resend.', 'error');
+                }
+            } catch (err) {
+                showToast('Cannot reach server.', 'error');
+            }
             document.getElementById('d1').focus();
         }
 
-        // ─── Sign Up Handler ───
-        function handleSignup(e) {
+        async function handleSignup(e) {
             e.preventDefault();
             const fullName = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('signupPhone').value.trim();
-            const countryCode = document.getElementById('signupCountryCode').value;
 
             if (!fullName || fullName.length < 2) {
                 showToast('Please enter your full name.', 'error');
                 return;
             }
-            if (!phone || phone.replace(/\D/g, '').length < 6) {
-                showToast('Please enter a valid phone number.', 'error');
+            const cleanPhone = phone.replace(/\D/g, '');
+            if (!cleanPhone || cleanPhone.length !== 10) {
+                showToast('Please enter a valid 10-digit phone number (e.g. 024 123 4567).', 'error');
                 return;
             }
 
@@ -1196,29 +1279,40 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
 
-            // Store basic signup session
-            setTimeout(() => {
-                try {
-                    const fullPhone = countryCode + phone;
-                    sessionStorage.setItem('k3k3_user', JSON.stringify({
-                        fname: fullName.split(' ')[0],
-                        lname: fullName.split(' ').slice(1).join(' '),
-                        email: '',
-                        phone: fullPhone,
-                        id: 'new_' + Date.now(),
-                        role_type: 'passenger'
-                    }));
-                    sessionStorage.setItem('k3k3_user_type', 'passenger');
-                    sessionStorage.setItem('k3k3_user_name', fullName.split(' ')[0]);
-                } catch (err) {
-                    console.warn('Storage error:', err);
-                }
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/passenger/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, fullName })
+                });
+                const data = await res.json();
 
-                showToast('Account created! Welcome to K3K3 🎉', 'success');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1200);
-            }, 1500);
+                if (data.success) {
+                    currentPhone = phone;
+                    try {
+                        sessionStorage.setItem('k3k3_signup_name', fullName);
+                    } catch(e) {}
+
+                    showToast('Verification code sent! Please verify your number.', 'success');
+
+                    // Switch to login section and show OTP step
+                    document.getElementById('signupSection').classList.add('step-hidden');
+                    document.getElementById('loginSection').classList.remove('step-hidden');
+                    document.getElementById('otpSentMsg').textContent =
+                        `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')}. Enter it below.`;
+                    document.getElementById('phoneStep').style.display = 'none';
+                    document.getElementById('verifyStep').classList.add('show');
+                    document.getElementById('d1').focus();
+                } else {
+                    showToast(data.error || 'Registration failed.', 'error');
+                }
+            } catch (err) {
+                console.error('Signup error:', err);
+                showToast('Cannot reach server. Please try again.', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
         }
     </script>
 

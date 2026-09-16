@@ -1901,6 +1901,14 @@ function showRiderDetail(riderId){
     </div>
   `;
 
+  const riderDisplayId = rider.rider_id ||
+    rider.k3r_id ||
+    rider.app_ref ||
+    rider.application_ref ||
+    (rider.phone ? `K3R-${String(rider.phone).replace(/\D/g, '').slice(-6)}` : null) ||
+    rider.id ||
+    '—';
+
   const detailHtml=`
     ${isSuspended ? `
       <div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:var(--red);padding:12px 16px;border-radius:var(--r);font-size:.84rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
@@ -1916,7 +1924,7 @@ function showRiderDetail(riderId){
       <div style="width:64px;height:64px;border-radius:50%;background:${isSuspended?'rgba(255,255,255,.1)':'var(--yellow)'};color:${isSuspended?'var(--muted)':'var(--bg)'};display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800">${rider.fname?.charAt(0)||'R'}</div>
       <div>
         <div style="font-size:1.2rem;font-weight:800">${rider.fname} ${rider.lname}</div>
-        <div style="font-size:.85rem;color:var(--muted)">ID: ${rider.id}</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-top:2px">ID: <strong style="color:var(--yellow);font-family:monospace;letter-spacing:0.5px">${escapeHtml(riderDisplayId)}</strong></div>
         <div style="margin-top:4px"><span class="list-badge ${stBadgeClass}" style="${stBadgeStyle}"><i class="fas ${stBadgeIcon}" style="font-size:.5rem"></i>${stBadgeText}</span></div>
       </div>
     </div>

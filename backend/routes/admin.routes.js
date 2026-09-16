@@ -182,6 +182,22 @@ router.post(['/applications', '/api/admin/applications', '/api/applications'], a
     const firstName = body.first_name || body.fname || body.firstName || '';
     const lastName = body.last_name || body.lname || body.lastName || '';
 
+    // Validate 18+ age requirement
+    const dob = body.date_of_birth || body.dateOfBirth || body.dob;
+    if (dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      if (isNaN(birthDate.getTime()) || age < 18) {
+        return res.status(400).json({
+          success: false,
+          error: 'You must be at least 18 years old to apply as a rider.'
+        });
+      }
+    }
+
     // Find or associate user_id if valid UUID exists
     let userId = null;
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

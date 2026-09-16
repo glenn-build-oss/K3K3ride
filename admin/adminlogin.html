@@ -795,6 +795,9 @@
                     const target = document.getElementById(adminOtpIds[i + j]);
                     if (target) target.value = ch;
                 });
+                if (adminOtpIds.every(oid => document.getElementById(oid)?.value)) {
+                    setTimeout(verifyAdminOTP, 200);
+                }
             });
         });
 

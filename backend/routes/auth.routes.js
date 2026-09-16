@@ -489,7 +489,7 @@ router.put('/passenger/profile', async (req, res) => {
  */
 router.post('/rider/send-otp', async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { phone, isRegister, purpose } = req.body;
 
     if (!phone) {
       return res.status(400).json({ success: false, error: 'Phone number is required' });
@@ -500,6 +500,19 @@ router.post('/rider/send-otp', async (req, res) => {
       normalizedPhone = normalizePhone(phone);
     } catch (err) {
       return res.status(400).json({ success: false, error: err.message });
+    }
+
+    // Pre-check: if attempting registration, verify number is not already registered as a rider
+    if (isRegister || purpose === 'register' || purpose === 'signup') {
+      const existingRider = await findUserByPhone(normalizedPhone, 'rider');
+      const existingApp = await getRiderApplicationStatus(normalizedPhone);
+      if (existingRider || existingApp) {
+        return res.status(409).json({
+          success: false,
+          code: 'PHONE_ALREADY_REGISTERED',
+          error: 'This phone number has already been used to register for a rider account. Please sign in instead.'
+        });
+      }
     }
 
     const otpCode = generateOTP();
@@ -701,13 +714,13 @@ router.get('/rider/status', async (req, res) => {
       });
     }
 
-    const isAppPending = appStatus === 'pending' || appStatus === 'pending_review' || appStatus === 'under_review';
-    const isApproved = !isAppPending && ((appStatus === 'approved') || (!appStatus && (userStatus === 'active' || userStatus === 'approved')));
+    const isApproved = (appStatus === 'approved') || (userStatus === 'active') || (userStatus === 'approved');
     const finalStatus = isApproved ? 'approved' : (appStatus || userStatus || 'pending');
 
     res.json({
       success: true,
       status: finalStatus,
+      isApproved: isApproved,
       application_ref: app?.app_ref || (app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null),
       app_ref: app?.app_ref || (app?.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null),
       first_name: app?.first_name || user?.first_name || '',
@@ -744,6 +757,17 @@ router.post('/rider/register', async (req, res) => {
       normalizedPhone = normalizePhone(phone);
     } catch (err) {
       return res.status(400).json({ success: false, error: err.message });
+    }
+
+    // Pre-check if phone number is already registered as a rider
+    const existingRider = await findUserByPhone(normalizedPhone, 'rider');
+    const existingApp = await getRiderApplicationStatus(normalizedPhone);
+    if (existingRider || existingApp) {
+      return res.status(409).json({
+        success: false,
+        code: 'PHONE_ALREADY_REGISTERED',
+        error: 'This phone number has already been used to register for a rider account. Please sign in instead.'
+      });
     }
 
     // Create rider with pending status

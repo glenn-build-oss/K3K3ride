@@ -33,18 +33,33 @@ function requireSupabase() {
  * Find user by phone number
  */
 async function findUserByPhone(phone, role) {
-  const { data, error } = await requireSupabase()
+  if (!phone) return null;
+  const rawDigits = String(phone).replace(/\D/g, '');
+  const last9 = rawDigits.slice(-9);
+  const possiblePhones = [
+    phone,
+    `+233${last9}`,
+    `233${last9}`,
+    `0${last9}`
+  ].filter(Boolean);
+  const uniquePhones = [...new Set(possiblePhones)];
+
+  let query = requireSupabase()
     .from('users')
     .select('*')
-    .eq('phone', phone)
-    .eq('role', role)
-    .single();
+    .in('phone', uniquePhones);
+
+  if (role) {
+    query = query.eq('role', role);
+  }
+
+  const { data, error } = await query.limit(1);
 
   if (error && error.code !== 'PGRST116') {
     console.error('[Supabase] Error finding user by phone:', error);
   }
 
-  return data || null;
+  return (data && data.length > 0) ? data[0] : null;
 }
 
 /**
@@ -1205,9 +1220,18 @@ async function getApprovedRiders() {
         const riderStatus = (u.status === 'suspended' || matchingApp?.status === 'suspended') ? 'suspended' : 'active';
         const isAvailable = riderStatus === 'suspended' ? false : (u.is_available ?? true);
 
+        const cleanRiderId = matchingApp?.rider_id ||
+          matchingApp?.app_ref ||
+          u.rider_id ||
+          (u.phone ? `K3R-${String(u.phone).replace(/\D/g, '').slice(-6)}` : `K3R-${String(u.id).slice(0, 6)}`);
+        const cleanAppRef = matchingApp?.app_ref || (matchingApp?.id ? `APP-${matchingApp.id.substring(0, 8).toUpperCase()}` : null);
+
         const riderObj = {
           id: u.id,
           user_id: u.id,
+          rider_id: cleanRiderId,
+          k3r_id: cleanRiderId,
+          app_ref: cleanAppRef,
           fname: u.first_name || matchingApp?.first_name || 'Rider',
           lname: u.last_name || matchingApp?.last_name || '',
           phone: u.phone || matchingApp?.phone || '',
@@ -1243,8 +1267,15 @@ async function getApprovedRiders() {
         if (app.phone && !processedPhones.has(app.phone)) {
           processedPhones.add(app.phone);
           const appStatus = app.status === 'suspended' ? 'suspended' : 'active';
+          const cleanAppRiderId = app.rider_id ||
+            app.app_ref ||
+            (app.phone ? `K3R-${String(app.phone).replace(/\D/g, '').slice(-6)}` : `K3R-${String(app.id).slice(0, 6)}`);
+          const cleanAppRef = app.app_ref || (app.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null);
           ridersList.push({
             id: app.user_id || app.id,
+            rider_id: cleanAppRiderId,
+            k3r_id: cleanAppRiderId,
+            app_ref: cleanAppRef,
             fname: app.first_name || 'Rider',
             lname: app.last_name || '',
             phone: app.phone || '',

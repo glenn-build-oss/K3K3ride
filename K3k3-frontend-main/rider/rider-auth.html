@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>K3K3 | Rider Sign In &amp; Sign Up</title>
-  <meta name="description" content="Sign in or register as a K3K3 Rider. Start earning with every trip across Ghana.">
+  <title>K3K3 | Driver Sign In &amp; Registration - Ho, Volta Region</title>
+  <meta name="description" content="Sign in or register as a K3K3 Rider in Ho, Volta Region. Start earning with every trip across HTU, UHAS, and Ho township.">
+  <link rel="canonical" href="https://k3k3ride.com/rider/rider-auth.html">
   <link rel="icon" type="image/png" href="../assets/k3k3.png">
   <link rel="shortcut icon" href="../favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -14,6 +15,7 @@
   <style>
     :root {
       --black:    #111111;
+      --black-2:  #222222;
       --yellow:   #FFD60A;
       --yellow-dk:#E6C000;
       --yellow-lt:rgba(255,214,10,0.1);
@@ -29,6 +31,7 @@
       --r-lg:     18px;
       --r-xl:     24px;
       --r-full:   999px;
+      --ease:     cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -195,28 +198,16 @@
     }
 
     .phone-field-wrap {
-      display: flex; gap: 0;
+      display: flex; gap: 0; width: 100%;
       border: 2px solid var(--border);
       border-radius: var(--r); overflow: hidden;
-      transition: border-color 0.2s;
+      background: var(--surface);
+      transition: border-color 0.2s, background-color 0.2s;
     }
-    .phone-field-wrap:focus-within { border-color: var(--yellow-dk); }
-
-    .country-code-select {
-      appearance: none; -webkit-appearance: none;
-      background: var(--surface); border: none;
-      border-right: 2px solid var(--border);
-      padding: 0 14px; font-family: inherit;
-      font-size: 0.875rem; font-weight: 600; color: var(--text);
-      cursor: pointer; min-width: 90px; outline: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-      padding-right: 28px;
-    }
+    .phone-field-wrap:focus-within { border-color: var(--yellow-dk); background: #ffffff; }
 
     .phone-number-input {
-      flex: 1; border: none; outline: none;
+      width: 100%; flex: 1; border: none; outline: none;
       padding: 14px 16px; font-family: inherit;
       font-size: 1rem; font-weight: 500; color: var(--text);
       background: transparent;
@@ -236,21 +227,21 @@
     /* ─── Buttons - Professional Uber/Bolt Style ─── */
     .otp-btn {
       width: 100%; padding: 14px 24px;
-      background: var(--black); color: var(--white);
+      background: #111111; color: #ffffff;
       border: none; border-radius: 24px;
       font-family: inherit; font-size: 1rem; font-weight: 600;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       gap: 10px; transition: all 0.2s var(--ease); margin-top: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .otp-btn:hover { background: var(--black-2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .otp-btn:hover { background: #222222; color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
     .otp-btn:active { transform: translateY(0); }
     .otp-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
     .otp-btn.dark-btn {
-      background: var(--black); color: var(--white);
+      background: #111111; color: #ffffff;
     }
-    .otp-btn.dark-btn:hover { background: var(--black-2); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .otp-btn.dark-btn:hover { background: #222222; color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
 
     /* ─── Switch banner ─── */
     .auth-switch-banner {
@@ -262,14 +253,14 @@
     .auth-switch-banner p { font-size: 0.875rem; color: var(--text-2); font-weight: 500; }
     .auth-switch-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      background: var(--black); color: var(--white);
+      background: #111111; color: #ffffff;
       border: none; border-radius: 20px;
       padding: 8px 18px; font-family: inherit;
       font-size: 0.82rem; font-weight: 600; cursor: pointer;
       transition: all 0.2s var(--ease); white-space: nowrap; text-decoration: none;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .auth-switch-btn:hover { background: var(--black-2); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .auth-switch-btn:hover { background: #222222; color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
     /* ─── Terms ─── */
     .terms-note {
@@ -411,7 +402,7 @@
       .form-subtitle { font-size: 0.75rem; }
       .field-label { font-size: 0.65rem; }
       .text-input, .phone-number-input { font-size: 0.85rem; padding: 10px 12px; }
-      .country-code-select { font-size: 0.8rem; padding: 0 10px; min-width: 75px; }
+      .phone-prefix { font-size: 0.8rem; padding: 0 10px; min-width: 75px; }
       .otp-btn { padding: 10px 16px; font-size: 0.85rem; }
       .mobile-brand-name { font-size: 1.1rem; }
       .mobile-brand-logo { width: 35px; height: 35px; }
@@ -444,7 +435,7 @@
 
     /* Touch-friendly improvements */
     @media (pointer: coarse) {
-      .otp-btn, .auth-switch-btn, .country-code-select, .text-input, .phone-number-input {
+      .otp-btn, .auth-switch-btn, .phone-prefix, .text-input, .phone-number-input {
         min-height: 48px;
         min-width: 48px;
       }
@@ -469,19 +460,19 @@
           <img src="../assets/k3k3.png" alt="K3K3" class="brand-logo" onerror="this.style.display='none'">
           <div>
             <div class="brand-name">K3K3</div>
-            <div class="brand-tagline">Rider Portal</div>
+            <div class="brand-tagline">Driver Portal</div>
           </div>
         </div>
 
         <div class="left-hero">
-          <div class="left-badge"><i class="fas fa-motorcycle"></i> Ride &amp; Earn</div>
+          <div class="left-badge"><i class="fas fa-motorcycle"></i> Drive &amp; Earn</div>
           <h2 class="left-title">Drive.<br>Earn.<br><span>Repeat.</span></h2>
           <p class="left-sub">Join K3K3 and start earning on your schedule. Fast pickups, real income, full flexibility across Ghana.</p>
 
           <div class="trust-pills">
             <div class="trust-pill">
               <i class="fas fa-shield-alt"></i>
-              <span>Verified, approved rider accounts</span>
+              <span>Verified, approved driver accounts</span>
             </div>
             <div class="trust-pill">
               <i class="fas fa-coins"></i>
@@ -489,11 +480,11 @@
             </div>
             <div class="trust-pill">
               <i class="fas fa-star"></i>
-              <span>4.8&#9733; average rider rating</span>
+              <span>4.8&#9733; average driver rating</span>
             </div>
             <div class="trust-pill">
               <i class="fas fa-clock"></i>
-              <span>Set your own hours, ride on demand</span>
+              <span>Set your own hours, drive on demand</span>
             </div>
           </div>
         </div>
@@ -519,7 +510,7 @@
 
           <!-- Step 1: Phone Number -->
           <div id="siPhoneStep">
-            <div class="form-eyebrow"><i class="fas fa-sign-in-alt"></i>&nbsp; Rider Sign In</div>
+            <div class="form-eyebrow"><i class="fas fa-sign-in-alt"></i>&nbsp; Driver Sign In</div>
             <h1 class="form-title">Welcome back</h1>
             <p class="form-subtitle">Enter your registered phone number to receive a one-time verification code.</p>
 
@@ -532,18 +523,8 @@
               <div class="field-group">
                 <label class="field-label" for="siPhone">Phone Number</label>
                 <div class="phone-field-wrap">
-                  <select class="country-code-select" id="siCountryCode" aria-label="Country code">
-                    <option value="+233">&#127468;&#127469; +233</option>
-                    <option value="+234">&#127475;&#127468; +234</option>
-                    <option value="+254">&#127472;&#127466; +254</option>
-                    <option value="+255">&#127481;&#127487; +255</option>
-                    <option value="+256">&#127482;&#127468; +256</option>
-                    <option value="+27">&#127487;&#127462; +27</option>
-                    <option value="+44">&#127468;&#127463; +44</option>
-                    <option value="+1">&#127482;&#127480; +1</option>
-                  </select>
                   <input type="tel" id="siPhone" class="phone-number-input"
-                    placeholder="024 000 0000" autocomplete="tel" inputmode="numeric" maxlength="15">
+                    placeholder="024 123 4567" autocomplete="tel" inputmode="numeric" maxlength="10">
                 </div>
               </div>
 
@@ -619,8 +600,8 @@
             </button>
 
             <div class="form-eyebrow"><i class="fas fa-user-plus"></i>&nbsp; Create Account</div>
-            <h1 class="form-title">Become a Rider</h1>
-            <p class="form-subtitle">Tell us about yourself. After verification you'll complete your full rider application.</p>
+            <h1 class="form-title">Become a Driver</h1>
+            <p class="form-subtitle">Tell us about yourself. After verification you'll complete your full driver application.</p>
 
             <div class="error-box" id="suError">
               <i class="fas fa-exclamation-circle"></i>
@@ -645,18 +626,8 @@
             <div class="field-group">
               <label class="field-label" for="suPhone">Phone Number</label>
               <div class="phone-field-wrap">
-                <select class="country-code-select" id="suCountryCode" aria-label="Country code">
-                  <option value="+233">&#127468;&#127469; +233</option>
-                  <option value="+234">&#127475;&#127468; +234</option>
-                  <option value="+254">&#127472;&#127466; +254</option>
-                  <option value="+255">&#127481;&#127487; +255</option>
-                  <option value="+256">&#127482;&#127468; +256</option>
-                  <option value="+27">&#127487;&#127462; +27</option>
-                  <option value="+44">&#127468;&#127463; +44</option>
-                  <option value="+1">&#127482;&#127480; +1</option>
-                </select>
                 <input type="tel" id="suPhone" class="phone-number-input"
-                  placeholder="024 000 0000" inputmode="numeric" maxlength="15">
+                  placeholder="024 123 4567" inputmode="numeric" maxlength="10">
               </div>
             </div>
 
@@ -666,7 +637,7 @@
 
             <div class="admin-note">
               <i class="fas fa-shield-check"></i>
-              <p><strong>Rider accounts require admin approval</strong> before your first ride. You will be notified once your application has been reviewed and approved.</p>
+              <p><strong>Driver accounts require admin approval</strong> before your first ride. You will be notified once your application has been reviewed and approved.</p>
             </div>
 
             <div class="auth-switch-banner" style="margin-top:16px;">
@@ -717,7 +688,7 @@
   </div><!-- /login-wrapper -->
 
   <script>
-    const API_BASE = 'http://localhost:8810';
+    const API_BASE = '';
     let siPhone = '';
     let suPhone = '';
 
@@ -759,16 +730,26 @@
     }
 
     /* ── OTP Input Helpers ── */
-    function initOtpInputs(ids) {
+    function initOtpInputs(ids, onComplete) {
       const inputs = ids.map(id => document.getElementById(id));
       inputs.forEach((inp, i) => {
         inp.value = '';
         inp.oninput = () => {
           inp.value = inp.value.replace(/[^0-9]/g, '').slice(-1);
           if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
+          const code = ids.map(id => document.getElementById(id)?.value || '').join('');
+          if (code.length === 6 && /^\d{6}$/.test(code)) {
+            setTimeout(() => {
+              if (typeof onComplete === 'function') onComplete();
+            }, 150);
+          }
         };
         inp.onkeydown = e => {
           if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus();
+          if (e.key === 'Enter') {
+            const code = ids.map(id => document.getElementById(id)?.value || '').join('');
+            if (code.length === 6 && typeof onComplete === 'function') onComplete();
+          }
         };
         inp.onpaste = e => {
           e.preventDefault();
@@ -776,6 +757,12 @@
           [...paste].slice(0, 6).forEach((ch, j) => { if (inputs[i + j]) inputs[i + j].value = ch; });
           const next = Math.min(i + paste.length, inputs.length - 1);
           inputs[next].focus();
+          const code = ids.map(id => document.getElementById(id)?.value || '').join('');
+          if (code.length === 6 && /^\d{6}$/.test(code)) {
+            setTimeout(() => {
+              if (typeof onComplete === 'function') onComplete();
+            }, 150);
+          }
         };
       });
       inputs[0].focus();
@@ -789,34 +776,47 @@
     const siIds = ['s1','s2','s3','s4','s5','s6'];
     const suIds = ['u1','u2','u3','u4','u5','u6'];
 
-    /* ── Generic OTP send (dev: shows code in toast) ── */
-    async function sendOtpToPhone(phone) {
+    /* ── Generic OTP send via K3K3 backend → Moolre SMS ── */
+    async function sendOtpToPhone(phone, purpose = 'login') {
       try {
-        const res = await fetch(`${API_BASE}/auth/rider/send-otp`, {
+        const res = await fetch(`${API_BASE}/api/auth/rider/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone })
+          body: JSON.stringify({ phone, purpose, isRegister: purpose === 'signup' })
         });
-        if (res.ok) { showToast('Verification code sent to ' + phone, 'success'); return; }
-      } catch(e) {}
-      // Dev mode fallback
-      showToast('Code sent! (Dev: use any 6 digits)', 'info');
+        const data = await res.json();
+        if (data.success) { showToast('Verification code sent!', 'success'); return true; }
+        showToast(data.error || 'Failed to send code.', 'error');
+        return false;
+      } catch(e) {
+        showToast('Cannot reach server. Please try again.', 'error');
+        return false;
+      }
     }
 
-    /* ── Generic OTP verify ── */
+    /* ── Generic OTP verify via K3K3 backend ── */
     async function verifyOtpWithBackend(phone, otp) {
       try {
-        const res = await fetch(`${API_BASE}/auth/rider/verify-otp`, {
+        const res = await fetch(`${API_BASE}/api/auth/rider/verify-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone, otp })
         });
-        if (res.ok) { const d = await res.json().catch(()=>({})); return { ok: true, token: d.token || null }; }
-        if (res.status === 404) return { ok: true, token: null };
-        const err = await res.json().catch(()=>({}));
-        return { ok: false, msg: err.detail || 'Invalid code. Please try again.' };
+        const data = await res.json();
+        if (data.success) {
+          const userStatus = data.status || data.user?.status || '';
+          const isApproved = data.isApproved || userStatus === 'approved' || userStatus === 'active';
+          return {
+            ok: true,
+            token: data.token || null,
+            user: data.user,
+            status: isApproved ? 'approved' : (userStatus || 'pending'),
+            isApproved
+          };
+        }
+        return { ok: false, msg: data.error || 'Invalid code. Please try again.' };
       } catch(e) {
-        return { ok: true, token: null }; // dev fallback
+        return { ok: false, msg: 'Cannot reach server. Please try again.' };
       }
     }
 
@@ -826,22 +826,21 @@
     async function handleSendOTP(e) {
       e.preventDefault();
       hideErr('siPhoneError');
-      const code  = document.getElementById('siCountryCode').value;
-      const phone = document.getElementById('siPhone').value.trim().replace(/\s/g, '');
+      const rawPhone = document.getElementById('siPhone').value.trim().replace(/\D/g, '');
 
-      if (!phone) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter your phone number.'); return; }
-      if (!/^\d{7,15}$/.test(phone)) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter a valid phone number.'); return; }
+      if (!rawPhone) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter your phone number.'); return; }
+      if (rawPhone.length !== 10) { showErr('siPhoneError', 'siPhoneErrorText', 'Please enter a valid 10-digit phone number (e.g. 024 123 4567).'); return; }
 
-      siPhone = code + phone;
+      siPhone = rawPhone;
       const btn = document.getElementById('siSendBtn');
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
 
-      await sendOtpToPhone(siPhone);
+      await sendOtpToPhone(rawPhone);
 
       document.getElementById('siPhoneStep').style.display = 'none';
       document.getElementById('siOtpStep').classList.add('show');
-      document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to ' + siPhone + '. Enter it below to sign in.';
-      initOtpInputs(siIds);
+      document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + rawPhone.replace(/^0/, '') + '. Enter it below to sign in.';
+      initOtpInputs(siIds, verifySiOtp);
 
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
     }
@@ -864,31 +863,70 @@
 
       const result = await verifyOtpWithBackend(siPhone, otp);
       if (result.ok) {
+        const isApproved = result.isApproved || result.status === 'approved' || result.user?.status === 'approved' || result.user?.status === 'active';
+        const finalStatus = isApproved ? 'approved' : (result.status || 'pending');
+
+        let firstName = result.user?.firstName || result.user?.first_name || '';
+        let lastName  = result.user?.lastName  || result.user?.last_name  || '';
+        let appRef    = result.user?.app_ref   || result.user?.applicationRef || result.user?.appRef || '';
+
+        // Match against existing applications in localStorage if missing from backend
         try {
-          // Check existing session to get rider details
-          const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
-          localStorage.setItem('riderSession', JSON.stringify({
-            phone: siPhone,
-            firstName: existingSession.firstName || '',
-            lastName: existingSession.lastName || '',
-            email: existingSession.email || '',
-            token: result.token,
-            loginTime: new Date().toISOString(),
-            status: existingSession.status || 'pending'
-          }));
+          const apps = JSON.parse(localStorage.getItem('k3k3_applications') || '[]');
+          const cleanPhone = siPhone.replace(/\D/g, '').slice(-9);
+          const matched = apps.find(a => a.phone && a.phone.replace(/\D/g, '').slice(-9) === cleanPhone);
+          if (matched) {
+            firstName = firstName || matched.first_name || matched.firstName || '';
+            lastName  = lastName  || matched.last_name  || matched.lastName  || '';
+            appRef    = appRef    || matched.app_ref    || matched.appRef    || '';
+          }
         } catch(e) {}
 
-        showToast('Signed in successfully!', 'success');
+        try {
+          const lastApp = JSON.parse(localStorage.getItem('lastRiderApplication') || '{}');
+          if (lastApp.phone && lastApp.phone.replace(/\D/g, '').slice(-9) === siPhone.replace(/\D/g, '').slice(-9)) {
+            firstName = firstName || lastApp.firstName || '';
+            lastName  = lastName  || lastApp.lastName  || '';
+            appRef    = appRef    || lastApp.appRef    || '';
+          }
+        } catch(e) {}
 
-        // Check rider status and redirect accordingly
-        const session = JSON.parse(localStorage.getItem('riderSession') || '{}');
+        if (!appRef) {
+          try { appRef = localStorage.getItem('lastApplicationRef') || ''; } catch(e) {}
+        }
+
+        try {
+          const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+          const riderSessionData = {
+            riderId: result.user?.id || existingSession.riderId || existingSession.id || null,
+            id: result.user?.id || existingSession.id || null,
+            phone: siPhone,
+            firstName: firstName || existingSession.firstName || '',
+            lastName: lastName || existingSession.lastName || '',
+            email: result.user?.email || existingSession.email || '',
+            applicationRef: appRef || existingSession.applicationRef || existingSession.appRef || '',
+            appRef: appRef || existingSession.appRef || existingSession.applicationRef || '',
+            token: result.token,
+            loginTime: new Date().toISOString(),
+            status: finalStatus,
+            role: 'rider'
+          };
+          localStorage.setItem('riderSession', JSON.stringify(riderSessionData));
+          sessionStorage.setItem('riderSession', JSON.stringify(riderSessionData));
+          localStorage.setItem('k3k3_user_type', 'rider');
+          localStorage.setItem('lastRiderPhone', siPhone);
+          if (appRef) localStorage.setItem('lastApplicationRef', appRef);
+        } catch(e) {}
+
+        showToast(isApproved ? 'Signed in! Opening Driver Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
+
         setTimeout(() => {
-          if (session.status === 'approved') {
+          if (finalStatus === 'approved') {
             window.location.href = 'dashboard.html';
           } else {
-            window.location.href = 'rider-pending.html';
+            window.location.href = 'pending.html';
           }
-        }, 1000);
+        }, 800);
       } else {
         showErr('siOtpError', 'siOtpErrorText', result.msg);
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify &amp; Sign In';
@@ -903,31 +941,47 @@
       const firstName = document.getElementById('suFirstName').value.trim();
       const lastName  = document.getElementById('suLastName').value.trim();
       const email     = document.getElementById('suEmail').value.trim();
-      const code      = document.getElementById('suCountryCode').value;
-      const phone     = document.getElementById('suPhone').value.trim().replace(/\s/g, '');
+      const phone     = document.getElementById('suPhone').value.trim().replace(/\D/g, '');
 
       if (!firstName) { showErr('suError', 'suErrorText', 'Please enter your first name.'); document.getElementById('suFirstName').focus(); return; }
       if (!lastName)  { showErr('suError', 'suErrorText', 'Please enter your last name.'); document.getElementById('suLastName').focus(); return; }
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('suError', 'suErrorText', 'Please enter a valid email address.'); document.getElementById('suEmail').focus(); return; }
-      if (!phone || !/^\d{7,15}$/.test(phone)) { showErr('suError', 'suErrorText', 'Please enter a valid phone number.'); document.getElementById('suPhone').focus(); return; }
+      if (!phone || phone.length !== 10) { showErr('suError', 'suErrorText', 'Please enter a valid 10-digit phone number (e.g. 024 123 4567).'); document.getElementById('suPhone').focus(); return; }
 
-      suPhone = code + phone;
+      suPhone = phone;
 
       try {
         sessionStorage.setItem('riderRegPrefill', JSON.stringify({
-          firstName, lastName, email, phone, countryCode: code, fullPhone: suPhone
+          firstName, lastName, email, phone, fullPhone: phone
         }));
       } catch(e) {}
 
+      // Register via backend
       const btn = document.getElementById('suContinueBtn');
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
 
-      await sendOtpToPhone(suPhone);
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/rider/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, firstName, lastName, email })
+        });
+        const data = await res.json();
+        if (!data.success) {
+          showErr('suError', 'suErrorText', data.error || 'This phone number has already been used to register for a rider account. Please sign in instead.');
+          btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
+          return;
+        }
+      } catch(e) {
+        showErr('suError', 'suErrorText', 'Unable to reach server. Please check your internet connection and try again.');
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
+        return;
+      }
 
       document.getElementById('suDetailsStep').style.display = 'none';
       document.getElementById('suOtpStep').classList.add('show');
-      document.getElementById('suOtpMsg').textContent = 'We sent a 6-digit code to ' + suPhone + '. Enter it to continue to your application.';
-      initOtpInputs(suIds);
+      document.getElementById('suOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + phone.replace(/^0/, '') + '. Enter it to continue to your application.';
+      initOtpInputs(suIds, verifySuOtp);
 
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
     }
@@ -938,7 +992,7 @@
       hideErr('suOtpError'); clearOtp(suIds);
     }
 
-    async function resendSuOtp() { clearOtp(suIds); await sendOtpToPhone(suPhone); }
+    async function resendSuOtp() { clearOtp(suIds); await sendOtpToPhone(suPhone, 'signup'); }
 
     async function verifySuOtp() {
       hideErr('suOtpError');
@@ -972,7 +1026,15 @@
       }
     }
 
-    /* ── Clear errors on input ── */
+    /* ── Phone 10-digit filter and error clear on input ── */
+    ['siPhone', 'suPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', function () {
+          this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+      }
+    });
     document.getElementById('siPhone').addEventListener('input', () => hideErr('siPhoneError'));
     ['suFirstName','suLastName','suEmail','suPhone'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => hideErr('suError'));

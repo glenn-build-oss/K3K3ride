@@ -831,11 +831,19 @@ class RiderApplicationForm {
         }
 
         if (!dateOfBirth) {
-
             this.showToast('Please fill in the Date of Birth field', 'error');
-
             return false;
+        }
 
+        // Validate 18+ age requirement
+        const dob = new Date(dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+        if (isNaN(dob.getTime()) || age < 18) {
+            this.showToast('You must be at least 18 years old to apply as a K3K3 rider', 'error');
+            return false;
         }
 
         if (!nationality) {
@@ -1452,17 +1460,10 @@ class RiderApplicationForm {
 
             
 
-            // Reset form after delay (don't redirect to admin)
-
+            // Redirect to pending page
             setTimeout(() => {
-
-                this.resetForm();
-
-                // Optionally redirect to rider login to check status
-
-                // window.location.href = 'rider-login.html';
-
-            }, 3000);
+                window.location.href = 'pending.html';
+            }, 1500);
 
             
 
@@ -1485,7 +1486,7 @@ class RiderApplicationForm {
     
 
     async submitApplication() {
-        const BACKEND = 'http://localhost:8810';
+        const BACKEND = '';
 
         const payload = {
             first_name:                 this.formData.firstName              || '',
@@ -1517,10 +1518,36 @@ class RiderApplicationForm {
             account_number:             this.formData.accountNumber          || null,
         };
 
-        // Validate required fields before sending
+        // Validate required personal information fields
         if (!payload.first_name || !payload.last_name || !payload.email || !payload.phone) {
             throw new Error('Please fill in all required personal information fields.');
         }
+
+        // Convert documents to Base64 data URLs
+        const documentsPayload = {};
+        const docKeys = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
+        for (const key of docKeys) {
+            const file = this.formData[key];
+            if (file && file instanceof File) {
+                try {
+                    const dataUrl = await new Promise((res) => {
+                        const r = new FileReader();
+                        r.onload = ev => res(ev.target.result);
+                        r.onerror = () => res(null);
+                        r.readAsDataURL(file);
+                    });
+                    if (dataUrl) {
+                        documentsPayload[key] = {
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: dataUrl
+                        };
+                    }
+                } catch (_) {}
+            }
+        }
+        payload.documents = documentsPayload;
 
         console.log('Submitting application to backend:', BACKEND + '/applications/');
 

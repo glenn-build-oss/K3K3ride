@@ -533,7 +533,8 @@
         if (raw) {
           const s = JSON.parse(raw);
           if (s.status === 'approved' || s.status === 'active') {
-            window.location.href = 'dashboard.html';
+            sessionStorage.setItem('k3k3_redirect_from_pending', String(Date.now()));
+            window.location.replace('dashboard.html');
             return;
           }
         }
@@ -548,8 +549,9 @@
       document.getElementById('detailRef').textContent       = appRef     || ('K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase());
 
       // Real-time check with backend: if admin has approved this account, redirect to dashboard
+      let isRedirecting = false;
       async function checkLiveStatus() {
-        if (!phone) return;
+        if (!phone || isRedirecting) return;
         try {
           const res = await fetch(`/api/auth/rider/status?phone=${encodeURIComponent(phone)}`);
           if (!res.ok) return;
@@ -569,33 +571,58 @@
             appRef = data.app_ref || data.application_ref;
             document.getElementById('detailRef').textContent = appRef;
           }
-          if (data.success && (data.status === 'approved' || data.isApproved)) {
+          if (data.success && (data.status === 'approved' || data.isApproved || data.status === 'active')) {
+            isRedirecting = true;
             // Update stored session
             try {
-              const s = JSON.parse(localStorage.getItem('riderSession') || '{}');
+              const s = JSON.parse(localStorage.getItem('riderSession') || sessionStorage.getItem('riderSession') || '{}');
               s.status = 'approved';
               s.phone = phone;
               if (data.first_name) s.firstName = data.first_name;
               if (data.last_name) s.lastName = data.last_name;
               localStorage.setItem('riderSession', JSON.stringify(s));
+              sessionStorage.setItem('riderSession', JSON.stringify(s));
+              sessionStorage.setItem('k3k3_redirect_from_pending', String(Date.now()));
             } catch(_) {}
 
             // Notify and navigate to dashboard
             const badge = document.querySelector('.status-card-sub');
             if (badge) badge.innerHTML = '<strong style="color:var(--green)">Congratulations! Application Approved!</strong> Redirecting to your Rider Dashboard…';
             setTimeout(() => {
-              window.location.href = 'dashboard.html';
-            }, 1200);
+              window.location.replace('dashboard.html');
+            }, 800);
           } else if (data.status === 'declined' || data.status === 'rejected') {
             const badge = document.querySelector('.status-card-sub');
-            if (badge) badge.innerHTML = '<strong style="color:#ef4444">Application Not Approved.</strong> Please contact K3K3 Support for assistance.';
+            const reasonHtml = data.admin_notes ? `<div style="margin-top:8px;padding:8px 12px;background:rgba(239,68,68,0.12);border-radius:8px;border-left:3px solid #ef4444;color:#fca5a5;font-size:0.85rem;"><strong>Admin Notes:</strong> ${data.admin_notes}</div>` : '';
+            if (badge) badge.innerHTML = `<strong style="color:#ef4444">Application Not Approved.</strong> Your application was reviewed and could not be approved at this time.${reasonHtml}`;
             const step2 = document.querySelector('.status-step.active');
             if (step2) {
               step2.classList.remove('active');
               const dot = step2.querySelector('.step-dot');
-              if (dot) dot.style.background = '#ef4444';
+              if (dot) {
+                dot.style.background = '#ef4444';
+                dot.innerHTML = '<i class="fas fa-times" style="font-size:0.75rem;color:#fff;"></i>';
+              }
               const desc = step2.querySelector('.step-desc');
-              if (desc) desc.textContent = 'Your application was reviewed and could not be approved at this time.';
+              if (desc) desc.textContent = data.admin_notes || 'Application was not approved. You may re-apply with updated documents.';
+            }
+
+            // Show re-apply action button
+            let actionWrap = document.getElementById('rejectedActions');
+            if (!actionWrap) {
+              actionWrap = document.createElement('div');
+              actionWrap.id = 'rejectedActions';
+              actionWrap.style.cssText = 'margin-top:20px;display:flex;gap:12px;width:100%;justify-content:center;flex-wrap:wrap;';
+              actionWrap.innerHTML = `
+                <a href="apply-to-ride.html" style="background:var(--yellow);color:#111;font-weight:700;padding:12px 22px;border-radius:12px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+                  <i class="fas fa-redo"></i> Re-apply as Driver
+                </a>
+                <a href="../index.html#contact" style="background:rgba(255,255,255,0.08);color:#fff;font-weight:600;padding:12px 18px;border-radius:12px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.15);">
+                  <i class="fas fa-headset"></i> Contact Support
+                </a>
+              `;
+              const statusCard = document.querySelector('.status-card');
+              if (statusCard) statusCard.appendChild(actionWrap);
             }
           }
         } catch(_) {}

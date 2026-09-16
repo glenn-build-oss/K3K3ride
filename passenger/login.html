@@ -1130,6 +1130,9 @@
                     });
                     const next = digits[Math.min(i + paste.length, digits.length - 1)];
                     if (next) next.focus();
+                    if (Array.from(digits).every(d => d.value && d.value.length === 1)) {
+                        setTimeout(handleVerifyOTP, 200);
+                    }
                 });
             });
         });
