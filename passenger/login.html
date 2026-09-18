@@ -1161,9 +1161,10 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    const realFullName = data.user.fullName || (data.user.firstName ? `${data.user.firstName} ${data.user.lastName || ''}`.trim() : '') || signupName || '';
-                    const realFirstName = data.user.firstName || (realFullName ? realFullName.split(' ')[0] : '') || '';
-                    const realLastName = data.user.lastName || (realFullName ? realFullName.split(' ').slice(1).join(' ') : '') || '';
+                    const realFullName = data.user?.fullName || (data.user?.firstName ? `${data.user.firstName} ${data.user.lastName || ''}`.trim() : '') || signupName || '';
+                    const realFirstName = data.user?.firstName || (realFullName ? realFullName.split(' ')[0] : '') || '';
+                    const realLastName = data.user?.lastName || (realFullName ? realFullName.split(' ').slice(1).join(' ') : '') || '';
+                    const displayName = realFirstName || realFullName || 'Passenger';
                     const isRider = data.user?.role === 'rider' || data.user?.role_type === 'rider' || data.isRider;
                     if (isRider) {
                         try {

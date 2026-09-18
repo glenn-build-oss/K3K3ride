@@ -11,10 +11,10 @@
 
 const { updateRideStatus, getRideById } = require('./supabase.service');
 
-// Campus default coordinate center (KNUST / K3K3 operating zone)
-const DEFAULT_CAMPUS_LAT = 6.6745;
-const DEFAULT_CAMPUS_LNG = -1.5716;
-const DEFAULT_DISPATCH_RADIUS_KM = 3.5; // Maximum radius to dispatch kekes
+// Default coordinate center (Ho, Volta Region operating zone)
+const DEFAULT_CAMPUS_LAT = 6.6012;
+const DEFAULT_CAMPUS_LNG = 0.4688;
+const DEFAULT_DISPATCH_RADIUS_KM = 6.0; // Maximum radius to dispatch kekes in Ho
 const OFFER_TTL_MS = 20000;            // 20-second countdown for each rider offer
 const STALE_HEARTBEAT_MS = 45000;      // 45 seconds without GPS ping = mark offline
 const KEKE_MAX_CAPACITY = 3;           // Standard K3K3 tricycle capacity
@@ -63,11 +63,15 @@ class DispatchService {
     const riderState = {
       socketId,
       riderId,
-      name: riderData.name || (existing ? existing.name : 'Keke Rider'),
-      phone: riderData.phone || (existing ? existing.phone : ''),
-      avatarUrl: riderData.avatarUrl || (existing ? existing.avatarUrl : null),
-      vehicleType: riderData.vehicleType || 'tricycle',
-      licensePlate: riderData.licensePlate || (existing ? existing.licensePlate : ''),
+      shortId: riderId.replace(/-/g, '').substring(0, 8).toUpperCase(),
+      name: riderData.name || (existing ? existing.name : 'Glenn Adjei'),
+      phone: riderData.phone || (existing ? existing.phone : '+233207739636'),
+      avatarUrl: riderData.avatarUrl || riderData.photoUrl || (existing ? existing.avatarUrl : '/uploads/applications/app_1789569576091_passportPhoto.jpg'),
+      photoUrl: riderData.photoUrl || riderData.avatarUrl || (existing ? existing.photoUrl : '/uploads/applications/app_1789569576091_passportPhoto.jpg'),
+      station: riderData.station || (existing ? existing.station : 'Ho Central'),
+      city: riderData.city || (existing ? existing.city : 'Ho'),
+      vehicleType: riderData.vehicleType || (existing ? existing.vehicleType : 'TVS RE Tricycle'),
+      licensePlate: riderData.licensePlate || (existing ? existing.licensePlate : 'ER1213131'),
       capacity: KEKE_MAX_CAPACITY,
       availableSeats: existing ? existing.availableSeats : KEKE_MAX_CAPACITY,
       activeTrips: existing ? existing.activeTrips : [],
@@ -527,13 +531,17 @@ class DispatchService {
         distanceKm: Math.round(distKm * 10) / 10,
         rider: {
           riderId: rider.riderId,
-          name: rider.name,
-          phone: rider.phone,
+          shortId: (rider.shortId || rider.riderId || '').replace(/-/g, '').substring(0, 8).toUpperCase(),
+          name: rider.name || 'Glenn Adjei',
+          phone: rider.phone || '+233207739636',
           lat: rider.lat,
           lng: rider.lng,
           heading: rider.heading,
-          vehicleType: rider.vehicleType,
-          licensePlate: rider.licensePlate,
+          vehicleType: rider.vehicleType || 'TVS RE Tricycle',
+          licensePlate: rider.licensePlate || 'ER1213131',
+          photoUrl: rider.photoUrl || rider.avatarUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg',
+          station: rider.station || 'Ho Central',
+          city: rider.city || 'Ho',
           rating: 4.9
         },
         pickup: updatedRide?.pickup_address || cascade?.ride?.pickup_address,

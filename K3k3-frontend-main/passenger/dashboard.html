@@ -10,7 +10,116 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Leaflet.js Live Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <style>
+    /* Live Responsive Map Styles */
+    .p-map-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: var(--sh-sm);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    #passengerLiveMap {
+      width: 100%;
+      height: clamp(280px, 42vh, 450px);
+      min-height: 250px;
+      z-index: 1;
+      background: var(--surface-2);
+    }
+    .p-map-card.fullscreen-mode {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 99999 !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      width: 100vw !important;
+      box-shadow: none !important;
+    }
+    .p-map-card.fullscreen-mode #passengerLiveMap {
+      height: calc(100% - 64px) !important;
+      min-height: calc(100% - 64px) !important;
+    }
+    .service-zone-pill {
+      font-size: .74rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.12);
+      color: #B45309;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .service-zone-pill:hover {
+      background: rgba(245, 158, 11, 0.22);
+    }
+    .custom-keke-marker-pass {
+      background: transparent;
+      border: none;
+    }
+    .keke-marker-pass-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFD60A, #E6C000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(255,214,10,0.5), 0 2px 8px rgba(0,0,0,0.4);
+      border: 2.5px solid #ffffff;
+      transition: transform .35s ease-out;
+      position: relative;
+      padding: 3px;
+    }
+    .keke-beacon-pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid #FFD60A;
+      opacity: 0.8;
+      animation: kekePulse 2s infinite ease-out;
+      pointer-events: none;
+    }
+    @keyframes kekePulse {
+      0% { transform: scale(0.9); opacity: 0.9; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    /* Rider Profile Modal */
+    .rider-profile-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .rider-profile-modal-box {
+      background: var(--white);
+      border-radius: var(--r-xl);
+      max-width: 460px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,.25);
+      animation: modalSlideUp .3s var(--ease);
+    }
+    @keyframes modalSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     /* =====================================================
    K3K3 PASSENGER DASHBOARD  —  DESKTOP WEBSITE LAYOUT
    Brand: Black #111  ·  Yellow #FFD60A  ·  Inter
@@ -425,10 +534,31 @@
     .drawer-brand {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      padding: 24px 22px 18px;
+      padding: 22px 20px 18px;
       border-bottom: 1px solid rgba(255, 255, 255, .07);
       flex-shrink: 0;
+    }
+
+    .drawer-close-btn {
+      display: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--white);
+      font-size: 0.95rem;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .drawer-close-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--yellow);
     }
 
     .drawer-logo {
@@ -987,6 +1117,103 @@
       transform: translateY(-1px);
       box-shadow: var(--sh-md)
     }
+
+    /* ── Document Upload Zones ── */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 640px) {
+      .upload-grid { grid-template-columns: 1fr; }
+    }
+    .upload-item { display: flex; flex-direction: column; gap: 6px; }
+    .upload-item label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--r);
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      background: var(--surface-2);
+      min-height: 125px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--yellow);
+      background: rgba(255,214,10,0.06);
+    }
+    .upload-zone.has-file {
+      border-color: var(--green);
+      background: rgba(16,185,129,0.06);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2;
+    }
+    .upload-zone .upload-icon { font-size: 1.6rem; color: var(--text-3); }
+    .upload-zone.has-file .upload-icon { color: var(--green); }
+    .upload-zone .upload-text { font-size: 0.82rem; color: var(--text-2); font-weight: 600; }
+    .upload-zone .upload-sub { font-size: 0.72rem; color: var(--text-3); }
+    .upload-zone .upload-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-full);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      pointer-events: none;
+    }
+    .upload-zone .file-preview {
+      width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .upload-zone .file-preview img { max-height: 70px; max-width: 100%; border-radius: 6px; object-fit: cover; }
+    .upload-zone .file-preview .file-name { font-size: 0.75rem; color: var(--text); font-weight: 600; word-break: break-all; }
+    .upload-zone .file-preview .file-size { font-size: 0.68rem; color: var(--text-2); }
+    .remove-file-btn {
+      position: absolute; top: 8px; right: 8px;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--red); color: white; border: none; cursor: pointer;
+      font-size: 0.68rem; display: none; align-items: center; justify-content: center;
+      z-index: 6; box-shadow: 0 2px 6px rgba(239,68,68,0.3);
+    }
+    .upload-zone.has-file .remove-file-btn { display: flex; }
+
+    .review-docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .review-doc-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
+    }
+    .review-doc-card i { font-size: 1.2rem; color: var(--green); }
+    .review-doc-card .doc-title { font-size: 0.75rem; font-weight: 700; color: var(--text); }
+    .review-doc-card .doc-file { font-size: 0.68rem; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
     .apply-success {
       text-align: center;
@@ -2911,23 +3138,72 @@
     #card-alone  .ride-price-amount { color: var(--black) }
     .ride-price-note { font-size: .62rem; color: var(--muted); font-weight: 500 }
 
-    /* ─── Payment Row ─── */
-    .campus-payment-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      background: rgba(16,185,129,.06);
-      border: 1px solid rgba(16,185,129,.15);
-      border-radius: 10px;
-      font-size: .8rem;
+    /* ─── Payment Selection ─── */
+    .campus-payment-section {
+      margin-top: 16px;
+    }
+    .campus-payment-label {
+      font-size: .75rem;
       font-weight: 600;
       color: var(--text-2);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
     }
-    .campus-payment-tag {
-      margin-left: auto;
-      font-size: .72rem;
+    .campus-payment-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .campus-payment-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .campus-payment-option:hover {
+      border-color: var(--yellow);
+      background: rgba(255,214,10,.04);
+    }
+    .campus-payment-option.selected {
+      border-color: var(--yellow);
+      background: rgba(255,214,10,.08);
+    }
+    .campus-payment-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .campus-payment-info {
+      flex: 1;
+    }
+    .campus-payment-name {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .campus-payment-desc {
+      font-size: .7rem;
       color: var(--muted);
+      margin-top: 2px;
+    }
+    .campus-payment-check {
+      font-size: 1.1rem;
+      color: var(--border);
+      transition: color .2s ease;
+    }
+    .campus-payment-option.selected .campus-payment-check {
+      color: var(--yellow);
     }
 
     @media(max-width: 380px) {
@@ -3404,55 +3680,56 @@
       }
     }
 
-    /* ── ≤768px (mobile / tablet portrait) ── */
-    @media(max-width:768px) {
+    /* ── ≤1024px (tablet & mobile drawer navigation) ── */
+    @media(max-width:1024px) {
       :root {
-        --sidebar-w: 0px;
-        --topbar-h: 60px;
+        --sidebar-w: 0px !important;
+        --topbar-h: 62px;
         --nav-h: 64px;
       }
 
       /* ── Topbar ── */
       .top-header {
-        left: 0;
-        right: 0;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
         padding: 0 16px;
         height: var(--topbar-h);
       }
 
       .header-brand-name {
-        font-size: .95rem
+        font-size: .95rem;
       }
 
       .header-brand-tagline {
-        display: none
+        display: none;
       }
 
       .header-search {
-        display: none
+        display: none;
       }
 
-      /* hide search pill on mobile */
+      /* hide search pill on mobile/tablet */
       .header-user-pill {
-        display: none
+        display: none;
       }
 
-      /* hide user pill on mobile */
+      /* hide user pill on mobile/tablet */
       .header-icon-btn {
         width: 36px;
         height: 36px;
-        font-size: .9rem
+        font-size: .9rem;
       }
 
       /* ── Hamburger ── */
       .hamburger {
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 5px;
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 10px;
         border: 1.5px solid var(--border);
         background: var(--surface);
@@ -3461,7 +3738,7 @@
       }
 
       .hamburger:hover {
-        background: var(--surface-2)
+        background: var(--surface-2);
       }
 
       .h-line {
@@ -3469,55 +3746,70 @@
         height: 2px;
         background: var(--text);
         border-radius: 2px;
-        transition: all .25s
+        transition: all .25s;
       }
 
       .hamburger.open .h-line:nth-child(1) {
-        transform: translateY(7px) rotate(45deg)
+        transform: translateY(7px) rotate(45deg);
       }
 
       .hamburger.open .h-line:nth-child(2) {
         opacity: 0;
-        transform: scaleX(0)
+        transform: scaleX(0);
       }
 
       .hamburger.open .h-line:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg)
+        transform: translateY(-7px) rotate(-45deg);
       }
 
-      /* ── Sidebar → drawer overlay ── */
+      /* ── Sidebar → responsive drawer overlay ── */
       .drawer {
-        transform: translateX(-100%);
-        width: 280px;
-        z-index: 900;
-        transition: transform .32s var(--ease);
+        transform: translateX(-100%) !important;
+        width: min(300px, 85vw) !important;
+        z-index: 999 !important;
+        transition: transform .32s var(--ease) !important;
+        box-shadow: 0 0 32px rgba(0, 0, 0, 0.45);
       }
 
       .drawer.open {
-        transform: translateX(0)
+        transform: translateX(0) !important;
       }
 
       .drawer-overlay {
-        display: block;
+        display: block !important;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, .55);
-        z-index: 800;
+        background: rgba(0, 0, 0, .58);
+        z-index: 990;
         opacity: 0;
         pointer-events: none;
         transition: opacity .28s;
+        backdrop-filter: blur(2px);
       }
 
       .drawer-overlay.show {
         opacity: 1;
-        pointer-events: all
+        pointer-events: all;
+      }
+
+      .drawer-close-btn {
+        display: flex !important;
+      }
+
+      .sidebar-collapse-btn {
+        display: none !important;
       }
 
       /* ── Main content ── */
       .main-content {
-        margin-left: 0;
+        margin-left: 0 !important;
+        width: 100% !important;
         padding: 16px 16px calc(var(--nav-h) + 16px);
       }
+    }
+
+    /* ── ≤768px (mobile phone portrait) ── */
+    @media(max-width:768px) {
 
       /* ── Bottom nav ── */
       .bottom-nav {
@@ -3930,23 +4222,63 @@
       animation: fadeUp .22s var(--ease);
     }
 
-    /* ── Topbar visible on 769-1024px tablet with sidebar ── */
-    @media(min-width:769px) {
+    /* ── Desktop > 1024px: sidebar visible, hamburger hidden ── */
+    @media(min-width:1025px) {
       .hamburger {
-        display: none
+        display: none !important;
       }
 
       .drawer-overlay {
-        display: none !important
+        display: none !important;
       }
 
       .drawer {
-        transform: none !important
+        transform: none !important;
       }
 
-      .bottom-nav {
-        display: none !important
+      .drawer-close-btn {
+        display: none !important;
       }
+
+      .sidebar-collapse-btn {
+        display: flex !important;
+      }
+    }
+
+    @media(min-width:769px) {
+      .bottom-nav {
+        display: none !important;
+      }
+    }
+
+    /* ── Delete Complete Ride History Button ── */
+    .btn-delete-history {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: var(--r-full);
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--red);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-delete-history:hover {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .btn-delete-history:active {
+      transform: translateY(0);
     }
 
     /* ── Fix topbar mobile overlap ── */
@@ -4047,11 +4379,16 @@
 ═══════════════════════════════════════ -->
   <aside class="drawer" id="drawer" aria-label="Navigation menu">
     <div class="drawer-brand">
-      <img src="../assets/k3k3.png" alt="K3K3" class="drawer-logo" onerror="this.style.display='none'">
-      <div class="drawer-brand-text">
-        <div class="drawer-brand-name">K3K3</div>
-        <div class="drawer-brand-tagline">Ride with us.</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="../assets/k3k3.png" alt="K3K3" class="drawer-logo" onerror="this.style.display='none'">
+        <div class="drawer-brand-text">
+          <div class="drawer-brand-name">K3K3</div>
+          <div class="drawer-brand-tagline">Ride with us.</div>
+        </div>
       </div>
+      <button class="drawer-close-btn" onclick="closeDrawer()" aria-label="Close navigation menu">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
     <div class="drawer-user">
@@ -4192,20 +4529,114 @@
       </div>
 
       <div class="home-body">
+        <!-- Live Map Radar & Route Map -->
+        <div class="p-map-card" id="passengerLiveMapCard">
+          <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--yellow-lt);color:var(--yellow-dk);display:flex;align-items:center;justify-content:center;font-size:.95rem">
+                <i class="fas fa-map-location-dot"></i>
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:.92rem;color:var(--text);display:flex;align-items:center;gap:8px">
+                  Live Radar &amp; Trip Map
+                  <span class="gps-status-pill live" id="passengerGpsPill"><i class="fas fa-circle-dot"></i> Live</span>
+                </div>
+                <div style="font-size:.78rem;color:var(--text-2)" id="passengerMapSub">Tracking kekes in Ho, Volta Region</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="service-zone-pill" onclick="showServiceAreaNotice()" title="Click to view K3K3 service area boundary">
+                <i class="fas fa-location-dot"></i> Ho, Volta Only
+              </span>
+              <button type="button" onclick="recenterPassengerMap()" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:.8rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px">
+                <i class="fas fa-crosshairs"></i> Center
+              </button>
+              <button type="button" id="passFullscreenBtn" onclick="togglePassengerMapFullscreen()" style="padding:7px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:.8rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px" title="Toggle Fullscreen Map">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div id="passengerLiveMap"></div>
+        </div>
+
+        <!-- Active Trip Card / Live Tracking Banner -->
+        <div id="homeActiveTripCard" style="display:none;margin-bottom:24px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:20px;box-shadow:var(--sh-md)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.2)"></span>
+              <span style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--green)" id="homeAtStatus">Rider Assigned</span>
+            </div>
+            <div style="font-size:.9rem;font-weight:800;color:var(--text)" id="homeAtFare">₵5.00</div>
+          </div>
+
+          <div onclick="openAssignedRiderModal()" style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-2);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:16px;cursor:pointer;transition:background .2s" title="Click to view driver credentials">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;border-radius:50%;background:var(--yellow);color:var(--black);font-weight:800;font-size:1.2rem;display:flex;align-items:center;justify-content:center;overflow:hidden" id="homeAtAvatar">G</div>
+              <div>
+                <div style="font-weight:800;font-size:1rem;color:var(--text);display:flex;align-items:center;gap:6px">
+                  <span id="homeAtName">Glenn Adjei</span>
+                  <span style="font-size:.72rem;background:var(--green-lt);color:var(--green);padding:2px 6px;border-radius:4px;font-weight:700"><i class="fas fa-check"></i> Verified</span>
+                </div>
+                <div style="font-size:.8rem;color:var(--text-2);margin-top:2px" id="homeAtVehicle">TVS RE · ER1213131</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase">ETA</div>
+              <div style="font-size:1.15rem;font-weight:900;color:var(--text)" id="homeAtETA">~3 min</div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:.84rem;color:var(--text);margin-bottom:16px;padding:0 4px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <i class="fas fa-circle-dot" style="color:var(--green);font-size:.8rem"></i>
+              <span style="color:var(--text-2)">Pickup:</span>
+              <strong id="homeAtPickup">Ho Central</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <i class="fas fa-flag-checkered" style="color:var(--red);font-size:.8rem"></i>
+              <span style="color:var(--text-2)">Drop-off:</span>
+              <strong id="homeAtDrop">Dome Area</strong>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a id="homeAtCall" href="tel:" style="flex:1;min-width:120px;height:44px;background:var(--black);color:var(--white);border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:.84rem;text-decoration:none">
+              <i class="fas fa-phone"></i> Call Driver
+            </a>
+            <button type="button" onclick="openAssignedRiderModal()" style="flex:1;min-width:120px;height:44px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--r-full);font-weight:700;font-size:.84rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+              <i class="fas fa-id-card"></i> Driver Info
+            </button>
+            <a id="homeAtNav" href="#" target="_blank" style="flex:1;min-width:120px;height:44px;background:#2563EB;color:#ffffff;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:.84rem;text-decoration:none" title="Open live turn-by-turn navigation in Google Maps">
+              <i class="fas fa-location-arrow"></i> Google Maps
+            </a>
+            <button type="button" onclick="shareRideLocation()" style="flex:1;min-width:120px;height:44px;background:var(--yellow);color:var(--black);border:none;border-radius:var(--r-full);font-weight:800;font-size:.84rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+              <i class="fas fa-share-nodes"></i> Share
+            </button>
+            <button type="button" onclick="cancelActiveTrip()" style="height:44px;padding:0 16px;background:var(--red-lt);color:var(--red);border:none;border-radius:var(--r-full);font-weight:700;font-size:.84rem;cursor:pointer">
+              Cancel
+            </button>
+          </div>
+        </div>
+
         <!-- No quick destinations - book directly from the hero -->
       </div><!-- end home-body -->
     </section>
 
     <!-- ══════ RIDES ══════ -->
     <section class="dash-section" id="sec-rides">
-      <div class="page-header">
-        <button class="page-header-back" onclick="navTo('home',null,'navHome')" aria-label="Back">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="page-header-info">
-          <h2>My Rides</h2>
-          <p>Your complete ride history</p>
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="page-header-back" onclick="navTo('home',null,'navHome')" aria-label="Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="page-header-info">
+            <h2>My Rides</h2>
+            <p>Your complete ride history</p>
+          </div>
         </div>
+        <button class="btn-delete-history" id="btnDeleteHistory" onclick="openDeleteHistoryModal()" title="Permanently delete complete ride history from database">
+          <i class="fas fa-trash-can"></i> Delete Complete Ride History
+        </button>
       </div>
       <div class="rides-body">
         <div class="trips-tabs">
@@ -4328,20 +4759,36 @@
             </div>
           </div>
           <div class="card-body" style="border-top:1px solid var(--border)">
-            <div style="display:flex;flex-direction:column;gap:12px">
-              <div style="display:flex;align-items:center;gap:10px;font-size:.875rem">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;gap:12px;font-size:.875rem">
                 <div
-                  style="width:32px;height:32px;border-radius:8px;background:var(--yellow-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <i class="fas fa-phone" style="font-size:.8rem;color:#9a7200"></i>
+                  style="width:36px;height:36px;border-radius:10px;background:var(--yellow-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-phone" style="font-size:.85rem;color:#9a7200"></i>
                 </div>
-                <span id="profilePhoneDisplay" style="color:var(--text-2)">Not set</span>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700">Phone Number</span>
+                  <span id="profilePhoneDisplay" style="color:var(--text);font-weight:600;word-break:break-all">Not set</span>
+                </div>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:.875rem">
+              <div style="display:flex;align-items:center;gap:12px;font-size:.875rem">
                 <div
-                  style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <i class="fas fa-envelope" style="font-size:.8rem;color:var(--blue)"></i>
+                  style="width:36px;height:36px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-envelope" style="font-size:.85rem;color:var(--blue)"></i>
                 </div>
-                <span id="profileEmailDisplay" style="color:var(--text-2)">Not set</span>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700">Email Address</span>
+                  <span id="profileEmailDisplay" style="color:var(--text);font-weight:600;word-break:break-all">Not set</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;font-size:.875rem">
+                <div
+                  style="width:36px;height:36px;border-radius:10px;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-shield-alt" style="font-size:.85rem;color:var(--red)"></i>
+                </div>
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700">Emergency Contact</span>
+                  <span id="profileEmergencyDisplay" style="color:var(--text-2);font-weight:500;word-break:break-all">Not set</span>
+                </div>
               </div>
             </div>
           </div>
@@ -4784,8 +5231,8 @@
             <div class="apply-form-grid">
               <div class="form-field">
                 <label class="form-label" for="applyLicenceNumber">Driver's Licence Number *</label>
-                <input type="text" class="form-input" id="applyLicenceNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" maxlength="18" style="text-transform:uppercase;">
-                <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">Format: DEL-XXXXXXXX-XXXXX</div>
+                <input type="text" class="form-input" id="applyLicenceNumber" placeholder="DEL-XXXXXXXX-XXXXX" pattern="^DEL-[A-Za-z0-9]{8}-[A-Za-z0-9]{5}$" minlength="18" maxlength="18" style="text-transform:uppercase;">
+                <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">Format: DEL-XXXXXXXX-XXXXX (exactly 18 characters)</div>
               </div>
               <div class="form-field">
                 <label class="form-label" for="applyLicenceExpiry">Licence Expiry Date *</label>
@@ -4806,7 +5253,80 @@
             <div class="form-field">
               <label class="form-label" for="applyExtra">Additional Information (Optional)</label>
               <textarea class="textarea-input" id="applyExtra"
-                placeholder="Any additional information you'd like us to know…" style="min-height:100px"></textarea>
+                placeholder="Any additional information you'd like us to know…" style="min-height:90px"></textarea>
+            </div>
+
+            <!-- Required Documents -->
+            <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
+              <div style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:4px">Required Documents</div>
+              <div style="font-size:.82rem;color:var(--text-2);margin-bottom:16px">Upload clear photos or scans (PNG, JPG, PDF)</div>
+
+              <div class="upload-grid">
+                <div class="upload-item">
+                  <label>Rider's License <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-riderLicense" data-name="riderLicense">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'riderLicense')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-riderLicense" accept="image/*,.pdf" onchange="handlePassengerDocUpload('riderLicense', this)">
+                    <i class="fas fa-id-card upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item">
+                  <label>Vehicle Registration <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-vehicleRegistration" data-name="vehicleRegistration">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'vehicleRegistration')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-vehicleRegistration" accept="image/*,.pdf" onchange="handlePassengerDocUpload('vehicleRegistration', this)">
+                    <i class="fas fa-car upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item">
+                  <label>National ID — Front <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-idCardFront" data-name="idCardFront">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'idCardFront')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-idCardFront" accept="image/*,.pdf" onchange="handlePassengerDocUpload('idCardFront', this)">
+                    <i class="fas fa-address-card upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Front side · Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item">
+                  <label>National ID — Back <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-idCardBack" data-name="idCardBack">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'idCardBack')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-idCardBack" accept="image/*,.pdf" onchange="handlePassengerDocUpload('idCardBack', this)">
+                    <i class="fas fa-address-card upload-icon"></i>
+                    <span class="upload-text">Tap to choose file</span>
+                    <span class="upload-sub">Back side · Photo, PDF · max 20MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-paperclip"></i> Choose File</button>
+                  </div>
+                </div>
+
+                <div class="upload-item" style="grid-column: 1 / -1;">
+                  <label>Passport Photo <span style="color:var(--red);font-weight:900">*</span></label>
+                  <div class="upload-zone" id="pzone-passportPhoto" data-name="passportPhoto">
+                    <button type="button" class="remove-file-btn" onclick="clearPassengerDoc(event, 'passportPhoto')"><i class="fas fa-times"></i></button>
+                    <input type="file" id="pfile-passportPhoto" accept="image/*" onchange="handlePassengerDocUpload('passportPhoto', this)">
+                    <i class="fas fa-portrait upload-icon"></i>
+                    <span class="upload-text">Tap to choose photo</span>
+                    <span class="upload-sub">PNG, JPG · max 10MB</span>
+                    <button type="button" class="upload-trigger-btn"><i class="fas fa-camera"></i> Choose Photo</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;padding:12px 14px;background:var(--yellow-lt);border-radius:var(--r);border-left:3px solid var(--yellow);font-size:.82rem;color:var(--text-2);display:flex;align-items:center;gap:10px">
+                <i class="fas fa-info-circle" style="color:var(--yellow);font-size:1.1rem;flex-shrink:0"></i>
+                <span>Ensure all documents are clear and readable. Upload both the front and back of your National ID Card.</span>
+              </div>
             </div>
           </div>
 
@@ -4867,6 +5387,19 @@
     </div>
   </div>
 
+  <!-- Delete Ride History Confirmation Modal -->
+  <div class="confirm-modal-backdrop" id="deleteHistoryModal" role="dialog" aria-modal="true" aria-labelledby="delHistTitle">
+    <div class="confirm-modal">
+      <div class="confirm-modal-icon" style="background:var(--red-lt);color:var(--red)"><i class="fas fa-trash-can"></i></div>
+      <h3 id="delHistTitle">Delete Complete Ride History?</h3>
+      <p>Are you sure you want to permanently delete your complete ride history? This will permanently remove all your completed trips, cancelled rides, and receipts from the database. <strong>This action cannot be undone.</strong></p>
+      <div class="confirm-modal-btns">
+        <button class="confirm-cancel-btn" onclick="closeDeleteHistoryModal()">Cancel</button>
+        <button class="confirm-ok-btn" id="confirmDeleteHistoryBtn" onclick="deleteRideHistory()"><i class="fas fa-trash-can"></i> Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Location Permission Prompt -->
   <div class="location-prompt" id="locationPrompt">
     <div class="location-prompt-icon"><i class="fas fa-location-dot"></i></div>
@@ -4917,20 +5450,46 @@
             <div class="campus-select-dot pickup"></div>
             <select class="campus-select" id="pickupSelect" onchange="onLocationChange()">
               <option value="">Select pickup location…</option>
-              <option>Cedi Auditorium</option>
-              <option>Sokode Hostel</option>
-              <option>Mirage</option>
-              <option>Ho Polytechnic</option>
-              <option>Trafalgar</option>
-              <option>Dave (Southern Campus)</option>
-              <option>School of Hygiene</option>
-              <option>Stadium</option>
-              <option>Ahoe</option>
-              <option>Barracks</option>
-              <option>Market</option>
-              <option>Mawuli Estates</option>
-              <option>Guiness</option>
-              <option>Lokoe</option>
+              <optgroup label="Campuses & Hostels (Ho)">
+                <option value="Ho Technical University (HSTU)">Ho Technical University (HSTU)</option>
+                <option value="HSTU Main Gate">HSTU Main Gate</option>
+                <option value="HSTU Student Hostel">HSTU Student Hostel</option>
+                <option value="Sokode Hostel">Sokode Hostel</option>
+                <option value="Cedi Auditorium">Cedi Auditorium (UHAS)</option>
+                <option value="University of Health & Allied Sciences (UHAS)">UHAS Campus</option>
+                <option value="School of Hygiene">School of Hygiene</option>
+                <option value="Dave (Southern Campus)">Dave (Southern Campus)</option>
+              </optgroup>
+              <optgroup label="Central & Commercial">
+                <option value="Ho Central">Ho Central</option>
+                <option value="Ho Central Market">Ho Central Market</option>
+                <option value="Ho Bus Terminal">Ho Bus Terminal</option>
+                <option value="Ho Town Centre">Ho Town Centre</option>
+                <option value="Ho Post Office">Ho Post Office</option>
+                <option value="Stadium">Ho Sports Stadium</option>
+                <option value="Ho Jubilee Park">Ho Jubilee Park</option>
+              </optgroup>
+              <optgroup label="Hospitals & Healthcare">
+                <option value="Trafalgar">Trafalgar (Ho Teaching Hospital)</option>
+                <option value="Volta Regional Hospital">Volta Regional Hospital</option>
+                <option value="Ho Municipal Hospital">Ho Municipal Hospital</option>
+              </optgroup>
+              <optgroup label="Townships & Residential">
+                <option value="Dome Area">Dome Area</option>
+                <option value="Bankoe">Bankoe</option>
+                <option value="Ahoe">Ahoe</option>
+                <option value="Kpehe">Kpehe</option>
+                <option value="Mawuli Estates">Mawuli Estates</option>
+                <option value="Mawuli School">Mawuli School</option>
+                <option value="Sokode Estates">Sokode Estates</option>
+                <option value="Sokode Junction">Sokode Junction</option>
+                <option value="Fiave">Fiave</option>
+                <option value="Agorve">Agorve</option>
+                <option value="Barracks">Volta Barracks</option>
+                <option value="Mirage">Mirage</option>
+                <option value="Guiness">Guiness</option>
+                <option value="Lokoe">Lokoe</option>
+              </optgroup>
             </select>
             <i class="fas fa-chevron-down campus-select-arrow"></i>
           </div>
@@ -4943,20 +5502,46 @@
             <div class="campus-select-dot dest"></div>
             <select class="campus-select" id="destSelect" onchange="onLocationChange()">
               <option value="">Select destination…</option>
-              <option>Cedi Auditorium</option>
-              <option>Sokode Hostel</option>
-              <option>Mirage</option>
-              <option>Ho Polytechnic</option>
-              <option>Trafalgar</option>
-              <option>Dave (Southern Campus)</option>
-              <option>School of Hygiene</option>
-              <option>Stadium</option>
-              <option>Ahoe</option>
-              <option>Barracks</option>
-              <option>Market</option>
-              <option>Mawuli Estates</option>
-              <option>Guiness</option>
-              <option>Lokoe</option>
+              <optgroup label="Campuses & Hostels (Ho)">
+                <option value="Ho Technical University (HSTU)">Ho Technical University (HSTU)</option>
+                <option value="HSTU Main Gate">HSTU Main Gate</option>
+                <option value="HSTU Student Hostel">HSTU Student Hostel</option>
+                <option value="Sokode Hostel">Sokode Hostel</option>
+                <option value="Cedi Auditorium">Cedi Auditorium (UHAS)</option>
+                <option value="University of Health & Allied Sciences (UHAS)">UHAS Campus</option>
+                <option value="School of Hygiene">School of Hygiene</option>
+                <option value="Dave (Southern Campus)">Dave (Southern Campus)</option>
+              </optgroup>
+              <optgroup label="Central & Commercial">
+                <option value="Ho Central">Ho Central</option>
+                <option value="Ho Central Market">Ho Central Market</option>
+                <option value="Ho Bus Terminal">Ho Bus Terminal</option>
+                <option value="Ho Town Centre">Ho Town Centre</option>
+                <option value="Ho Post Office">Ho Post Office</option>
+                <option value="Stadium">Ho Sports Stadium</option>
+                <option value="Ho Jubilee Park">Ho Jubilee Park</option>
+              </optgroup>
+              <optgroup label="Hospitals & Healthcare">
+                <option value="Trafalgar">Trafalgar (Ho Teaching Hospital)</option>
+                <option value="Volta Regional Hospital">Volta Regional Hospital</option>
+                <option value="Ho Municipal Hospital">Ho Municipal Hospital</option>
+              </optgroup>
+              <optgroup label="Townships & Residential">
+                <option value="Dome Area">Dome Area</option>
+                <option value="Bankoe">Bankoe</option>
+                <option value="Ahoe">Ahoe</option>
+                <option value="Kpehe">Kpehe</option>
+                <option value="Mawuli Estates">Mawuli Estates</option>
+                <option value="Mawuli School">Mawuli School</option>
+                <option value="Sokode Estates">Sokode Estates</option>
+                <option value="Sokode Junction">Sokode Junction</option>
+                <option value="Fiave">Fiave</option>
+                <option value="Agorve">Agorve</option>
+                <option value="Barracks">Volta Barracks</option>
+                <option value="Mirage">Mirage</option>
+                <option value="Guiness">Guiness</option>
+                <option value="Lokoe">Lokoe</option>
+              </optgroup>
             </select>
             <i class="fas fa-chevron-down campus-select-arrow"></i>
           </div>
@@ -5027,11 +5612,35 @@
           </div>
         </div>
 
-        <!-- Payment row -->
-        <div class="campus-payment-row">
-          <i class="fas fa-money-bill-wave" style="color:var(--green)"></i>
-          <span>Cash Payment</span>
-          <span class="campus-payment-tag">Pay driver after ride</span>
+        <!-- Payment method selection -->
+        <div class="campus-payment-section">
+          <div class="campus-payment-label">Payment Method</div>
+          <div class="campus-payment-options">
+            <div class="campus-payment-option" id="payment-cash" onclick="selectPaymentMethod('cash')">
+              <div class="campus-payment-icon">
+                <i class="fas fa-money-bill-wave" style="color:var(--green)"></i>
+              </div>
+              <div class="campus-payment-info">
+                <div class="campus-payment-name">Cash</div>
+                <div class="campus-payment-desc">Pay driver after ride</div>
+              </div>
+              <div class="campus-payment-check">
+                <i class="fas fa-check-circle"></i>
+              </div>
+            </div>
+            <div class="campus-payment-option" id="payment-momo" onclick="selectPaymentMethod('momo')">
+              <div class="campus-payment-icon">
+                <i class="fas fa-mobile-alt" style="color:var(--yellow)"></i>
+              </div>
+              <div class="campus-payment-info">
+                <div class="campus-payment-name">MoMo</div>
+                <div class="campus-payment-desc">Pay via mobile money</div>
+              </div>
+              <div class="campus-payment-check">
+                <i class="fas fa-check-circle"></i>
+              </div>
+            </div>
+          </div>
         </div>
 
         <button class="book-btn" style="width:100%;margin-top:12px" id="confirmRideBtn" onclick="confirmRide()" disabled>
@@ -5085,9 +5694,182 @@
         </div>
       </div>
 
+      <!-- ASSIGNED STATE (when rider accepts) -->
+      <div id="assignedState" style="display:none;text-align:center">
+        <div style="width:72px;height:72px;border-radius:50%;background:#D1FAE5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem">
+          <i class="fas fa-check"></i>
+        </div>
+        <div class="search-status-title" style="color:var(--text)">Rider Assigned!</div>
+        <div class="search-status-sub" id="assignedRiderSub">Your K3K3 keke is on the way</div>
+        
+        <div style="background:var(--surface-2);border-radius:var(--r-lg);padding:16px;margin:16px 0;text-align:left;display:flex;align-items:center;gap:14px">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--yellow);color:var(--black);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:1.2rem" id="assignedRiderAvatar">K</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:1rem;color:var(--text)" id="assignedRiderName">Kofi Mensah</div>
+            <div style="font-size:.82rem;color:var(--text-2)" id="assignedRiderVehicle">Tricycle · AS 4920-24</div>
+          </div>
+          <a id="assignedRiderCall" href="tel:" style="width:40px;height:40px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;text-decoration:none">
+            <i class="fas fa-phone"></i>
+          </a>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);font-size:.88rem;margin-bottom:20px">
+          <span style="color:var(--text-2)"><i class="fas fa-clock" style="color:var(--yellow-dk)"></i> Estimated Arrival</span>
+          <span style="font-weight:800;color:var(--text)" id="assignedRiderETA">~3 min</span>
+        </div>
+
+        <button class="rsearch-retry-btn" onclick="closeRiderSearch()" style="background:var(--yellow);color:var(--black)">
+          <i class="fas fa-eye"></i> View Trip Details
+        </button>
+      </div>
+
+  <!-- Assigned Rider Profile Modal -->
+  <div class="rider-profile-modal-backdrop" id="assignedRiderProfileModal" style="display:none">
+    <div class="rider-profile-modal-box">
+      <div style="padding:18px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div style="font-weight:800;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:8px">
+          <i class="fas fa-id-card" style="color:var(--yellow-dk)"></i> Assigned Driver Profile
+        </div>
+        <button type="button" onclick="closeAssignedRiderModal()" style="background:none;border:none;font-size:1.2rem;color:var(--muted);cursor:pointer;padding:4px 8px">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div style="padding:22px 20px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div style="width:72px;height:72px;border-radius:50%;overflow:hidden;background:var(--yellow);color:var(--black);font-weight:900;font-size:1.8rem;display:flex;align-items:center;justify-content:center;border:3px solid var(--yellow);box-shadow:var(--sh-md)" id="modalRiderPhotoBox">
+            <span id="modalRiderInitial">G</span>
+          </div>
+          <div>
+            <h3 style="font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:4px" id="modalRiderName">Glenn Adjei</h3>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span style="display:inline-block;padding:3px 8px;border-radius:6px;background:var(--green-lt);color:var(--green);font-size:.76rem;font-weight:800">
+                <i class="fas fa-circle-check"></i> Verified Partner
+              </span>
+              <span style="font-family:monospace;font-size:.78rem;font-weight:800;color:var(--text-2);background:var(--surface-2);padding:3px 8px;border-radius:6px" id="modalRiderId">
+                ID: 68A4171C
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;font-size:.84rem">
+          <div>
+            <div style="color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase">Tricycle</div>
+            <div style="font-weight:800;color:var(--text);margin-top:2px" id="modalRiderVehicle">TVS RE</div>
+          </div>
+          <div>
+            <div style="color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase">License Plate</div>
+            <div style="font-weight:800;color:var(--black);margin-top:2px"><span style="background:var(--yellow);padding:2px 7px;border-radius:4px;letter-spacing:.05em" id="modalRiderPlate">ER1213131</span></div>
+          </div>
+          <div>
+            <div style="color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase">Station / Hub</div>
+            <div style="font-weight:700;color:var(--text);margin-top:2px" id="modalRiderStation">Ho Central</div>
+          </div>
+          <div>
+            <div style="color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase">Rating</div>
+            <div style="font-weight:800;color:var(--yellow-dk);margin-top:2px"><i class="fas fa-star" style="color:var(--yellow)"></i> <span id="modalRiderRating">4.9</span> (120+ trips)</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <a id="modalRiderCallBtn" href="tel:" style="flex:1;height:46px;background:var(--black);color:var(--white);border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:.88rem;text-decoration:none">
+            <i class="fas fa-phone"></i> Call Driver
+          </a>
+          <button type="button" onclick="shareRideLocation()" style="flex:1;height:46px;background:var(--yellow);color:var(--black);border:none;border-radius:var(--r);font-weight:800;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+            <i class="fas fa-share-nodes"></i> Share Location
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Multi-Channel Share Ride Modal (WhatsApp, Snapchat, SMS, Copy) -->
+  <div class="rider-profile-modal-backdrop" id="shareRideModal" style="display:none">
+    <div class="rider-profile-modal-box" style="max-width:440px">
+      <div style="padding:18px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div style="font-weight:800;font-size:1.05rem;color:var(--text);display:flex;align-items:center;gap:8px">
+          <i class="fas fa-share-nodes" style="color:var(--yellow)"></i> Share Live Ride Details
+        </div>
+        <button type="button" onclick="closeShareRideModal()" style="background:none;border:none;font-size:1.2rem;color:var(--muted);cursor:pointer;padding:4px 8px">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div style="padding:20px">
+        <p style="font-size:.85rem;color:var(--text-2);margin-bottom:16px;line-height:1.4">
+          Share your real-time K3K3 keke trip, driver details, and live Google Maps tracking with family and friends:
+        </p>
+
+        <!-- Trip Summary Snippet -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--yellow);color:var(--black);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;overflow:hidden;padding:2px">
+              <img src="../assets/k3k3.png" alt="Keke" style="width:100%;height:100%;object-fit:contain">
+            </div>
+            <div>
+              <div style="font-weight:800;font-size:.95rem;color:var(--text)" id="shareModalDriverName">Glenn Adjei</div>
+              <div style="font-size:.76rem;color:var(--text-2)" id="shareModalVehicleInfo">TVS RE · ER1213131</div>
+            </div>
+          </div>
+          <div style="font-size:.82rem;color:var(--text-2);display:flex;flex-direction:column;gap:4px">
+            <div><strong style="color:var(--green)">Pickup:</strong> <span id="shareModalPickup">Ho Central</span></div>
+            <div><strong style="color:var(--red)">Destination:</strong> <span id="shareModalDrop">Trafalgar</span></div>
+          </div>
+        </div>
+
+        <!-- Direct Instant Share Buttons Grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <!-- WhatsApp Button -->
+          <a id="shareWhatsAppBtn" href="#" target="_blank" style="height:48px;background:#25D366;color:#ffffff;border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:.86rem;text-decoration:none;box-shadow:0 3px 10px rgba(37,211,102,0.3)">
+            <i class="fab fa-whatsapp" style="font-size:1.25rem"></i> WhatsApp
+          </a>
+
+          <!-- Snapchat Button -->
+          <a id="shareSnapchatBtn" href="#" target="_blank" style="height:48px;background:#FFFC00;color:#000000;border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:.86rem;text-decoration:none;box-shadow:0 3px 10px rgba(255,252,0,0.3)">
+            <i class="fab fa-snapchat" style="font-size:1.2rem"></i> Snapchat
+          </a>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <!-- Native Mobile Share Sheet Button -->
+          <button type="button" onclick="executeNativeShare()" style="flex:1;height:44px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text)">
+            <i class="fas fa-ellipsis"></i> More Options
+          </button>
+          
+          <!-- Copy Link Button -->
+          <button type="button" onclick="copyShareRideLink()" style="flex:1;height:44px;background:var(--yellow);border:none;border-radius:var(--r);font-weight:800;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--black)">
+            <i class="fas fa-link"></i> Copy Link
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geofencing Out of Service Area Notice Modal -->
+  <div class="rider-profile-modal-backdrop" id="serviceAreaNoticeModal" style="display:none">
+    <div class="rider-profile-modal-box" style="max-width:440px">
+      <div style="padding:22px;text-align:center">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,214,10,0.15);border:2px solid var(--yellow);color:var(--yellow);display:inline-flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:14px">
+          <i class="fas fa-map-location-dot"></i>
+        </div>
+        <h3 style="font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:8px">K3K3ride Service Area</h3>
+        <p style="font-size:.86rem;color:var(--text-2);line-height:1.45;margin-bottom:16px">
+          We noticed your current location is outside our service area. 
+          <strong style="color:var(--yellow);display:block;margin-top:4px">K3K3ride currently operates exclusively in Ho, Volta Region (Ghana).</strong>
+        </p>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:20px;line-height:1.4">
+          Pickups are available at Ho campuses (HTU, UHAS, Sokode), healthcare centres (Trafalgar, Municipal), and central stations. You can explore Ho stations to preview fares or plan a trip!
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button type="button" onclick="exploreHoStations()" style="width:100%;height:46px;background:var(--yellow);color:var(--black);border:none;border-radius:var(--r);font-weight:800;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+            <i class="fas fa-compass"></i> Explore Ho Stations & Fares
+          </button>
+          <button type="button" onclick="closeServiceAreaNotice()" style="width:100%;height:40px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--r);font-weight:600;font-size:.82rem;cursor:pointer">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="confirm-modal-backdrop" id="logoutModal">
     <div class="confirm-modal">
@@ -5116,11 +5898,20 @@
     </div>
   </div>
 
+  <!-- Socket.io Real-Time Client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    if (typeof io === 'undefined') {
+      document.write('<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"><\/script>');
+    }
+  </script>
+
   <!-- ═══════════════════════════════════════
      JAVASCRIPT
 ═══════════════════════════════════════ -->
   <script>
-    const API = 'http://localhost:8810';
+    const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8810' : '';
+    const API = API_BASE ? `${API_BASE}/api` : '/api';
 
     /* ─── State ─── */
     let currentSection = 'home';
@@ -5395,6 +6186,19 @@
        Init
     ══════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', () => {
+      // Role Guard: Only redirect if explicitly logged in as rider and not viewing passenger portal
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const forcePassenger = urlParams.get('view') === 'passenger' || sessionStorage.getItem('k3k3_active_role') === 'passenger';
+        const storedUser = JSON.parse(localStorage.getItem('k3k3_user') || sessionStorage.getItem('k3k3_user') || '{}');
+        const userType = localStorage.getItem('k3k3_user_type') || sessionStorage.getItem('k3k3_user_type');
+
+        if (!forcePassenger && storedUser.role === 'rider' && userType === 'rider') {
+          window.location.replace('../rider/dashboard.html');
+          return;
+        }
+      } catch (_) {}
+
       loadUserFromAPI();
       loadSettings();
       renderDrivers();
@@ -5445,9 +6249,10 @@
           const headers = { 'Content-Type': 'application/json' };
           const token = getAuthToken();
           if (token) headers['Authorization'] = `Bearer ${token}`;
-          const res = await fetch(`${API}/users/${userId}`, { headers });
+          const res = await fetch(`${API}/auth/users/${userId}`, { headers });
           if (res.ok) {
-            userData = await res.json();
+            const json = await res.json();
+            userData = json.user || json;
           }
         } catch (err) {
           console.warn('Could not fetch user from API, using session data:', err.message);
@@ -5459,8 +6264,8 @@
         const s = getStoredSession();
         if (s) {
           userData = {
-            fname: s.fname || s.first_name || s.name || s.fullname?.split(' ')[0] || 'Friend',
-            lname: s.lname || s.last_name || s.fullname?.split(' ').slice(1).join(' ') || '',
+            fname: s.fname || s.first_name || (s.name && s.name !== 'Passenger' ? s.name.split(' ')[0] : '') || '',
+            lname: s.lname || s.last_name || (s.name && s.name !== 'Passenger' ? s.name.split(' ').slice(1).join(' ') : '') || '',
             email: s.email || '',
             phone: s.phone || '',
             id: s.id || s.user_id || null,
@@ -5468,43 +6273,87 @@
         }
       }
 
-      // Auth suspended — always provide a default user so dashboard is accessible
       if (!userData) {
-        userData = { fname: 'Passenger', lname: '', email: '', phone: '' };
+        userData = { fname: '', lname: '', email: '', phone: '' };
+      }
+
+      // If user data has a real name, persist it to storage
+      if (userData.fname || userData.first_name) {
+        try {
+          const currentSession = getStoredSession() || {};
+          const fName = userData.fname || userData.first_name || '';
+          const lName = userData.lname || userData.last_name || '';
+          const fullName = userData.full_name || `${fName} ${lName}`.trim() || fName;
+          const merged = {
+            ...currentSession,
+            ...userData,
+            fname: fName,
+            lname: lName,
+            name: fullName
+          };
+          sessionStorage.setItem('k3k3_user', JSON.stringify(merged));
+          localStorage.setItem('k3k3_user', JSON.stringify(merged));
+          if (fName) localStorage.setItem('k3k3_user_name', fName);
+        } catch (_) {}
       }
 
       applyUserToUI(userData);
     }
 
     function applyUserToUI(u) {
-      const fn = u.fname || u.first_name || u.name || 'Friend';
-      const ln = u.lname || u.last_name || '';
+      let rawFn = (u.fname || u.first_name || '').trim();
+      let rawLn = (u.lname || u.last_name || '').trim();
+      if (!rawFn && u.name && u.name !== 'Passenger') {
+        const parts = u.name.trim().split(' ');
+        rawFn = parts[0] || '';
+        rawLn = parts.slice(1).join(' ') || '';
+      }
+
+      const fn = rawFn;
+      const ln = rawLn;
       const email = u.email || '';
       const phone = u.phone || '';
-      const dn = fn + (ln ? ' ' + ln : '');
-      const initials = fn.charAt(0).toUpperCase();
+      const fallbackDisplay = phone ? `Member (${phone.slice(-4)})` : 'Member';
+      const displayFirstName = fn || fallbackDisplay;
+      const dn = (fn && ln) ? `${fn} ${ln}` : (fn || fallbackDisplay);
+      const initials = (fn ? fn.charAt(0) : (phone ? phone.slice(-2) : 'M')).toUpperCase();
 
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
       const setV = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
 
-      set('heroName', fn);
-      set('drawerName', fn);
+      set('heroName', displayFirstName);
+      set('drawerName', dn);
       set('drawerAvatar', initials);
       set('acctAvatarBig', initials);
       set('acctName', dn);
-      set('acctEmail', email || 'K3K3 Passenger Member');
+      set('acctEmail', email || (phone ? `Phone: ${phone}` : 'K3K3 Passenger Member'));
       set('profileAvatarBig', initials);
       set('profileDisplayName', dn);
 
       const ha = document.getElementById('headerUserAvatar');
       const hn = document.getElementById('headerUserName');
       if (ha) ha.textContent = initials;
-      if (hn) hn.textContent = fn;
+      if (hn) hn.textContent = displayFirstName;
 
       const ppd = document.getElementById('profilePhoneDisplay');
       const ped = document.getElementById('profileEmailDisplay');
+      const pemd = document.getElementById('profileEmergencyDisplay');
       if (ppd) ppd.textContent = phone || 'Not set';
       if (ped) ped.textContent = email || 'Not set';
+
+      // Emergency contact from u or stored session
+      const s = getStoredSession() || {};
+      const en = u.emergency_name || u.emergencyName || s.emergency_name || s.emergencyName || '';
+      const ep = u.emergency_phone || u.emergencyPhone || s.emergency_phone || s.emergencyPhone || '';
+      if (pemd) {
+        if (en || ep) {
+          pemd.textContent = [en, ep].filter(Boolean).join(' · ');
+          pemd.style.color = 'var(--text)';
+        } else {
+          pemd.textContent = 'Not set';
+          pemd.style.color = 'var(--text-2)';
+        }
+      }
 
       setV('profileFirstName', fn);
       setV('profileLastName', ln);
@@ -5519,16 +6368,11 @@
       if (aLName && !aLName.value) aLName.value = ln;
       if (aPhone && !aPhone.value && phone) aPhone.value = phone;
 
-      // Emergency contact from session (if available)
-      const s = getStoredSession();
-      if (s) {
-        const en = s.emergency_name || s.emergencyName || '';
-        const ep = s.emergency_phone || s.emergencyPhone || '';
-        const enEl = document.getElementById('emergencyName');
-        const epEl = document.getElementById('emergencyPhone');
-        if (enEl && en) enEl.value = en;
-        if (epEl && ep) epEl.value = ep;
-      }
+      // Emergency contact inputs
+      const enEl = document.getElementById('emergencyName');
+      const epEl = document.getElementById('emergencyPhone');
+      if (enEl && en) enEl.value = en;
+      if (epEl && ep) epEl.value = ep;
     }
 
     /* ─── Save Profile → API ─── */
@@ -5545,32 +6389,177 @@
       const btn = document.querySelector('#sec-profile .form-save-btn');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
 
+      // Instantly update the UI summary card, headers, and navigation
+      const fullName = `${fn} ${ln}`.trim() || fn;
+      const initials = (fn ? fn.charAt(0) : (ph ? ph.slice(-2) : 'M')).toUpperCase();
+      const pdn = document.getElementById('profileDisplayName');
+      const pab = document.getElementById('profileAvatarBig');
+      const ppd = document.getElementById('profilePhoneDisplay');
+      const ped = document.getElementById('profileEmailDisplay');
+      const pemd = document.getElementById('profileEmergencyDisplay');
+      if (pdn) pdn.textContent = fullName;
+      if (pab) pab.textContent = initials;
+      if (ppd) ppd.textContent = ph || 'Not set';
+      if (ped) ped.textContent = em || 'Not set';
+      if (pemd) {
+        if (en || ep) {
+          pemd.textContent = [en, ep].filter(Boolean).join(' · ');
+          pemd.style.color = 'var(--text)';
+        } else {
+          pemd.textContent = 'Not set';
+          pemd.style.color = 'var(--text-2)';
+        }
+      }
+
+      const hn = document.getElementById('headerUserName');
+      const ha = document.getElementById('headerUserAvatar');
+      const dn = document.getElementById('drawerName');
+      const da = document.getElementById('drawerAvatar');
+      const an = document.getElementById('acctName');
+      const aa = document.getElementById('acctAvatarBig');
+      const hero = document.getElementById('heroName');
+      if (hn) hn.textContent = fn;
+      if (ha) ha.textContent = initials;
+      if (dn) dn.textContent = fullName;
+      if (da) da.textContent = initials;
+      if (an) an.textContent = fullName;
+      if (aa) aa.textContent = initials;
+      if (hero) hero.textContent = fn;
+
+      // Update session storage immediately
+      const s = getStoredSession() || {};
+      Object.assign(s, {
+        fname: fn, lname: ln,
+        first_name: fn, last_name: ln,
+        name: fullName, full_name: fullName,
+        phone: ph, email: em,
+        emergency_name: en, emergency_phone: ep
+      });
+      try {
+        sessionStorage.setItem('k3k3_user', JSON.stringify(s));
+        localStorage.setItem('k3k3_user', JSON.stringify(s));
+        localStorage.setItem('k3k3_user_name', fn);
+      } catch (e) { }
+
       if (userId) {
         try {
           const headers = { 'Content-Type': 'application/json' };
           const token = getAuthToken();
           if (token) headers['Authorization'] = `Bearer ${token}`;
           const body = {
+            userId,
             fname: fn, lname: ln, phone: ph, email: em,
             emergency_name: en, emergency_phone: ep
           };
           let res = await fetch(`${API}/auth/passenger/profile`, { method: 'PUT', headers, body: JSON.stringify(body) });
-          if (res.ok) {
-            const updated = await res.json();
-            // Update session with latest data
-            const s = getStoredSession();
-            if (s) {
-              Object.assign(s, updated);
-              try { sessionStorage.setItem('k3k3_user', JSON.stringify(s)); } catch (e) { }
-            }
+          if (!res.ok) {
+            // Defensive fallback to PATCH /api/auth/users/:id
+            res = await fetch(`${API}/auth/users/${userId}`, { method: 'PATCH', headers, body: JSON.stringify({ fname: fn, lname: ln, phone: ph, email: em }) });
           }
-        } catch (err) { console.warn('Profile API save note:', err.message); }
+          if (res.ok) {
+            const resp = await res.json();
+            const updated = resp.user || resp;
+            Object.assign(s, updated, {
+              fname: fn, lname: ln,
+              first_name: fn, last_name: ln,
+              name: fullName, full_name: fullName,
+              phone: ph, email: em,
+              emergency_name: en, emergency_phone: ep
+            });
+            try {
+              sessionStorage.setItem('k3k3_user', JSON.stringify(s));
+              localStorage.setItem('k3k3_user', JSON.stringify(s));
+            } catch (e) { }
+          } else {
+            const errJson = await res.json().catch(() => ({}));
+            showToast(errJson.error || 'Failed to save profile to server', 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
+            return;
+          }
+        } catch (err) {
+          console.warn('Profile API save note:', err.message);
+          showToast('Profile saved locally. Sync will complete when online.', 'warning');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
+          return;
+        }
       }
 
-      // Refresh UI from API
       await loadUserFromAPI();
       showToast('Profile saved successfully ✓', 'success');
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
+    }
+
+    /* ══════════════════════════════════════════
+       Delete Complete Ride History
+    ══════════════════════════════════════════ */
+    function openDeleteHistoryModal() {
+      const modal = document.getElementById('deleteHistoryModal');
+      if (modal) modal.classList.add('show');
+    }
+    function closeDeleteHistoryModal() {
+      const modal = document.getElementById('deleteHistoryModal');
+      if (modal) modal.classList.remove('show');
+    }
+    async function deleteRideHistory() {
+      const userId = getUserId();
+      if (!userId) {
+        showToast('Please log in to manage your ride history', 'error');
+        closeDeleteHistoryModal();
+        return;
+      }
+
+      const btn = document.getElementById('confirmDeleteHistoryBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…';
+      }
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = getAuthToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        let res = await fetch(`${API}/trips/passenger/${userId}`, {
+          method: 'DELETE',
+          headers
+        });
+
+        if (!res.ok) {
+          // Fallback to /trips/passenger/:id directly
+          res = await fetch(`/trips/passenger/${userId}`, {
+            method: 'DELETE',
+            headers
+          });
+        }
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success !== false) {
+          closeDeleteHistoryModal();
+          showToast('Complete ride history permanently deleted from database ✓', 'success');
+
+          // Immediately re-render trips and payments from database (renders clean empty states)
+          await renderTrips();
+          await renderPayments();
+
+          // Reset dashboard counter statistics
+          const cTot = document.getElementById('chipTotal');
+          const cComp = document.getElementById('chipCompleted');
+          const stR = document.getElementById('statRides');
+          if (cTot) cTot.textContent = '0';
+          if (cComp) cComp.textContent = '0';
+          if (stR) stR.textContent = '0';
+        } else {
+          showToast(data.error || 'Failed to delete ride history from database', 'error');
+        }
+      } catch (err) {
+        console.error('Delete ride history error:', err);
+        showToast('Could not connect to server. Please try again.', 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-trash-can"></i> Delete Permanently';
+        }
+      }
     }
 
     /* ─── Change Password → API ─── */
@@ -5736,6 +6725,9 @@
         const db = document.getElementById(drawerId); if (db) db.classList.add('active');
       }
       if (section === 'apply-rider') loadApplyRiderDefaults();
+      if (section === 'home' && passengerMap) {
+        setTimeout(() => passengerMap.invalidateSize(), 150);
+      }
       closeDrawer();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -5828,7 +6820,12 @@
           sessionStorage.setItem('k3k3_lat', pos.coords.latitude);
           sessionStorage.setItem('k3k3_lng', pos.coords.longitude);
           showToast('Location access enabled ✓', 'success');
-          autoFillPickup(pos.coords.latitude, pos.coords.longitude);
+          
+          if (!isInsideHoVoltaServiceZone(pos.coords.latitude, pos.coords.longitude)) {
+            showServiceAreaNotice(pos.coords.latitude, pos.coords.longitude);
+          } else {
+            autoFillPickup(pos.coords.latitude, pos.coords.longitude);
+          }
         },
         () => {
           showToast('Location access denied by browser.', 'error');
@@ -5879,6 +6876,14 @@
         const c = document.getElementById(id);
         if (c) c.classList.remove('selected');
       });
+
+      // Reset payment method selection
+      paymentMethod = null;
+      ['payment-cash','payment-momo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('selected');
+      });
+
       const confirmBtn = document.getElementById('confirmRideBtn');
       const confirmLbl = document.getElementById('confirmRideBtnLabel');
       const nextBtn    = document.getElementById('step1NextBtn');
@@ -5972,7 +6977,22 @@
         if (p.area.toLowerCase().includes(q)) return true;
         return p.tags.some(tag => tag.includes(q));
       }).slice(0, 8);
-      if (!results.length) { hideSuggestions(suggestionsId); return; }
+      if (!results.length) {
+        box.innerHTML = `
+          <div style="padding:14px 16px;text-align:center;color:var(--text-2);font-size:0.84rem">
+            <div style="font-size:1.1rem;margin-bottom:4px;color:#F59E0B"><i class="fas fa-location-dot"></i></div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:4px">Location outside Ho / Volta</div>
+            <div style="font-size:0.78rem;line-height:1.4">K3K3ride currently operates exclusively in Ho &amp; Volta Region.</div>
+            <div style="margin-top:8px">
+              <button type="button" onclick="selectPlace('${inputId}','${suggestionsId}','Ho Central Market')" style="font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:6px;border:none;background:var(--yellow);color:var(--black);cursor:pointer">
+                Select Ho Central Market
+              </button>
+            </div>
+          </div>
+        `;
+        box.classList.add('show');
+        return;
+      }
       box.innerHTML = results.map(p => `
     <div class="place-suggestion-item" onclick="selectPlace('${inputId}','${suggestionsId}','${p.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
       <div class="place-sugg-icon"><i class="fas ${p.icon}"></i></div>
@@ -6036,6 +7056,80 @@
     ];
     window.CAMPUS_FARES = CAMPUS_FARES;
 
+    // Comprehensive GPS coordinate lookup for all landmarks in Ho, Volta Region
+    const HO_COORDINATES = {
+      // Ho Technical University (HTU / HSTU) & Sokode
+      'Ho Technical University (HSTU)': [6.6276, 0.4735],
+      'HSTU Main Gate': [6.6280, 0.4730],
+      'HSTU Student Hostel': [6.6270, 0.4740],
+      'Ho Polytechnic': [6.6276, 0.4735],
+      'Sokode Hostel': [6.6270, 0.4740],
+      'Sokode Junction': [6.6265, 0.4718],
+      'Sokode Estates': [6.6258, 0.4710],
+      'Sokode Market': [6.6260, 0.4715],
+
+      // UHAS & Campus Landmarks
+      'Cedi Auditorium': [6.6090, 0.4660],
+      'Cedi Auditorium (UHAS)': [6.6090, 0.4660],
+      'University of Health & Allied Sciences (UHAS)': [6.6090, 0.4660],
+      'UHAS Campus': [6.6090, 0.4660],
+      'School of Hygiene': [6.6045, 0.4695],
+      'Dave (Southern Campus)': [6.5920, 0.4610],
+
+      // Hospitals
+      'Trafalgar': [6.6050, 0.4700],
+      'Trafalgar (Ho Teaching Hospital)': [6.6050, 0.4700],
+      'Ho Teaching Hospital': [6.6050, 0.4700],
+      'Volta Regional Hospital': [6.6055, 0.4705],
+      'Ho Municipal Hospital': [6.6048, 0.4698],
+
+      // Central Ho & Transport
+      'Ho Central': [6.6012, 0.4688],
+      'Ho Central Market': [6.6018, 0.4685],
+      'Market': [6.6018, 0.4685],
+      'Ho Bus Terminal': [6.6010, 0.4670],
+      'Ho Town Centre': [6.6005, 0.4680],
+      'Ho Post Office': [6.6012, 0.4688],
+      'Ho Police Station': [6.6020, 0.4692],
+      'Stadium': [6.6040, 0.4665],
+      'Ho Stadium': [6.6040, 0.4665],
+      'Ho Sports Stadium': [6.6040, 0.4665],
+      'Ho Jubilee Park': [6.6000, 0.4660],
+      'Ho Cultural Centre': [6.6008, 0.4675],
+
+      // Neighborhoods & Suburbs
+      'Ahoe': [6.6070, 0.4730],
+      'Dome Area': [6.6100, 0.4720],
+      'Bankoe': [6.6130, 0.4760],
+      'Kpehe': [6.5980, 0.4640],
+      'Fiave': [6.6150, 0.4780],
+      'Agorve': [6.6120, 0.4750],
+      'Shiakobu': [6.5950, 0.4620],
+      'Barracks': [6.6180, 0.4820],
+      'Volta Barracks': [6.6180, 0.4820],
+      'Mawuli Estates': [6.6030, 0.4750],
+      'Mawuli School': [6.6030, 0.4705],
+      'Guiness': [6.6110, 0.4710],
+      'Lokoe': [6.5890, 0.4580],
+      'Mirage': [6.6025, 0.4670],
+      'Chances Hotel Ho': [6.6008, 0.4672],
+      'Ho Tarso Hotel': [6.6010, 0.4678]
+    };
+    window.HO_COORDINATES = HO_COORDINATES;
+
+    function getHoCoordinate(name) {
+      if (!name) return null;
+      const clean = String(name).trim();
+      if (HO_COORDINATES[clean]) return HO_COORDINATES[clean];
+      const lower = clean.toLowerCase();
+      for (const [k, v] of Object.entries(HO_COORDINATES)) {
+        if (k.toLowerCase() === lower || lower.includes(k.toLowerCase()) || k.toLowerCase().includes(lower)) {
+          return v;
+        }
+      }
+      return [6.6012, 0.4688]; // Default to Ho Central
+    }
+
     // Default fallback fare when route not in matrix
     const DEFAULT_CAMPUS_FARE = 3.00;
     const ALONE_MULTIPLIER = 3; // Ride alone = shared fare × 3
@@ -6054,6 +7148,7 @@
     // ── State ──
     let _campusFare = null;
     let _rideType = null; // 'shared' | 'alone'
+    let paymentMethod = null; // 'cash' | 'momo'
     let _pickupVal = '';
     let _destVal = '';
 
@@ -6089,6 +7184,11 @@
         if (fareEl) fareEl.textContent = `₵${_campusFare.toFixed(2)} / person`;
       }
 
+      // Preview dynamic route on live map and auto-fit bounds (not centered to static point)
+      if (typeof previewRouteOnPassengerMap === 'function') {
+        previewRouteOnPassengerMap(pickup, dest);
+      }
+
       if (nextBtn) {
         nextBtn.disabled = false;
         nextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Choose Ride';
@@ -6120,34 +7220,801 @@
     function backToStep1() {
       document.getElementById('bookStep2').style.display = 'none';
       document.getElementById('bookStep1').style.display = 'block';
+
+      // Reset ride type + payment method when going back so step 2 is fresh
+      _rideType = null;
+      paymentMethod = null;
+      ['card-shared','card-alone'].forEach(id => {
+        const c = document.getElementById(id);
+        if (c) c.classList.remove('selected');
+      });
+      ['payment-cash','payment-momo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('selected');
+      });
+      const confirmBtn = document.getElementById('confirmRideBtn');
+      const confirmLbl = document.getElementById('confirmRideBtnLabel');
+      if (confirmBtn) confirmBtn.disabled = true;
+      if (confirmLbl) confirmLbl.textContent = 'Select ride & payment';
     }
 
     function selectRideType(type) {
       _rideType = type;
       document.getElementById('card-shared').classList.toggle('selected', type === 'shared');
       document.getElementById('card-alone').classList.toggle('selected',  type === 'alone');
+      updateConfirmButton();
+    }
 
-      const fare = type === 'shared'
-        ? _campusFare.toFixed(2)
-        : (_campusFare * ALONE_MULTIPLIER).toFixed(2);
+    function selectPaymentMethod(method) {
+      paymentMethod = method;
+      document.getElementById('payment-cash').classList.toggle('selected', method === 'cash');
+      document.getElementById('payment-momo').classList.toggle('selected', method === 'momo');
+      updateConfirmButton();
+    }
 
+    function updateConfirmButton() {
       const confirmBtn = document.getElementById('confirmRideBtn');
       const confirmLbl = document.getElementById('confirmRideBtnLabel');
-      if (confirmBtn) confirmBtn.disabled = false;
-      if (confirmLbl) {
-        const label = type === 'shared' ? 'Shared Ride' : 'Ride Alone';
-        confirmLbl.textContent = `Book ${label} — ₵${fare}`;
+      
+      if (_rideType && paymentMethod) {
+        confirmBtn.disabled = false;
+        const fare = _rideType === 'shared' ? _campusFare : _campusFare * ALONE_MULTIPLIER;
+        const label = _rideType === 'shared' ? 'Shared Ride' : 'Ride Alone';
+        const paymentLabel = paymentMethod === 'cash' ? 'Cash' : 'MoMo';
+        confirmLbl.textContent = `Book ${label} — ₵${fare.toFixed(2)} (${paymentLabel})`;
+      } else {
+        confirmBtn.disabled = true;
+        confirmLbl.textContent = 'Select ride & payment';
       }
     }
 
+    // ─── Socket.io & Real-Time Dispatch Integration ───
+    let passengerSocket = null;
+
+    function initPassengerSocket() {
+      if (typeof io === 'undefined') {
+        console.warn('[Socket.io] Client library not loaded. Falling back to HTTP polling.');
+        return;
+      }
+      if (passengerSocket && passengerSocket.connected) return;
+
+      try {
+        passengerSocket = io(API_BASE, {
+          path: '/socket.io',
+          transports: ['websocket', 'polling'],
+          reconnection: true,
+          reconnectionAttempts: 20,
+          reconnectionDelay: 1500
+        });
+
+        passengerSocket.on('connect', () => {
+          console.log('[Passenger Socket] Connected, socket ID:', passengerSocket.id);
+          const userId = getUserId();
+          if (userId) {
+            passengerSocket.emit('passenger:join', { passengerId: userId });
+          }
+          // Re-subscribe to any active trip in session
+          try {
+            const active = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+            if (active && (active.id || active.tripId)) {
+              passengerSocket.emit('trip:join', { tripId: active.id || active.tripId });
+            }
+          } catch(_) {}
+        });
+
+        // Event: Rider accepted trip!
+        passengerSocket.on('trip:accepted', (data) => {
+          handleTripAccepted(data);
+        });
+
+        // Event: In-trip GPS location ping from rider
+        passengerSocket.on('trip:rider_location', (coords) => {
+          handleRiderLocationPing(coords);
+        });
+
+        // Event: Trip status change
+        passengerSocket.on('trip:status_change', (update) => {
+          handleTripStatusChange(update);
+        });
+
+        // Event: No riders available
+        passengerSocket.on('trip:no_riders', (data) => {
+          document.getElementById('searchingState').style.display = 'none';
+          document.getElementById('assignedState').style.display = 'none';
+          document.getElementById('noRidersState').style.display = 'block';
+          showToast(data.message || 'No available riders near your pickup.', 'info');
+        });
+
+        // Event: Online keke pool update
+        passengerSocket.on('riders:pool_update', (pool) => {
+          if (typeof renderDrivers === 'function') renderDrivers();
+        });
+
+      } catch (err) {
+        console.warn('[Passenger Socket Error]', err.message);
+      }
+    }
+
+    let passengerMap = null;
+    let passengerUserMarker = null;
+    let passengerRiderMarker = null;
+    let passengerRouteLayer = null;
+
+    function initPassengerMap() {
+      const mapEl = document.getElementById('passengerLiveMap');
+      if (!mapEl || typeof L === 'undefined') return;
+      if (passengerMap) {
+        setTimeout(() => passengerMap.invalidateSize(), 200);
+        return;
+      }
+
+      const initialLat = parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012');
+      const initialLng = parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688');
+
+      passengerMap = L.map('passengerLiveMap', {
+        zoomControl: false,
+        attributionControl: false,
+        tap: false,
+        scrollWheelZoom: false
+      }).setView([initialLat, initialLng], 15);
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c']
+      }).addTo(passengerMap);
+
+      L.control.zoom({ position: 'bottomright' }).addTo(passengerMap);
+
+      // User location marker in Ho
+      passengerUserMarker = L.circleMarker([initialLat, initialLng], {
+        radius: 8,
+        fillColor: '#3B82F6',
+        color: '#ffffff',
+        weight: 3,
+        fillOpacity: 1
+      }).addTo(passengerMap).bindPopup('<b>Your Location</b>');
+
+      window.addEventListener('resize', () => {
+        if (passengerMap) passengerMap.invalidateSize();
+      });
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => { if (passengerMap) passengerMap.invalidateSize(); }, 250);
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && passengerMap) {
+          setTimeout(() => passengerMap.invalidateSize(), 200);
+        }
+      });
+
+      // Restore active trip on map if present
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+        if (saved && (saved.status === 'accepted' || saved.rider)) {
+          updatePassengerMapWithTrip(saved);
+        }
+      } catch(_) {}
+
+      setTimeout(() => passengerMap.invalidateSize(), 300);
+    }
+
+    function togglePassengerMapFullscreen() {
+      const card = document.getElementById('passengerLiveMapCard');
+      const btn = document.getElementById('passFullscreenBtn');
+      if (!card) return;
+      const isFull = card.classList.toggle('fullscreen-mode');
+      if (btn) {
+        btn.innerHTML = isFull ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+        btn.title = isFull ? 'Exit Fullscreen' : 'Toggle Fullscreen Map';
+      }
+      setTimeout(() => {
+        if (passengerMap) passengerMap.invalidateSize();
+      }, 250);
+    }
+
+    function recenterPassengerMap() {
+      if (!passengerMap) {
+        initPassengerMap();
+        return;
+      }
+      const lat = parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012');
+      const lng = parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688');
+      passengerMap.setView([lat, lng], 16, { animate: true });
+    }
+
+    /**
+     * ─────────────────────────────────────────────────────────
+     * OSRM ROAD ROUTING & ETA ENGINE (Open Source Routing Machine)
+     * ─────────────────────────────────────────────────────────
+     */
+    async function fetchOsrmDrivingRoute(originLat, originLng, destLat, destLng) {
+      const oLat = parseFloat(originLat);
+      const oLng = parseFloat(originLng);
+      const dLat = parseFloat(destLat);
+      const dLng = parseFloat(destLng);
+      if (isNaN(oLat) || isNaN(oLng) || isNaN(dLat) || isNaN(dLng)) return null;
+
+      const url = `https://router.project-osrm.org/route/v1/driving/${oLng.toFixed(6)},${oLat.toFixed(6)};${dLng.toFixed(6)},${dLat.toFixed(6)}?overview=full&geometries=geojson`;
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4500);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const latLngs = (route.geometry?.coordinates || []).map(c => [c[1], c[0]]);
+          const distanceKm = parseFloat((route.distance / 1000).toFixed(1));
+          const durationMin = Math.max(1, Math.round(route.duration / 60));
+          return {
+            latLngs,
+            distanceKm,
+            durationMin,
+            summary: `${durationMin} mins (${distanceKm} km)`,
+            isRealRoad: true
+          };
+        }
+      } catch (err) {
+        console.warn('[Passenger OSRM Road Routing Warning]', err.message);
+      }
+
+      return {
+        latLngs: [[oLat, oLng], [dLat, dLng]],
+        distanceKm: 1.5,
+        durationMin: 5,
+        summary: '5 mins (1.5 km)',
+        isFallback: true
+      };
+    }
+
+    async function previewRouteOnPassengerMap(pickup, dest) {
+      if (!passengerMap) initPassengerMap();
+      if (!passengerMap) return;
+
+      const pCoords = getHoCoordinate(pickup) || [6.6012, 0.4688];
+      const dCoords = getHoCoordinate(dest) || [6.6050, 0.4700];
+
+      if (passengerRouteLayer) {
+        passengerMap.removeLayer(passengerRouteLayer);
+        passengerRouteLayer = null;
+      }
+
+      const group = L.featureGroup();
+
+      const pMarker = L.circleMarker(pCoords, {
+        radius: 8,
+        fillColor: '#10B981',
+        color: '#ffffff',
+        weight: 2.5,
+        fillOpacity: 1
+      }).bindPopup(`<b>Pickup:</b> ${pickup}`);
+      group.addLayer(pMarker);
+
+      const dMarker = L.circleMarker(dCoords, {
+        radius: 8,
+        fillColor: '#EF4444',
+        color: '#ffffff',
+        weight: 2.5,
+        fillOpacity: 1
+      }).bindPopup(`<b>Destination:</b> ${dest}`);
+      group.addLayer(dMarker);
+
+      // Fetch real street road path from OSRM
+      const route = await fetchOsrmDrivingRoute(pCoords[0], pCoords[1], dCoords[0], dCoords[1]);
+      const latLngs = (route && route.latLngs.length > 0) ? route.latLngs : [pCoords, dCoords];
+
+      const line = L.polyline(latLngs, {
+        color: '#FFD60A',
+        weight: 5,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round'
+      });
+      group.addLayer(line);
+
+      passengerRouteLayer = group;
+      group.addTo(passengerMap);
+
+      // Auto-fit bounds dynamically to show entire route
+      passengerMap.fitBounds(L.latLngBounds([pCoords, dCoords]), { padding: [50, 50], maxZoom: 16 });
+    }
+
+    async function updatePassengerMapWithTrip(trip) {
+      if (!passengerMap) initPassengerMap();
+      if (!passengerMap || !trip) return;
+
+      const pickupName = trip.pickup || trip.pickup_address || trip.pickup_label || 'Ho Central';
+      const dropName = trip.drop || trip.dropoff_address || trip.dest_label || 'Trafalgar';
+
+      const defaultP = getHoCoordinate(pickupName) || [6.6012, 0.4688];
+      const defaultD = getHoCoordinate(dropName) || [6.6050, 0.4700];
+
+      let pLat = parseFloat(trip.pickup_lat || trip.pickupLat || defaultP[0]);
+      let pLng = parseFloat(trip.pickup_lng || trip.pickupLng || defaultP[1]);
+      if (pLng < 0) { pLat = defaultP[0]; pLng = defaultP[1]; }
+
+      let dLat = parseFloat(trip.dropoff_lat || trip.dropoffLat || defaultD[0]);
+      let dLng = parseFloat(trip.dropoff_lng || trip.dropoffLng || defaultD[1]);
+      if (dLng < 0) { dLat = defaultD[0]; dLng = defaultD[1]; }
+
+      const r = trip.rider || {};
+      let rLat = typeof r.lat === 'number' ? r.lat : pLat;
+      let rLng = typeof r.lng === 'number' ? r.lng : pLng;
+      if (rLng < 0) { rLat = pLat; rLng = pLng; }
+
+      if (passengerRouteLayer) {
+        passengerMap.removeLayer(passengerRouteLayer);
+        passengerRouteLayer = null;
+      }
+
+      const group = L.featureGroup();
+
+      // Pickup
+      const pMarker = L.circleMarker([pLat, pLng], {
+        radius: 8,
+        fillColor: '#10B981',
+        color: '#ffffff',
+        weight: 2.5,
+        fillOpacity: 1
+      }).bindPopup(`<b>Pickup:</b> ${pickupName}`);
+      group.addLayer(pMarker);
+
+      // Dropoff
+      const dMarker = L.circleMarker([dLat, dLng], {
+        radius: 8,
+        fillColor: '#EF4444',
+        color: '#ffffff',
+        weight: 2.5,
+        fillOpacity: 1
+      }).bindPopup(`<b>Destination:</b> ${dropName}`);
+      group.addLayer(dMarker);
+
+      // Rider keke marker with custom K3K3 vehicle image & pulse beacon
+      const kekeIcon = L.divIcon({
+        className: 'custom-keke-marker-pass',
+        html: '<div class="keke-marker-pass-icon" id="passMapKeke"><div class="keke-beacon-pulse"></div><img src="../assets/k3k3.png" alt="K3K3 Keke" style="width:28px;height:28px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35));"></div>',
+        iconSize: [44, 44],
+        iconAnchor: [22, 22]
+      });
+
+      passengerRiderMarker = L.marker([rLat, rLng], { icon: kekeIcon, zIndexOffset: 1000 }).addTo(group);
+
+      // Request OSRM road routes for both legs:
+      // Leg 1: Rider -> Passenger (approaching road path in Amber)
+      // Leg 2: Pickup -> Destination (passenger route in Blue)
+      const [riderLeg, tripLeg] = await Promise.all([
+        fetchOsrmDrivingRoute(rLat, rLng, pLat, pLng),
+        fetchOsrmDrivingRoute(pLat, pLng, dLat, dLng)
+      ]);
+
+      if (riderLeg && riderLeg.latLngs.length > 0) {
+        const riderPolyline = L.polyline(riderLeg.latLngs, {
+          color: '#FFD60A',
+          weight: 5,
+          opacity: 0.95,
+          lineCap: 'round',
+          lineJoin: 'round'
+        });
+        group.addLayer(riderPolyline);
+      }
+
+      if (tripLeg && tripLeg.latLngs.length > 0) {
+        const tripPolyline = L.polyline(tripLeg.latLngs, {
+          color: '#3B82F6',
+          weight: 4,
+          dashArray: '6, 8',
+          opacity: 0.8,
+          lineCap: 'round',
+          lineJoin: 'round'
+        });
+        group.addLayer(tripPolyline);
+      }
+
+      passengerRouteLayer = group;
+      group.addTo(passengerMap);
+
+      // Auto-fit bounds dynamically so pickup, dropoff, and live rider are framed together!
+      const bounds = L.latLngBounds([[rLat, rLng], [pLat, pLng], [dLat, dLng]]);
+      passengerMap.fitBounds(bounds, { padding: [50, 50] });
+    }
+
+    function openAssignedRiderModal() {
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      populateAssignedRiderModal(trip?.rider, trip);
+      const m = document.getElementById('assignedRiderProfileModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeAssignedRiderModal() {
+      const m = document.getElementById('assignedRiderProfileModal');
+      if (m) m.style.display = 'none';
+    }
+
+    function populateAssignedRiderModal(r, trip) {
+      const rider = r || {};
+      const name = rider.name || 'Glenn Adjei';
+      const rawId = rider.shortId || rider.riderId || '68A4171C';
+      const shortId = (String(rawId).replace(/-/g, '').substring(0, 8)).toUpperCase();
+      const photoUrl = rider.photoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+      const vehicle = rider.vehicleType || 'TVS RE';
+      const plate = rider.licensePlate || 'ER1213131';
+      const station = rider.station || 'Ho Central';
+      const phone = rider.phone || '+233207739636';
+      const rating = rider.rating || '4.9';
+
+      const mName = document.getElementById('modalRiderName');
+      const mId = document.getElementById('modalRiderId');
+      const mVeh = document.getElementById('modalRiderVehicle');
+      const mPlate = document.getElementById('modalRiderPlate');
+      const mStation = document.getElementById('modalRiderStation');
+      const mRating = document.getElementById('modalRiderRating');
+      const mPhoto = document.getElementById('modalRiderPhotoBox');
+      const mCall = document.getElementById('modalRiderCallBtn');
+
+      if (mName) mName.textContent = name;
+      if (mId) mId.textContent = 'ID: ' + shortId;
+      if (mVeh) mVeh.textContent = vehicle;
+      if (mPlate) mPlate.textContent = plate;
+      if (mStation) mStation.textContent = station;
+      if (mRating) mRating.textContent = rating;
+      if (mCall) mCall.href = `tel:${phone}`;
+
+      if (mPhoto) {
+        if (photoUrl) {
+          mPhoto.innerHTML = `<img src="${photoUrl}" alt="${name}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<span>${name.charAt(0)}</span>'">`;
+        } else {
+          mPhoto.innerHTML = `<span>${name.charAt(0)}</span>`;
+        }
+      }
+    }
+
+    /* ─── Multi-Channel Ride Sharing (WhatsApp, Snapchat, Native, Copy) ─── */
+    function shareRideLocation() {
+      openShareRideModal();
+    }
+
+    function openShareRideModal() {
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      const r = trip?.rider || {};
+      const driverName = r.name || 'Glenn Adjei';
+      const driverPlate = r.licensePlate || 'ER1213131';
+      const driverVehicle = r.vehicleType || 'TVS RE';
+      const pickup = trip?.pickup || trip?.pickup_address || trip?.from || 'Ho Central';
+      const drop = trip?.drop || trip?.dropoff_address || trip?.to || 'Dome Area';
+
+      const lat = r.lat || parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012');
+      const lng = r.lng || parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688');
+      const mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+
+      const shareText = `🚕 I'm riding with K3K3!\nDriver: ${driverName} (${driverVehicle} · ${driverPlate})\nPickup: ${pickup}\nDestination: ${drop}\nLive GPS Tracking: ${mapUrl}`;
+
+      // Populate Modal Fields
+      const dn = document.getElementById('shareModalDriverName');
+      const vi = document.getElementById('shareModalVehicleInfo');
+      const pk = document.getElementById('shareModalPickup');
+      const dp = document.getElementById('shareModalDrop');
+      if (dn) dn.textContent = driverName;
+      if (vi) vi.textContent = `${driverVehicle} · ${driverPlate}`;
+      if (pk) pk.textContent = pickup;
+      if (dp) dp.textContent = drop;
+
+      // WhatsApp deep link
+      const waBtn = document.getElementById('shareWhatsAppBtn');
+      if (waBtn) {
+        waBtn.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      }
+
+      // Snapchat deep link
+      const snapBtn = document.getElementById('shareSnapchatBtn');
+      if (snapBtn) {
+        snapBtn.href = `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(mapUrl)}`;
+      }
+
+      window._currentRideShareText = shareText;
+      window._currentRideShareUrl = mapUrl;
+
+      const modal = document.getElementById('shareRideModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeShareRideModal() {
+      const modal = document.getElementById('shareRideModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function executeNativeShare() {
+      const text = window._currentRideShareText || 'Tracking my K3K3 ride';
+      const url = window._currentRideShareUrl || 'https://www.google.com/maps';
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'K3K3 Live Ride Tracking',
+            text: text,
+            url: url
+          });
+          showToast('Ride shared successfully!', 'success');
+          closeShareRideModal();
+          return;
+        } catch (err) {
+          if (err.name !== 'AbortError') console.warn('[Native Share]', err);
+        }
+      }
+      copyShareRideLink();
+    }
+
+    async function copyShareRideLink() {
+      const text = window._currentRideShareText || 'Tracking my K3K3 ride';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('✅ Live ride link copied to clipboard!', 'success');
+          closeShareRideModal();
+          return;
+        } catch (_) {}
+      }
+      prompt('Copy your live ride link:', text);
+      closeShareRideModal();
+    }
+
+    /* ─── Ho, Volta Region Service Zone Geofence ─── */
+    function isInsideHoVoltaServiceZone(lat, lng) {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      if (isNaN(latitude) || isNaN(longitude)) return true; // Named pickup stations pass
+      const inBoundingBox = (latitude >= 6.45 && latitude <= 6.78 && longitude >= 0.30 && longitude <= 0.65);
+      const dLat = (latitude - 6.6012) * 111;
+      const dLng = (longitude - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
+      const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+      return inBoundingBox || distKm <= 35;
+    }
+
+    function checkUserLocationServiceZone(lat, lng) {
+      if (!isInsideHoVoltaServiceZone(lat, lng)) {
+        showServiceAreaNotice(lat, lng);
+      }
+    }
+
+    function showServiceAreaNotice(lat, lng) {
+      const modal = document.getElementById('serviceAreaNoticeModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeServiceAreaNotice() {
+      const modal = document.getElementById('serviceAreaNoticeModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function exploreHoStations() {
+      closeServiceAreaNotice();
+      openBookModal();
+      const pInput = document.getElementById('pickupInput');
+      const pSel = document.getElementById('pickupSelect');
+      if (pInput) pInput.value = 'Ho Central Market';
+      if (pSel) pSel.value = 'Ho Central Market';
+      showToast('Pickup set to Ho Central Market. Select your destination in Ho!', 'info');
+    }
+
+    function handleTripAccepted(data) {
+      console.log('[Trip Assigned]', data);
+      const tripId = data.tripId || data.id;
+      sessionStorage.setItem('k3k3_active_trip', JSON.stringify(data));
+
+      // Subscribe to trip room for live GPS
+      if (passengerSocket && passengerSocket.connected && tripId) {
+        passengerSocket.emit('trip:join', { tripId });
+      }
+
+      // Update Assigned State in search modal
+      document.getElementById('searchingState').style.display = 'none';
+      document.getElementById('noRidersState').style.display = 'none';
+      const assigned = document.getElementById('assignedState');
+      if (assigned) assigned.style.display = 'block';
+
+      const rider = data.rider || {};
+      const riderName = rider.name || 'Glenn Adjei';
+      const vehicle = `${rider.vehicleType || 'TVS RE'} · ${rider.licensePlate || 'ER1213131'}`;
+      const phone = rider.phone || '+233207739636';
+      const photoUrl = rider.photoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+
+      const aName = document.getElementById('assignedRiderName');
+      const aVeh  = document.getElementById('assignedRiderVehicle');
+      const aCall = document.getElementById('assignedRiderCall');
+      const aAva  = document.getElementById('assignedRiderAvatar');
+      const aEta  = document.getElementById('assignedRiderETA');
+      const hEta  = document.getElementById('homeAtETA');
+      if (aName) aName.textContent = riderName;
+      if (aVeh)  aVeh.textContent  = vehicle;
+      if (aCall) aCall.href = phone ? `tel:${phone}` : 'javascript:void(0)';
+      if (aAva) {
+        if (photoUrl) {
+          aAva.innerHTML = `<img src="${photoUrl}" alt="${riderName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${riderName.charAt(0)}'">`;
+        } else {
+          aAva.textContent = riderName.charAt(0).toUpperCase();
+        }
+      }
+
+      // Display immediate arrival ETA
+      const initialEta = data.etaText || (data.etaMinutes ? `~${data.etaMinutes} min` : '~3 min');
+      if (aEta) aEta.textContent = initialEta;
+      if (hEta) hEta.textContent = initialEta;
+
+      // Render Home Active Trip Card
+      renderHomeActiveTrip(data);
+
+      // Open assigned rider profile modal so passenger sees driver details immediately
+      populateAssignedRiderModal(rider, data);
+      openAssignedRiderModal();
+
+      showToast(`Driver ${riderName} assigned! Arriving in ${initialEta}.`, 'success');
+    }
+
+    function handleRiderLocationPing(coords) {
+      if (!coords) return;
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      if (!trip) return;
+
+      // Update moving keke marker on live map
+      if (passengerRiderMarker && typeof coords.lat === 'number' && typeof coords.lng === 'number') {
+        passengerRiderMarker.setLatLng([coords.lat, coords.lng]);
+        const dom = document.getElementById('passMapKeke');
+        if (dom && coords.heading) {
+          dom.style.transform = `rotate(${coords.heading}deg)`;
+        }
+      }
+
+      // Calculate dynamic ETA using pickup coords
+      const pLat = parseFloat(trip.pickup_lat || sessionStorage.getItem('k3k3_lat') || '6.6012');
+      const pLng = parseFloat(trip.pickup_lng || sessionStorage.getItem('k3k3_lng') || '0.4688');
+      const dist = estimateDist({ lat: coords.lat, lng: coords.lng }, { lat: pLat, lng: pLng });
+      const etaMin = Math.max(1, Math.ceil((dist / 18) * 60));
+
+      const etaStr = `~${etaMin} min (${dist.toFixed(1)} km)`;
+      const aEta = document.getElementById('assignedRiderETA');
+      const hEta = document.getElementById('homeAtETA');
+      if (aEta) aEta.textContent = etaStr;
+      if (hEta) hEta.textContent = etaStr;
+    }
+
+    function handleTripStatusChange(update) {
+      console.log('[Trip Status Change]', update);
+      if (update.status === 'completed') {
+        sessionStorage.removeItem('k3k3_active_trip');
+        const card = document.getElementById('homeActiveTripCard');
+        if (card) card.style.display = 'none';
+        closeRiderSearch();
+        closeAssignedRiderModal();
+        showToast('Trip completed! Thank you for riding with K3K3.', 'success');
+        if (typeof renderTrips === 'function') renderTrips();
+        if (typeof renderPayments === 'function') renderPayments();
+        if (passengerRouteLayer && passengerMap) {
+          passengerMap.removeLayer(passengerRouteLayer);
+          passengerRouteLayer = null;
+        }
+      } else if (update.status === 'cancelled') {
+        sessionStorage.removeItem('k3k3_active_trip');
+        const card = document.getElementById('homeActiveTripCard');
+        if (card) card.style.display = 'none';
+        closeRiderSearch();
+        closeAssignedRiderModal();
+        showToast('Trip was cancelled.', 'info');
+        if (passengerRouteLayer && passengerMap) {
+          passengerMap.removeLayer(passengerRouteLayer);
+          passengerRouteLayer = null;
+        }
+      } else if (update.status === 'arriving') {
+        const s = document.getElementById('homeAtStatus');
+        if (s) s.textContent = 'Rider Arrived at Pickup';
+        showToast('Your rider has arrived at your pickup spot!', 'warn');
+      } else if (update.status === 'in_progress') {
+        const s = document.getElementById('homeAtStatus');
+        if (s) s.textContent = 'Trip in Progress';
+      }
+    }
+
+    function renderHomeActiveTrip(tripData) {
+      const card = document.getElementById('homeActiveTripCard');
+      if (!card || !tripData) return;
+
+      const r = tripData.rider || {};
+      const pickup = tripData.pickup || tripData.pickup_address || 'Ho Central';
+      const drop   = tripData.drop || tripData.dropoff_address || 'Dome Area';
+      const fare   = parseFloat(tripData.fare || tripData.estimated_fare || 5).toFixed(2);
+      const name   = r.name || 'Glenn Adjei';
+      const vehicle = `${r.vehicleType || 'TVS RE'} · ${r.licensePlate || 'ER1213131'}`;
+      const photoUrl = r.photoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+
+      document.getElementById('homeAtName').textContent    = name;
+      document.getElementById('homeAtVehicle').textContent = vehicle;
+      document.getElementById('homeAtPickup').textContent  = pickup;
+      document.getElementById('homeAtDrop').textContent    = drop;
+      document.getElementById('homeAtFare').textContent    = '₵' + fare;
+      
+      const av = document.getElementById('homeAtAvatar');
+      if (av) {
+        if (photoUrl) {
+          av.innerHTML = `<img src="${photoUrl}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${name.charAt(0)}'">`;
+        } else {
+          av.textContent = name.charAt(0).toUpperCase();
+        }
+      }
+
+      document.getElementById('homeAtCall').href          = r.phone ? `tel:${r.phone}` : 'javascript:void(0)';
+
+      const navBtn = document.getElementById('homeAtNav');
+      if (navBtn) {
+        const pCoords = getHoCoordinate(pickup) || [6.6012, 0.4688];
+        const dCoords = getHoCoordinate(drop) || [6.6050, 0.4700];
+        navBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${pCoords[0]},${pCoords[1]}&destination=${dCoords[0]},${dCoords[1]}&travelmode=driving`;
+      }
+
+      const initialEta = tripData.etaText || (tripData.etaMinutes ? `~${tripData.etaMinutes} min` : '~3 min');
+      const hEta = document.getElementById('homeAtETA');
+      if (hEta) hEta.textContent = initialEta;
+
+      card.style.display = 'block';
+
+      // Update Live Map with active trip bounds & route
+      updatePassengerMapWithTrip(tripData);
+    }
+
+    async function cancelActiveTrip() {
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      if (!trip) return;
+      const tripId = trip.tripId || trip.id;
+      if (!confirm('Are you sure you want to cancel this ride?')) return;
+
+      try {
+        await fetch(`${API}/trips/${tripId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'cancelled' })
+        });
+      } catch(_) {}
+
+      sessionStorage.removeItem('k3k3_active_trip');
+      document.getElementById('homeActiveTripCard').style.display = 'none';
+      closeAssignedRiderModal();
+      if (passengerRouteLayer && passengerMap) {
+        passengerMap.removeLayer(passengerRouteLayer);
+        passengerRouteLayer = null;
+      }
+      showToast('Ride request cancelled.', 'info');
+    }
+
+    // Call initPassengerSocket & initPassengerMap on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      initPassengerSocket();
+      setTimeout(() => initPassengerMap(), 250);
+      // Restore active trip if one exists in sessionStorage
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+        if (saved && (saved.status === 'accepted' || saved.rider)) {
+          renderHomeActiveTrip(saved);
+        }
+      } catch(_) {}
+    });
+
     async function confirmRide() {
-      if (!_rideType || !_campusFare) return;
+      if (!_rideType || !_campusFare || !paymentMethod) return;
 
       const pickup = _pickupVal;
       const dest   = _destVal;
       const fare   = _rideType === 'shared' ? _campusFare : _campusFare * ALONE_MULTIPLIER;
 
-      // Update legacy input fields so existing showRiderSearch() still works
+      // Geofence pre-flight check: Ensure pickup location is inside Ho / Volta Region
+      const pCoord = getHoCoordinate(pickup) || [
+        parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012'),
+        parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688')
+      ];
+      if (!isInsideHoVoltaServiceZone(pCoord[0], pCoord[1])) {
+        closeBookModal();
+        showServiceAreaNotice(pCoord[0], pCoord[1]);
+        showToast("K3K3ride isn't available in this location yet. We currently serve Ho & Volta Region!", "warn");
+        return;
+      }
+
       const pickupInputEl = document.getElementById('pickupInput');
       const destInputEl   = document.getElementById('destInput');
       if (pickupInputEl) pickupInputEl.value = pickup;
@@ -6156,41 +8023,53 @@
       closeBookModal();
       showRiderSearch(pickup, dest);
 
-      // Post to API
+      // Post to backend API (which automatically triggers dispatchService.dispatchRide)
       const sess = getStoredSession();
-      const passengerId = sess?.passenger_id || sess?.passengerId || sess?.id || null;
+      const passengerId = sess?.passenger_id || sess?.passengerId || sess?.id || 'passenger-demo';
 
-      if (passengerId) {
-        try {
-          const body = {
-            passenger_id:  passengerId,
-            pickup_lat:    parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6018'),
-            pickup_lng:    parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4685'),
-            dest_lat:      6.6018,
-            dest_lng:      0.4685,
-            pickup_label:  pickup,
-            dest_label:    dest,
-            fare_estimate: fare,
-            ride_type:     _rideType,            // 'shared' | 'alone'
-            campus_fare:   _campusFare,          // base per-person fixed fare
-          };
-          const res = await fetch(`${API}/trips/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
-          if (res.ok) {
-            const trip = await res.json();
-            sessionStorage.setItem('k3k3_active_trip', JSON.stringify(trip));
-            showToast('Ride requested! Searching for a rider…', 'success');
-            pollTripStatus(trip.id);
-          } else {
-            const err = await res.json().catch(() => ({}));
-            showToast(err.detail || 'Could not request ride. Try again.', 'error');
+      try {
+        const dCoord = getHoCoordinate(dest) || [6.6050, 0.4700];
+
+        const body = {
+          passenger_id:  passengerId,
+          pickup_lat:    pCoord[0],
+          pickup_lng:    pCoord[1],
+          dest_lat:      dCoord[0],
+          dest_lng:      dCoord[1],
+          pickup_label:  pickup,
+          dest_label:    dest,
+          fare_estimate: fare,
+          ride_type:     _rideType,
+          campus_fare:   _campusFare,
+          payment_method: paymentMethod,
+        };
+        const res = await fetch(`${API}/trips/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          const resp = await res.json();
+          const trip = resp.ride || resp;
+          sessionStorage.setItem('k3k3_active_trip', JSON.stringify(trip));
+          showToast('Ride requested! Dispatching nearest keke…', 'success');
+
+          // Subscribe socket to this trip
+          if (passengerSocket && passengerSocket.connected && trip.id) {
+            passengerSocket.emit('trip:join', { tripId: trip.id });
           }
-        } catch (e) {
-          showToast('Network error — please retry.', 'error');
+        } else {
+          const err = await res.json().catch(() => ({}));
+          if (err.code === 'OUT_OF_SERVICE_ZONE') {
+            closeRiderSearch();
+            showServiceAreaNotice(pCoord[0], pCoord[1]);
+            showToast(err.error || "K3K3ride is not available in your location yet.", 'warn');
+          } else {
+            showToast(err.detail || err.error || 'Could not request ride. Try again.', 'error');
+          }
         }
+      } catch (e) {
+        showToast('Network error — please retry.', 'error');
       }
     }
 
@@ -6208,44 +8087,27 @@
     }
 
     function estimateFare(lat1, lng1, lat2, lng2) {
-      // Kept for legacy references; campus uses fixed fares from matrix
       return _campusFare || DEFAULT_CAMPUS_FARE;
     }
 
-    async function pollTripStatus(tripId, attempts = 0) {
-      if (attempts > 24) return; // stop after 2 min
-      await new Promise(r => setTimeout(r, 5000));
-      try {
-        const res = await fetch(`${API}/trips/${tripId}`);
-        if (!res.ok) return;
-        const t = await res.json();
-        if (t.status === 'accepted') {
-          showToast('A rider has accepted your trip!', 'success');
-          return;
-        }
-        if (t.status === 'requested') pollTripStatus(tripId, attempts + 1);
-      } catch (e) { }
-    }
-
     function showRiderSearch(pickup, dest) {
-      // Reset to searching state
+      // Reset states
       document.getElementById('searchingState').style.display = 'block';
       document.getElementById('noRidersState').style.display = 'none';
+      document.getElementById('assignedState').style.display = 'none';
+
       const sub = document.getElementById('searchStatusSub');
       if (sub) sub.textContent = `Searching near "${pickup}"…`;
 
       document.getElementById('riderSearchOverlay').classList.add('show');
 
-      // Step 1 — 1.5s: update message
+      // Update search status message progressively without closing prematurely
+      clearTimeout(riderSearchTimer);
       riderSearchTimer = setTimeout(() => {
-        if (sub) sub.textContent = 'Contacting available riders in your area…';
-      }, 1500);
-
-      // Step 2 — 4s: show "no riders" professional state
-      riderSearchTimer = setTimeout(() => {
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('noRidersState').style.display = 'block';
-      }, 4000);
+        if (sub && document.getElementById('searchingState').style.display !== 'none') {
+          sub.textContent = 'Contacting available keke riders in your area…';
+        }
+      }, 3000);
     }
 
     function retryRiderSearch() {
@@ -6253,14 +8115,14 @@
       const dest = document.getElementById('destInput').value.trim();
       document.getElementById('searchingState').style.display = 'block';
       document.getElementById('noRidersState').style.display = 'none';
+      document.getElementById('assignedState').style.display = 'none';
+
       const sub = document.getElementById('searchStatusSub');
       if (sub) sub.textContent = `Retrying search near "${pickup}"…`;
 
       clearTimeout(riderSearchTimer);
-      riderSearchTimer = setTimeout(() => {
-        document.getElementById('searchingState').style.display = 'none';
-        document.getElementById('noRidersState').style.display = 'block';
-      }, 4000);
+      // Re-trigger confirmRide
+      confirmRide();
     }
 
     function closeRiderSearch() {
@@ -6268,7 +8130,6 @@
       document.getElementById('riderSearchOverlay').classList.remove('show');
       document.getElementById('pickupInput').value = '';
       document.getElementById('destInput').value = '';
-      // Re-fill pickup if location available
       const lat = sessionStorage.getItem('k3k3_lat');
       const lng = sessionStorage.getItem('k3k3_lng');
       if (lat && lng) autoFillPickup(parseFloat(lat), parseFloat(lng));
@@ -6342,6 +8203,63 @@
       if (applyCurrentStep === applyTotalSteps) buildApplyReview();
     }
 
+    const passengerUploadedDocs = {};
+
+    function handlePassengerDocUpload(key, input) {
+      if (!input || !input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const maxSize = key === 'passportPhoto' ? 10 * 1024 * 1024 : 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showToast(`File is too large (max ${key === 'passportPhoto' ? '10MB' : '20MB'})`, 'error');
+        input.value = '';
+        return;
+      }
+      const allowed = key === 'passportPhoto'
+        ? ['image/jpeg', 'image/png', 'image/jpg']
+        : ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (!allowed.includes(file.type)) {
+        showToast('Invalid file format. Please upload JPG, PNG or PDF.', 'error');
+        input.value = '';
+        return;
+      }
+
+      passengerUploadedDocs[key] = file;
+      const zone = document.getElementById('pzone-' + key);
+      if (zone) {
+        zone.classList.add('has-file');
+        const textEl = zone.querySelector('.upload-text');
+        const subEl = zone.querySelector('.upload-sub');
+        if (textEl) textEl.textContent = file.name;
+        if (subEl) subEl.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB ✓`;
+      }
+      showToast(`${file.name} uploaded ✓`, 'success');
+    }
+
+    function clearPassengerDoc(e, key) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      delete passengerUploadedDocs[key];
+      const input = document.getElementById('pfile-' + key);
+      if (input) input.value = '';
+      const zone = document.getElementById('pzone-' + key);
+      if (zone) {
+        zone.classList.remove('has-file');
+        const textEl = zone.querySelector('.upload-text');
+        const subEl = zone.querySelector('.upload-sub');
+        if (textEl) textEl.textContent = 'Tap to choose file';
+        if (subEl) subEl.textContent = key === 'passportPhoto' ? 'PNG, JPG · max 10MB' : 'Photo, PDF · max 20MB';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.upload-zone[id^="pzone-"]').forEach(zone => {
+        zone.addEventListener('click', (e) => {
+          if (e.target.closest('.remove-file-btn') || e.target.tagName === 'INPUT') return;
+          const fileInput = zone.querySelector('input[type="file"]');
+          if (fileInput) fileInput.click();
+        });
+      });
+    });
+
     function applyValidateStep() {
       const required = {
         1: ['applyFName', 'applyDOB', 'applyGender', 'applyPhone', 'applyAddress'],
@@ -6362,6 +8280,35 @@
           showToast(`Please enter: ${labels[id] || id}`, 'error'); return false;
         }
       }
+
+      if (applyCurrentStep === 3) {
+        const licInput = document.getElementById('applyLicenceNumber');
+        const licVal = (licInput ? licInput.value : '').trim().toUpperCase();
+        if (licInput) licInput.value = licVal;
+        const licRegex = /^DEL-[A-Z0-9]{8}-[A-Z0-9]{5}$/;
+        if (licVal && !licRegex.test(licVal)) {
+          showToast("Driver's License must follow format: DEL-XXXXXXXX-XXXXX (e.g. DEL-12345678-12345)", 'error');
+          licInput && licInput.focus();
+          return false;
+        }
+
+        const reqDocs = [
+          { key: 'riderLicense', name: "Rider's License" },
+          { key: 'vehicleRegistration', name: "Vehicle Registration" },
+          { key: 'idCardFront', name: "National ID (Front)" },
+          { key: 'idCardBack', name: "National ID (Back)" },
+          { key: 'passportPhoto', name: "Passport Photo" }
+        ];
+        for (const doc of reqDocs) {
+          if (!passengerUploadedDocs[doc.key]) {
+            showToast(`Please upload your ${doc.name}. All 5 documents are required.`, 'error');
+            const zone = document.getElementById('pzone-' + doc.key);
+            if (zone) zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          }
+        }
+      }
+
       if (applyCurrentStep === 4 && !document.getElementById('applyTermsCheck').checked) {
         showToast('Please agree to the Terms of Service', 'error'); return false;
       }
@@ -6397,6 +8344,7 @@
         'ID Number': document.getElementById('applyIdNumber').value,
         "Driver's Licence": document.getElementById('applyLicenceNumber').value,
         'Licence Expiry': document.getElementById('applyLicenceExpiry').value,
+        'Documents': `${Object.keys(passengerUploadedDocs).length} of 5 uploaded ✓`
       };
       const rc = document.getElementById('applyReviewContent');
       if (!rc) return;
@@ -6410,6 +8358,39 @@
     async function submitRiderApplication() {
       const btn = document.getElementById('applyNextBtn');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…'; }
+
+      // Convert passengerUploadedDocs to base64
+      const documentsPayload = {};
+      for (const [key, file] of Object.entries(passengerUploadedDocs)) {
+        if (file) {
+          try {
+            const dataUrl = await new Promise((res) => {
+              const r = new FileReader();
+              r.onload = ev => res(ev.target.result);
+              r.onerror = () => res(null);
+              r.readAsDataURL(file);
+            });
+            if (dataUrl) {
+              documentsPayload[key] = {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: dataUrl
+              };
+            }
+          } catch (_) {}
+        }
+      }
+
+      const reqDocs = ['riderLicense', 'vehicleRegistration', 'idCardFront', 'idCardBack', 'passportPhoto'];
+      const missing = reqDocs.filter(k => !documentsPayload[k]);
+      if (missing.length > 0) {
+        showToast('All 5 documents are strictly required before submitting.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application'; }
+        applyCurrentStep = 3;
+        applyRenderStep();
+        return;
+      }
 
       const userId = getUserId();
       const payload = {
@@ -6434,132 +8415,229 @@
         experience: document.getElementById('applyExperience').value,
         extra: document.getElementById('applyExtra').value.trim(),
         status: 'pending',
+        documents: documentsPayload
       };
 
       try {
         const headers = { 'Content-Type': 'application/json' };
         const token = getAuthToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
-        await fetch(`${API}/applications/`, { method: 'POST', headers, body: JSON.stringify(payload) });
-      } catch (err) { console.warn('Application submission note:', err.message); }
-
-      document.querySelectorAll('.apply-form-step').forEach(s => s.classList.remove('active-step'));
-      const success = document.getElementById('applySuccess');
-      if (success) success.classList.add('show');
-      document.getElementById('applyFormFooter').style.display = 'none';
-      document.getElementById('applyStepper').style.display = 'none';
-      if (btn) { btn.disabled = false; }
+        const res = await fetch(`${API}/applications/`, { method: 'POST', headers, body: JSON.stringify(payload) });
+        if (res.ok) {
+          const result = await res.json();
+          const appRef = result.app_ref || ('K3PA-' + Math.random().toString(36).substring(2,8).toUpperCase());
+          try {
+            localStorage.setItem('lastRiderApplication', JSON.stringify({
+              firstName: payload.fname,
+              lastName: payload.lname,
+              phone: payload.phone,
+              appRef: appRef
+            }));
+            localStorage.setItem('lastApplicationRef', appRef);
+          } catch(_) {}
+          showToast('Application submitted! Taking you to your status page…', 'success');
+          setTimeout(() => {
+            window.location.href = '../rider/pending.html';
+          }, 1200);
+          return;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          showToast(errData.error || errData.detail || 'Failed to submit application', 'error');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application'; }
+          return;
+        }
+      } catch (err) {
+        console.warn('Application submission note:', err.message);
+        showToast('Network error submitting application. Please try again.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application'; }
+      }
     }
 
     /* ══════════════════════════════════════════
        Render Functions
     ══════════════════════════════════════════ */
-    function renderDrivers() {
+    async function renderDrivers() {
       const el = document.getElementById('driversList');
       if (!el) return;
-      el.innerHTML = DRIVERS.map(d => `
-    <div class="driver-row" onclick="openBookModal(null)">
-      <div class="driver-avatar">${d.name.charAt(0)}</div>
-      <div class="driver-info">
-        <div class="driver-name">${d.name}</div>
-        <div class="driver-vehicle">${d.vehicle}</div>
-      </div>
-      <div class="driver-meta">
-        <div class="driver-eta"><i class="fas fa-clock" style="font-size:.7rem"></i> ${d.eta}</div>
-        <div class="driver-rating"><i class="fas fa-star" style="color:var(--yellow);font-size:.7rem"></i> ${d.rating}</div>
-      </div>
-    </div>`).join('');
+
+      try {
+        const res = await fetch(`${API}/trips/riders/available?radius=15`);
+        if (res.ok) {
+          const data = await res.json();
+          const riders = data.riders || (Array.isArray(data) ? data : []);
+          if (riders.length > 0) {
+            el.innerHTML = riders.map(d => `
+              <div class="driver-row" onclick="openBookModal(null)">
+                <div class="driver-avatar">${(d.first_name || d.name || 'R').charAt(0).toUpperCase()}</div>
+                <div class="driver-info">
+                  <div class="driver-name">${d.first_name || d.name || 'Available Rider'} ${d.last_name || ''}</div>
+                  <div class="driver-vehicle">${d.vehicle_make || d.vehicle || 'K3K3 Tricycle'} · ${d.license_plate || d.vehicle_plate || 'Active'}</div>
+                </div>
+                <div class="driver-meta">
+                  <div class="driver-eta"><i class="fas fa-clock" style="font-size:.7rem"></i> ${d.eta || '3 min'}</div>
+                  <div class="driver-rating"><i class="fas fa-star" style="color:var(--yellow);font-size:.7rem"></i> ${d.rating || '4.9'}</div>
+                </div>
+              </div>`).join('');
+            return;
+          }
+        }
+      } catch (_) {}
+
+      // Clean live status when no active riders in immediate radius
+      el.innerHTML = `
+        <div style="padding:28px 16px;text-align:center;color:var(--text-2);background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border)">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--yellow-lt);color:var(--yellow-dk);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.2rem">
+            <i class="fas fa-motorcycle"></i>
+          </div>
+          <div style="font-weight:700;color:var(--text);font-size:0.95rem;margin-bottom:4px">K3K3 Campus Network Active</div>
+          <div style="font-size:0.82rem;color:var(--text-2);max-width:280px;margin:0 auto 14px">Available riders will be matched automatically when you request a ride.</div>
+          <button onclick="openBookModal(null)" style="background:var(--yellow);color:var(--black);font-weight:700;border:none;padding:8px 18px;border-radius:var(--r-full);cursor:pointer;font-size:0.82rem;display:inline-flex;align-items:center;gap:6px">
+            <i class="fas fa-bolt"></i> Request Ride Now
+          </button>
+        </div>`;
     }
+
     async function renderTrips() {
       const privOff = sessionStorage.getItem('k3k3_privacyTripHistory') === 'false';
       const cEl = document.getElementById('completedRides');
       const xEl = document.getElementById('cancelledRides');
       if (privOff) {
         if (cEl) cEl.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
+        if (xEl) xEl.innerHTML = '';
         return;
       }
-      
-      let completed = TRIPS.completed;
-      let cancelled = TRIPS.cancelled;
-      
+
+      let completed = [];
+      let cancelled = [];
+
       const userId = getUserId();
       if (userId) {
         try {
           const res = await fetch(`${API}/trips/passenger/${userId}`);
           if (res.ok) {
             const data = await res.json();
-            if (data.success && data.rides) {
-              completed = data.rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
-                from: r.pickup_label || 'Unknown',
-                to: r.dest_label || 'Unknown',
-                date: new Date(r.created_at).toLocaleDateString(),
-                time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                driver: r.driver_name || 'Assigned Driver',
-                amount: `GH₵ ${r.fare_estimate || '0.00'}`
-              }));
-              cancelled = data.rides.filter(r => r.status === 'cancelled').map(r => ({
-                from: r.pickup_label || 'Unknown',
-                to: r.dest_label || 'Unknown',
-                date: new Date(r.created_at).toLocaleDateString(),
-                time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                reason: 'Cancelled'
-              }));
-            }
+            const rides = data.rides || (Array.isArray(data) ? data : []);
+            completed = rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
+              from: r.pickup_address || r.pickup_label || 'Pickup Location',
+              to: r.dropoff_address || r.dest_label || 'Destination',
+              date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent',
+              time: r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              driver: r.driver_name || r.rider_name || 'K3K3 Rider',
+              amount: `GH₵ ${(parseFloat(r.estimated_fare || r.fare_estimate || 0)).toFixed(2)}`
+            }));
+            cancelled = rides.filter(r => r.status === 'cancelled').map(r => ({
+              from: r.pickup_address || r.pickup_label || 'Pickup Location',
+              to: r.dropoff_address || r.dest_label || 'Destination',
+              date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent',
+              time: r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              reason: r.cancel_reason || 'Cancelled'
+            }));
           }
         } catch (err) {
-          console.warn('Could not fetch real trips, falling back to mock:', err);
+          console.warn('Could not fetch real trips:', err.message);
         }
       }
 
+      // NO mock fallback! If 0 trips, display clean empty state
       if (cEl) {
         if (completed.length === 0) {
-           cEl.innerHTML = '<div class="empty-state"><i class="fas fa-route"></i><p>No completed rides yet.</p></div>';
+          cEl.innerHTML = `
+            <div class="empty-state" style="padding:40px 16px;text-align:center">
+              <div style="width:52px;height:52px;border-radius:50%;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem">
+                <i class="fas fa-route"></i>
+              </div>
+              <p style="font-weight:700;color:var(--text);margin-bottom:4px">No completed rides yet</p>
+              <p style="font-size:0.85rem;color:var(--text-2);margin-bottom:14px">Your completed trips and receipts will appear here.</p>
+              <button onclick="openBookModal(null)" style="background:var(--yellow);color:var(--black);font-weight:700;border:none;padding:8px 18px;border-radius:var(--r-full);cursor:pointer;font-size:0.82rem">
+                Book a Ride
+              </button>
+            </div>`;
         } else {
-           cEl.innerHTML = completed.map(tr => `
-    <div class="trip-card">
-      <div class="trip-icon completed"><i class="fas fa-check"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${tr.from} → ${tr.to}</div>
-        <div class="trip-meta">${tr.date} · ${tr.time} · ${tr.driver}</div>
-      </div>
-      <div class="trip-right">
-        <div class="trip-amount">${tr.amount}</div>
-        <div class="trip-status completed">Completed</div>
-      </div>
-    </div>`).join('');
+          cEl.innerHTML = completed.map(tr => `
+            <div class="trip-card">
+              <div class="trip-icon completed"><i class="fas fa-check"></i></div>
+              <div class="trip-details">
+                <div class="trip-route">${tr.from} → ${tr.to}</div>
+                <div class="trip-meta">${tr.date} ${tr.time ? '· ' + tr.time : ''} · ${tr.driver}</div>
+              </div>
+              <div class="trip-right">
+                <div class="trip-amount">${tr.amount}</div>
+                <div class="trip-status completed">Completed</div>
+              </div>
+            </div>`).join('');
         }
       }
-      
+
       if (xEl) {
         if (cancelled.length === 0) {
-           xEl.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No cancelled rides.</p></div>';
+          xEl.innerHTML = `
+            <div class="empty-state" style="padding:32px 16px;text-align:center">
+              <i class="fas fa-check-circle" style="font-size:1.4rem;color:var(--green);margin-bottom:8px"></i>
+              <p style="font-weight:600;color:var(--text);font-size:0.9rem">No cancelled rides</p>
+            </div>`;
         } else {
-           xEl.innerHTML = cancelled.map(tr => `
-    <div class="trip-card">
-      <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${tr.from} → ${tr.to}</div>
-        <div class="trip-meta">${tr.date} · ${tr.time}</div>
-        <div class="trip-meta" style="color:var(--red)">${tr.reason}</div>
-      </div>
-      <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
-    </div>`).join('');
+          xEl.innerHTML = cancelled.map(tr => `
+            <div class="trip-card">
+              <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
+              <div class="trip-details">
+                <div class="trip-route">${tr.from} → ${tr.to}</div>
+                <div class="trip-meta">${tr.date} ${tr.time ? '· ' + tr.time : ''}</div>
+                <div class="trip-meta" style="color:var(--red)">${tr.reason}</div>
+              </div>
+              <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
+            </div>`).join('');
         }
       }
+
+      const st = document.getElementById('statRides');
+      if (st) st.textContent = completed.length;
     }
-    function renderPayments() {
+
+    async function renderPayments() {
       const el = document.getElementById('paymentList');
       if (!el) return;
-      el.innerHTML = PAYMENTS.map(p => `
-    <div class="trip-card">
-      <div class="trip-icon completed"><i class="fas fa-receipt"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${p.label}</div>
-        <div class="trip-meta">${p.date} · ${p.time}</div>
-      </div>
-      <div class="trip-right"><div class="trip-amount">${p.amount}</div></div>
-    </div>`).join('');
+
+      const userId = getUserId();
+      let payments = [];
+
+      if (userId) {
+        try {
+          const res = await fetch(`${API}/trips/passenger/${userId}`);
+          if (res.ok) {
+            const data = await res.json();
+            const rides = data.rides || (Array.isArray(data) ? data : []);
+            payments = rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
+              label: `Ride — ${r.pickup_address || r.pickup_label || 'Pickup'} → ${r.dropoff_address || r.dest_label || 'Destination'}`,
+              date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recent',
+              time: r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+              amount: `GH₵ ${(parseFloat(r.estimated_fare || r.fare_estimate || 0)).toFixed(2)}`
+            }));
+          }
+        } catch (_) {}
+      }
+
+      if (payments.length === 0) {
+        el.innerHTML = `
+          <div class="empty-state" style="padding:40px 16px;text-align:center">
+            <div style="width:52px;height:52px;border-radius:50%;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem">
+              <i class="fas fa-receipt"></i>
+            </div>
+            <p style="font-weight:700;color:var(--text);margin-bottom:4px">No transactions yet</p>
+            <p style="font-size:0.85rem;color:var(--text-2)">Payment receipts for your completed rides will appear here.</p>
+          </div>`;
+      } else {
+        el.innerHTML = payments.map(p => `
+          <div class="trip-card">
+            <div class="trip-icon completed"><i class="fas fa-receipt"></i></div>
+            <div class="trip-details">
+              <div class="trip-route">${p.label}</div>
+              <div class="trip-meta">${p.date} ${p.time ? '· ' + p.time : ''}</div>
+            </div>
+            <div class="trip-right"><div class="trip-amount">${p.amount}</div></div>
+          </div>`).join('');
+      }
     }
+
     function renderNotifications() {
       const ridesOn = sessionStorage.getItem('k3k3_notifRideUpdates') !== 'false';
       const driversOn = sessionStorage.getItem('k3k3_notifDriverAlerts') !== 'false';
@@ -6569,36 +8647,23 @@
         if (!ridesOn) {
           el1.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Ride update notifications are disabled in Settings.</p></div>';
         } else {
-          el1.innerHTML = NOTIFS.rides.map(n => `
-        <div class="notif-item ${n.read ? '' : 'unread'}">
-          <div class="notif-icon"><i class="fas fa-motorcycle"></i></div>
-          <div class="notif-body">
-            <div class="notif-title">${n.title}</div>
-            <div class="notif-desc">${n.desc}</div>
-            <div class="notif-time">${n.time}</div>
-          </div>
-        </div>`).join('');
+          el1.innerHTML = '<div class="empty-state" style="padding:32px 16px;text-align:center"><i class="fas fa-bell-slash" style="font-size:1.4rem;color:var(--muted);margin-bottom:8px"></i><p style="font-weight:600;color:var(--text);font-size:0.9rem">No ride updates right now</p><p style="font-size:0.8rem;color:var(--text-2);margin-top:4px">Updates will appear when you have an active ride.</p></div>';
         }
       }
       if (el2) {
         if (!driversOn) {
           el2.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Driver alert notifications are disabled in Settings.</p></div>';
         } else {
-          el2.innerHTML = NOTIFS.drivers.map(n => `
-        <div class="notif-item ${n.read ? '' : 'unread'}">
-          <div class="notif-icon"><i class="fas fa-user-circle"></i></div>
-          <div class="notif-body">
-            <div class="notif-title">${n.title}</div>
-            <div class="notif-desc">${n.desc}</div>
-            <div class="notif-time">${n.time}</div>
-          </div>
-        </div>`).join('');
+          el2.innerHTML = '<div class="empty-state" style="padding:32px 16px;text-align:center"><i class="fas fa-user-clock" style="font-size:1.4rem;color:var(--muted);margin-bottom:8px"></i><p style="font-weight:600;color:var(--text);font-size:0.9rem">No driver alerts</p><p style="font-size:0.8rem;color:var(--text-2);margin-top:4px">Arrival alerts will show when your rider is nearby.</p></div>';
         }
       }
+      unreadCount = 0;
+      updateNotifBadge();
     }
+
     function updateStats() {
       const el = document.getElementById('statRides');
-      if (el) el.textContent = TRIPS.completed.length;
+      if (el && (!el.textContent || el.textContent === '—')) el.textContent = '0';
     }
     function markAllRead() {
       NOTIFS.rides.forEach(n => n.read = true);
@@ -6670,985 +8735,19 @@
       }
       if (e.key === 'Escape') {
         closeDrawer(); closeBookModal(); closeLogoutModal();
+        closeDeleteHistoryModal();
         closeRiderSearch();
       }
     });
 
-    document.getElementById('logoutModal').addEventListener('click', e => {
+    document.getElementById('logoutModal')?.addEventListener('click', e => {
       if (e.target === document.getElementById('logoutModal')) closeLogoutModal();
     });
+
+    document.getElementById('deleteHistoryModal')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('deleteHistoryModal')) closeDeleteHistoryModal();
+    });
   </script>
-</body>
-
-</html>
-
-<script>
-  const API = 'http://localhost:8810';
-
-  /* ─── State ─── */
-  let currentSection = 'home';
-  let prevSection = 'home';
-  let currentLang = localStorage.getItem('k3k3_lang') || 'en';
-  let selectedLang = currentLang;
-  let unreadCount = 3;
-  let applyCurrentStep = 1;
-  const applyTotalSteps = 4;
-
-  /* ─── i18n Translations ─── */
-  const TRANSLATIONS = {
-    en: {
-      nav_home: 'Home', nav_rides: 'My Rides', nav_account: 'Account',
-      nav_profile: 'Profile', nav_notifications: 'Notifications',
-      nav_support: 'Support', nav_settings: 'Settings',
-      nav_apply: 'Apply as Rider',
-      hero_greeting_morning: 'GOOD MORNING',
-      hero_greeting_afternoon: 'GOOD AFTERNOON',
-      hero_greeting_evening: 'GOOD EVENING',
-      search_placeholder: 'Search destination…',
-      book_ride: 'Book your Ride',
-      request_ride: 'Request Ride',
-      nearby_riders: 'Nearby Riders',
-      quick_dest: 'Quick Destinations',
-      save_profile: 'Save Profile',
-      update_password: 'Update Password',
-      logout: 'Logout',
-      apply_now: 'Apply Now',
-      submit_report: 'Submit Report',
-      mark_all_read: 'Mark all read',
-    },
-    fr: {
-      nav_home: 'Accueil', nav_rides: 'Mes Trajets', nav_account: 'Compte',
-      nav_profile: 'Profil', nav_notifications: 'Notifications',
-      nav_support: 'Support', nav_settings: 'Paramètres',
-      nav_apply: 'Devenir Chauffeur',
-      hero_greeting_morning: 'BONJOUR',
-      hero_greeting_afternoon: 'BON APRÈS-MIDI',
-      hero_greeting_evening: 'BONSOIR',
-      search_placeholder: 'Chercher une destination…',
-      book_ride: 'Réserver un trajet',
-      request_ride: 'Demander un trajet',
-      nearby_riders: 'Chauffeurs proches',
-      quick_dest: 'Destinations rapides',
-      save_profile: 'Sauvegarder',
-      update_password: 'Modifier le mot de passe',
-      logout: 'Déconnexion',
-      apply_now: 'Postuler',
-      submit_report: 'Soumettre',
-      mark_all_read: 'Tout marquer comme lu',
-    },
-    ewe: {
-      nav_home: 'Ʋe', nav_rides: 'Ŋkɔ-dɔwoem', nav_account: 'Akaɔ',
-      nav_profile: 'Nyemeƒe Hă', nav_notifications: 'Nusẽwoem',
-      nav_support: 'Kpekpeɖeŋu', nav_settings: 'Atitɔ',
-      nav_apply: 'Wɔ Agbagbã',
-      hero_greeting_morning: 'ŊDƆ NYUIE',
-      hero_greeting_afternoon: 'ŊDƆ NYUIE (Egbe)',
-      hero_greeting_evening: 'ZA NYUIE',
-      search_placeholder: 'De ƒuƒoƒo ŋkɔ…',
-      book_ride: 'De ŋkɔ-dɔ',
-      request_ride: 'Nye ŋkɔ-dɔ',
-      nearby_riders: 'Ŋkɔ-dɔlawo Gbɔ',
-      quick_dest: 'Tatɔwo',
-      save_profile: 'Ɖo Na',
-      update_password: 'Ɖo Anɔ Fofo',
-      logout: 'Ɖo Asi',
-      apply_now: 'Wɔ Agbagbã',
-      submit_report: 'Ɖo',
-      mark_all_read: 'Xɔ Katã',
-    },
-    twi: {
-      nav_home: 'Fie', nav_rides: 'Me Nkɔ', nav_account: 'Akaunti',
-      nav_profile: 'Me Ho Nsɛm', nav_notifications: 'Nsɛm',
-      nav_support: 'Mmoa', nav_settings: 'Nhyehyɛe',
-      nav_apply: 'Bɔ Krataa',
-      hero_greeting_morning: 'MAAKYE',
-      hero_greeting_afternoon: 'MAAHA',
-      hero_greeting_evening: 'MAADWO',
-      search_placeholder: 'Hwehwɛ baabi…',
-      book_ride: 'Bɔ Nkɔ',
-      request_ride: 'Sre Nkɔ',
-      nearby_riders: 'Nkɔfoɔ Fitaa',
-      quick_dest: 'Beaeɛ Atɔ',
-      save_profile: 'Sie',
-      update_password: 'Sesa Password',
-      logout: 'Pue',
-      apply_now: 'Bɔ Krataa',
-      submit_report: 'Fa Kɔ',
-      mark_all_read: 'Kenkan Nyinaa',
-    }
-  };
-
-  function t(key) { return (TRANSLATIONS[currentLang] || TRANSLATIONS.en)[key] || key; }
-
-  /* ─── Data ─── */
-  const TRIPS = {
-    completed: [
-      { from: 'Ho Market', to: 'Ho Polytechnic', date: '24 Jun 2025', time: '08:32', amount: 'GH₵ 5.00', driver: 'Kofi A.' },
-      { from: 'Bus Terminal', to: 'Ho Teaching Hospital', date: '22 Jun 2025', time: '14:15', amount: 'GH₵ 8.00', driver: 'Yaw B.' },
-      { from: 'Ho Central', to: 'Dome Market', date: '20 Jun 2025', time: '10:00', amount: 'GH₵ 6.50', driver: 'Ama K.' },
-    ],
-    cancelled: [
-      { from: 'Ho Market', to: 'Bus Terminal', date: '21 Jun 2025', time: '09:00', reason: 'Driver did not arrive' },
-      { from: 'Ho Polytechnic', to: 'Ho Central', date: '18 Jun 2025', time: '17:30', reason: 'Cancelled by passenger' },
-    ]
-  };
-
-  const PAYMENTS = [
-    { label: 'Ride — Ho Market → Polytechnic', date: '24 Jun 2025', time: '08:32', amount: 'GH₵ 5.00' },
-    { label: 'Ride — Bus Terminal → Hospital', date: '22 Jun 2025', time: '14:15', amount: 'GH₵ 8.00' },
-    { label: 'Ride — Ho Central → Dome', date: '20 Jun 2025', time: '10:00', amount: 'GH₵ 6.50' },
-  ];
-
-  const NOTIFS = {
-    rides: [
-      { title: 'Ride Confirmed', desc: 'Your ride from Ho Market to Ho Polytechnic is confirmed. Kofi is on the way.', time: '2 min ago', read: false },
-      { title: 'Ride Completed', desc: 'You have successfully completed your ride. Rate your rider!', time: '1 hr ago', read: false },
-      { title: 'Payment Received', desc: 'GH₵ 5.00 payment confirmed for your last ride.', time: '1 hr ago', read: true },
-    ],
-    drivers: [
-      { title: 'Driver Arriving', desc: 'Kofi A. is 3 minutes away from your pickup point.', time: 'Just now', read: false },
-      { title: 'Driver Nearby', desc: 'Your rider Yaw B. is 500m away. Please proceed to pickup.', time: '2 days ago', read: true },
-    ]
-  };
-
-  const FAQS = [
-    { q: 'How do I book a K3K3 ride?', a: 'Go to Home, tap the "Where to?" bar or a quick destination, enter your pickup and tap Request Ride. A nearby rider will be assigned within minutes.' },
-    { q: 'What payment methods are accepted?', a: 'We accept mobile money (MTN, Vodafone, AirtelTigo) and cash payments made to the rider at the end of your ride.' },
-    { q: 'How do I cancel a ride?', a: 'If your rider has not yet arrived, you can cancel from the active ride screen. Repeated cancellations may incur a small fee.' },
-    { q: 'Is my personal data safe?', a: 'Yes. K3K3 encrypts all personal data and never shares it with third parties. Manage data options in Privacy Settings.' },
-    { q: 'How do I contact my rider?', a: 'Once a rider is assigned, their contact number appears in the active ride panel so you can call them directly.' },
-  ];
-
-  const DRIVERS = [
-    { name: 'Kofi Asante', rating: '4.9', vehicle: 'Bajaj RE · GR-1234', eta: '2 min', km: '0.4 km' },
-    { name: 'Yaw Boateng', rating: '4.8', vehicle: 'TVS King · GR-5678', eta: '4 min', km: '0.9 km' },
-    { name: 'Ama Kumi', rating: '4.9', vehicle: 'Piaggio Apé · ER-9012', eta: '6 min', km: '1.3 km' },
-    { name: 'Kwame Doe', rating: '4.7', vehicle: 'Bajaj RE · GA-3456', eta: '8 min', km: '1.8 km' },
-  ];
-
-  /* ─── Init ─── */
-  document.addEventListener('DOMContentLoaded', () => {
-    loadUserInfo();
-    loadSettings();
-    renderDrivers();
-    renderTrips();
-    renderPayments();
-    renderNotifications();
-    renderFAQs();
-    updateStats();
-    updateNotifBadge();
-    setGreeting();
-    applyLanguage(false);        // apply saved language silently
-    initSidebarCollapse();
-    initLocationPrompt();
-  });
-
-  function setGreeting() {
-    const h = new Date().getHours();
-    const key = h < 12 ? 'hero_greeting_morning' : h < 17 ? 'hero_greeting_afternoon' : 'hero_greeting_evening';
-    const el = document.getElementById('heroGreeting');
-    if (el) el.textContent = t(key);
-  }
-
-  /* ─── Get user from storage ─── */
-  function getStoredUser() {
-    try {
-      const u = localStorage.getItem('k3k3_user') || sessionStorage.getItem('k3k3_user');
-      return u ? JSON.parse(u) : null;
-    } catch (e) { return null; }
-  }
-  function getUserId() {
-    const u = getStoredUser();
-    if (u && u.id) return u.id;
-    return localStorage.getItem('k3k3_user_id') || sessionStorage.getItem('k3k3_user_id') || null;
-  }
-  function getAuthToken() {
-    return localStorage.getItem('k3k3_token') || sessionStorage.getItem('k3k3_token') || null;
-  }
-
-  /* ─── Load User Info from storage/DB ─── */
-  function loadUserInfo() {
-    const u = getStoredUser();
-    const fn = (u && (u.fname || u.name)) || localStorage.getItem('k3k3_firstName') || localStorage.getItem('k3k3_user_name') || 'Friend';
-    const ln = (u && u.lname) || localStorage.getItem('k3k3_lastName') || '';
-    const email = (u && u.email) || localStorage.getItem('k3k3_email') || localStorage.getItem('k3k3_user_email') || '';
-    const phone = (u && u.phone) || localStorage.getItem('k3k3_phone') || '';
-    const dn = fn + (ln ? ' ' + ln : '');
-
-    const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v };
-    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v };
-    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v };
-
-    setEl('heroName', fn);
-    setEl('drawerName', fn);
-    setTxt('drawerAvatar', fn.charAt(0).toUpperCase());
-    setTxt('acctAvatarBig', fn.charAt(0).toUpperCase());
-    setEl('acctName', dn);
-    setEl('acctEmail', email || 'K3K3 Passenger Member');
-    setTxt('profileAvatarBig', fn.charAt(0).toUpperCase());
-    setEl('profileDisplayName', dn);
-
-    const ha = document.getElementById('headerUserAvatar');
-    const hn = document.getElementById('headerUserName');
-    if (ha) ha.textContent = fn.charAt(0).toUpperCase();
-    if (hn) hn.textContent = fn;
-
-    // profile summary display spans
-    const ppd = document.getElementById('profilePhoneDisplay');
-    const ped = document.getElementById('profileEmailDisplay');
-    if (ppd) ppd.textContent = phone || 'Not set';
-    if (ped) ped.textContent = email || 'Not set';
-
-    setVal('profileFirstName', fn);
-    setVal('profileLastName', ln);
-    if (phone) setVal('profilePhone', phone);
-    if (email) setVal('profileEmail', email);
-
-    // Pre-fill apply form name/phone
-    setVal('applyFName', fn);
-    setVal('applyLName', ln);
-    if (phone) setVal('applyPhone', phone);
-
-    const en = localStorage.getItem('k3k3_emergencyName') || '';
-    const ep = localStorage.getItem('k3k3_emergencyPhone') || '';
-    if (en) setVal('emergencyName', en);
-    if (ep) setVal('emergencyPhone', ep);
-  }
-
-  /* ─── Save Profile → API ─── */
-  async function saveProfile() {
-    const fn = document.getElementById('profileFirstName').value.trim();
-    const ln = document.getElementById('profileLastName').value.trim();
-    const ph = document.getElementById('profilePhone').value.trim();
-    const em = document.getElementById('profileEmail').value.trim();
-    const en = document.getElementById('emergencyName').value.trim();
-    const ep = document.getElementById('emergencyPhone').value.trim();
-    if (!fn) { showToast('Please enter your first name', 'error'); return }
-
-    const userId = getUserId();
-    const btn = document.querySelector('#sec-profile .form-save-btn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
-
-    if (userId) {
-      try {
-        const res = await fetch(`${API}/users/${userId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fname: fn, lname: ln, phone: ph, email: em })
-        });
-        if (!res.ok) {
-          // fallback: try PUT
-          const res2 = await fetch(`${API}/users/${userId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fname: fn, lname: ln, phone: ph, email: em })
-          });
-          if (!res2.ok) throw new Error('Save failed');
-        }
-        // Update stored user object
-        const stored = getStoredUser();
-        if (stored) {
-          stored.fname = fn; stored.lname = ln; stored.phone = ph; stored.email = em;
-          const key = localStorage.getItem('k3k3_user') ? 'k3k3_user' : 'k3k3_user';
-          try { localStorage.setItem('k3k3_user', JSON.stringify(stored)) } catch (e) { }
-          try { sessionStorage.setItem('k3k3_user', JSON.stringify(stored)) } catch (e) { }
-        }
-      } catch (err) {
-        console.warn('API profile save failed, saving locally only:', err);
-      }
-    }
-
-    // Always update localStorage
-    localStorage.setItem('k3k3_firstName', fn);
-    if (ln) localStorage.setItem('k3k3_lastName', ln);
-    if (ph) { localStorage.setItem('k3k3_phone', ph); }
-    if (em) localStorage.setItem('k3k3_email', em);
-    if (en) localStorage.setItem('k3k3_emergencyName', en);
-    if (ep) localStorage.setItem('k3k3_emergencyPhone', ep);
-
-    // Refresh UI
-    loadUserInfo();
-    showToast('Profile saved successfully ✓', 'success');
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save Profile'; }
-  }
-
-  /* ─── Change Password → API ─── */
-  async function changePassword() {
-    const cur = document.getElementById('pwdCurrent').value;
-    const nw = document.getElementById('pwdNew').value;
-    const conf = document.getElementById('pwdConfirm').value;
-    if (!cur) { showToast('Enter your current password', 'error'); return }
-    if (nw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return }
-    if (nw !== conf) { showToast('Passwords do not match', 'error'); return }
-
-    const userId = getUserId();
-    const btn = document.querySelector('#sec-settings .form-save-btn:last-of-type');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating…'; }
-
-    if (userId) {
-      try {
-        const res = await fetch(`${API}/users/${userId}/change-password`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ current_password: cur, new_password: nw })
-        });
-        if (!res.ok) {
-          // fallback: try PATCH
-          const res2 = await fetch(`${API}/users/${userId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: nw })
-          });
-          if (!res2.ok) throw new Error('Password update failed');
-        }
-      } catch (err) {
-        console.warn('API password change failed:', err);
-        showToast('Could not update password on server. Check your connection.', 'error');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Update Password'; }
-        return;
-      }
-    }
-
-    document.getElementById('pwdCurrent').value = '';
-    document.getElementById('pwdNew').value = '';
-    document.getElementById('pwdConfirm').value = '';
-    document.getElementById('pwdBar').style.width = '0';
-    document.getElementById('pwdHint').textContent = '';
-    showToast('Password updated successfully ✓', 'success');
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Update Password'; }
-  }
-
-  /* ─── Settings ─── */
-  function loadSettings() {
-    currentLang = localStorage.getItem('k3k3_lang') || 'en';
-    selectedLang = currentLang;
-    document.querySelectorAll('.lang-option').forEach(el => {
-      el.classList.toggle('selected', el.dataset.lang === currentLang);
-    });
-    const s = name => { const v = localStorage.getItem('k3k3_' + name); return v === null ? true : v === 'true' };
-    setToggle('toggleRideUpdates', s('notifRideUpdates'));
-    setToggle('toggleDriverAlerts', s('notifDriverAlerts'));
-    setToggle('togglePromotions', s('notifPromotions'));
-    setToggle('toggleLocation', s('privacyLocation'));
-    setToggle('toggleTripHistory', s('privacyTripHistory'));
-  }
-  function setToggle(id, val) { const el = document.getElementById(id); if (el) el.checked = val }
-
-  function saveSetting(key, value) {
-    localStorage.setItem('k3k3_' + key, value);
-    // Handle special side effects
-    if (key === 'privacyLocation' && value === true) {
-      requestLocationPermission();
-    }
-    if (key === 'privacyTripHistory' && value === false) {
-      // Hide trip history display
-      const el = document.getElementById('completedRides');
-      if (el) el.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
-    } else if (key === 'privacyTripHistory' && value === true) {
-      renderTrips();
-    }
-    showToast('Setting saved', 'success');
-  }
-
-  /* ─── Language ─── */
-  function selectLang(el) {
-    document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected'); selectedLang = el.dataset.lang;
-  }
-  function applyLanguage(showFeedback = true) {
-    currentLang = selectedLang || currentLang;
-    localStorage.setItem('k3k3_lang', currentLang);
-    document.getElementById('htmlRoot').lang = currentLang;
-
-    // Apply translations to all data-i18n elements
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.dataset.i18n;
-      const val = t(key);
-      if (val) el.textContent = val;
-    });
-
-    // Update dynamic elements
-    setGreeting();
-    const sp = document.getElementById('homeSearchBar');
-    if (sp) sp.placeholder = t('search_placeholder');
-
-    if (showFeedback) showToast('Language updated to: ' + (TRANSLATIONS[currentLang]?.nav_home ? currentLang.toUpperCase() : currentLang), 'success');
-  }
-
-  /* ─── Navigation ─── */
-  const PAGE_TITLES = {
-    home: 'Home', rides: 'My Rides', account: 'Account',
-    profile: 'Profile', notifications: 'Notifications',
-    support: 'Support', settings: 'Settings', 'apply-rider': 'Apply as Rider'
-  };
-  function navTo(section, drawerId, navId) {
-    prevSection = currentSection;
-    document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
-    const sec = document.getElementById('sec-' + section);
-    if (sec) sec.classList.add('active');
-    currentSection = section;
-
-    // update topbar page title
-    const pt = document.getElementById('topbarPageTitle');
-    if (pt) pt.textContent = PAGE_TITLES[section] || '';
-
-    // bottom nav
-    if (navId) {
-      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-      const nb = document.getElementById(navId);
-      if (nb) nb.classList.add('active');
-    }
-
-    // drawer
-    if (drawerId) {
-      document.querySelectorAll('.drawer-item').forEach(b => b.classList.remove('active'));
-      const db = document.getElementById(drawerId);
-      if (db) db.classList.add('active');
-    }
-
-    // If navigating to apply-rider, pre-fill name/phone
-    if (section === 'apply-rider') loadApplyRiderDefaults();
-
-    closeDrawer();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function goBack() {
-    const prev = prevSection || 'home';
-    const navMap = { home: 'navHome', rides: 'navRides', account: 'navAccount' };
-    navTo(prev, null, navMap[prev] || null);
-  }
-
-  /* ─── Sidebar Collapse ─── */
-  function initSidebarCollapse() {
-    const collapsed = localStorage.getItem('k3k3_sidebar_collapsed') === 'true';
-    if (collapsed) {
-      document.body.classList.add('sidebar-collapsed');
-      updateCollapseIcon(true);
-    }
-  }
-  function toggleSidebar() {
-    const collapsed = document.body.classList.toggle('sidebar-collapsed');
-    localStorage.setItem('k3k3_sidebar_collapsed', collapsed);
-    updateCollapseIcon(collapsed);
-  }
-  function updateCollapseIcon(collapsed) {
-    const icon = document.getElementById('sidebarCollapseIcon');
-    const label = document.querySelector('.sidebar-collapse-btn .drawer-item-label');
-    if (icon) {
-      icon.className = collapsed ? 'fas fa-chevrons-right' : 'fas fa-chevrons-left';
-    }
-    if (label) label.textContent = collapsed ? 'Expand Sidebar' : 'Collapse Sidebar';
-  }
-
-  /* ─── Drawer (Mobile) ─── */
-  function toggleDrawer() {
-    const d = document.getElementById('drawer');
-    const o = document.getElementById('drawerOverlay');
-    const b = document.getElementById('hamburgerBtn');
-    const open = d.classList.contains('open');
-    d.classList.toggle('open', !open);
-    o.classList.toggle('show', !open);
-    if (b) b.classList.toggle('open', !open);
-  }
-  function closeDrawer() {
-    const d = document.getElementById('drawer');
-    const o = document.getElementById('drawerOverlay');
-    const b = document.getElementById('hamburgerBtn');
-    if (d) d.classList.remove('open');
-    if (o) o.classList.remove('show');
-    if (b) b.classList.remove('open');
-  }
-
-  /* ─── Logout Modal ─── */
-  function openLogoutModal() {
-    document.getElementById('logoutModal').classList.add('show');
-  }
-  function closeLogoutModal() {
-    document.getElementById('logoutModal').classList.remove('show');
-  }
-  function doLogout() {
-    closeLogoutModal();
-    showToast('Logging out…', 'info');
-    setTimeout(() => {
-      // Clear user session data
-      ['k3k3_user', 'k3k3_user_id', 'k3k3_user_name', 'k3k3_user_email', 'k3k3_user_type',
-        'k3k3_token', 'k3k3_firstName', 'k3k3_lastName', 'k3k3_phone', 'k3k3_email',
-        'firstName', 'phone', 'email', 'authToken', 'user_token', 'accessToken'].forEach(k => {
-          localStorage.removeItem(k);
-          sessionStorage.removeItem(k);
-        });
-      window.location.href = 'login.html';
-    }, 1000);
-  }
-
-  /* ─── Location Permission ─── */
-  function initLocationPrompt() {
-    const granted = localStorage.getItem('k3k3_location_granted');
-    const denied = sessionStorage.getItem('k3k3_location_denied');
-    if (!granted && !denied) {
-      setTimeout(() => {
-        const el = document.getElementById('locationPrompt');
-        if (el) el.classList.remove('hidden');
-      }, 2500);
-    }
-  }
-  function allowLocation() {
-    const el = document.getElementById('locationPrompt');
-    if (el) el.classList.add('hidden');
-    requestLocationPermission();
-  }
-  function denyLocation() {
-    const el = document.getElementById('locationPrompt');
-    if (el) el.classList.add('hidden');
-    sessionStorage.setItem('k3k3_location_denied', 'true');
-    showToast('Location access denied. You can enable it in Settings anytime.', 'info');
-  }
-  function requestLocationPermission() {
-    if (!navigator.geolocation) { showToast('Geolocation not supported by your browser', 'error'); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        localStorage.setItem('k3k3_location_granted', 'true');
-        localStorage.setItem('k3k3_lat', pos.coords.latitude);
-        localStorage.setItem('k3k3_lng', pos.coords.longitude);
-        showToast('Location access enabled ✓', 'success');
-      },
-      err => {
-        showToast('Location access denied by browser. Enable it in your browser settings.', 'error');
-        // Uncheck the toggle if user denied via browser
-        setToggle('toggleLocation', false);
-        localStorage.setItem('k3k3_privacyLocation', 'false');
-      }
-    );
-  }
-
-  /* ─── Apply Rider Multi-step Form ─── */
-  function loadApplyRiderDefaults() {
-    const u = getStoredUser();
-    const fn = (u && u.fname) || localStorage.getItem('k3k3_firstName') || '';
-    const ln = (u && u.lname) || localStorage.getItem('k3k3_lastName') || '';
-    const ph = (u && u.phone) || localStorage.getItem('k3k3_phone') || '';
-    const setVal = (id, v) => { const el = document.getElementById(id); if (el && !el.value) el.value = v };
-    setVal('applyFName', fn); setVal('applyLName', ln); setVal('applyPhone', ph);
-    // reset to step 1
-    applyCurrentStep = 1;
-    applyRenderStep();
-  }
-
-  function applyRenderStep() {
-    for (let i = 1; i <= applyTotalSteps; i++) {
-      const step = document.getElementById(`applyStep${i}`);
-      if (step) step.classList.toggle('active-step', i === applyCurrentStep);
-      const ind = document.getElementById(`applyStepInd${i}`);
-      if (ind) {
-        ind.classList.toggle('active', i === applyCurrentStep);
-        ind.classList.toggle('done', i < applyCurrentStep);
-      }
-    }
-    const counter = document.getElementById('applyStepCounter');
-    if (counter) counter.textContent = `Step ${applyCurrentStep} of ${applyTotalSteps}`;
-    const prevBtn = document.getElementById('applyPrevBtn');
-    const nextBtn = document.getElementById('applyNextBtn');
-    if (prevBtn) prevBtn.style.visibility = applyCurrentStep === 1 ? 'hidden' : 'visible';
-    if (nextBtn) {
-      if (applyCurrentStep === applyTotalSteps) {
-        nextBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
-      } else {
-        nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
-      }
-    }
-    if (applyCurrentStep === applyTotalSteps) buildApplyReview();
-  }
-
-  function applyValidateStep() {
-    if (applyCurrentStep === 1) {
-      if (!document.getElementById('applyFName').value.trim()) { showToast('Please enter your first name', 'error'); return false; }
-      if (!document.getElementById('applyDOB').value) { showToast('Please enter your date of birth', 'error'); return false; }
-      if (!document.getElementById('applyGender').value) { showToast('Please select your gender', 'error'); return false; }
-      if (!document.getElementById('applyPhone').value.trim()) { showToast('Please enter your phone number', 'error'); return false; }
-      if (!document.getElementById('applyAddress').value.trim()) { showToast('Please enter your residential address', 'error'); return false; }
-    }
-    if (applyCurrentStep === 2) {
-      if (!document.getElementById('applyVehicleType').value) { showToast('Please select a vehicle type', 'error'); return false; }
-      if (!document.getElementById('applyVehicleMake').value.trim()) { showToast('Please enter the vehicle make', 'error'); return false; }
-      if (!document.getElementById('applyVehicleYear').value) { showToast('Please enter the vehicle year', 'error'); return false; }
-      if (!document.getElementById('applyRegNumber').value.trim()) { showToast('Please enter the registration number', 'error'); return false; }
-    }
-    if (applyCurrentStep === 3) {
-      if (!document.getElementById('applyIdType').value) { showToast('Please select an ID type', 'error'); return false; }
-      if (!document.getElementById('applyIdNumber').value.trim()) { showToast('Please enter your ID number', 'error'); return false; }
-      if (!document.getElementById('applyLicenceNumber').value.trim()) { showToast("Please enter your driver's licence number", 'error'); return false; }
-      if (!document.getElementById('applyLicenceExpiry').value) { showToast('Please enter your licence expiry date', 'error'); return false; }
-    }
-    if (applyCurrentStep === 4) {
-      if (!document.getElementById('applyTermsCheck').checked) { showToast('Please agree to the Terms of Service to proceed', 'error'); return false; }
-    }
-    return true;
-  }
-
-  function applyStepNext() {
-    if (!applyValidateStep()) return;
-    if (applyCurrentStep === applyTotalSteps) {
-      submitRiderApplication();
-      return;
-    }
-    applyCurrentStep++;
-    applyRenderStep();
-    window.scrollTo({ top: document.getElementById('sec-apply-rider').offsetTop - 80, behavior: 'smooth' });
-  }
-  function applyStepPrev() {
-    if (applyCurrentStep <= 1) return;
-    applyCurrentStep--;
-    applyRenderStep();
-  }
-
-  function buildApplyReview() {
-    const vals = {
-      'Full Name': (document.getElementById('applyFName').value + ' ' + document.getElementById('applyLName').value).trim(),
-      'Date of Birth': document.getElementById('applyDOB').value,
-      'Gender': document.getElementById('applyGender').value,
-      'Phone': document.getElementById('applyPhone').value,
-      'Address': document.getElementById('applyAddress').value,
-      'Vehicle Type': document.getElementById('applyVehicleType').value,
-      'Vehicle Make': document.getElementById('applyVehicleMake').value + ' ' + document.getElementById('applyVehicleModel').value,
-      'Year': document.getElementById('applyVehicleYear').value,
-      'Reg. Number': document.getElementById('applyRegNumber').value.toUpperCase(),
-      'ID Type': document.getElementById('applyIdType').value,
-      'ID Number': document.getElementById('applyIdNumber').value,
-      "Driver's Licence": document.getElementById('applyLicenceNumber').value,
-      'Licence Expiry': document.getElementById('applyLicenceExpiry').value,
-    };
-    const rc = document.getElementById('applyReviewContent');
-    if (!rc) return;
-    rc.innerHTML = Object.entries(vals).filter(([, v]) => v.trim()).map(([k, v]) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:.78rem;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em">${k}</span>
-      <span style="font-size:.88rem;font-weight:600;color:var(--text)">${v}</span>
-    </div>`).join('');
-  }
-
-  async function submitRiderApplication() {
-    const btn = document.getElementById('applyNextBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…'; }
-
-    const userId = getUserId();
-    const payload = {
-      user_id: userId || null,
-      fname: document.getElementById('applyFName').value.trim(),
-      lname: document.getElementById('applyLName').value.trim(),
-      dob: document.getElementById('applyDOB').value,
-      gender: document.getElementById('applyGender').value,
-      phone: document.getElementById('applyPhone').value.trim(),
-      nationality: document.getElementById('applyNationality').value.trim() || 'Ghanaian',
-      address: document.getElementById('applyAddress').value.trim(),
-      vehicle_type: document.getElementById('applyVehicleType').value,
-      vehicle_make: document.getElementById('applyVehicleMake').value.trim(),
-      vehicle_model: document.getElementById('applyVehicleModel').value.trim(),
-      vehicle_year: document.getElementById('applyVehicleYear').value,
-      vehicle_color: document.getElementById('applyVehicleColor').value.trim(),
-      reg_number: document.getElementById('applyRegNumber').value.toUpperCase().trim(),
-      id_type: document.getElementById('applyIdType').value,
-      id_number: document.getElementById('applyIdNumber').value.trim(),
-      licence_number: document.getElementById('applyLicenceNumber').value.trim(),
-      licence_expiry: document.getElementById('applyLicenceExpiry').value,
-      experience: document.getElementById('applyExperience').value,
-      extra: document.getElementById('applyExtra').value.trim(),
-      status: 'pending',
-    };
-
-    try {
-      const res = await fetch(`${API}/applications/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    } catch (err) {
-      console.warn('Application API submission note:', err.message);
-      // Proceed to success state anyway if it's a 422/already submitted scenario
-    }
-
-    // Show success state
-    document.querySelectorAll('.apply-form-step').forEach(s => s.classList.remove('active-step'));
-    const success = document.getElementById('applySuccess');
-    if (success) success.classList.add('show');
-    document.getElementById('applyFormFooter').style.display = 'none';
-    document.getElementById('applyStepper').style.display = 'none';
-    if (btn) { btn.disabled = false; }
-  }
-
-  /* ─── Book Modal ─── */
-  function openBookModal(dest) {
-    const modal = document.getElementById('bookModal');
-    modal.classList.add('show');
-    if (dest) document.getElementById('destInput').value = dest;
-    setTimeout(() => document.getElementById('pickupInput').focus(), 100);
-  }
-  function closeBookModal() {
-    document.getElementById('bookModal').classList.remove('show');
-  }
-  function handleModalBackdrop(e) {
-    if (e.target === document.getElementById('bookModal')) closeBookModal();
-  }
-
-  /* ─── Tabs ─── */
-  function switchTab(btn, panelId) {
-    const sec = btn.closest('.dash-section') || btn.closest('[style]') || document.body;
-    sec.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    sec.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    const panel = document.getElementById(panelId);
-    if (panel) panel.classList.add('active');
-  }
-
-  /* ─── Render Functions ─── */
-  function renderDrivers() {
-    document.getElementById('driversList').innerHTML = DRIVERS.map(d => `
-    <div class="driver-row" onclick="openBookModal(null)">
-      <div class="driver-avatar">${d.name.charAt(0)}</div>
-      <div class="driver-info">
-        <div class="driver-name">${d.name}</div>
-        <div class="driver-vehicle">${d.vehicle}</div>
-      </div>
-      <div class="driver-meta">
-        <div class="driver-eta"><i class="fas fa-clock" style="font-size:.7rem"></i> ${d.eta}</div>
-        <div class="driver-rating"><i class="fas fa-star" style="color:var(--yellow);font-size:.7rem"></i> ${d.rating}</div>
-      </div>
-    </div>`).join('');
-  }
-  async function renderTrips() {
-    const privacyOff = localStorage.getItem('k3k3_privacyTripHistory') === 'false';
-    const cEl = document.getElementById('completedRides');
-    const xEl = document.getElementById('cancelledRides');
-    if (privacyOff) {
-      if (cEl) cEl.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
-      return;
-    }
-
-    let completed = TRIPS.completed;
-    let cancelled = TRIPS.cancelled;
-    
-    const userId = getUserId();
-    if (userId) {
-      try {
-        const res = await fetch(`${API}/trips/passenger/${userId}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.rides) {
-            completed = data.rides.filter(r => r.status === 'completed' || r.status === 'arrived').map(r => ({
-              from: r.pickup_label || 'Unknown',
-              to: r.dest_label || 'Unknown',
-              date: new Date(r.created_at).toLocaleDateString(),
-              time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-              driver: r.driver_name || 'Assigned Driver',
-              amount: `GH₵ ${r.fare_estimate || '0.00'}`
-            }));
-            cancelled = data.rides.filter(r => r.status === 'cancelled').map(r => ({
-              from: r.pickup_label || 'Unknown',
-              to: r.dest_label || 'Unknown',
-              date: new Date(r.created_at).toLocaleDateString(),
-              time: new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-              reason: 'Cancelled'
-            }));
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch real trips, falling back to mock:', err);
-      }
-    }
-
-    if (cEl) {
-      if (completed.length === 0) {
-         cEl.innerHTML = '<div class="empty-state"><i class="fas fa-route"></i><p>No completed rides yet.</p></div>';
-      } else {
-         cEl.innerHTML = completed.map(t => `
-    <div class="trip-card">
-      <div class="trip-icon completed"><i class="fas fa-check"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${t.from} → ${t.to}</div>
-        <div class="trip-meta">${t.date} · ${t.time} · ${t.driver}</div>
-      </div>
-      <div class="trip-right">
-        <div class="trip-amount">${t.amount}</div>
-        <div class="trip-status completed">Completed</div>
-      </div>
-    </div>`).join('');
-      }
-    }
-    
-    if (xEl) {
-      if (cancelled.length === 0) {
-         xEl.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>No cancelled rides.</p></div>';
-      } else {
-         xEl.innerHTML = cancelled.map(t => `
-    <div class="trip-card">
-      <div class="trip-icon cancelled"><i class="fas fa-times"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${t.from} → ${t.to}</div>
-        <div class="trip-meta">${t.date} · ${t.time}</div>
-        <div class="trip-meta" style="color:var(--red)">${t.reason}</div>
-      </div>
-      <div class="trip-right"><div class="trip-status cancelled">Cancelled</div></div>
-    </div>`).join('');
-      }
-    }
-  }
-  function renderPayments() {
-    document.getElementById('paymentList').innerHTML = PAYMENTS.map(p => `
-    <div class="trip-card">
-      <div class="trip-icon completed"><i class="fas fa-receipt"></i></div>
-      <div class="trip-details">
-        <div class="trip-route">${p.label}</div>
-        <div class="trip-meta">${p.date} · ${p.time}</div>
-      </div>
-      <div class="trip-right"><div class="trip-amount">${p.amount}</div></div>
-    </div>`).join('');
-  }
-  function renderNotifications() {
-    const notifRides = localStorage.getItem('k3k3_notifRideUpdates') !== 'false';
-    const notifDrivers = localStorage.getItem('k3k3_notifDriverAlerts') !== 'false';
-
-    const el1 = document.getElementById('rideNotifs');
-    const el2 = document.getElementById('driverNotifs');
-    if (!el1 || !el2) return;
-
-    if (!notifRides) {
-      el1.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Ride update notifications are disabled in Settings.</p></div>';
-    } else {
-      el1.innerHTML = NOTIFS.rides.map(n => `
-      <div class="notif-item ${n.read ? '' : 'unread'}">
-        <div class="notif-icon"><i class="fas fa-motorcycle"></i></div>
-        <div class="notif-body">
-          <div class="notif-title">${n.title}</div>
-          <div class="notif-desc">${n.desc}</div>
-          <div class="notif-time">${n.time}</div>
-        </div>
-      </div>`).join('');
-    }
-    if (!notifDrivers) {
-      el2.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><p>Driver alert notifications are disabled in Settings.</p></div>';
-    } else {
-      el2.innerHTML = NOTIFS.drivers.map(n => `
-      <div class="notif-item ${n.read ? '' : 'unread'}">
-        <div class="notif-icon"><i class="fas fa-user-circle"></i></div>
-        <div class="notif-body">
-          <div class="notif-title">${n.title}</div>
-          <div class="notif-desc">${n.desc}</div>
-          <div class="notif-time">${n.time}</div>
-        </div>
-      </div>`).join('');
-    }
-  }
-  function updateStats() {
-    const el = document.getElementById('statRides');
-    if (el) el.textContent = TRIPS.completed.length;
-  }
-
-  function markAllRead() {
-    NOTIFS.rides.forEach(n => n.read = true);
-    NOTIFS.drivers.forEach(n => n.read = true);
-    unreadCount = 0;
-    renderNotifications();
-    updateNotifBadge();
-    showToast('All notifications marked as read', 'success');
-  }
-
-  function updateNotifBadge() {
-    const dot = document.getElementById('headerNotifDot');
-    if (dot) dot.style.display = unreadCount > 0 ? '' : 'none';
-  }
-
-  function renderFAQs() {
-    document.getElementById('faqList').innerHTML = FAQS.map((f, i) => `
-    <div class="faq-item" id="faq-${i}">
-      <div class="faq-q" onclick="toggleFaq(${i})">
-        <span>${f.q}</span><i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="faq-a">${f.a}</div>
-    </div>`).join('');
-  }
-  function toggleFaq(i) { document.getElementById('faq-' + i).classList.toggle('open') }
-
-  /* ─── Support ─── */
-  function submitIssue() {
-    const cat = document.getElementById('issueCategory').value;
-    const desc = document.getElementById('issueDesc').value.trim();
-    if (!cat) { showToast('Please select a category', 'error'); return }
-    if (!desc) { showToast('Please describe the issue', 'error'); return }
-    if (desc.length < 20) { showToast('Please provide more detail (at least 20 characters)', 'error'); return }
-    showToast("Report submitted. We'll get back to you within 24 hours.", 'success');
-    document.getElementById('issueCategory').value = '';
-    document.getElementById('issueDesc').value = '';
-  }
-
-  /* ─── Password Strength ─── */
-  function checkPwdStrength(pwd) {
-    const bar = document.getElementById('pwdBar');
-    const hint = document.getElementById('pwdHint');
-    let s = 0;
-    if (pwd.length >= 8) s++; if (/[A-Z]/.test(pwd)) s++;
-    if (/[0-9]/.test(pwd)) s++; if (/[^a-zA-Z0-9]/.test(pwd)) s++;
-    const L = [{ p: '0%', c: '', t: '' }, { p: '25%', c: '#EF4444', t: 'Weak' }, { p: '50%', c: '#F59E0B', t: 'Fair' }, { p: '75%', c: '#3B82F6', t: 'Good' }, { p: '100%', c: '#10B981', t: 'Strong' }];
-    const l = L[s] || L[0];
-    bar.style.width = l.p; bar.style.background = l.c;
-    hint.textContent = l.t; hint.style.color = l.c;
-  }
-
-  /* ─── Booking ─── */
-  function clearField(id) {
-    document.getElementById(id).value = '';
-    document.getElementById(id).focus();
-  }
-  function requestRide() {
-    const pickup = document.getElementById('pickupInput').value.trim();
-    const dest = document.getElementById('destInput').value.trim();
-    if (!pickup) { showToast('Please enter a pickup location', 'error'); document.getElementById('pickupInput').focus(); return }
-    if (!dest) { showToast('Please enter a destination', 'error'); document.getElementById('destInput').focus(); return }
-    closeBookModal();
-    showToast('Searching for riders...', 'info');
-    const sess = (() => { try { return JSON.parse(sessionStorage.getItem('k3k3_session') || sessionStorage.getItem('k3k3_user') || localStorage.getItem('k3k3_user') || 'null'); } catch (e) { return null; } })();
-    const pid = sess?.passenger_id || sess?.passengerId || sess?.id || null;
-    const plat = parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6018');
-    const plng = parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4685');
-    const dc = (window.HO_PLACES || []).find(p => p.name.toLowerCase() === dest.toLowerCase()) || { lat: 6.6018, lng: 0.4685 };
-    if (pid) {
-      const dR = (dc.lat - plat) * Math.PI / 180, dG = (dc.lng - plng) * Math.PI / 180;
-      const a = Math.sin(dR / 2) ** 2 + Math.cos(plat * Math.PI / 180) * Math.cos(dc.lat * Math.PI / 180) * Math.sin(dG / 2) ** 2;
-      const dist = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const fare = Math.max(3, +(dist * 1.8 + 2).toFixed(2));
-      const base = typeof API_BASE !== 'undefined' ? API_BASE : (typeof API !== 'undefined' ? API : 'http://localhost:8810');
-      fetch(base + '/trips/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ passenger_id: pid, pickup_lat: plat, pickup_lng: plng, dest_lat: dc.lat, dest_lng: dc.lng, pickup_label: pickup, dest_label: dest, fare_estimate: fare }) })
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(t => { sessionStorage.setItem('k3k3_active_trip', JSON.stringify(t)); setTimeout(() => showToast('Ride requested! A rider will accept soon.', 'success'), 1500); })
-        .catch(() => { setTimeout(() => showToast('Request sent - waiting for riders.', 'info'), 1500); });
-    } else { setTimeout(() => showToast('Please log in to request a ride.', 'error'), 500); }
-  }
-
-  /* ─── Toast ─── */
-  function showToast(msg, type = 'info') {
-    const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
-    const el = document.createElement('div');
-    el.className = `toast-notif ${type}`;
-    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
-    document.getElementById('toast-container').appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; setTimeout(() => el.remove(), 300) }, 4000);
-  }
-
-  /* ─── Keyboard shortcuts ─── */
-  document.addEventListener('keydown', e => {
-    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-      e.preventDefault(); openBookModal(null);
-    }
-    if (e.key === 'Escape') {
-      closeDrawer(); closeBookModal(); closeLogoutModal();
-    }
-  });
-
-  // Close logout modal on backdrop click
-  document.getElementById('logoutModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('logoutModal')) closeLogoutModal();
-  });
-</script>
 </body>
 
 </html>

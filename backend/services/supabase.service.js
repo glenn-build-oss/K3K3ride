@@ -1338,19 +1338,37 @@ async function suspendRider(riderId, reason = 'Suspended by admin') {
     const supabase = requireSupabase();
     let phone = null;
     let riderName = 'Rider';
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(riderId));
 
-    const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
-    if (user) {
-      phone = user.phone;
-      riderName = user.first_name || riderName;
-      await supabase.from('users').update({ status: 'suspended', updated_at: new Date().toISOString() }).eq('id', riderId);
-    }
+    if (isUuid) {
+      const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
+      if (user) {
+        phone = user.phone;
+        riderName = user.first_name || riderName;
+        await supabase.from('users').update({ status: 'suspended', updated_at: new Date().toISOString() }).eq('id', riderId);
+      }
 
-    const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
-    if (app) {
-      if (!phone) phone = app.phone;
-      if (riderName === 'Rider') riderName = app.first_name || riderName;
-      await supabase.from('rider_applications').update({ status: 'suspended', rejection_reason: reason, updated_at: new Date().toISOString() }).eq('id', app.id);
+      const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
+      if (app) {
+        if (!phone) phone = app.phone;
+        if (riderName === 'Rider') riderName = app.first_name || riderName;
+        await supabase.from('rider_applications').update({ status: 'suspended', rejection_reason: reason, updated_at: new Date().toISOString() }).eq('id', app.id);
+      }
+    } else {
+      // riderId may be phone number or custom ID
+      const cleanPhone = String(riderId).replace(/[^\d+]/g, '');
+      const { data: user } = await supabase.from('users').select('*').or(`phone.eq.${cleanPhone},phone.eq.+${cleanPhone}`).maybeSingle();
+      if (user) {
+        phone = user.phone;
+        riderName = user.first_name || riderName;
+        await supabase.from('users').update({ status: 'suspended', updated_at: new Date().toISOString() }).eq('id', user.id);
+      }
+      const { data: app } = await supabase.from('rider_applications').select('*').or(`phone.eq.${cleanPhone},phone.eq.+${cleanPhone}`).maybeSingle();
+      if (app) {
+        if (!phone) phone = app.phone;
+        if (riderName === 'Rider') riderName = app.first_name || riderName;
+        await supabase.from('rider_applications').update({ status: 'suspended', rejection_reason: reason, updated_at: new Date().toISOString() }).eq('id', app.id);
+      }
     }
 
     if (phone) {
@@ -1373,19 +1391,37 @@ async function unsuspendRider(riderId) {
     const supabase = requireSupabase();
     let phone = null;
     let riderName = 'Rider';
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(riderId));
 
-    const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
-    if (user) {
-      phone = user.phone;
-      riderName = user.first_name || riderName;
-      await supabase.from('users').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', riderId);
-    }
+    if (isUuid) {
+      const { data: user } = await supabase.from('users').select('*').eq('id', riderId).maybeSingle();
+      if (user) {
+        phone = user.phone;
+        riderName = user.first_name || riderName;
+        await supabase.from('users').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', riderId);
+      }
 
-    const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
-    if (app) {
-      if (!phone) phone = app.phone;
-      if (riderName === 'Rider') riderName = app.first_name || riderName;
-      await supabase.from('rider_applications').update({ status: 'approved', rejection_reason: null, updated_at: new Date().toISOString() }).eq('id', app.id);
+      const { data: app } = await supabase.from('rider_applications').select('*').or(`id.eq.${riderId},user_id.eq.${riderId}`).maybeSingle();
+      if (app) {
+        if (!phone) phone = app.phone;
+        if (riderName === 'Rider') riderName = app.first_name || riderName;
+        await supabase.from('rider_applications').update({ status: 'approved', rejection_reason: null, updated_at: new Date().toISOString() }).eq('id', app.id);
+      }
+    } else {
+      // riderId may be phone number
+      const cleanPhone = String(riderId).replace(/[^\d+]/g, '');
+      const { data: user } = await supabase.from('users').select('*').or(`phone.eq.${cleanPhone},phone.eq.+${cleanPhone}`).maybeSingle();
+      if (user) {
+        phone = user.phone;
+        riderName = user.first_name || riderName;
+        await supabase.from('users').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', user.id);
+      }
+      const { data: app } = await supabase.from('rider_applications').select('*').or(`phone.eq.${cleanPhone},phone.eq.+${cleanPhone}`).maybeSingle();
+      if (app) {
+        if (!phone) phone = app.phone;
+        if (riderName === 'Rider') riderName = app.first_name || riderName;
+        await supabase.from('rider_applications').update({ status: 'approved', rejection_reason: null, updated_at: new Date().toISOString() }).eq('id', app.id);
+      }
     }
 
     if (phone) {

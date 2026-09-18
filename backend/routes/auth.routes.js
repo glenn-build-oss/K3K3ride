@@ -844,31 +844,45 @@ router.get('/rider/profile', async (req, res) => {
       app = await getRiderApplicationStatus(normalized);
     }
 
-    const fn = user?.first_name || app?.first_name || 'Rider';
-    const ln = user?.last_name || app?.last_name || '';
-    const full = user?.full_name || (fn ? `${fn} ${ln}`.trim() : (app?.full_name || 'K3K3 Rider'));
+    // Prioritize details from the official application reviewed and approved by admin
+    const fn = app?.first_name || user?.first_name || 'Glenn';
+    const ln = app?.last_name || user?.last_name || 'Adjei';
+    const full = `${fn} ${ln}`.trim();
+    const plate = app?.license_plate || app?.vehicle_plate || 'ER1213131';
+    const vehicleType = [app?.vehicle_make, app?.vehicle_model].filter(Boolean).join(' ') || app?.vehicle_type || 'TVS RE';
+    const photoUrl = app?.passport_photo_url || user?.avatar_url || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+    const station = app?.station || (app?.city ? `${app.city} Central` : 'Ho Central');
+    const effectiveId = user?.id || app?.user_id || riderId || '68a4171c-a07d-4a6b-af40-6084f8d38c7a';
+    const shortId = effectiveId.replace(/-/g, '').substring(0, 8).toUpperCase();
 
     res.json({
       success: true,
       profile: {
-        id: user?.id || riderId || 'rider-demo',
-        phone: user?.phone || app?.phone || phone || '',
+        id: effectiveId,
+        shortId: shortId,
+        phone: app?.phone || user?.phone || phone || '+233207739636',
         firstName: fn,
         lastName: ln,
         fullName: full,
-        email: user?.email || app?.email || '',
+        email: app?.email || user?.email || '',
         role: 'rider',
-        status: user?.status || app?.status || 'approved',
-        vehicleType: app?.vehicle_type || 'TVS King Deluxe Tricycle',
-        licensePlate: app?.vehicle_plate || app?.reg_number || 'AS 4920-24',
+        status: app?.status || user?.status || 'approved',
+        vehicleType: vehicleType,
+        vehicleMake: app?.vehicle_make || 'TVS',
+        vehicleModel: app?.vehicle_model || 'RE',
+        vehicleColor: app?.vehicle_color || 'Yellow',
+        vehicleYear: app?.vehicle_year || 2020,
+        licensePlate: plate,
+        photoUrl: photoUrl,
         capacity: 3,
-        station: app?.station || 'KNUST Main Gate',
+        station: station,
+        city: app?.city || 'Ho',
         rating: 4.9,
         acceptanceRate: '98%',
         tripsCompleted: 84,
         emergencyName: app?.emergency_contact_name || user?.emergency_name || '',
         emergencyPhone: app?.emergency_contact_phone || user?.emergency_phone || '',
-        joinedDate: user?.created_at || app?.created_at || new Date().toISOString()
+        joinedDate: app?.created_at || user?.created_at || new Date().toISOString()
       }
     });
   } catch (err) {
@@ -924,7 +938,7 @@ router.put('/rider/profile', async (req, res) => {
         if (ln) appUpdates.last_name = ln;
         if (email) appUpdates.email = email.toLowerCase().trim();
         const plate = licensePlate || vehiclePlate;
-        if (plate) appUpdates.vehicle_plate = plate.trim();
+        if (plate) appUpdates.license_plate = plate.trim();
         if (station) appUpdates.station = station.trim();
         const emName = emergencyName || emergency_name;
         if (emName) appUpdates.emergency_contact_name = emName.trim();
@@ -945,13 +959,14 @@ router.put('/rider/profile', async (req, res) => {
       message: 'Rider profile updated successfully',
       profile: {
         id: targetId || updatedUser?.id || 'rider-demo',
-        firstName: fn || updatedUser?.first_name || 'Rider',
-        lastName: ln || updatedUser?.last_name || '',
-        fullName: full || updatedUser?.full_name || 'Rider',
+        shortId: (targetId || updatedUser?.id || '68A4171C').replace(/-/g, '').substring(0, 8).toUpperCase(),
+        firstName: fn || updatedUser?.first_name || 'Glenn',
+        lastName: ln || updatedUser?.last_name || 'Adjei',
+        fullName: full || updatedUser?.full_name || 'Glenn Adjei',
         email: email || updatedUser?.email || '',
         phone: effectivePhone || '',
-        licensePlate: licensePlate || vehiclePlate || 'AS 4920-24',
-        station: station || 'KNUST Main Gate',
+        licensePlate: licensePlate || vehiclePlate || 'ER1213131',
+        station: station || 'Ho Central',
         emergencyName: emergencyName || emergency_name || '',
         emergencyPhone: emergencyPhone || emergency_phone || ''
       }
@@ -1011,9 +1026,9 @@ router.post('/admin/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    // ─── ADMIN 2FA OTP TOGGLE ───
-    // OTP disabled by default as requested; re-enable anytime with ADMIN_OTP_ENABLED=true
-    const isOtpEnabled = process.env.ADMIN_OTP_ENABLED === 'true';
+    // ─── ADMIN 2FA OTP SECURITY ENFORCEMENT ───
+    // Re-enabled: Enforce 2FA OTP verification for all admin logins (secure by default)
+    const isOtpEnabled = process.env.ADMIN_OTP_ENABLED !== 'false';
 
     if (!isOtpEnabled) {
       console.log(`[Auth] Admin login for ${cleanEmail} — 2FA OTP is disabled, logging in directly`);
@@ -1104,8 +1119,8 @@ router.post('/admin/verify-otp', async (req, res) => {
     const cleanEmail = String(email).trim().toLowerCase();
     const cleanOtp = String(otp).trim();
 
-    // If OTP is disabled, allow immediate authorization
-    const isOtpEnabled = process.env.ADMIN_OTP_ENABLED === 'true';
+    // Check if 2FA OTP verification is enforced
+    const isOtpEnabled = process.env.ADMIN_OTP_ENABLED !== 'false';
     if (!isOtpEnabled) {
       let admin = await findUserByEmail(cleanEmail);
       if (!admin && cleanEmail === 'admin@k3k3.com') {

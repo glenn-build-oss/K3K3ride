@@ -1,4 +1,4 @@
-const CACHE_NAME = 'k3k3-v6';
+const CACHE_NAME = 'k3k3-v7';
 const ASSETS = [
   '/',
   '/index.html',
@@ -10,19 +10,25 @@ const ASSETS = [
   '/assets/k3k3.png',
   '/css/responsive.css',
   '/passenger/login.html',
-  '/passenger/login.css',
-  '/passenger/toast.css'
+  '/passenger/login.css'
 ];
 
-// Install event - cache all assets
+// Install event - cache all assets safely
 self.addEventListener('install', e => {
   console.log('[SW] Installing service worker...');
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching assets');
-        return cache.addAll(ASSETS);
+      .then(async cache => {
+        console.log('[SW] Caching assets...');
+        await Promise.allSettled(
+          ASSETS.map(url =>
+            cache.add(url).catch(err => {
+              console.warn(`[SW] Could not pre-cache ${url}:`, err.message);
+            })
+          )
+        );
+        console.log('[SW] Asset caching complete');
       })
       .then(() => {
         console.log('[SW] Installation complete');

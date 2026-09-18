@@ -10,7 +10,93 @@
   <link rel="icon" type="image/x-icon" href="../favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Leaflet.js Live Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <style>
+    /* Live Map Styles */
+    .map-card-container {
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      background: var(--white);
+      box-shadow: var(--sh-sm);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    #riderLiveMap {
+      width: 100%;
+      height: clamp(280px, 42vh, 450px);
+      min-height: 250px;
+      z-index: 1;
+      border-bottom-left-radius: var(--r-lg);
+      border-bottom-right-radius: var(--r-lg);
+    }
+    .map-card-container.fullscreen-mode {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 99999 !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      width: 100vw !important;
+      box-shadow: none !important;
+    }
+    .map-card-container.fullscreen-mode #riderLiveMap {
+      height: calc(100% - 64px) !important;
+      min-height: calc(100% - 64px) !important;
+      border-radius: 0 !important;
+    }
+    .gps-status-pill {
+      font-size: .72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all .2s;
+    }
+    .gps-status-pill.live {
+      background: var(--green-lt);
+      color: var(--green);
+    }
+    .gps-status-pill.fallback {
+      background: rgba(245,158,11,.15);
+      color: #B45309;
+    }
+    .custom-keke-marker {
+      background: transparent;
+      border: none;
+    }
+    .keke-marker-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFD60A, #E6C000);
+      color: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(255,214,10,0.5), 0 2px 8px rgba(0,0,0,0.4);
+      border: 2.5px solid #ffffff;
+      position: relative;
+      padding: 3px;
+      transition: transform .35s ease-out;
+    }
+    .keke-marker-pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid #FFD60A;
+      opacity: 0.8;
+      animation: kekeRiderPulse 2s infinite ease-out;
+      pointer-events: none;
+    }
+    @keyframes kekeRiderPulse {
+      0% { transform: scale(0.9); opacity: 0.9; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
     /* ════════════════════════════════════════
        DESIGN TOKENS - Match Passenger Dashboard
     ════════════════════════════════════════ */
@@ -1736,9 +1822,56 @@
         <div class="atrip-route" id="atRoute"></div>
         <div class="atrip-actions">
           <button class="atrip-btn call"     onclick="callPassenger()"><i class="fas fa-phone"></i> Call</button>
+          <a class="atrip-btn" id="atNavBtn" href="#" target="_blank" style="background:#2563EB;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px" title="Turn-by-turn live navigation in Google Maps"><i class="fas fa-location-arrow"></i> Google Maps</a>
           <button class="atrip-btn complete" onclick="openModal('completeTripModal')"><i class="fas fa-check-circle"></i> Complete Trip</button>
         </div>
       </div>
+    </div>
+
+    <!-- Live Map Radar -->
+    <div class="card map-card-container" id="riderMapCard" style="margin-bottom:20px;overflow:hidden;padding:0">
+      <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--yellow-lt);color:var(--yellow-dk);display:flex;align-items:center;justify-content:center;font-size:.95rem">
+            <i class="fas fa-location-crosshairs"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:.92rem;color:var(--text);display:flex;align-items:center;gap:8px">
+              Live Map Radar
+              <span class="gps-status-pill live" id="riderGpsPill"><i class="fas fa-circle-dot"></i> GPS Live</span>
+            </div>
+            <div style="font-size:.78rem;color:var(--text-2)" id="riderMapSub">Real-time GPS positioning & active trip route</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" onclick="recenterRiderMap()" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:.8rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px">
+            <i class="fas fa-crosshairs"></i> Center
+          </button>
+          <button type="button" id="riderFullscreenBtn" onclick="toggleRiderMapFullscreen()" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:.8rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px" title="Toggle Fullscreen Map">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      <!-- OSRM Live Road Navigation & ETA Lead Banner -->
+      <div id="riderNavRoutingBanner" style="display:none;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(17,19,24,.95));border:1px solid rgba(16,185,129,.35);border-radius:12px;padding:12px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:50%;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:0 0 10px rgba(16,185,129,.3)">
+            <i class="fas fa-location-arrow"></i>
+          </div>
+          <div>
+            <div style="font-size:.88rem;font-weight:800;color:var(--text)" id="riderNavTitle">Lead to Passenger Pickup</div>
+            <div style="font-size:.76rem;color:var(--text-2)" id="riderNavSub">Calculating OSRM road route & ETA…</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="riderNavEtaBadge" style="padding:6px 12px;border-radius:999px;background:#10B981;color:#fff;font-size:.78rem;font-weight:800;white-space:nowrap">
+            — mins
+          </span>
+          <a id="riderNavGoogleMapsBtn" href="#" target="_blank" style="padding:7px 14px;border-radius:8px;background:#FFD60A;color:#000;font-size:.78rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+            <i class="fab fa-google"></i> Turn-by-Turn GPS
+          </a>
+        </div>
+      </div>
+      <div id="riderLiveMap"></div>
     </div>
 
     <!-- Stats - Simplified -->
@@ -2108,8 +2241,8 @@
               <i class="fas fa-location-dot"></i>
             </div>
             <div class="profile-field-info">
-              <div class="profile-field-lbl">Preferred Campus Station</div>
-              <div class="profile-field-val" id="profStation">KNUST Main Gate</div>
+              <div class="profile-field-lbl">Preferred Station / Hub</div>
+              <div class="profile-field-val" id="profStation">Ho Central</div>
             </div>
           </div>
         </div>
@@ -2120,7 +2253,7 @@
         <div class="card-header">
           <div>
             <div class="card-title"><i class="fas fa-motorcycle" style="color:var(--yellow);margin-right:8px"></i> Vehicle & Tricycle Info</div>
-            <div class="card-sub">Campus registered keke specifications</div>
+            <div class="card-sub">Registered keke specifications</div>
           </div>
         </div>
         <div class="card-body">
@@ -2131,7 +2264,7 @@
             <div class="profile-field-info">
               <div class="profile-field-lbl">Vehicle License Plate</div>
               <div style="margin-top:4px">
-                <span class="license-plate-badge" id="profPlateBadge">AS 4920-24</span>
+                <span class="license-plate-badge" id="profPlateBadge">ER1213131</span>
               </div>
             </div>
           </div>
@@ -2142,7 +2275,7 @@
             </div>
             <div class="profile-field-info">
               <div class="profile-field-lbl">Vehicle Model & Capacity</div>
-              <div class="profile-field-val" id="profVehicleType">TVS King Deluxe · 3 Passenger Seats</div>
+              <div class="profile-field-val" id="profVehicleType">TVS RE · 3 Passenger Seats</div>
             </div>
           </div>
 
@@ -2315,25 +2448,8 @@
             <input type="text" id="editProfPlate" class="form-control" placeholder="e.g. AS 4920-24">
           </div>
           <div class="form-group" style="margin-bottom:0">
-            <label class="form-label" for="editProfStation">Preferred Campus Hub</label>
-            <input type="text" id="editProfStation" class="form-control" list="campusHubsList" placeholder="e.g. KNUST Main Gate, Gaza, Commercial Area..." required>
-            <datalist id="campusHubsList">
-              <option value="KNUST Main Gate">
-              <option value="Commercial Area">
-              <option value="Tech Junction">
-              <option value="Ayeduase Gate">
-              <option value="Brunei Complex">
-              <option value="Hall 7 / Boakye">
-              <option value="Gaza / Kotei Gate">
-              <option value="Engineering Gate">
-              <option value="Conti / Unity Hall">
-              <option value="Katanga / University Hall">
-              <option value="Africa Hall">
-              <option value="Queen Elizabeth II Hall">
-              <option value="Independence Hall">
-              <option value="SRC Hostel">
-              <option value="Kotei Station">
-            </datalist>
+            <label class="form-label" for="editProfStation">Preferred Station / Hub</label>
+            <input type="text" id="editProfStation" class="form-control" placeholder="Enter campus station / hub (e.g. Ho Central, Dome Area, Kpehe...)" required>
           </div>
         </div>
 
@@ -2413,6 +2529,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildMiniChart();
   renderEarnings();
   restoreSidebarState();
+  setTimeout(() => initRiderMap(), 250);
 });
 
 function loadSession() {
@@ -2509,31 +2626,44 @@ function loadSession() {
 
 function renderRiderProfile(data) {
   const s = data || session || {};
-  const fn  = s.firstName || s.first_name || 'Rider';
-  const ln  = s.lastName  || s.last_name  || '';
-  const full = s.fullName || (fn ? `${fn} ${ln}`.trim() : 'K3K3 Rider');
+  const fn  = s.firstName || s.first_name || 'Glenn';
+  const ln  = s.lastName  || s.last_name  || 'Adjei';
+  const full = s.fullName || (fn ? `${fn} ${ln}`.trim() : 'Glenn Adjei');
   const ini = fn.charAt(0).toUpperCase();
-  const rid = s.riderId || s.id || '—';
-  const phone = s.phone || 'Not set';
-  const email = s.email || 'Not set';
-  const station = s.station || 'KNUST Main Gate';
-  const plate = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'AS 4920-24';
-  const vehicle = s.vehicleType || s.vehicle_type || 'TVS King Deluxe · 3 Passenger Seats';
+  const rawId = s.shortId || s.riderId || s.id || '68A4171C';
+  const shortId = (String(rawId).replace(/-/g, '').substring(0, 8)).toUpperCase();
+  const ridText = 'ID: ' + shortId;
+  const phone = s.phone || '+233207739636';
+  const email = s.email || 'adjeikwafoglenn@gmail.com';
+  const station = s.station || 'Ho Central';
+  const plate = s.licensePlate || s.vehiclePlate || 'ER1213131';
+  const vehicle = s.vehicleType || 'TVS RE · 3 Passenger Seats';
   const emName = s.emergencyName || s.emergency_name || '';
   const emPhone = s.emergencyPhone || s.emergency_phone || '';
+  const photoUrl = s.photoUrl || s.avatarUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+
+  const setAvatarWithPhoto = (elId) => {
+    const elTarget = el(elId);
+    if (!elTarget) return;
+    if (photoUrl) {
+      elTarget.innerHTML = `<img src="${photoUrl}" alt="${full}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.parentElement.textContent='${ini}'">`;
+    } else {
+      elTarget.textContent = ini;
+    }
+  };
 
   // Header & Sidebar
-  setEl('sbAvatar', ini);
+  setAvatarWithPhoto('sbAvatar');
   setEl('sbName', full);
-  setEl('sbId', rid !== '—' ? 'ID: ' + (String(rid).length > 10 ? String(rid).substring(0, 8).toUpperCase() : rid) : 'Guest Mode');
-  setEl('topAvatar', ini);
+  setEl('sbId', ridText);
+  setAvatarWithPhoto('topAvatar');
   setEl('heroName', fn);
 
   // Profile Section elements
-  setEl('profAvatar', ini);
+  setAvatarWithPhoto('profAvatar');
   setEl('profName', full);
   setEl('profDetailName', full);
-  setEl('profId', rid !== '—' ? 'Rider ID: ' + (String(rid).length > 10 ? String(rid).substring(0, 8).toUpperCase() : rid) : 'Active Partner');
+  setEl('profId', 'Rider ' + ridText);
   setEl('profPhone', phone);
   setEl('profEmail', email);
   setEl('profStation', station);
@@ -2550,8 +2680,7 @@ function renderRiderProfile(data) {
 async function loadRiderProfileFromAPI() {
   if (!session) return;
   const rid = session.riderId || session.id;
-  const phone = session.phone;
-  if (!rid && !phone) return;
+  const phone = session.phone || '+233207739636';
 
   try {
     const params = new URLSearchParams();
@@ -2628,8 +2757,8 @@ function openEditProfileModal() {
   if (lnInput) lnInput.value = s.lastName  || s.last_name  || (s.fullName ? s.fullName.split(' ').slice(1).join(' ') : 'Rider');
   if (phInput) phInput.value = (s.phone && s.phone !== 'Not set') ? s.phone : '0504842974';
   if (emInput) emInput.value = (s.email && s.email !== 'Not set') ? s.email : '';
-  if (stInput) stInput.value = s.station || 'KNUST Main Gate';
-  if (plInput) plInput.value = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'AS 4920-24';
+  if (stInput) stInput.value = s.station || 'Ho Central';
+  if (plInput) plInput.value = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'ER1213131';
   if (enInput) enInput.value = s.emergencyName || s.emergency_name || '';
   if (epInput) epInput.value = s.emergencyPhone || s.emergency_phone || '';
 
@@ -2647,7 +2776,7 @@ async function saveRiderProfile(e) {
   const ln = (el('editProfLastName')?.value || '').trim();
   const phone = (el('editProfPhone')?.value || '').trim();
   const email = (el('editProfEmail')?.value || '').trim();
-  const station = el('editProfStation')?.value || 'KNUST Main Gate';
+  const station = el('editProfStation')?.value || 'Ho Central';
   const plate = (el('editProfPlate')?.value || '').trim();
   const emName = (el('editProfEmergencyName')?.value || '').trim();
   const emPhone = (el('editProfEmergencyPhone')?.value || '').trim();
@@ -2744,6 +2873,9 @@ function showSec(name) {
 
   setEl('topbarTitle', SEC_TITLES[name] || name);
   closeSidebar();
+  if (name === 'home' && riderMap) {
+    setTimeout(() => riderMap.invalidateSize(), 150);
+  }
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -2893,22 +3025,28 @@ function connectWS() {
       wsConn.on('connect', () => {
         console.log('[Socket.io] Rider connected, ID:', wsConn.id);
 
-        const lat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6745');
-        const lng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '-1.5716');
+        const lat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+        const lng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
 
-        // Register online with backend dispatch
+        // Register online with backend dispatch using real application credentials
         wsConn.emit('rider:online', {
-          riderId: riderId,
-          name: `${session?.firstName || ''} ${session?.lastName || ''}`.trim() || 'Keke Rider',
-          phone: session?.phone || '',
+          riderId: session?.id || session?.riderId || riderId || '68a4171c-a07d-4a6b-af40-6084f8d38c7a',
+          shortId: '68A4171C',
+          name: session?.fullName || `${session?.firstName || ''} ${session?.lastName || ''}`.trim() || 'Glenn Adjei',
+          phone: session?.phone || '+233207739636',
+          photoUrl: session?.photoUrl || session?.passportPhotoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg',
+          avatarUrl: session?.photoUrl || session?.passportPhotoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg',
+          station: session?.station || 'Ho Central',
+          city: session?.city || 'Ho',
           lat: lat,
           lng: lng,
           capacity: 3,
-          vehicleType: session?.vehicleType || 'tricycle',
-          licensePlate: session?.licensePlate || ''
+          vehicleType: session?.vehicleType || 'TVS RE Tricycle',
+          licensePlate: session?.licensePlate || 'ER1213131'
         });
 
-        // Start GPS streaming
+        // Initialize Live Map & Start GPS streaming
+        initRiderMap();
         startLocationTracking();
       });
 
@@ -2963,41 +3101,339 @@ function connectWS() {
   }
 }
 
+let riderMap = null;
+let riderMarker = null;
+let riderAccuracyCircle = null;
+let tripRouteLayer = null;
+
+function initRiderMap() {
+  const mapEl = el('riderLiveMap');
+  if (!mapEl || typeof L === 'undefined') return;
+  if (riderMap) {
+    setTimeout(() => riderMap.invalidateSize(), 200);
+    return;
+  }
+
+  const initialLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const initialLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+
+  riderMap = L.map('riderLiveMap', {
+    zoomControl: false,
+    attributionControl: false,
+    tap: false,
+    scrollWheelZoom: false
+  }).setView([initialLat, initialLng], 15);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    subdomains: ['a', 'b', 'c']
+  }).addTo(riderMap);
+
+  L.control.zoom({ position: 'bottomright' }).addTo(riderMap);
+
+  const kekeIcon = L.divIcon({
+    className: 'custom-keke-marker',
+    html: '<div class="keke-marker-icon" id="kekeMarkerDom"><div class="keke-marker-pulse"></div><img src="../assets/k3k3.png" alt="K3K3 Keke" style="width:28px;height:28px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35));"></div>',
+    iconSize: [44, 44],
+    iconAnchor: [22, 22]
+  });
+
+  riderMarker = L.marker([initialLat, initialLng], { icon: kekeIcon, zIndexOffset: 1000 }).addTo(riderMap);
+  riderAccuracyCircle = L.circle([initialLat, initialLng], {
+    radius: 35,
+    color: '#FFD60A',
+    fillColor: '#FFD60A',
+    fillOpacity: 0.15,
+    weight: 2
+  }).addTo(riderMap);
+
+  window.addEventListener('resize', () => {
+    if (riderMap) riderMap.invalidateSize();
+  });
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => { if (riderMap) riderMap.invalidateSize(); }, 250);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && riderMap) {
+      setTimeout(() => riderMap.invalidateSize(), 200);
+    }
+  });
+
+  setTimeout(() => riderMap.invalidateSize(), 300);
+}
+
+function toggleRiderMapFullscreen() {
+  const card = document.getElementById('riderMapCard');
+  const btn = document.getElementById('riderFullscreenBtn');
+  if (!card) return;
+  const isFull = card.classList.toggle('fullscreen-mode');
+  if (btn) {
+    btn.innerHTML = isFull ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+    btn.title = isFull ? 'Exit Fullscreen' : 'Toggle Fullscreen Map';
+  }
+  setTimeout(() => {
+    if (riderMap) riderMap.invalidateSize();
+  }, 250);
+}
+
+function updateRiderMapPosition(lat, lng, heading = 0, isLive = true) {
+  if (!riderMap) initRiderMap();
+  if (!riderMap) return;
+
+  const latNum = parseFloat(lat);
+  const lngNum = parseFloat(lng);
+  if (isNaN(latNum) || isNaN(lngNum)) return;
+
+  if (riderMarker) {
+    riderMarker.setLatLng([latNum, lngNum]);
+    const kekeDom = document.getElementById('kekeMarkerDom');
+    if (kekeDom && heading) {
+      kekeDom.style.transform = `rotate(${heading}deg)`;
+    }
+  }
+  if (riderAccuracyCircle) {
+    riderAccuracyCircle.setLatLng([latNum, lngNum]);
+  }
+
+  if (!activeTrip) {
+    riderMap.panTo([latNum, lngNum], { animate: true, duration: 0.5 });
+  } else {
+    updateActiveTripMapRoute(activeTrip);
+  }
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * OSRM ROAD ROUTING & ETA ENGINE (Open Source Routing Machine)
+ * ─────────────────────────────────────────────────────────
+ */
+async function fetchOsrmDrivingRoute(originLat, originLng, destLat, destLng) {
+  const oLat = parseFloat(originLat);
+  const oLng = parseFloat(originLng);
+  const dLat = parseFloat(destLat);
+  const dLng = parseFloat(destLng);
+  if (isNaN(oLat) || isNaN(oLng) || isNaN(dLat) || isNaN(dLng)) return null;
+
+  // OSRM API expects "lng,lat;lng,lat"
+  const url = `https://router.project-osrm.org/route/v1/driving/${oLng.toFixed(6)},${oLat.toFixed(6)};${dLng.toFixed(6)},${dLat.toFixed(6)}?overview=full&geometries=geojson`;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4500);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      // Convert OSRM GeoJSON [lng, lat] to Leaflet [lat, lng]
+      const latLngs = (route.geometry?.coordinates || []).map(c => [c[1], c[0]]);
+      const distanceKm = parseFloat((route.distance / 1000).toFixed(1));
+      const durationMin = Math.max(1, Math.round(route.duration / 60));
+      return {
+        latLngs,
+        distanceKm,
+        durationMin,
+        summary: `${durationMin} mins (${distanceKm} km)`,
+        isRealRoad: true
+      };
+    }
+  } catch (err) {
+    console.warn('[OSRM Road Routing Warning]', err.message);
+  }
+
+  // Fallback to Haversine straight line if OSRM is unreachable
+  const d = estimateDist(oLat, oLng, dLat, dLng);
+  const eta = Math.max(1, Math.ceil(d / 18 * 60));
+  return {
+    latLngs: [[oLat, oLng], [dLat, dLng]],
+    distanceKm: parseFloat(d.toFixed(1)),
+    durationMin: eta,
+    summary: `${eta} mins (${d.toFixed(1)} km)`,
+    isFallback: true
+  };
+}
+
+async function updateActiveTripMapRoute(trip) {
+  if (!riderMap || !trip) return;
+  const pLat = parseFloat(trip.pickup_lat || trip.pickupLat || '6.6012');
+  const pLng = parseFloat(trip.pickup_lng || trip.pickupLng || '0.4688');
+  const dLat = parseFloat(trip.dropoff_lat || trip.dropoffLat || '6.6080');
+  const dLng = parseFloat(trip.dropoff_lng || trip.dropoffLng || '0.4650');
+  const rLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || pLat);
+  const rLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || pLng);
+
+  if (tripRouteLayer) {
+    riderMap.removeLayer(tripRouteLayer);
+    tripRouteLayer = null;
+  }
+
+  const group = L.featureGroup();
+
+  // 1. Pickup Marker (Green)
+  const pickupMarker = L.circleMarker([pLat, pLng], {
+    radius: 8,
+    fillColor: '#10B981',
+    color: '#ffffff',
+    weight: 2.5,
+    fillOpacity: 1
+  }).bindPopup(`<b>Passenger Pickup:</b> ${trip.from || trip.pickup || 'Pickup Location'}`);
+  group.addLayer(pickupMarker);
+
+  // 2. Destination Marker (Red)
+  const dropMarker = L.circleMarker([dLat, dLng], {
+    radius: 8,
+    fillColor: '#EF4444',
+    color: '#ffffff',
+    weight: 2.5,
+    fillOpacity: 1
+  }).bindPopup(`<b>Destination:</b> ${trip.to || trip.drop || 'Drop-off Location'}`);
+  group.addLayer(dropMarker);
+
+  const isHeadingToPickup = trip.status !== 'in_progress' && trip.status !== 'picked_up';
+
+  // 3. Request OSRM driving routes
+  const [pickupRoute, destRoute] = await Promise.all([
+    fetchOsrmDrivingRoute(rLat, rLng, pLat, pLng),
+    fetchOsrmDrivingRoute(pLat, pLng, dLat, dLng)
+  ]);
+
+  if (pickupRoute && pickupRoute.latLngs.length > 0) {
+    // Road polyline to lead rider to passenger pickup (Emerald Green)
+    const leadPolyline = L.polyline(pickupRoute.latLngs, {
+      color: '#10B981',
+      weight: 5,
+      opacity: 0.92,
+      lineCap: 'round',
+      lineJoin: 'round'
+    });
+    group.addLayer(leadPolyline);
+  }
+
+  if (destRoute && destRoute.latLngs.length > 0) {
+    // Road polyline for passenger destination (Blue)
+    const tripPolyline = L.polyline(destRoute.latLngs, {
+      color: '#3B82F6',
+      weight: 4,
+      dashArray: '6, 8',
+      opacity: 0.82,
+      lineCap: 'round',
+      lineJoin: 'round'
+    });
+    group.addLayer(tripPolyline);
+  }
+
+  tripRouteLayer = group;
+  group.addTo(riderMap);
+
+  // Auto-fit to view rider + route
+  const allCoords = [[rLat, rLng], [pLat, pLng], [dLat, dLng]];
+  riderMap.fitBounds(L.latLngBounds(allCoords), { padding: [40, 40], maxZoom: 16 });
+
+  // Update Navigation Banner with OSRM stats & Google Maps Link
+  const navBanner = el('riderNavRoutingBanner');
+  const navTitle = el('riderNavTitle');
+  const navSub = el('riderNavSub');
+  const etaBadge = el('riderNavEtaBadge');
+  const gMapsBtn = el('riderNavGoogleMapsBtn');
+
+  if (navBanner) {
+    navBanner.style.display = 'flex';
+    if (isHeadingToPickup && pickupRoute) {
+      if (navTitle) navTitle.textContent = `Lead to Passenger (${trip.from || trip.pickup || 'Pickup'})`;
+      if (navSub) navSub.textContent = `OSRM Road Routing: ${pickupRoute.distanceKm} km · ${pickupRoute.durationMin} mins drive`;
+      if (etaBadge) etaBadge.textContent = `🟢 ${pickupRoute.durationMin} mins (${pickupRoute.distanceKm} km)`;
+      if (gMapsBtn) {
+        gMapsBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${rLat},${rLng}&destination=${pLat},${pLng}&travelmode=driving`;
+      }
+    } else if (destRoute) {
+      if (navTitle) navTitle.textContent = `Lead to Destination (${trip.to || trip.drop || 'Destination'})`;
+      if (navSub) navSub.textContent = `OSRM Road Routing: ${destRoute.distanceKm} km · ${destRoute.durationMin} mins drive`;
+      if (etaBadge) etaBadge.textContent = `🏁 ${destRoute.durationMin} mins (${destRoute.distanceKm} km)`;
+      if (gMapsBtn) {
+        gMapsBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${rLat},${rLng}&destination=${dLat},${dLng}&travelmode=driving`;
+      }
+    }
+  }
+}
+
+function recenterRiderMap() {
+  if (!riderMap) {
+    initRiderMap();
+    return;
+  }
+  const lat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const lng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+  riderMap.setView([lat, lng], 16, { animate: true });
+}
+
 function startLocationTracking() {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation) {
+    handleGpsFallback();
+    return;
+  }
   if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
 
   gpsWatchId = navigator.geolocation.watchPosition(
     pos => {
       const { latitude, longitude, heading, speed } = pos.coords;
-      sessionStorage.setItem('k3k3_rider_lat', latitude);
-      sessionStorage.setItem('k3k3_rider_lng', longitude);
-
-      if (wsConn && wsConn.emit) {
-        // Stream rider coordinates to dispatch pool
-        wsConn.emit('rider:location', {
-          lat: latitude,
-          lng: longitude,
-          heading: heading || 0,
-          speed: speed || 0
-        });
-
-        // If currently driving an active trip, forward to trip room
-        if (activeTrip && activeTrip.id) {
-          wsConn.emit('trip:location_update', {
-            tripId: activeTrip.id,
-            riderId: session?.dbRiderId || session?.id,
-            lat: latitude,
-            lng: longitude,
-            heading: heading || 0,
-            speed: speed || 0
-          });
-        }
+      handleGpsPosition(latitude, longitude, heading || 0, speed || 0, true);
+    },
+    err => {
+      console.warn('[GPS Tracking Warning]', err.message);
+      if (err.code === 3) {
+        if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = navigator.geolocation.watchPosition(
+          pos2 => handleGpsPosition(pos2.coords.latitude, pos2.coords.longitude, pos2.coords.heading || 0, pos2.coords.speed || 0, true),
+          err2 => handleGpsFallback(err2),
+          { enableHighAccuracy: false, maximumAge: 30000, timeout: 15000 }
+        );
+      } else {
+        handleGpsFallback(err);
       }
     },
-    err => console.warn('[GPS Tracking Warning]', err.message),
-    { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
   );
+}
+
+function handleGpsPosition(latitude, longitude, heading = 0, speed = 0, isLive = true) {
+  sessionStorage.setItem('k3k3_rider_lat', latitude);
+  sessionStorage.setItem('k3k3_rider_lng', longitude);
+
+  updateRiderMapPosition(latitude, longitude, heading, isLive);
+
+  const pill = el('riderGpsPill');
+  if (pill) {
+    pill.className = isLive ? 'gps-status-pill live' : 'gps-status-pill fallback';
+    pill.innerHTML = isLive ? '<i class="fas fa-circle-dot"></i> GPS Live' : '<i class="fas fa-map-pin"></i> Ho Central (Fallback)';
+  }
+
+  if (wsConn && wsConn.emit) {
+    wsConn.emit('rider:location', {
+      lat: latitude,
+      lng: longitude,
+      heading: heading,
+      speed: speed
+    });
+
+    if (activeTrip && activeTrip.id) {
+      wsConn.emit('trip:location_update', {
+        tripId: activeTrip.id,
+        riderId: session?.dbRiderId || session?.id,
+        lat: latitude,
+        lng: longitude,
+        heading: heading,
+        speed: speed
+      });
+    }
+  }
+}
+
+function handleGpsFallback(err) {
+  const fallbackLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const fallbackLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+  handleGpsPosition(fallbackLat, fallbackLng, 0, 0, false);
 }
 
 function stopLocationTracking() {
@@ -3041,8 +3477,8 @@ function handleWsMessage(msg) {
     fare:    parseFloat(msg.fare_estimate || msg.fare || 5.0),
     ride_type: msg.ride_type || 'shared',
     distance: typeof msg.distance_km === 'number' ? msg.distance_km : estimateDist(
-      { lat: msg.pickup_lat || 6.6745, lng: msg.pickup_lng || -1.5716 },
-      { lat: msg.dest_lat || 6.6800,   lng: msg.dest_lng || -1.5750 }
+      { lat: msg.pickup_lat || 6.6012, lng: msg.pickup_lng || 0.4688 },
+      { lat: msg.dest_lat || 6.6050,   lng: msg.dest_lng || 0.4700 }
     ),
     isNew: true,
     ttl: msg.ttl_seconds || 20
@@ -3196,7 +3632,7 @@ function buildReqCard(r) {
       <div class="req-meta">
         ${r.isNew ? '<span class="req-new-badge">New</span>' : ''}
         <div class="req-fare">₵${fare}</div>
-        <div class="req-dist">${dist} km</div>
+        <div class="req-dist" id="reqDistVal-${r.id}">${dist} km</div>
       </div>
     </div>
     <div class="req-route">
@@ -3216,7 +3652,7 @@ function buildReqCard(r) {
       </div>
     </div>
     <div class="req-chips">
-      <div class="chip"><i class="fas fa-clock"></i> ~${eta} min</div>
+      <div class="chip" id="reqEtaChip-${r.id}"><i class="fas fa-clock"></i> ~${eta} min</div>
       <div class="chip green"><i class="fas fa-money-bill-wave"></i> Cash</div>
     </div>
     <div class="req-actions">
@@ -3224,6 +3660,20 @@ function buildReqCard(r) {
       <button class="req-btn accept"  onclick="acceptReq('${r.id}')"><i class="fas fa-check"></i> Accept Ride</button>
     </div>
   `;
+
+  // Asynchronously enrich with OSRM real road distance and ETA
+  const curLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const curLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+  if (r.pickup_lat && r.pickup_lng) {
+    fetchOsrmDrivingRoute(curLat, curLng, r.pickup_lat, r.pickup_lng).then(osrmRes => {
+      if (osrmRes && osrmRes.isRealRoad) {
+        const chip = card.querySelector(`#reqEtaChip-${r.id}`);
+        const distEl = card.querySelector(`#reqDistVal-${r.id}`);
+        if (chip) chip.innerHTML = `<i class="fas fa-route" style="color:var(--yellow)"></i> ~${osrmRes.durationMin} min road ETA`;
+        if (distEl) distEl.textContent = `${osrmRes.distanceKm} km`;
+      }
+    }).catch(() => {});
+  }
 
   // Countdown animation
   const fill = card.querySelector('#tf-'+r.id);
@@ -3325,6 +3775,12 @@ function renderActiveTrip() {
       <div><div class="atrip-r-lbl">Drop-off</div><div class="atrip-r-place">${r.drop}</div></div>
     </div>
   `;
+  const navBtn = el('atNavBtn');
+  if (navBtn) {
+    const dLat = r.dest_lat || 6.6050;
+    const dLng = r.dest_lng || 0.4700;
+    navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${dLat},${dLng}&travelmode=driving`;
+  }
   el('activeTripCard').classList.add('show');
 }
 

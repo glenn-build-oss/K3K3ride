@@ -35,6 +35,23 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * Validate whether coordinates fall inside the active Ho, Volta Region service area.
+ * Bounding Box: 6.45° N to 6.78° N | 0.30° E to 0.65° E, or <= 35km from Ho center (6.6012, 0.4688).
+ */
+function isInsideHoVoltaServiceZone(lat, lng) {
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  if (isNaN(latitude) || isNaN(longitude)) return true; // Allow named campus stops without explicit GPS
+
+  const inBoundingBox = (latitude >= 6.45 && latitude <= 6.78 && longitude >= 0.30 && longitude <= 0.65);
+  const dLat = (latitude - 6.6012) * 111;
+  const dLng = (longitude - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
+  const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+
+  return inBoundingBox || distKm <= 35;
+}
+
+/**
  * POST /api/trips/
  * Create a new ride request
  */
@@ -59,6 +76,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ 
         success: false, 
         error: 'Missing required fields: passenger_id, pickup_label, dest_label, fare_estimate' 
+      });
+    }
+
+    // Geofence check: Ensure pickup is inside Ho, Volta Region
+    if (pickup_lat && pickup_lng && !isInsideHoVoltaServiceZone(pickup_lat, pickup_lng)) {
+      return res.status(400).json({
+        success: false,
+        code: 'OUT_OF_SERVICE_ZONE',
+        error: 'K3K3ride is not available in your location yet. We currently operate exclusively in Ho, Volta Region, Ghana.'
       });
     }
 

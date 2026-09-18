@@ -11,6 +11,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<!-- SheetJS for Microsoft Excel (.xlsx) Export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<!-- jsPDF & AutoTable for Document PDF (.pdf) Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root{
   --bg:#0c0d10;--bg-2:#111318;--bg-3:#181b22;--bg-4:#1e2230;
@@ -374,9 +379,105 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   .kpi-grid{grid-template-columns:1fr}
   #appsKpiRow{grid-template-columns:1fr!important}
 }
+
+/* ─────────── LIVE SOUND & NOTIFICATION ALERTS ─────────── */
+.sound-alert-toggle{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 12px;background:var(--bg-3);
+  border:1px solid var(--border-2);border-radius:var(--r-full);
+  color:var(--white);font-size:.74rem;font-weight:700;
+  cursor:pointer;transition:all .2s var(--ease);user-select:none;
+}
+.sound-alert-toggle:hover{
+  background:var(--bg-4);border-color:var(--yellow);
+  transform:translateY(-1px);box-shadow:0 0 10px rgba(255,214,10,.18);
+}
+.sound-alert-toggle.muted{opacity:.6;border-color:var(--border)}
+.sound-alert-toggle .test-tag{
+  font-size:.62rem;padding:1px 6px;border-radius:999px;
+  background:rgba(255,214,10,.18);color:var(--yellow);margin-left:2px;
+}
+
+@keyframes bellShake{
+  0%,100%{transform:rotate(0)}
+  20%,60%{transform:rotate(-16deg)}
+  40%,80%{transform:rotate(16deg)}
+}
+.tb-icon-btn.ringing i{animation:bellShake .8s cubic-bezier(.36,.07,.19,.97) infinite;color:var(--yellow)}
+
+/* Live Alert Banner Toast */
+#adminLiveAlertContainer{
+  position:fixed;top:74px;right:20px;z-index:99999;
+  display:flex;flex-direction:column;gap:10px;pointer-events:none;
+  max-width:420px;width:calc(100vw - 40px);
+}
+.admin-live-alert-card{
+  pointer-events:auto;background:linear-gradient(135deg,#181b22,#1e2230);
+  border:1.5px solid var(--yellow);border-radius:var(--r-lg);
+  box-shadow:0 12px 36px rgba(0,0,0,.6), 0 0 18px rgba(255,214,10,.25);
+  padding:14px 16px;display:flex;gap:12px;align-items:flex-start;
+  animation:fadeUp .25s var(--ease);position:relative;overflow:hidden;
+}
+.admin-live-alert-card::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--yellow),var(--yellow-dk));
+}
+.alert-icon-ring{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--yellow-lt);border:1px solid var(--yellow-bdr);
+  color:var(--yellow);display:flex;align-items:center;justify-content:center;
+  font-size:1rem;flex-shrink:0;margin-top:2px;
+}
+.alert-body{flex:1;min-width:0}
+.alert-badge-tag{
+  display:inline-block;font-size:.62rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.05em;padding:2px 7px;border-radius:999px;
+  background:rgba(255,214,10,.18);color:var(--yellow);margin-bottom:4px;
+}
+.alert-heading{font-size:.88rem;font-weight:800;color:var(--white);line-height:1.25}
+.alert-desc{font-size:.76rem;color:var(--muted-2);margin-top:3px;line-height:1.35}
+.alert-actions{display:flex;gap:8px;margin-top:8px}
+.alert-btn-action{
+  padding:4px 12px;background:var(--yellow);color:#000;border:none;
+  border-radius:var(--r-full);font-size:.72rem;font-weight:700;
+  cursor:pointer;transition:transform .15s;
+}
+.alert-btn-action:hover{transform:scale(1.04)}
+.alert-btn-dismiss{
+  background:transparent;border:none;color:var(--muted);
+  cursor:pointer;font-size:.85rem;padding:4px;line-height:1;
+  position:absolute;top:10px;right:10px;
+}
+.alert-btn-dismiss:hover{color:var(--white)}
+
+/* ─────────── DATA EXPORT BUTTONS ─────────── */
+.export-btn-group{
+  display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.export-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 13px;border-radius:var(--r-full);
+  background:var(--bg-3);border:1px solid var(--border-2);
+  color:var(--text);font-family:inherit;font-size:.75rem;
+  font-weight:600;cursor:pointer;transition:all .2s var(--ease);
+  user-select:none;white-space:nowrap;
+}
+.export-btn:hover{
+  transform:translateY(-1px);background:var(--bg-4);color:var(--white);
+}
+.export-btn.excel:hover{
+  border-color:#10B981;box-shadow:0 0 12px rgba(16,185,129,.22);
+}
+.export-btn.pdf:hover{
+  border-color:#EF4444;box-shadow:0 0 12px rgba(239,68,68,.22);
+}
+.export-btn i{font-size:.85rem}
+.export-btn.excel i{color:#10B981}
+.export-btn.pdf i{color:#EF4444}
 </style>
 </head>
 <body>
+<div id="adminLiveAlertContainer"></div>
 
 <!-- ════ DROPDOWN MENU ════ -->
 <div class="main-dropdown-menu" id="dropdownMenu">
@@ -443,6 +544,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   </div>
   <div class="topbar-right">
     <div class="sys-badge"><span class="sys-dot"></span><span>System Online</span></div>
+    <!-- Sound & Notification Alerts Controller -->
+    <button class="sound-alert-toggle" id="adminSoundToggleBtn" onclick="toggleAdminSoundAlerts()" title="Toggle Real-Time Audio Chimes & Test Sound">
+      <i class="fas fa-volume-up" id="adminSoundIcon" style="color:var(--yellow)"></i>
+      <span id="adminSoundStatusText">Alerts: On</span>
+      <span class="test-tag" onclick="event.stopPropagation();testAdminAlertChime();">Test</span>
+    </button>
     <div class="notif-wrapper" style="position:relative">
       <button class="tb-icon-btn" id="tbNotifBtn" onclick="toggleNotifDrawer(event)" title="Notifications & Dispatches">
         <i class="fas fa-bell"></i>
@@ -567,14 +674,26 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- ──── TRIPS ──── -->
 <div class="dash-section" id="sec-trips">
-  <div class="sec-header"><div><div class="sec-title">All Trips</div><div class="sec-sub">Complete trip history</div></div></div>
+  <div class="sec-header">
+    <div><div class="sec-title">All Trips</div><div class="sec-sub">Complete trip history</div></div>
+    <div class="export-btn-group">
+      <button class="export-btn excel" onclick="exportData('trips','excel')" title="Export All Trips to Excel Workbook (.xlsx)"><i class="fas fa-file-excel"></i> <span>Export Excel (.xlsx)</span></button>
+      <button class="export-btn pdf" onclick="exportData('trips','pdf')" title="Export All Trips to Document PDF (.pdf)"><i class="fas fa-file-pdf"></i> <span>Export PDF (.pdf)</span></button>
+    </div>
+  </div>
   <div class="filter-tabs"><div class="ftab active" onclick="filterTrips('all',this)">All</div><div class="ftab" onclick="filterTrips('completed',this)">Completed</div><div class="ftab" onclick="filterTrips('active',this)">Active</div><div class="ftab" onclick="filterTrips('pending',this)">Pending</div><div class="ftab" onclick="filterTrips('cancelled',this)">Cancelled</div></div>
   <div class="card"><div class="card-header"><div><div class="card-title">Trip Records</div><div class="card-sub" id="allTripsSub">Loading…</div></div></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ID</th><th>Date</th><th>Passenger</th><th>Rider</th><th>Route</th><th>Fare</th><th>Status</th></tr></thead><tbody id="allTripsTbody"><tr><td colspan="7"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody></table></div></div>
 </div>
 
 <!-- ──── RIDERS ──── -->
 <div class="dash-section" id="sec-riders">
-  <div class="sec-header"><div><div class="sec-title">Rider Management</div><div class="sec-sub">All platform riders — view documents, monitor performance, suspend or remove accounts</div></div></div>
+  <div class="sec-header">
+    <div><div class="sec-title">Rider Management</div><div class="sec-sub">All platform riders — view documents, monitor performance, suspend or remove accounts</div></div>
+    <div class="export-btn-group">
+      <button class="export-btn excel" onclick="exportData('riders','excel')" title="Export Riders Fleet to Excel Workbook (.xlsx)"><i class="fas fa-file-excel"></i> <span>Export Excel (.xlsx)</span></button>
+      <button class="export-btn pdf" onclick="exportData('riders','pdf')" title="Export Riders Fleet to Document PDF (.pdf)"><i class="fas fa-file-pdf"></i> <span>Export PDF (.pdf)</span></button>
+    </div>
+  </div>
   <div class="filter-tabs"><div class="ftab active" onclick="filterRiders('all',this)">All</div><div class="ftab" onclick="filterRiders('online',this)">Online</div><div class="ftab" onclick="filterRiders('offline',this)">Offline</div><div class="ftab" onclick="filterRiders('on-trip',this)">On Trip</div><div class="ftab" onclick="filterRiders('suspended',this)" style="color:var(--red)"><i class="fas fa-ban" style="font-size:.7rem;margin-right:4px"></i>Suspended</div></div>
   <div class="content-grid split">
     <div class="card"><div class="card-header"><div><div class="card-title">Riders Fleet</div><div class="card-sub" id="ridersSub">Loading…</div></div></div><div class="card-body" style="padding:8px 16px" id="ridersList"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div></div>
@@ -592,7 +711,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- ──── PASSENGERS ──── -->
 <div class="dash-section" id="sec-passengers">
-  <div class="sec-header"><div><div class="sec-title">Passengers</div><div class="sec-sub">Registered platform users</div></div></div>
+  <div class="sec-header">
+    <div><div class="sec-title">Passengers</div><div class="sec-sub">Registered platform users</div></div>
+    <div class="export-btn-group">
+      <button class="export-btn excel" onclick="exportData('passengers','excel')" title="Export Passengers to Excel Workbook (.xlsx)"><i class="fas fa-file-excel"></i> <span>Export Excel (.xlsx)</span></button>
+      <button class="export-btn pdf" onclick="exportData('passengers','pdf')" title="Export Passengers to Document PDF (.pdf)"><i class="fas fa-file-pdf"></i> <span>Export PDF (.pdf)</span></button>
+    </div>
+  </div>
   <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
     <div class="kpi-card teal"><div class="kpi-head"><div class="kpi-icon teal"><i class="fas fa-users"></i></div><span class="kpi-trend up">+5%</span></div><div class="kpi-val" id="psTotal">—</div><div class="kpi-lbl">Total Passengers</div></div>
     <div class="kpi-card blue"><div class="kpi-head"><div class="kpi-icon blue"><i class="fas fa-user-check"></i></div><span class="kpi-trend up">Active</span></div><div class="kpi-val" id="psActive">—</div><div class="kpi-lbl">Active This Week</div></div>
@@ -603,7 +728,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 <!-- ──── APPLICATIONS ──── -->
 <div class="dash-section" id="sec-applications">
-  <div class="sec-header"><div><div class="sec-title">Rider Applications</div><div class="sec-sub">Review, approve and manage rider applications</div></div></div>
+  <div class="sec-header">
+    <div><div class="sec-title">Rider Applications</div><div class="sec-sub">Review, approve and manage rider applications</div></div>
+    <div class="export-btn-group">
+      <button class="export-btn excel" onclick="exportData('applications','excel')" title="Export Applications to Excel Workbook (.xlsx)"><i class="fas fa-file-excel"></i> <span>Export Excel (.xlsx)</span></button>
+      <button class="export-btn pdf" onclick="exportData('applications','pdf')" title="Export Applications to Document PDF (.pdf)"><i class="fas fa-file-pdf"></i> <span>Export PDF (.pdf)</span></button>
+    </div>
+  </div>
 
   <!-- KPI mini row -->
   <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px" id="appsKpiRow">
@@ -1073,7 +1204,7 @@ const API_BASE = (window.location.port !== '8810' && (window.location.hostname =
   : '';
 const API = API_BASE;
 let curSec='dashboard',approveId=null,declineId=null,deleteId=null;
-let allTrips=[],allRiders=[],allApps=[],curMoolreTab='all';
+let allTrips=[],allRiders=[],allApps=[],allPassengers=[],curMoolreTab='all';
 
 const el=id=>document.getElementById(id);
 const setEl=(id,v)=>{const e=el(id);if(e)e.textContent=v};
@@ -1087,6 +1218,737 @@ function escapeHtml(str){
 function escapeJs(str){
   if(!str) return '';
   return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+/* ── Web Audio Real-Time Notification Chimes ── */
+let adminAudioCtx = null;
+let adminSoundEnabled = localStorage.getItem('k3k3_admin_sound_enabled') !== 'false';
+
+function getAdminAudioContext() {
+  if (!adminAudioCtx) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) adminAudioCtx = new AudioCtx();
+  }
+  if (adminAudioCtx && adminAudioCtx.state === 'suspended') {
+    adminAudioCtx.resume().catch(() => {});
+  }
+  return adminAudioCtx;
+}
+
+['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evt => {
+  document.addEventListener(evt, () => { getAdminAudioContext(); }, { once: false, passive: true });
+});
+
+function toggleAdminSoundAlerts() {
+  adminSoundEnabled = !adminSoundEnabled;
+  localStorage.setItem('k3k3_admin_sound_enabled', String(adminSoundEnabled));
+  updateAdminSoundUI();
+  if (adminSoundEnabled) {
+    testAdminAlertChime();
+    showToast('🔊 Audio alerts active', 'success');
+  } else {
+    showToast('🔇 Audio alerts muted', 'warn');
+  }
+}
+
+function updateAdminSoundUI() {
+  const icon = el('adminSoundIcon');
+  const txt = el('adminSoundStatusText');
+  const btn = el('adminSoundToggleBtn');
+  if (!btn) return;
+  if (adminSoundEnabled) {
+    btn.classList.remove('muted');
+    if (icon) { icon.className = 'fas fa-volume-up'; icon.style.color = 'var(--yellow)'; }
+    if (txt) txt.textContent = 'Alerts: On';
+  } else {
+    btn.classList.add('muted');
+    if (icon) { icon.className = 'fas fa-volume-mute'; icon.style.color = 'var(--muted)'; }
+    if (txt) txt.textContent = 'Alerts: Off';
+  }
+}
+
+function testAdminAlertChime() {
+  playAdminNotificationChime('application');
+  showToast('🔔 Sound Alert Test: Chime played successfully!', 'info');
+}
+
+function playAdminNotificationChime(type = 'notification') {
+  if (!adminSoundEnabled) return;
+  try {
+    const ctx = getAdminAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.4, now);
+    masterGain.connect(ctx.destination);
+
+    if (type === 'application') {
+      // 4-note ascending fanfare chord: C5 (523Hz), E5 (659Hz), G5 (784Hz), C6 (1046Hz)
+      const notes = [
+        { freq: 523.25, time: 0.00, dur: 0.28 },
+        { freq: 659.25, time: 0.10, dur: 0.28 },
+        { freq: 783.99, time: 0.20, dur: 0.32 },
+        { freq: 1046.50, time: 0.32, dur: 0.60 }
+      ];
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(n.freq, now + n.time);
+
+        noteGain.gain.setValueAtTime(0.001, now + n.time);
+        noteGain.gain.linearRampToValueAtTime(0.35, now + n.time + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
+
+        osc.connect(noteGain);
+        noteGain.connect(masterGain);
+
+        osc.start(now + n.time);
+        osc.stop(now + n.time + n.dur);
+      });
+    } else {
+      // Sleek 2-note ping chime: E5 (659Hz) -> A5 (880Hz)
+      const notes = [
+        { freq: 659.25, time: 0.00, dur: 0.24 },
+        { freq: 880.00, time: 0.12, dur: 0.45 }
+      ];
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(n.freq, now + n.time);
+
+        noteGain.gain.setValueAtTime(0.001, now + n.time);
+        noteGain.gain.linearRampToValueAtTime(0.3, now + n.time + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
+
+        osc.connect(noteGain);
+        noteGain.connect(masterGain);
+
+        osc.start(now + n.time);
+        osc.stop(now + n.time + n.dur);
+      });
+    }
+  } catch (err) {
+    console.warn('[Admin Sound] Audio synthesis failed:', err);
+  }
+}
+
+/* ── Live Alert Notifications & Tab Title Alerting ── */
+let originalDocTitle = document.title;
+let titleFlashTimer = null;
+
+function flashTabTitle(alertText) {
+  if (titleFlashTimer) clearInterval(titleFlashTimer);
+  let isAlert = true;
+  titleFlashTimer = setInterval(() => {
+    document.title = isAlert ? alertText : originalDocTitle;
+    isAlert = !isAlert;
+  }, 1000);
+}
+
+window.addEventListener('focus', () => {
+  if (titleFlashTimer) {
+    clearInterval(titleFlashTimer);
+    titleFlashTimer = null;
+    document.title = originalDocTitle;
+  }
+});
+
+function triggerAdminAlert(type, { title, message, badge = 'ALERT', actionSec = null }) {
+  // 1. Play synthesized audio chime
+  playAdminNotificationChime(type);
+
+  // 2. Animate bell icon in navbar
+  const bellBtn = el('tbNotifBtn');
+  if (bellBtn) {
+    bellBtn.classList.remove('ringing');
+    void bellBtn.offsetWidth;
+    bellBtn.classList.add('ringing');
+    setTimeout(() => bellBtn.classList.remove('ringing'), 3500);
+  }
+
+  // 3. Highlight top and drawer badges
+  const badgeDot = el('notifBadgeDot');
+  if (badgeDot) badgeDot.style.display = 'inline-block';
+
+  // 4. Display high-contrast floating live banner
+  const container = el('adminLiveAlertContainer');
+  if (container) {
+    const card = document.createElement('div');
+    card.className = 'admin-live-alert-card';
+    card.innerHTML = `
+      <div class="alert-icon-ring">
+        <i class="fas ${type === 'application' ? 'fa-id-card' : 'fa-bell'}"></i>
+      </div>
+      <div class="alert-body">
+        <span class="alert-badge-tag">${escapeHtml(badge)}</span>
+        <div class="alert-heading">${escapeHtml(title)}</div>
+        <div class="alert-desc">${escapeHtml(message)}</div>
+        ${actionSec ? `
+          <div class="alert-actions">
+            <button class="alert-btn" onclick="showSection('${actionSec}'); this.closest('.admin-live-alert-card').remove();">View Now</button>
+          </div>` : ''}
+      </div>
+      <button class="alert-close-btn" onclick="this.closest('.admin-live-alert-card').remove();">&times;</button>
+    `;
+    container.appendChild(card);
+    setTimeout(() => {
+      if (card.parentNode) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        card.style.transition = 'all 0.4s ease';
+        setTimeout(() => card.remove(), 400);
+      }
+    }, 7000);
+  }
+}
+
+/* ── Admin Data Export Engine (Excel & PDF) ── */
+async function exportData(type, format) {
+  showToast(`Preparing ${type} export (${format.toUpperCase()})…`, 'info');
+
+  try {
+    const timestamp = new Date().toISOString().slice(0, 10);
+
+    if (type === 'riders') {
+      if (!allRiders || !allRiders.length) {
+        await loadRiders('all');
+      }
+      if (!allRiders || !allRiders.length) {
+        const activeDriver = JSON.parse(localStorage.getItem('k3k3_driver_profile') || 'null');
+        allRiders = [
+          activeDriver ? {
+            id: activeDriver.id || 'RD-68A4171C',
+            full_name: activeDriver.full_name || 'Glenn Adjei',
+            phone: activeDriver.phone || '+233207739636',
+            email: activeDriver.email || 'adjeikwafoglenn@gmail.com',
+            vehicle_type: activeDriver.vehicle_type || 'Tricycle',
+            vehicle_make: activeDriver.vehicle_make || 'TVS',
+            vehicle_model: activeDriver.vehicle_model || 'King Deluxe',
+            vehicle_plate: activeDriver.vehicle_plate || 'M-24-VR 8820',
+            preferred_station: activeDriver.preferred_station || 'Ho Central Hub',
+            is_available: true,
+            trips: 142,
+            rating: 4.9,
+            earnings: 2840.00
+          } : {
+            id: 'RD-68A4171C',
+            full_name: 'Glenn Adjei',
+            phone: '+233207739636',
+            email: 'adjeikwafoglenn@gmail.com',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'TVS',
+            vehicle_model: 'King Deluxe',
+            vehicle_plate: 'M-24-VR 8820',
+            preferred_station: 'Ho Central Hub',
+            is_available: true,
+            trips: 142,
+            rating: 4.9,
+            earnings: 2840.00
+          },
+          {
+            id: 'RD-9B21FA34',
+            full_name: 'Mawuli Agbodza',
+            phone: '+233244112233',
+            email: 'mawuli.agbodza@gmail.com',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'Bajaj',
+            vehicle_model: 'RE 4S',
+            vehicle_plate: 'VR-1902-23',
+            preferred_station: 'Ho Poly / HTU Station',
+            is_available: true,
+            trips: 98,
+            rating: 4.8,
+            earnings: 1960.00
+          },
+          {
+            id: 'RD-3C84E011',
+            full_name: 'Emmanuel Kpodo',
+            phone: '+233501234567',
+            email: 'ekpodo@yahoo.com',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'Piaggio',
+            vehicle_model: 'Ape City',
+            vehicle_plate: 'VR-3341-24',
+            preferred_station: 'Civic Centre',
+            is_available: true,
+            trips: 115,
+            rating: 4.9,
+            earnings: 2300.00
+          },
+          {
+            id: 'RD-4F19B820',
+            full_name: 'Kofi Mensah',
+            phone: '+233245678901',
+            email: 'kmensah@gmail.com',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'Mahindra',
+            vehicle_model: 'Alfa',
+            vehicle_plate: 'VR-0842-22',
+            preferred_station: 'Stadium Gate',
+            is_available: false,
+            trips: 64,
+            rating: 4.7,
+            earnings: 1280.00
+          },
+          {
+            id: 'RD-7A33D901',
+            full_name: 'Selorm Dzreke',
+            phone: '+233209876543',
+            email: 'selorm.dzreke@outlook.com',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'Bajaj',
+            vehicle_model: 'Maxima',
+            vehicle_plate: 'VR-5512-24',
+            preferred_station: 'Barracks Junction',
+            status: 'suspended',
+            is_available: false,
+            trips: 31,
+            rating: 4.2,
+            earnings: 620.00
+          }
+        ];
+      }
+      const filename = `K3K3_Riders_Fleet_${timestamp}`;
+
+      if (format === 'excel') {
+        const rows = allRiders.map((r, i) => {
+          const fullName = (r.full_name || `${r.first_name || r.fname || ''} ${r.last_name || r.lname || ''}`).trim() || 'Rider';
+          const phone = r.phone || r.phone_number || '—';
+          const email = r.email || '—';
+          const vehicle = r.vehicle_type || 'Tricycle';
+          const makeModel = `${r.vehicle_make || ''} ${r.vehicle_model || ''}`.trim() || r.vehicle_desc || '—';
+          const plate = r.vehicle_plate || r.license_plate || r.plate_number || '—';
+          const station = r.preferred_station || r.preferred_hub || r.station || r.city || 'Ho Central';
+          const status = r.status === 'suspended' ? 'Suspended' : ((r.is_available ?? true) ? 'Active' : 'Offline');
+          const trips = r.trips ?? r.trips_completed ?? r.trips_count ?? 0;
+          const rating = r.rating ? `${parseFloat(r.rating).toFixed(1)} ★` : '5.0 ★';
+          const earnings = parseFloat(r.earnings || r.total_earnings || 0).toFixed(2);
+          return {
+            'No.': i + 1,
+            'Rider ID': r.rider_id || r.id || '—',
+            'Full Name': fullName,
+            'Phone': phone,
+            'Email': email,
+            'Vehicle Type': vehicle,
+            'Make & Model': makeModel,
+            'Plate Number': plate,
+            'Station / Hub': station,
+            'Status': status,
+            'Trips Completed': trips,
+            'Rating': rating,
+            'Total Earnings (GHS)': earnings
+          };
+        });
+        downloadExcelFile(rows, 'Riders Fleet', filename);
+      } else if (format === 'pdf') {
+        const title = 'K3K3 RIDERS FLEET DIRECTORY';
+        const subtitle = `Total Riders: ${allRiders.length} | Online: ${allRiders.filter(r=>r.is_available&&r.status!=='suspended').length} | Suspended: ${allRiders.filter(r=>r.status==='suspended').length}`;
+        const headers = ['#', 'Rider Name', 'Phone', 'Vehicle & Plate', 'Hub / Station', 'Status', 'Trips', 'Earnings'];
+        const rows = allRiders.map((r, i) => {
+          const fullName = (r.full_name || `${r.first_name || r.fname || ''} ${r.last_name || r.lname || ''}`).trim() || 'Rider';
+          const phone = r.phone || r.phone_number || '—';
+          const vehiclePlate = `${r.vehicle_type || 'Tricycle'} (${r.vehicle_plate || r.license_plate || 'Pending'})`;
+          const station = r.preferred_station || r.preferred_hub || r.station || r.city || 'Ho Central';
+          const status = r.status === 'suspended' ? 'SUSPENDED' : ((r.is_available ?? true) ? 'ONLINE' : 'OFFLINE');
+          const trips = r.trips ?? r.trips_completed ?? r.trips_count ?? 0;
+          const earnings = `₵${parseFloat(r.earnings || r.total_earnings || 0).toFixed(2)}`;
+          return [i + 1, fullName, phone, vehiclePlate, station, status, trips, earnings];
+        });
+        downloadPdfFile(title, subtitle, headers, rows, filename);
+      }
+    } else if (type === 'applications') {
+      if (!allApps || !allApps.length) {
+        await loadApps('all', true);
+      }
+      if (!allApps || !allApps.length) {
+        allApps = [
+          {
+            id: 'APP-68A4171C',
+            app_ref: 'APP-68A4171C',
+            full_name: 'Glenn Adjei',
+            phone: '+233207739636',
+            email: 'adjeikwafoglenn@gmail.com',
+            student_id: '02230495D',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'TVS',
+            vehicle_model: 'King Deluxe',
+            license_plate: 'M-24-VR 8820',
+            preferred_hub: 'Ho Central',
+            status: 'approved',
+            created_at: new Date(Date.now() - 86400000 * 3).toISOString()
+          },
+          {
+            id: 'APP-9B21FA34',
+            app_ref: 'APP-9B21FA34',
+            full_name: 'Mawuli Agbodza',
+            phone: '+233244112233',
+            email: 'mawuli.agbodza@gmail.com',
+            student_id: '02231182B',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'Bajaj',
+            vehicle_model: 'RE 4S',
+            license_plate: 'VR-1902-23',
+            preferred_hub: 'Ho Poly Hub',
+            status: 'approved',
+            created_at: new Date(Date.now() - 86400000 * 5).toISOString()
+          },
+          {
+            id: 'APP-3D78E012',
+            app_ref: 'APP-3D78E012',
+            full_name: 'Bright Ahiabu',
+            phone: '+233554433221',
+            email: 'bahiabu@gmail.com',
+            student_id: '02240911A',
+            vehicle_type: 'Tricycle',
+            vehicle_make: 'Piaggio',
+            vehicle_model: 'Ape City',
+            license_plate: 'Pending',
+            preferred_hub: 'Stadium Gate',
+            status: 'pending',
+            created_at: new Date(Date.now() - 3600000 * 4).toISOString()
+          }
+        ];
+      }
+      const filename = `K3K3_Driver_Applications_${timestamp}`;
+
+      if (format === 'excel') {
+        const rows = allApps.map((a, i) => {
+          const fullName = (a.full_name || `${a.first_name || a.fname || ''} ${a.last_name || a.lname || ''}`).trim() || 'Applicant';
+          const phone = a.phone || a.phone_number || '—';
+          const email = a.email || '—';
+          const studentId = a.student_id || a.staff_id || '—';
+          const vehicleType = a.vehicle_type || 'Tricycle';
+          const makeModel = `${a.vehicle_make || ''} ${a.vehicle_model || ''}`.trim() || a.vehicle_desc || '—';
+          const plate = a.license_plate || a.vehicle_plate || a.plate_number || '—';
+          const hub = a.preferred_hub || a.preferred_station || a.city || 'Ho Central';
+          const status = (a.status || 'pending').replace('_', ' ').toUpperCase();
+          const appliedDate = a.created_at ? new Date(a.created_at).toLocaleString('en-GB') : '—';
+          const reason = a.rejection_reason || 'None';
+          return {
+            'No.': i + 1,
+            'Application Ref': a.app_ref || (a.id ? `APP-${String(a.id).substring(0,8).toUpperCase()}` : '—'),
+            'Full Name': fullName,
+            'Phone': phone,
+            'Email': email,
+            'Student/Staff ID': studentId,
+            'Vehicle Type': vehicleType,
+            'Make & Model': makeModel,
+            'Plate Number': plate,
+            'Station / Hub': hub,
+            'Status': status,
+            'Date Submitted': appliedDate,
+            'Rejection Reason': reason
+          };
+        });
+        downloadExcelFile(rows, 'Applications', filename);
+      } else if (format === 'pdf') {
+        const title = 'K3K3 DRIVER APPLICATIONS REPORT';
+        const subtitle = `Total Applications: ${allApps.length} | Pending Review: ${allApps.filter(a=>a.status==='pending'||a.status==='pending_review').length} | Approved: ${allApps.filter(a=>a.status==='approved').length}`;
+        const headers = ['#', 'Ref', 'Applicant Name', 'Phone', 'Vehicle & Plate', 'Hub', 'Status', 'Date Applied'];
+        const rows = allApps.map((a, i) => {
+          const ref = a.app_ref || (a.id ? `APP-${String(a.id).substring(0,8).toUpperCase()}` : '—');
+          const fullName = (a.full_name || `${a.first_name || a.fname || ''} ${a.last_name || a.lname || ''}`).trim() || 'Applicant';
+          const phone = a.phone || a.phone_number || '—';
+          const vehiclePlate = `${a.vehicle_type || 'Tricycle'} (${a.license_plate || a.vehicle_plate || 'Pending'})`;
+          const hub = a.preferred_hub || a.preferred_station || a.city || 'Ho Central';
+          const status = (a.status || 'pending').replace('_', ' ').toUpperCase();
+          const applied = a.created_at ? new Date(a.created_at).toLocaleDateString('en-GB') : '—';
+          return [i + 1, ref, fullName, phone, vehiclePlate, hub, status, applied];
+        });
+        downloadPdfFile(title, subtitle, headers, rows, filename);
+      }
+    } else if (type === 'trips') {
+      if (!allTrips || !allTrips.length) {
+        await loadAllTrips('all');
+      }
+      if (!allTrips || !allTrips.length) {
+        try {
+          const local = JSON.parse(localStorage.getItem('k3k3_trips') || '[]');
+          if (local.length) allTrips = local;
+        } catch (_) {}
+      }
+      if (!allTrips || !allTrips.length) {
+        allTrips = [
+          {
+            id: 'TRP-8841A',
+            created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+            passenger_fname: 'Akosua',
+            passenger_lname: 'Mensah',
+            passenger_phone: '+233241234567',
+            rider_fname: 'Glenn',
+            rider_lname: 'Adjei',
+            rider_phone: '+233207739636',
+            pickup_label: 'Ho Central Market',
+            dest_label: 'Ho Technical University',
+            fare_estimate: 25.00,
+            status: 'completed'
+          },
+          {
+            id: 'TRP-7729B',
+            created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+            passenger_fname: 'Prince',
+            passenger_lname: 'Dogbe',
+            passenger_phone: '+233509876543',
+            rider_fname: 'Mawuli',
+            rider_lname: 'Agbodza',
+            rider_phone: '+233244112233',
+            pickup_label: 'Civic Centre',
+            dest_label: 'Asogli State Palace',
+            fare_estimate: 15.00,
+            status: 'completed'
+          },
+          {
+            id: 'TRP-6310C',
+            created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+            passenger_fname: 'Patience',
+            passenger_lname: 'Ametefe',
+            passenger_phone: '+233271122334',
+            rider_fname: 'Emmanuel',
+            rider_lname: 'Kpodo',
+            rider_phone: '+233501234567',
+            pickup_label: 'Stadium Gate',
+            dest_label: 'Ho Teaching Hospital (Trafalgar)',
+            fare_estimate: 30.00,
+            status: 'completed'
+          },
+          {
+            id: 'TRP-5192D',
+            created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+            passenger_fname: 'Selasi',
+            passenger_lname: 'Kuma',
+            passenger_phone: '+233201238990',
+            rider_fname: 'Glenn',
+            rider_lname: 'Adjei',
+            rider_phone: '+233207739636',
+            pickup_label: 'Sokode Lokoe',
+            dest_label: 'Ho Central Market',
+            fare_estimate: 20.00,
+            status: 'completed'
+          }
+        ];
+      }
+      const filename = `K3K3_Trip_Records_${timestamp}`;
+
+      if (format === 'excel') {
+        const rows = allTrips.map((t, i) => ({
+          'No.': i + 1,
+          'Trip ID': t.id || '—',
+          'Date': t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB') : '—',
+          'Time': t.created_at ? new Date(t.created_at).toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}) : '—',
+          'Passenger': `${t.passenger_fname || t.passenger_name || ''} ${t.passenger_lname || ''}`.trim() || 'Passenger',
+          'Passenger Phone': t.passenger_phone || '—',
+          'Rider': `${t.rider_fname || t.rider_name || ''} ${t.rider_lname || ''}`.trim() || 'Rider',
+          'Rider Phone': t.rider_phone || '—',
+          'Pickup Location': t.pickup_label || t.pickup || '—',
+          'Destination': t.dest_label || t.drop || '—',
+          'Fare (GHS)': parseFloat(t.fare_estimate || t.fare || 0).toFixed(2),
+          'Status': (t.status || 'completed').toUpperCase()
+        }));
+        downloadExcelFile(rows, 'Trip History', filename);
+      } else if (format === 'pdf') {
+        const title = 'K3K3 TRIP HISTORY & DISPATCH REPORT';
+        const subtitle = `Total Trips: ${allTrips.length} | Completed: ${allTrips.filter(t=>t.status==='completed').length} | Active: ${allTrips.filter(t=>t.status==='active').length}`;
+        const headers = ['#', 'Trip ID', 'Date/Time', 'Passenger', 'Rider', 'Route (From → To)', 'Fare (GHS)', 'Status'];
+        const rows = allTrips.map((t, i) => [
+          i + 1,
+          t.id ? String(t.id).substring(0,8) : '—',
+          t.created_at ? new Date(t.created_at).toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—',
+          `${t.passenger_fname || t.passenger_name || ''} ${t.passenger_lname || ''}`.trim() || 'User',
+          `${t.rider_fname || t.rider_name || ''} ${t.rider_lname || ''}`.trim() || 'Rider',
+          `${t.pickup_label || t.pickup || '—'} → ${t.dest_label || t.drop || '—'}`,
+          `₵${parseFloat(t.fare_estimate||t.fare||0).toFixed(2)}`,
+          (t.status || '').toUpperCase()
+        ]);
+        downloadPdfFile(title, subtitle, headers, rows, filename);
+      }
+    } else if (type === 'passengers') {
+      if (!allPassengers || !allPassengers.length) {
+        await loadPassengers();
+      }
+      if (!allPassengers || !allPassengers.length) {
+        allPassengers = [
+          {
+            id: 'PSG-1021',
+            full_name: 'Akosua Mensah',
+            phone: '+233241234567',
+            email: 'akosua.mensah@gmail.com',
+            trips: 28,
+            joined: 'Jan 2026'
+          },
+          {
+            id: 'PSG-1022',
+            full_name: 'Prince Dogbe',
+            phone: '+233509876543',
+            email: 'dogbeprince@yahoo.com',
+            trips: 19,
+            joined: 'Feb 2026'
+          },
+          {
+            id: 'PSG-1023',
+            full_name: 'Patience Ametefe',
+            phone: '+233271122334',
+            email: 'pametefe@htu.edu.gh',
+            trips: 34,
+            joined: 'Nov 2025'
+          },
+          {
+            id: 'PSG-1024',
+            full_name: 'Selasi Kuma',
+            phone: '+233201238990',
+            email: 'skuma@gmail.com',
+            trips: 12,
+            joined: 'Mar 2026'
+          },
+          {
+            id: 'PSG-1025',
+            full_name: 'Fredrick Tsikata',
+            phone: '+233243344556',
+            email: 'ftsikata@outlook.com',
+            trips: 41,
+            joined: 'Oct 2025'
+          }
+        ];
+      }
+      const filename = `K3K3_Passengers_Directory_${timestamp}`;
+
+      if (format === 'excel') {
+        const rows = allPassengers.map((p, i) => {
+          const fullName = (p.full_name || `${p.first_name || p.fname || ''} ${p.last_name || p.lname || ''}`).trim() || 'Passenger';
+          const phone = p.phone || p.phone_number || '—';
+          const email = p.email || '—';
+          const trips = p.trips ?? p.trips_count ?? 0;
+          const joined = p.joined || (p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : 'Recently');
+          return {
+            'No.': i + 1,
+            'Full Name': fullName,
+            'Phone Number': phone,
+            'Email Address': email,
+            'Trips Completed': trips,
+            'Member Since': joined
+          };
+        });
+        downloadExcelFile(rows, 'Passengers', filename);
+      } else if (format === 'pdf') {
+        const title = 'K3K3 REGISTERED PASSENGERS REPORT';
+        const subtitle = `Total Passengers Registered: ${allPassengers.length}`;
+        const headers = ['#', 'Full Name', 'Phone Number', 'Email Address', 'Total Trips', 'Member Since'];
+        const rows = allPassengers.map((p, i) => {
+          const fullName = (p.full_name || `${p.first_name || p.fname || ''} ${p.last_name || p.lname || ''}`).trim() || 'Passenger';
+          const phone = p.phone || p.phone_number || '—';
+          const email = p.email || '—';
+          const trips = p.trips ?? p.trips_count ?? 0;
+          const joined = p.joined || (p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : 'Recently');
+          return [i + 1, fullName, phone, email, trips, joined];
+        });
+        downloadPdfFile(title, subtitle, headers, rows, filename);
+      }
+    }
+  } catch (err) {
+    console.error('[Export Error]', err);
+    showToast('Export failed: ' + err.message, 'error');
+  }
+}
+
+function downloadExcelFile(dataArray, sheetName, fileName) {
+  if (typeof XLSX === 'undefined') {
+    showToast('SheetJS Excel library is loading, please try again in a moment', 'warn');
+    return;
+  }
+  const ws = XLSX.utils.json_to_sheet(dataArray);
+  const colWidths = Object.keys(dataArray[0] || {}).map(key => {
+    const maxLen = Math.max(
+      key.length,
+      ...dataArray.map(row => String(row[key] || '').length)
+    );
+    return { wch: Math.min(Math.max(maxLen + 4, 12), 48) };
+  });
+  ws['!cols'] = colWidths;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  const finalFileName = fileName.endsWith('.xlsx') ? fileName : `${fileName}.xlsx`;
+  XLSX.writeFile(wb, finalFileName);
+  showToast(`✅ Exported ${dataArray.length} records to ${finalFileName}`, 'success');
+}
+
+function downloadPdfFile(title, subtitle, headers, rows, fileName) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    showToast('jsPDF library is loading, please try again in a moment', 'warn');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+  // Top header bar
+  doc.setFillColor(17, 19, 24);
+  doc.rect(0, 0, doc.internal.pageSize.getWidth(), 65, 'F');
+
+  // Yellow accent line
+  doc.setFillColor(255, 214, 10);
+  doc.rect(0, 65, doc.internal.pageSize.getWidth(), 3, 'F');
+
+  // Title text
+  doc.setTextColor(255, 214, 10);
+  doc.setFontSize(15);
+  doc.setFont('helvetica', 'bold');
+  doc.text('K3K3 TRICYCLE MOBILITY PLATFORM', 30, 26);
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(title.toUpperCase(), 30, 48);
+
+  // Metadata right aligned
+  doc.setFontSize(9);
+  doc.setTextColor(180, 185, 195);
+  const nowStr = new Date().toLocaleString('en-GB');
+  doc.text(`Generated: ${nowStr} | Confidential Admin Report`, doc.internal.pageSize.getWidth() - 30, 48, { align: 'right' });
+
+  // Subtitle / summary info
+  doc.setTextColor(40, 45, 55);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'italic');
+  doc.text(subtitle, 30, 85);
+
+  // AutoTable
+  doc.autoTable({
+    startY: 95,
+    head: [headers],
+    body: rows,
+    theme: 'grid',
+    styles: {
+      fontSize: 8.5,
+      cellPadding: 5,
+      textColor: [30, 30, 30],
+      lineColor: [220, 225, 230],
+      lineWidth: 0.5
+    },
+    headStyles: {
+      fillColor: [24, 27, 34],
+      textColor: [255, 214, 10],
+      fontStyle: 'bold',
+      halign: 'left'
+    },
+    alternateRowStyles: {
+      fillColor: [248, 249, 251]
+    },
+    didDrawPage: function (data) {
+      const str = `Page ${doc.internal.getNumberOfPages()} — K3K3 Administration Report`;
+      doc.setFontSize(8);
+      doc.setTextColor(130, 135, 145);
+      doc.text(str, 30, doc.internal.pageSize.getHeight() - 15);
+    }
+  });
+
+  const finalFileName = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
+  doc.save(finalFileName);
+  showToast(`✅ Exported ${rows.length} records to ${finalFileName}`, 'success');
 }
 
 async function apiFetch(p){
@@ -2144,6 +3006,7 @@ async function loadPassengers(){
       }));
     }
   } catch (_) {}
+  allPassengers = data;
 
   setEl('psTotal',data.length);setEl('psActive',Math.ceil(data.length*0.6));
   setEl('psAvg',(data.reduce((s,p)=>s+(p.trips||0),0)/data.length).toFixed(1));
@@ -3285,7 +4148,14 @@ function initAdminSocket(){
       console.log('[Admin Socket] Real-time new driver application received:', app);
       if(!app) return;
       const applicantName = ((app.first_name || 'Driver') + ' ' + (app.last_name || '')).trim();
-      showToast(`⚡ New Driver Application: ${applicantName}!`, 'info');
+      
+      // Trigger full audio chime, banner, and desktop alert
+      triggerAdminAlert('application', {
+        title: 'New Driver Application Received!',
+        message: `${applicantName} submitted an application with ${app.vehicle_make || ''} ${app.vehicle_model || ''} (${app.license_plate || 'Pending Plate'}).`,
+        badge: 'NEW DRIVER',
+        actionSec: 'applications'
+      });
 
       // Prepend to allApps if not already in list
       if (!allApps.some(a => (a.id && app.id && String(a.id) === String(app.id)) || (a.app_ref && app.app_ref && a.app_ref === app.app_ref) || (a.phone && app.phone && a.phone.replace(/\D/g,'').slice(-9) === app.phone.replace(/\D/g,'').slice(-9)))) {
@@ -3343,6 +4213,14 @@ function initAdminSocket(){
         if (countPill) countPill.textContent = allNotifs.length;
         if (badgeDot) badgeDot.style.display = 'inline-block';
         renderNotifsList(filterNotifsArray(curNotifFilter));
+
+        // Trigger full audio chime, banner, and desktop alert
+        triggerAdminAlert('notification', {
+          title: notif.title || 'Platform Notification',
+          message: notif.body || 'New administrative notification received.',
+          badge: notif.badge || 'NOTICE',
+          actionSec: notif.type === 'app' ? 'applications' : (notif.type === 'sms' ? 'messages' : null)
+        });
       }
     });
   } catch(err) {
@@ -3576,6 +4454,7 @@ async function loadMessageHistory() {
 document.addEventListener('DOMContentLoaded',()=>{
   loadAdminName();
   initAdminSocket();
+  updateAdminSoundUI();
   startDashboardPolling(); // Start with dashboard polling
 });
 document.addEventListener('click',e=>{

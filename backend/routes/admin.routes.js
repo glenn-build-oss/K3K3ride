@@ -737,9 +737,10 @@ router.post('/riders/:id/suspend', async (req, res) => {
 
 /**
  * POST /api/admin/riders/:id/unsuspend
- * Reactivate / Unsuspend a rider account
+ * POST /api/admin/riders/:id/reactivate
+ * Reactivate / Unsuspend a rider account and send SMS notification
  */
-router.post('/riders/:id/unsuspend', async (req, res) => {
+async function handleRiderReactivation(req, res) {
   try {
     const { id } = req.params;
     const result = await unsuspendRider(id);
@@ -749,21 +750,33 @@ router.post('/riders/:id/unsuspend', async (req, res) => {
     }
 
     // Send SMS notice to rider
+    let smsSent = false;
     if (result.phone) {
       try {
         const smsMsg = `Good news! Your K3K3 Rider account has been reactivated. You can now log in with your phone number and start accepting rides. Welcome back!`;
-        await sendSMS(result.phone, smsMsg, `reactivate_${id}`);
+        const smsRes = await sendSMS(result.phone, smsMsg, `reactivate_${id}`);
+        smsSent = true;
+        console.log(`[Admin] Reactivation SMS dispatched to rider ${result.phone}`);
       } catch (smsErr) {
         console.warn('[Admin] SMS notification for reactivation failed (non-fatal):', smsErr.message);
       }
     }
 
-    res.json({ success: true, message: 'Rider account reactivated successfully', status: 'active' });
+    res.json({ 
+      success: true, 
+      message: 'Rider account reactivated successfully', 
+      status: 'active',
+      phone: result.phone,
+      smsSent
+    });
   } catch (error) {
     console.error('[Admin] Error reactivating rider:', error);
     res.status(500).json({ success: false, error: 'Failed to reactivate rider' });
   }
-});
+}
+
+router.post('/riders/:id/unsuspend', handleRiderReactivation);
+router.post('/riders/:id/reactivate', handleRiderReactivation);
 
 /**
  * PATCH /api/admin/riders/:id/status
@@ -775,9 +788,27 @@ router.patch('/riders/:id/status', async (req, res) => {
     const { status, reason } = req.body || {};
     if (status === 'suspended') {
       const result = await suspendRider(id, reason);
+      if (result.success && result.phone) {
+        try {
+          const smsMsg = `Notice from K3K3: Your rider account has been temporarily suspended.${reason ? ` Reason: ${reason}.` : ''} For inquiries or assistance, please contact K3K3 Support.`;
+          await sendSMS(result.phone, smsMsg, `suspend_${id}`);
+          console.log(`[Admin] Suspension SMS dispatched to rider ${result.phone}`);
+        } catch (smsErr) {
+          console.warn('[Admin] SMS notification for suspension failed (non-fatal):', smsErr.message);
+        }
+      }
       return res.json(result);
     } else if (status === 'active' || status === 'approved') {
       const result = await unsuspendRider(id);
+      if (result.success && result.phone) {
+        try {
+          const smsMsg = `Good news! Your K3K3 Rider account has been reactivated. You can now log in with your phone number and start accepting rides. Welcome back!`;
+          await sendSMS(result.phone, smsMsg, `reactivate_${id}`);
+          console.log(`[Admin] Reactivation SMS dispatched to rider ${result.phone}`);
+        } catch (smsErr) {
+          console.warn('[Admin] SMS notification for reactivation failed (non-fatal):', smsErr.message);
+        }
+      }
       return res.json(result);
     }
     res.status(400).json({ success: false, error: 'Invalid status. Supported: active, suspended' });
