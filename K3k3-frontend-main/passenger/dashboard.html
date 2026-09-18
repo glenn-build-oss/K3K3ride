@@ -5898,13 +5898,8 @@
     </div>
   </div>
 
-  <!-- Socket.io Real-Time Client -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    if (typeof io === 'undefined') {
-      document.write('<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"><\/script>');
-    }
-  </script>
+  <!-- Socket.io Real-Time Client (CDN loaded directly, avoiding 404 and document.write) -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
   <!-- ═══════════════════════════════════════
      JAVASCRIPT
@@ -5912,6 +5907,20 @@
   <script>
     const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8810' : '';
     const API = API_BASE ? `${API_BASE}/api` : '/api';
+
+    function resolvePhotoUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      const trimmed = rawUrl.trim();
+      if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return '';
+      if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+      }
+      const cleanPath = trimmed.startsWith('/') ? trimmed : '/' + trimmed;
+      if (API_BASE && window.location.port !== '8810') {
+        return `${API_BASE}${cleanPath}`;
+      }
+      return cleanPath;
+    }
 
     /* ─── State ─── */
     let currentSection = 'home';
@@ -7637,7 +7646,7 @@
       const name = rider.name || 'Glenn Adjei';
       const rawId = rider.shortId || rider.riderId || '68A4171C';
       const shortId = (String(rawId).replace(/-/g, '').substring(0, 8)).toUpperCase();
-      const photoUrl = rider.photoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+      const photoUrl = resolvePhotoUrl(rider.photoUrl || '');
       const vehicle = rider.vehicleType || 'TVS RE';
       const plate = rider.licensePlate || 'ER1213131';
       const station = rider.station || 'Ho Central';
@@ -7816,7 +7825,7 @@
       const riderName = rider.name || 'Glenn Adjei';
       const vehicle = `${rider.vehicleType || 'TVS RE'} · ${rider.licensePlate || 'ER1213131'}`;
       const phone = rider.phone || '+233207739636';
-      const photoUrl = rider.photoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+      const photoUrl = resolvePhotoUrl(rider.photoUrl || '');
 
       const aName = document.getElementById('assignedRiderName');
       const aVeh  = document.getElementById('assignedRiderVehicle');
@@ -7923,7 +7932,7 @@
       const fare   = parseFloat(tripData.fare || tripData.estimated_fare || 5).toFixed(2);
       const name   = r.name || 'Glenn Adjei';
       const vehicle = `${r.vehicleType || 'TVS RE'} · ${r.licensePlate || 'ER1213131'}`;
-      const photoUrl = r.photoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+      const photoUrl = resolvePhotoUrl(r.photoUrl || '');
 
       document.getElementById('homeAtName').textContent    = name;
       document.getElementById('homeAtVehicle').textContent = vehicle;

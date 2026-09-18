@@ -64,10 +64,99 @@
     .gps-status-pill.fallback {
       background: rgba(245,158,11,.15);
       color: #B45309;
+      cursor: pointer;
     }
-    .custom-keke-marker {
+    .gps-status-pill.requesting {
+      background: rgba(59, 130, 246, 0.15);
+      color: #2563EB;
+    }
+    .gps-status-pill.denied {
+      background: rgba(239, 68, 68, 0.15);
+      color: #DC2626;
+      cursor: pointer;
+    }
+    .custom-motorcycle-marker, .custom-keke-marker {
       background: transparent;
       border: none;
+    }
+    .motorcycle-marker-container {
+      width: 52px;
+      height: 52px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45));
+    }
+    .motorcycle-pulse-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid #FFD60A;
+      opacity: 0.85;
+      animation: motoPulseRing 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+      pointer-events: none;
+    }
+    .motorcycle-pulse-ring.outer {
+      inset: -12px;
+      border-color: rgba(255, 214, 10, 0.45);
+      animation: motoPulseRing 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1) 0.6s;
+    }
+    @keyframes motoPulseRing {
+      0% { transform: scale(0.65); opacity: 0.9; }
+      70% { transform: scale(1.4); opacity: 0.2; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .motorcycle-bearing-beam {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 12px solid #FFD60A;
+      filter: drop-shadow(0 -2px 5px rgba(255,214,10,0.85));
+      pointer-events: none;
+      transition: transform 0.35s ease-out;
+    }
+    .motorcycle-disc {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1f1f1f, #0d0d0d);
+      color: #FFD60A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(255,214,10,0.4), inset 0 2px 4px rgba(255,255,255,0.25);
+      border: 2.5px solid #FFD60A;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.4s cubic-bezier(0.2, 1, 0.4, 1);
+    }
+    .motorcycle-disc i {
+      font-size: 1.25rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+      transition: transform 0.2s ease;
+    }
+    .motorcycle-disc.is-moving {
+      border-color: #10B981;
+      color: #34D399;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.6), inset 0 2px 4px rgba(255,255,255,0.3);
+      animation: motoDrivingJiggle 0.45s infinite alternate ease-in-out;
+    }
+    .motorcycle-disc.is-idle {
+      animation: motoIdleEngine 2.2s infinite ease-in-out;
+    }
+    @keyframes motoDrivingJiggle {
+      0% { transform: translateY(-1.5px) rotate(-1.5deg); }
+      100% { transform: translateY(1.5px) rotate(1.5deg); }
+    }
+    @keyframes motoIdleEngine {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
     .keke-marker-icon {
       width: 44px;
@@ -1851,6 +1940,19 @@
             <i class="fas fa-expand"></i>
           </button>
         </div>
+      </div>
+      <!-- Location Prompt / Grant Permission Banner -->
+      <div id="riderGpsPromptBanner" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(255,214,10,.05));border-bottom:1px solid rgba(245,158,11,.25);padding:10px 16px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px">
+          <i class="fas fa-location-dot" style="color:#D97706;font-size:1.1rem"></i>
+          <div style="font-size:.82rem;color:var(--text);font-weight:600">
+            Enable driver location to activate full service, pin your motorcycle on the map, and receive passenger requests.
+          </div>
+        </div>
+        <button type="button" onclick="requestDriverLocation(true)" style="padding:6px 14px;border-radius:8px;background:var(--yellow);border:1px solid var(--yellow-dk);font-size:.78rem;font-weight:700;color:var(--black);cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+          <i class="fas fa-crosshairs"></i> Allow Location
+        </button>
+      </div>
       <!-- OSRM Live Road Navigation & ETA Lead Banner -->
       <div id="riderNavRoutingBanner" style="display:none;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(17,19,24,.95));border:1px solid rgba(16,185,129,.35);border-radius:12px;padding:12px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:10px">
@@ -2484,17 +2586,33 @@
 <!-- ════════════════════════════════════════
      JAVASCRIPT
 ════════════════════════════════════════ -->
-<!-- Socket.io Real-Time Client -->
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  if (typeof io === 'undefined') {
-    document.write('<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"><\/script>');
-  }
-</script>
+<!-- Socket.io Real-Time Client (CDN loaded directly, avoiding 404 and document.write) -->
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8810' : '';
 const API  = API_BASE ? `${API_BASE}/api` : '';
 const GOAL = 300; // daily earnings target in GH₵
+
+// Non-blocking fallback if CDN is blocked or unavailable
+if (typeof io === 'undefined') {
+  const s = document.createElement('script');
+  s.src = (API_BASE || '') + '/socket.io/socket.io.js';
+  document.head.appendChild(s);
+}
+
+function resolvePhotoUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  const trimmed = rawUrl.trim();
+  if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return '';
+  if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  const cleanPath = trimmed.startsWith('/') ? trimmed : '/' + trimmed;
+  if (API_BASE && window.location.port !== '8810') {
+    return `${API_BASE}${cleanPath}`;
+  }
+  return cleanPath;
+}
 
 /* ── State ─────────────────────────────── */
 let session       = null;   // rider session (from sessionStorage)
@@ -2529,7 +2647,9 @@ document.addEventListener('DOMContentLoaded', () => {
   buildMiniChart();
   renderEarnings();
   restoreSidebarState();
-  setTimeout(() => initRiderMap(), 250);
+  initRiderMap();
+  // Prompt for driver location immediately on dashboard open so system has full service
+  requestDriverLocation(true);
 });
 
 function loadSession() {
@@ -2640,15 +2760,16 @@ function renderRiderProfile(data) {
   const vehicle = s.vehicleType || 'TVS RE · 3 Passenger Seats';
   const emName = s.emergencyName || s.emergency_name || '';
   const emPhone = s.emergencyPhone || s.emergency_phone || '';
-  const photoUrl = s.photoUrl || s.avatarUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg';
+  const rawPhoto = s.photoUrl || s.avatarUrl || s.passportPhotoUrl || '';
+  const resolvedPhoto = resolvePhotoUrl(rawPhoto);
 
   const setAvatarWithPhoto = (elId) => {
     const elTarget = el(elId);
     if (!elTarget) return;
-    if (photoUrl) {
-      elTarget.innerHTML = `<img src="${photoUrl}" alt="${full}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.parentElement.textContent='${ini}'">`;
+    if (resolvedPhoto) {
+      elTarget.innerHTML = `<img src="${resolvedPhoto}" alt="${full}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:700;background:var(--yellow);color:var(--black);border-radius:inherit;\\'>${ini}</span>';">`;
     } else {
-      elTarget.textContent = ini;
+      elTarget.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:700;background:var(--yellow);color:var(--black);border-radius:inherit;">${ini}</span>`;
     }
   };
 
@@ -3034,8 +3155,8 @@ function connectWS() {
           shortId: '68A4171C',
           name: session?.fullName || `${session?.firstName || ''} ${session?.lastName || ''}`.trim() || 'Glenn Adjei',
           phone: session?.phone || '+233207739636',
-          photoUrl: session?.photoUrl || session?.passportPhotoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg',
-          avatarUrl: session?.photoUrl || session?.passportPhotoUrl || '/uploads/applications/app_1789569576091_passportPhoto.jpg',
+          photoUrl: resolvePhotoUrl(session?.photoUrl || session?.passportPhotoUrl || session?.avatarUrl || ''),
+          avatarUrl: resolvePhotoUrl(session?.photoUrl || session?.passportPhotoUrl || session?.avatarUrl || ''),
           station: session?.station || 'Ho Central',
           city: session?.city || 'Ho',
           lat: lat,
@@ -3131,14 +3252,25 @@ function initRiderMap() {
 
   L.control.zoom({ position: 'bottomright' }).addTo(riderMap);
 
-  const kekeIcon = L.divIcon({
-    className: 'custom-keke-marker',
-    html: '<div class="keke-marker-icon" id="kekeMarkerDom"><div class="keke-marker-pulse"></div><img src="../assets/k3k3.png" alt="K3K3 Keke" style="width:28px;height:28px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35));"></div>',
-    iconSize: [44, 44],
-    iconAnchor: [22, 22]
+  const motorcycleIcon = L.divIcon({
+    className: 'custom-motorcycle-marker',
+    html: `
+      <div class="motorcycle-marker-container" id="motorcycleMarkerContainer">
+        <div class="motorcycle-pulse-ring"></div>
+        <div class="motorcycle-pulse-ring outer"></div>
+        <div class="motorcycle-bearing-beam" id="motorcycleBeamDom"></div>
+        <div class="motorcycle-disc is-idle" id="motorcycleDiscDom" title="K3K3 Motorcycle Rider">
+          <i class="fa-solid fa-motorcycle"></i>
+        </div>
+      </div>
+    `,
+    iconSize: [52, 52],
+    iconAnchor: [26, 26]
   });
 
-  riderMarker = L.marker([initialLat, initialLng], { icon: kekeIcon, zIndexOffset: 1000 }).addTo(riderMap);
+  riderMarker = L.marker([initialLat, initialLng], { icon: motorcycleIcon, zIndexOffset: 1000 }).addTo(riderMap);
+  currentMarkerLat = initialLat;
+  currentMarkerLng = initialLng;
   riderAccuracyCircle = L.circle([initialLat, initialLng], {
     radius: 35,
     color: '#FFD60A',
@@ -3162,6 +3294,102 @@ function initRiderMap() {
   setTimeout(() => riderMap.invalidateSize(), 300);
 }
 
+let markerAnimationId = null;
+let currentMarkerLat = null;
+let currentMarkerLng = null;
+let currentMarkerHeading = 0;
+
+function calculateBearing(lat1, lng1, lat2, lng2) {
+  const toRad = d => (d * Math.PI) / 180;
+  const toDeg = r => (r * 180) / Math.PI;
+  const dLng = toRad(lng2 - lng1);
+  const phi1 = toRad(lat1);
+  const phi2 = toRad(lat2);
+  const y = Math.sin(dLng) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLng);
+  let brng = toDeg(Math.atan2(y, x));
+  return (brng + 360) % 360;
+}
+
+function smoothMoveMotorcycleMarker(targetLat, targetLng, targetHeading = 0, speed = 0) {
+  if (!riderMarker) return;
+
+  const startLat = (currentMarkerLat !== null) ? currentMarkerLat : targetLat;
+  const startLng = (currentMarkerLng !== null) ? currentMarkerLng : targetLng;
+  const dist = Math.hypot(targetLat - startLat, targetLng - startLng);
+
+  // Compute bearing if device heading is 0 or absent
+  let effectiveHeading = targetHeading;
+  if ((!effectiveHeading || effectiveHeading === 0) && dist > 0.00003) {
+    effectiveHeading = calculateBearing(startLat, startLng, targetLat, targetLng);
+  }
+  if (effectiveHeading) {
+    currentMarkerHeading = effectiveHeading;
+  }
+
+  const motoDom = document.getElementById('motorcycleDiscDom');
+  const motoBeam = document.getElementById('motorcycleBeamDom');
+  if (motoDom && currentMarkerHeading !== undefined) {
+    motoDom.style.transform = `rotate(${currentMarkerHeading}deg)`;
+  }
+  if (motoBeam && currentMarkerHeading !== undefined) {
+    motoBeam.style.transform = `translateX(-50%) rotate(${currentMarkerHeading}deg)`;
+  }
+
+  // If stationary or tiny movement, update immediately
+  if (dist < 0.00001) {
+    riderMarker.setLatLng([targetLat, targetLng]);
+    currentMarkerLat = targetLat;
+    currentMarkerLng = targetLng;
+    if (motoDom) {
+      motoDom.classList.remove('is-moving');
+      motoDom.classList.add('is-idle');
+    }
+    return;
+  }
+
+  // Switch to moving driving animation
+  if (motoDom) {
+    motoDom.classList.remove('is-idle');
+    motoDom.classList.add('is-moving');
+  }
+
+  if (markerAnimationId) {
+    cancelAnimationFrame(markerAnimationId);
+  }
+
+  const duration = 750; // smooth 750ms glide between GPS updates
+  const startTime = performance.now();
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+
+    const curLat = startLat + (targetLat - startLat) * ease;
+    const curLng = startLng + (targetLng - startLng) * ease;
+
+    riderMarker.setLatLng([curLat, curLng]);
+    currentMarkerLat = curLat;
+    currentMarkerLng = curLng;
+
+    if (progress < 1) {
+      markerAnimationId = requestAnimationFrame(animate);
+    } else {
+      riderMarker.setLatLng([targetLat, targetLng]);
+      currentMarkerLat = targetLat;
+      currentMarkerLng = targetLng;
+      markerAnimationId = null;
+      if (motoDom) {
+        motoDom.classList.remove('is-moving');
+        motoDom.classList.add('is-idle');
+      }
+    }
+  }
+
+  markerAnimationId = requestAnimationFrame(animate);
+}
+
 function toggleRiderMapFullscreen() {
   const card = document.getElementById('riderMapCard');
   const btn = document.getElementById('riderFullscreenBtn');
@@ -3176,7 +3404,7 @@ function toggleRiderMapFullscreen() {
   }, 250);
 }
 
-function updateRiderMapPosition(lat, lng, heading = 0, isLive = true) {
+function updateRiderMapPosition(lat, lng, heading = 0, isLive = true, speed = 0) {
   if (!riderMap) initRiderMap();
   if (!riderMap) return;
 
@@ -3184,13 +3412,8 @@ function updateRiderMapPosition(lat, lng, heading = 0, isLive = true) {
   const lngNum = parseFloat(lng);
   if (isNaN(latNum) || isNaN(lngNum)) return;
 
-  if (riderMarker) {
-    riderMarker.setLatLng([latNum, lngNum]);
-    const kekeDom = document.getElementById('kekeMarkerDom');
-    if (kekeDom && heading) {
-      kekeDom.style.transform = `rotate(${heading}deg)`;
-    }
-  }
+  smoothMoveMotorcycleMarker(latNum, lngNum, heading, speed);
+
   if (riderAccuracyCircle) {
     riderAccuracyCircle.setLatLng([latNum, lngNum]);
   }
@@ -3368,6 +3591,62 @@ function recenterRiderMap() {
   riderMap.setView([lat, lng], 16, { animate: true });
 }
 
+function requestDriverLocation(forcePrompt = false) {
+  const pill = el('riderGpsPill');
+  const banner = el('riderGpsPromptBanner');
+  if (pill) {
+    pill.className = 'gps-status-pill requesting';
+    pill.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location…';
+  }
+
+  if (!navigator.geolocation) {
+    if (pill) {
+      pill.className = 'gps-status-pill fallback';
+      pill.innerHTML = '<i class="fas fa-triangle-exclamation"></i> GPS Not Supported';
+      pill.onclick = null;
+    }
+    handleGpsFallback();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude, heading, speed, accuracy } = pos.coords;
+      sessionStorage.setItem('k3k3_rider_lat', latitude);
+      sessionStorage.setItem('k3k3_rider_lng', longitude);
+
+      if (banner) banner.style.display = 'none';
+
+      // Pinpoint on map
+      if (!riderMap) initRiderMap();
+      if (riderMap) {
+        riderMap.flyTo([latitude, longitude], 16, { duration: 1.2 });
+      }
+
+      handleGpsPosition(latitude, longitude, heading || 0, speed || 0, true, accuracy);
+
+      showToast(`📍 Motorcycle pinpointed (${accuracy ? Math.round(accuracy) + 'm accuracy' : 'GPS live'})`, 'success');
+
+      // Start continuous background GPS watching
+      startLocationTracking();
+    },
+    (err) => {
+      console.warn('[GPS Initial Request Warning]', err.code, err.message);
+      if (banner) banner.style.display = 'flex';
+      if (pill) {
+        pill.className = 'gps-status-pill fallback';
+        pill.innerHTML = '<i class="fas fa-location-crosshairs"></i> Tap to Enable GPS';
+        pill.onclick = () => requestDriverLocation(true);
+      }
+      handleGpsFallback(err);
+      if (forcePrompt && err.code === 1) { // PERMISSION_DENIED
+        showToast('⚠️ Location access needed: allow location in your browser so riders can find your motorcycle.', 'warning', 6000);
+      }
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
 function startLocationTracking() {
   if (!navigator.geolocation) {
     handleGpsFallback();
@@ -3377,15 +3656,15 @@ function startLocationTracking() {
 
   gpsWatchId = navigator.geolocation.watchPosition(
     pos => {
-      const { latitude, longitude, heading, speed } = pos.coords;
-      handleGpsPosition(latitude, longitude, heading || 0, speed || 0, true);
+      const { latitude, longitude, heading, speed, accuracy } = pos.coords;
+      handleGpsPosition(latitude, longitude, heading || 0, speed || 0, true, accuracy);
     },
     err => {
       console.warn('[GPS Tracking Warning]', err.message);
       if (err.code === 3) {
         if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = navigator.geolocation.watchPosition(
-          pos2 => handleGpsPosition(pos2.coords.latitude, pos2.coords.longitude, pos2.coords.heading || 0, pos2.coords.speed || 0, true),
+          pos2 => handleGpsPosition(pos2.coords.latitude, pos2.coords.longitude, pos2.coords.heading || 0, pos2.coords.speed || 0, true, pos2.coords.accuracy),
           err2 => handleGpsFallback(err2),
           { enableHighAccuracy: false, maximumAge: 30000, timeout: 15000 }
         );
@@ -3397,16 +3676,23 @@ function startLocationTracking() {
   );
 }
 
-function handleGpsPosition(latitude, longitude, heading = 0, speed = 0, isLive = true) {
+function handleGpsPosition(latitude, longitude, heading = 0, speed = 0, isLive = true, accuracy = null) {
   sessionStorage.setItem('k3k3_rider_lat', latitude);
   sessionStorage.setItem('k3k3_rider_lng', longitude);
 
-  updateRiderMapPosition(latitude, longitude, heading, isLive);
+  updateRiderMapPosition(latitude, longitude, heading, isLive, speed);
+
+  const banner = el('riderGpsPromptBanner');
+  if (banner && isLive) {
+    banner.style.display = 'none';
+  }
 
   const pill = el('riderGpsPill');
   if (pill) {
     pill.className = isLive ? 'gps-status-pill live' : 'gps-status-pill fallback';
-    pill.innerHTML = isLive ? '<i class="fas fa-circle-dot"></i> GPS Live' : '<i class="fas fa-map-pin"></i> Ho Central (Fallback)';
+    const accText = accuracy ? ` · ±${Math.round(accuracy)}m` : '';
+    pill.innerHTML = isLive ? `<i class="fas fa-circle-dot"></i> GPS Live${accText}` : '<i class="fas fa-map-pin"></i> Ho Central (Fallback)';
+    pill.onclick = isLive ? null : () => requestDriverLocation(true);
   }
 
   if (wsConn && wsConn.emit) {
