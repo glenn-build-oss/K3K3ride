@@ -2277,12 +2277,12 @@
     <div class="profile-stats-grid">
       <div class="profile-stat-box">
         <div class="lbl">Driver Rating</div>
-        <div class="val" style="color:var(--yellow-dk)"><i class="fas fa-star" style="font-size:1rem;color:var(--yellow);margin-right:4px"></i><span id="profRating">4.9</span></div>
-        <div class="sub">128+ Passenger Reviews</div>
+        <div class="val" style="color:var(--yellow-dk)"><i class="fas fa-star" style="font-size:1rem;color:var(--yellow);margin-right:4px"></i><span id="profRating">5.0</span></div>
+        <div class="sub" id="profReviewsSub"><span id="profReviewsCount">0</span> Passenger Reviews</div>
       </div>
       <div class="profile-stat-box">
         <div class="lbl">Trips Completed</div>
-        <div class="val" style="color:var(--blue)" id="profTripsCount">84</div>
+        <div class="val" style="color:var(--blue)" id="profTripsCount">0</div>
         <div class="sub">Campus Shared & Alone</div>
       </div>
       <div class="profile-stat-box">
@@ -2292,7 +2292,7 @@
       </div>
       <div class="profile-stat-box">
         <div class="lbl">Total Earnings</div>
-        <div class="val" style="color:var(--text)" id="profEarnings">₵ 640.00</div>
+        <div class="val" style="color:var(--text)" id="profEarnings">₵ 0.00</div>
         <div class="sub">Direct Payouts</div>
       </div>
     </div>
@@ -2345,6 +2345,16 @@
             <div class="profile-field-info">
               <div class="profile-field-lbl">Preferred Station / Hub</div>
               <div class="profile-field-val" id="profStation">Ho Central</div>
+            </div>
+          </div>
+
+          <div class="profile-field-row">
+            <div class="profile-field-icon" style="background:rgba(234,179,8,.12);color:var(--yellow-dk)">
+              <i class="fas fa-business-time"></i>
+            </div>
+            <div class="profile-field-info">
+              <div class="profile-field-lbl">Driving Experience</div>
+              <div class="profile-field-val" id="profExperience">1-2 years</div>
             </div>
           </div>
         </div>
@@ -2556,7 +2566,7 @@
         </div>
 
         <div style="margin:16px 0 10px;padding-top:14px;border-top:1px solid var(--border)">
-          <div class="form-label" style="color:var(--text);font-size:.78rem"><i class="fas fa-shield-halved" style="color:var(--red);margin-right:6px"></i> Emergency Contact (Optional)</div>
+          <div class="form-label" style="color:var(--text);font-size:.78rem"><i class="fas fa-shield-halved" style="color:var(--red);margin-right:6px"></i> Emergency Contact & Driving Experience</div>
         </div>
 
         <div class="form-group-2">
@@ -2568,6 +2578,17 @@
             <label class="form-label" for="editProfEmergencyPhone">Emergency Phone</label>
             <input type="tel" id="editProfEmergencyPhone" class="form-control" placeholder="050 000 0000">
           </div>
+        </div>
+
+        <div class="form-group" style="margin-top:12px;margin-bottom:0">
+          <label class="form-label" for="editProfExperience"><i class="fas fa-business-time" style="color:var(--yellow-dk);margin-right:6px"></i> Driving Experience (Exp)</label>
+          <select id="editProfExperience" class="form-control" style="font-family:inherit">
+            <option value="1-2 years">1-2 years</option>
+            <option value="2-3 years">2-3 years</option>
+            <option value="3-5 years">3-5 years</option>
+            <option value="5+ years">5+ years</option>
+            <option value="Less than 1 year">Less than 1 year</option>
+          </select>
         </div>
       </div>
       <div class="modal-footer">
@@ -2590,7 +2611,7 @@
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) ? 'http://localhost:8810' : '';
-const API  = API_BASE ? `${API_BASE}/api` : '';
+const API  = API_BASE ? `${API_BASE}/api` : '/api';
 const GOAL = 300; // daily earnings target in GH₵
 
 // Non-blocking fallback if CDN is blocked or unavailable
@@ -2712,7 +2733,7 @@ function loadSession() {
   }
 
   // Live server status check: ensure account is verified approved on backend
-  fetch(`/api/auth/rider/status?phone=${encodeURIComponent(session.phone)}`)
+  fetch(`${API}/auth/rider/status?phone=${encodeURIComponent(session.phone)}`)
     .then(res => res.json())
     .then(data => {
       if (data && data.success) {
@@ -2758,6 +2779,7 @@ function renderRiderProfile(data) {
   const station = s.station || 'Ho Central';
   const plate = s.licensePlate || s.vehiclePlate || 'ER1213131';
   const vehicle = s.vehicleType || 'TVS RE · 3 Passenger Seats';
+  const exp = s.experience || '1-2 years';
   const emName = s.emergencyName || s.emergency_name || '';
   const emPhone = s.emergencyPhone || s.emergency_phone || '';
   const rawPhoto = s.photoUrl || s.avatarUrl || s.passportPhotoUrl || '';
@@ -2788,13 +2810,27 @@ function renderRiderProfile(data) {
   setEl('profPhone', phone);
   setEl('profEmail', email);
   setEl('profStation', station);
+  setEl('profExperience', exp);
   setEl('profPlateBadge', plate);
   setEl('profVehicleType', vehicle);
   setEl('profEmergency', emName ? `${emName} (${emPhone || 'No phone'})` : 'Not set');
 
-  // Stats
-  if (s.rating) setEl('profRating', s.rating);
-  if (s.tripsCompleted) setEl('profTripsCount', s.tripsCompleted);
+  // Stats & Passenger Reviews
+  const revCount = (typeof s.reviewCount === 'number' ? s.reviewCount : (typeof s.reviews_count === 'number' ? s.reviews_count : (parseInt(s.review_count, 10) || 0)));
+  const revSub = el('profReviewsSub');
+  if (revSub) {
+    revSub.innerHTML = `<span id="profReviewsCount">${revCount}</span> Passenger Review${revCount !== 1 ? 's' : ''}`;
+  } else {
+    setEl('profReviewsCount', revCount);
+  }
+
+  if (s.rating !== undefined && s.rating !== null) {
+    setEl('profRating', typeof s.rating === 'number' ? s.rating.toFixed(1) : s.rating);
+  } else {
+    setEl('profRating', '5.0');
+  }
+
+  if (s.tripsCompleted !== undefined) setEl('profTripsCount', s.tripsCompleted);
   if (s.acceptanceRate) setEl('profAcceptRate', s.acceptanceRate);
 }
 
@@ -2808,7 +2844,7 @@ async function loadRiderProfileFromAPI() {
     if (rid && rid !== '—') params.append('riderId', rid);
     if (phone && phone !== 'Not set') params.append('phone', phone);
 
-    const res = await fetch(`/api/auth/rider/profile?${params.toString()}`);
+    const res = await fetch(`${API}/auth/rider/profile?${params.toString()}`);
     if (res.ok) {
       const result = await res.json();
       if (result.success && result.profile) {
@@ -2826,7 +2862,7 @@ async function loadRiderProfileFromAPI() {
 async function fetchRiderTripsAndEarnings() {
   const riderId = session?.riderId || session?.id || session?.dbRiderId || 'rider-demo';
   try {
-    const res = await fetch(`/api/trips/rider/${encodeURIComponent(riderId)}`);
+    const res = await fetch(`${API}/trips/rider/${encodeURIComponent(riderId)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.success) {
@@ -2845,6 +2881,16 @@ async function fetchRiderTripsAndEarnings() {
       }
       if (riderEarningsStats.totalEarnings !== undefined) {
         setEl('profEarnings', '₵ ' + riderEarningsStats.totalEarnings.toFixed(2));
+      }
+      if (riderEarningsStats.rating !== undefined) {
+        setEl('profRating', typeof riderEarningsStats.rating === 'number' ? riderEarningsStats.rating.toFixed(1) : riderEarningsStats.rating);
+      }
+      if (riderEarningsStats.reviewCount !== undefined) {
+        const cnt = riderEarningsStats.reviewCount;
+        const revSub = el('profReviewsSub');
+        if (revSub) {
+          revSub.innerHTML = `<span id="profReviewsCount">${cnt}</span> Passenger Review${cnt !== 1 ? 's' : ''}`;
+        }
       }
     }
   } catch (err) {
@@ -2871,6 +2917,7 @@ function openEditProfileModal() {
   const emInput = el('editProfEmail');
   const stInput = el('editProfStation');
   const plInput = el('editProfPlate');
+  const expInput = el('editProfExperience');
   const enInput = el('editProfEmergencyName');
   const epInput = el('editProfEmergencyPhone');
 
@@ -2880,6 +2927,7 @@ function openEditProfileModal() {
   if (emInput) emInput.value = (s.email && s.email !== 'Not set') ? s.email : '';
   if (stInput) stInput.value = s.station || 'Ho Central';
   if (plInput) plInput.value = s.licensePlate || s.vehiclePlate || s.vehicle_plate || 'ER1213131';
+  if (expInput) expInput.value = s.experience || '1-2 years';
   if (enInput) enInput.value = s.emergencyName || s.emergency_name || '';
   if (epInput) epInput.value = s.emergencyPhone || s.emergency_phone || '';
 
@@ -2899,6 +2947,7 @@ async function saveRiderProfile(e) {
   const email = (el('editProfEmail')?.value || '').trim();
   const station = el('editProfStation')?.value || 'Ho Central';
   const plate = (el('editProfPlate')?.value || '').trim();
+  const exp = el('editProfExperience')?.value || '1-2 years';
   const emName = (el('editProfEmergencyName')?.value || '').trim();
   const emPhone = (el('editProfEmergencyPhone')?.value || '').trim();
 
@@ -2927,13 +2976,14 @@ async function saveRiderProfile(e) {
     phone,
     email,
     station,
+    experience: exp,
     licensePlate: plate,
     emergencyName: emName,
     emergencyPhone: emPhone
   };
 
   try {
-    const res = await fetch('/api/auth/rider/profile', {
+    const res = await fetch(`${API}/auth/rider/profile`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -2941,7 +2991,7 @@ async function saveRiderProfile(e) {
 
     const data = await res.json();
     if (res.ok && data.success) {
-      session = { ...session, ...data.profile, firstName: fn, lastName: ln, fullName: `${fn} ${ln}`.trim(), phone, email, station, licensePlate: plate, emergencyName: emName, emergencyPhone: emPhone };
+      session = { ...session, ...data.profile, firstName: fn, lastName: ln, fullName: `${fn} ${ln}`.trim(), phone, email, station, experience: exp, licensePlate: plate, emergencyName: emName, emergencyPhone: emPhone };
       localStorage.setItem('riderSession', JSON.stringify(session));
       sessionStorage.setItem('riderSession', JSON.stringify(session));
       renderRiderProfile(session);
@@ -2952,7 +3002,7 @@ async function saveRiderProfile(e) {
     }
   } catch (err) {
     console.warn('[Profile Save] Fallback to local session update:', err.message);
-    session = { ...session, firstName: fn, lastName: ln, fullName: `${fn} ${ln}`.trim(), phone, email, station, licensePlate: plate, emergencyName: emName, emergencyPhone: emPhone };
+    session = { ...session, firstName: fn, lastName: ln, fullName: `${fn} ${ln}`.trim(), phone, email, station, experience: exp, licensePlate: plate, emergencyName: emName, emergencyPhone: emPhone };
     localStorage.setItem('riderSession', JSON.stringify(session));
     sessionStorage.setItem('riderSession', JSON.stringify(session));
     renderRiderProfile(session);

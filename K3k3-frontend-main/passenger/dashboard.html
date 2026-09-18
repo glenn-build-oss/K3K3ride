@@ -4528,9 +4528,8 @@
         </div>
       </div>
 
-      <div class="home-body">
-        <!-- Live Map Radar & Route Map -->
-        <div class="p-map-card" id="passengerLiveMapCard">
+        <!-- Live Map Radar & Route Map (Pops up when ride starts) -->
+        <div class="p-map-card" id="passengerLiveMapCard" style="display:none;margin-bottom:24px">
           <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;gap:10px">
             <div style="display:flex;align-items:center;gap:10px">
               <div style="width:36px;height:36px;border-radius:50%;background:var(--yellow-lt);color:var(--yellow-dk);display:flex;align-items:center;justify-content:center;font-size:.95rem">
@@ -7888,10 +7887,11 @@
 
     function handleTripStatusChange(update) {
       console.log('[Trip Status Change]', update);
-      if (update.status === 'completed') {
         sessionStorage.removeItem('k3k3_active_trip');
         const card = document.getElementById('homeActiveTripCard');
         if (card) card.style.display = 'none';
+        const mapCard = document.getElementById('passengerLiveMapCard');
+        if (mapCard) mapCard.style.display = 'none';
         closeRiderSearch();
         closeAssignedRiderModal();
         showToast('Trip completed! Thank you for riding with K3K3.', 'success');
@@ -7905,6 +7905,8 @@
         sessionStorage.removeItem('k3k3_active_trip');
         const card = document.getElementById('homeActiveTripCard');
         if (card) card.style.display = 'none';
+        const mapCard = document.getElementById('passengerLiveMapCard');
+        if (mapCard) mapCard.style.display = 'none';
         closeRiderSearch();
         closeAssignedRiderModal();
         showToast('Trip was cancelled.', 'info');
@@ -7964,6 +7966,14 @@
 
       card.style.display = 'block';
 
+      // Map pops up to track the ride in real time
+      const mapCard = document.getElementById('passengerLiveMapCard');
+      if (mapCard) {
+        mapCard.style.display = 'block';
+        if (!passengerMap) initPassengerMap();
+        else setTimeout(() => passengerMap.invalidateSize(), 200);
+      }
+
       // Update Live Map with active trip bounds & route
       updatePassengerMapWithTrip(tripData);
     }
@@ -7984,6 +7994,8 @@
 
       sessionStorage.removeItem('k3k3_active_trip');
       document.getElementById('homeActiveTripCard').style.display = 'none';
+      const mapCard = document.getElementById('passengerLiveMapCard');
+      if (mapCard) mapCard.style.display = 'none';
       closeAssignedRiderModal();
       if (passengerRouteLayer && passengerMap) {
         passengerMap.removeLayer(passengerRouteLayer);
@@ -8114,7 +8126,7 @@
       clearTimeout(riderSearchTimer);
       riderSearchTimer = setTimeout(() => {
         if (sub && document.getElementById('searchingState').style.display !== 'none') {
-          sub.textContent = 'Contacting available keke riders in your area…';
+          sub.textContent = 'Contacting available K3K3 riders in your area…';
         }
       }, 3000);
     }

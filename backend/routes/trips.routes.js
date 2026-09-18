@@ -265,12 +265,20 @@ router.get('/rider/:riderId', async (req, res) => {
     let momoEarnings = 0;
     let cashTrips = 0;
     let momoTrips = 0;
+    let ratingSum = 0;
+    let ratingsCount = 0;
 
     const formattedRides = (rides || []).map(r => {
       const fare = parseFloat(r.actual_fare || r.estimated_fare || r.fare || 0);
       const isCompleted = r.status === 'completed' || r.status === 'done';
       const rDate = r.requested_at || r.created_at;
       const isToday = rDate ? rDate.startsWith(today) : false;
+
+      const score = r.rider_rating || r.rating;
+      if (score && !isNaN(score)) {
+        ratingSum += parseFloat(score);
+        ratingsCount++;
+      }
 
       if (isCompleted) {
         completedTrips++;
@@ -304,6 +312,7 @@ router.get('/rider/:riderId', async (req, res) => {
     });
 
     const avgFare = completedTrips > 0 ? (totalEarnings / completedTrips) : 0;
+    const avgRating = ratingsCount > 0 ? parseFloat((ratingSum / ratingsCount).toFixed(1)) : 5.0;
 
     res.json({
       success: true,
@@ -317,7 +326,10 @@ router.get('/rider/:riderId', async (req, res) => {
         momoEarnings: Math.round(momoEarnings * 100) / 100,
         cashTrips,
         momoTrips,
-        averageFare: Math.round(avgFare * 100) / 100
+        averageFare: Math.round(avgFare * 100) / 100,
+        rating: avgRating,
+        reviewCount: ratingsCount,
+        reviewsCount: ratingsCount
       }
     });
   } catch (error) {

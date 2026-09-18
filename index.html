@@ -164,6 +164,102 @@
 <body>
 
   <!-- ==========================================================================
+       DARK LOADING INTRO SCREEN (Bolt-Style K3K3 Splash)
+       ========================================================================== -->
+  <div id="k3k3LoadingScreen" style="
+    position: fixed; inset: 0; z-index: 999999;
+    background: #0A0A0E;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  " onclick="this.style.opacity='0';this.style.pointerEvents='none';">
+    <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;">
+      <!-- Glowing Ambient Aura -->
+      <div style="
+        position: absolute; width: 140px; height: 140px;
+        background: radial-gradient(circle, rgba(255,214,10,0.35) 0%, rgba(255,214,10,0) 70%);
+        border-radius: 50%; filter: blur(20px);
+        animation: k3k3AuraPulse 2s infinite ease-in-out;
+        pointer-events: none;
+      "></div>
+
+      <!-- K3K3 Centered Logo -->
+      <img src="assets/k3k3.png" alt="K3K3" style="
+        width: 88px; height: 88px; object-fit: contain;
+        position: relative; z-index: 2;
+        filter: drop-shadow(0 8px 24px rgba(255,214,10,0.45));
+        animation: k3k3LogoScale 1.8s infinite ease-in-out;
+      ">
+
+      <div style="
+        margin-top: 20px; font-family: 'Inter', -apple-system, sans-serif;
+        font-size: 1.4rem; font-weight: 900; letter-spacing: -0.03em;
+        color: #FFFFFF; display: flex; align-items: center; gap: 6px;
+      ">
+        <span>K3K3</span><span style="color: #FFD60A;">RIDE</span>
+      </div>
+
+      <div style="
+        margin-top: 6px; font-size: 0.75rem; font-weight: 600;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(255,255,255,0.45);
+      ">
+        Campus &amp; Urban Transit
+      </div>
+
+      <!-- Minimal glowing loader bar -->
+      <div style="
+        width: 120px; height: 3px; background: rgba(255,255,255,0.1);
+        border-radius: 999px; margin-top: 24px; overflow: hidden; position: relative;
+      ">
+        <div style="
+          position: absolute; top: 0; left: 0; bottom: 0; width: 45%;
+          background: linear-gradient(90deg, transparent, #FFD60A, transparent);
+          border-radius: 999px; animation: k3k3LoaderSlide 1.2s infinite ease-in-out;
+        "></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes k3k3AuraPulse {
+      0%, 100% { transform: scale(0.9); opacity: 0.5; }
+      50% { transform: scale(1.35); opacity: 0.9; }
+    }
+    @keyframes k3k3LogoScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    @keyframes k3k3LoaderSlide {
+      0% { left: -50%; }
+      100% { left: 100%; }
+    }
+  </style>
+
+  <script>
+    window.addEventListener('load', function() {
+      const loader = document.getElementById('k3k3LoadingScreen');
+      if (!loader) return;
+      setTimeout(function() {
+        loader.style.opacity = '0';
+        loader.style.transform = 'scale(1.04)';
+        loader.style.pointerEvents = 'none';
+        setTimeout(function() {
+          if (loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 550);
+      }, 700);
+    });
+    setTimeout(function() {
+      const loader = document.getElementById('k3k3LoadingScreen');
+      if (loader && loader.style.opacity !== '0') {
+        loader.style.opacity = '0';
+        loader.style.pointerEvents = 'none';
+        setTimeout(function() { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 550);
+      }
+    }, 2800);
+  </script>
+
+  <!-- ==========================================================================
        HEADER & NAVIGATION BAR
        ========================================================================== -->
   <header class="header">

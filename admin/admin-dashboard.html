@@ -2807,15 +2807,38 @@ function showRiderDetail(riderId){
         <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Plate Number</div>
         <div style="font-size:.95rem;font-weight:600;color:var(--yellow);font-family:monospace">${rider.vehicle_plate||'—'}</div>
       </div>
+      <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Campus Hub / Station</div>
+        <div style="font-size:.95rem;font-weight:600"><i class="fas fa-location-dot" style="color:var(--yellow);margin-right:4px"></i>${escapeHtml(rider.station || 'Ho Central')}</div>
+      </div>
+      <div style="background:var(--bg-3);padding:16px;border-radius:var(--r)">
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Driving Experience</div>
+        <div style="font-size:.95rem;font-weight:600"><i class="fas fa-business-time" style="color:var(--yellow-dk);margin-right:4px"></i>${escapeHtml(rider.experience || '1-2 years')}</div>
+      </div>
+      <div style="grid-column:span 2;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);padding:14px 16px;border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:.68rem;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:6px">
+            <i class="fas fa-shield-halved"></i> Emergency Contact
+          </div>
+          <div style="font-size:.9rem;font-weight:700;margin-top:3px;color:var(--white)">
+            ${escapeHtml(rider.emergency_contact_name || 'Not specified')}
+          </div>
+        </div>
+        ${rider.emergency_contact_phone ? `
+          <a href="tel:${rider.emergency_contact_phone}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(239,68,68,.15);color:var(--red);border-radius:6px;font-size:.78rem;font-weight:700;text-decoration:none;border:1px solid rgba(239,68,68,.3)">
+            <i class="fas fa-phone-alt"></i> ${escapeHtml(rider.emergency_contact_phone)}
+          </a>
+        ` : `<span style="font-size:.75rem;color:var(--muted)">No phone set</span>`}
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
       <div style="text-align:center;padding:12px;background:var(--bg-3);border-radius:var(--r)">
         <div style="font-size:1.3rem;font-weight:800;color:var(--yellow)">${rider.trips_completed||0}</div>
-        <div style="font-size:.7rem;color:var(--muted)">Trips</div>
+        <div style="font-size:.7rem;color:var(--muted)">Trips Completed</div>
       </div>
       <div style="text-align:center;padding:12px;background:var(--bg-3);border-radius:var(--r)">
-        <div style="font-size:1.3rem;font-weight:800;color:var(--green)">⭐ ${rider.rating||'—'}</div>
-        <div style="font-size:.7rem;color:var(--muted)">Rating</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--green)">⭐ ${typeof rider.rating === 'number' ? rider.rating.toFixed(1) : (rider.rating||'5.0')}</div>
+        <div style="font-size:.7rem;color:var(--muted)">${rider.reviews_count || rider.review_count || 0} Reviews</div>
       </div>
       <div style="text-align:center;padding:12px;background:var(--bg-3);border-radius:var(--r)">
         <div style="font-size:1.3rem;font-weight:800;color:var(--blue)">₵${(rider.total_earnings||0).toFixed(2)}</div>

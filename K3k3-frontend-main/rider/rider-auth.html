@@ -918,15 +918,38 @@
           if (appRef) localStorage.setItem('lastApplicationRef', appRef);
         } catch(e) {}
 
-        showToast(isApproved ? 'Signed in! Opening Driver Dashboard…' : 'Application awaiting approval. Redirecting…', 'success');
+        showToast(isApproved ? 'Signed in! Locating motorcycle…' : 'Application awaiting approval. Redirecting…', 'success');
 
-        setTimeout(() => {
+        const proceedToNext = () => {
           if (finalStatus === 'approved') {
             window.location.href = 'dashboard.html';
           } else {
             window.location.href = 'pending.html';
           }
-        }, 800);
+        };
+
+        if (finalStatus === 'approved' && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              try {
+                sessionStorage.setItem('k3k3_rider_lat', pos.coords.latitude);
+                sessionStorage.setItem('k3k3_rider_lng', pos.coords.longitude);
+                localStorage.setItem('k3k3_driver_last_coords', JSON.stringify({
+                  lat: pos.coords.latitude,
+                  lng: pos.coords.longitude,
+                  timestamp: Date.now()
+                }));
+              } catch(_) {}
+              proceedToNext();
+            },
+            () => {
+              proceedToNext();
+            },
+            { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
+          );
+        } else {
+          setTimeout(proceedToNext, 700);
+        }
       } else {
         showErr('siOtpError', 'siOtpErrorText', result.msg);
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify &amp; Sign In';

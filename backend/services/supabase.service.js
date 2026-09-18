@@ -1226,6 +1226,11 @@ async function getApprovedRiders() {
           (u.phone ? `K3R-${String(u.phone).replace(/\D/g, '').slice(-6)}` : `K3R-${String(u.id).slice(0, 6)}`);
         const cleanAppRef = matchingApp?.app_ref || (matchingApp?.id ? `APP-${matchingApp.id.substring(0, 8).toUpperCase()}` : null);
 
+        const rawExp = matchingApp?.experience || (matchingApp?.emergency_contact_name && matchingApp.emergency_contact_name.startsWith('Exp:') ? matchingApp.emergency_contact_name.replace('Exp:', '').trim() : (u.experience || '1-2 years'));
+        const emName = (matchingApp?.emergency_contact_name && !matchingApp.emergency_contact_name.startsWith('Exp:')) ? matchingApp.emergency_contact_name : (u.emergency_name || u.emergency_contact_name || '');
+        const emPhone = matchingApp?.emergency_contact_phone || u.emergency_phone || u.emergency_contact_phone || '';
+        const station = matchingApp?.station || (matchingApp?.city ? `${matchingApp.city} Central` : (u.station || 'Ho Central'));
+
         const riderObj = {
           id: u.id,
           user_id: u.id,
@@ -1240,9 +1245,15 @@ async function getApprovedRiders() {
           status: riderStatus,
           is_available: isAvailable,
           on_trip: false,
-          rating: 4.9,
+          rating: 5.0,
+          review_count: 0,
+          reviews_count: 0,
           trips_completed: 0,
           total_earnings: 0,
+          experience: rawExp,
+          emergency_contact_name: emName,
+          emergency_contact_phone: emPhone,
+          station: station,
           vehicle_type: matchingApp?.vehicle_type || 'Tricycle',
           vehicle_make: matchingApp?.vehicle_make || '',
           vehicle_model: matchingApp?.vehicle_model || '',
@@ -1271,6 +1282,11 @@ async function getApprovedRiders() {
             app.app_ref ||
             (app.phone ? `K3R-${String(app.phone).replace(/\D/g, '').slice(-6)}` : `K3R-${String(app.id).slice(0, 6)}`);
           const cleanAppRef = app.app_ref || (app.id ? `APP-${app.id.substring(0, 8).toUpperCase()}` : null);
+          const rawExp = app.experience || (app.emergency_contact_name && app.emergency_contact_name.startsWith('Exp:') ? app.emergency_contact_name.replace('Exp:', '').trim() : '1-2 years');
+          const emName = (app.emergency_contact_name && !app.emergency_contact_name.startsWith('Exp:')) ? app.emergency_contact_name : '';
+          const emPhone = app.emergency_contact_phone || '';
+          const station = app.station || (app.city ? `${app.city} Central` : 'Ho Central');
+
           ridersList.push({
             id: app.user_id || app.id,
             rider_id: cleanAppRiderId,
@@ -1285,8 +1301,14 @@ async function getApprovedRiders() {
             is_available: appStatus === 'suspended' ? false : true,
             on_trip: false,
             rating: 5.0,
+            review_count: 0,
+            reviews_count: 0,
             trips_completed: 0,
             total_earnings: 0,
+            experience: rawExp,
+            emergency_contact_name: emName,
+            emergency_contact_phone: emPhone,
+            station: station,
             vehicle_type: app.vehicle_type || 'Tricycle',
             vehicle_make: app.vehicle_make || '',
             vehicle_model: app.vehicle_model || '',
@@ -1304,6 +1326,46 @@ async function getApprovedRiders() {
         }
       }
     }
+
+    // Try enriching real rides, ratings and earnings from rides table
+    try {
+      const { data: allRidesData } = await requireSupabase()
+        .from('rides')
+        .select('rider_id, status, actual_fare, estimated_fare, fare, rating, rider_rating');
+
+      if (allRidesData && Array.isArray(allRidesData) && allRidesData.length > 0) {
+        const statsMap = new Map();
+        for (const r of allRidesData) {
+          if (!r.rider_id) continue;
+          if (!statsMap.has(r.rider_id)) {
+            statsMap.set(r.rider_id, { completed: 0, earnings: 0, ratingSum: 0, ratingCount: 0 });
+          }
+          const s = statsMap.get(r.rider_id);
+          if (r.status === 'completed' || r.status === 'done') {
+            s.completed++;
+            s.earnings += parseFloat(r.actual_fare || r.estimated_fare || r.fare || 0);
+          }
+          const score = r.rider_rating || r.rating;
+          if (score && !isNaN(score)) {
+            s.ratingSum += parseFloat(score);
+            s.ratingCount++;
+          }
+        }
+
+        for (const rider of ridersList) {
+          const s = statsMap.get(rider.id) || statsMap.get(rider.user_id) || statsMap.get(rider.rider_id);
+          if (s) {
+            rider.trips_completed = s.completed;
+            rider.total_earnings = Math.round(s.earnings * 100) / 100;
+            if (s.ratingCount > 0) {
+              rider.rating = parseFloat((s.ratingSum / s.ratingCount).toFixed(1));
+              rider.review_count = s.ratingCount;
+              rider.reviews_count = s.ratingCount;
+            }
+          }
+        }
+      }
+    } catch (_) {}
 
     return ridersList;
   } catch (err) {

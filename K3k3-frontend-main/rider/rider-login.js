@@ -1,5 +1,5 @@
 // K3K3 Rider Login System - Real Backend API Integration
-const API_BASE = 'http://localhost:8810';
+const API_BASE = '';
 
 class RiderLoginSystem {
     constructor() {
@@ -399,12 +399,37 @@ class RiderLoginSystem {
     // ─── Redirect to Rider Dashboard ──────────────────────────────────────────
     redirectToDashboard(session) {
         localStorage.setItem('riderSession', JSON.stringify(session));
+        sessionStorage.setItem('riderSession', JSON.stringify(session));
 
-        // Check rider status and redirect accordingly
-        if (session.status === 'approved') {
-            window.location.href = 'dashboard.html';
+        const proceed = () => {
+            if (session.status === 'approved' || session.status === 'active') {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.location.href = 'pending.html';
+            }
+        };
+
+        if ((session.status === 'approved' || session.status === 'active') && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    try {
+                        sessionStorage.setItem('k3k3_rider_lat', pos.coords.latitude);
+                        sessionStorage.setItem('k3k3_rider_lng', pos.coords.longitude);
+                        localStorage.setItem('k3k3_driver_last_coords', JSON.stringify({
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude,
+                            timestamp: Date.now()
+                        }));
+                    } catch (_) {}
+                    proceed();
+                },
+                () => {
+                    proceed();
+                },
+                { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
+            );
         } else {
-            window.location.href = 'rider-pending.html';
+            proceed();
         }
     }
 }

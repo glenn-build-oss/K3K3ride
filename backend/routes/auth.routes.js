@@ -855,6 +855,43 @@ router.get('/rider/profile', async (req, res) => {
     const effectiveId = user?.id || app?.user_id || riderId || '68a4171c-a07d-4a6b-af40-6084f8d38c7a';
     const shortId = effectiveId.replace(/-/g, '').substring(0, 8).toUpperCase();
 
+    // Query real completed rides, ratings and review counts for this rider
+    let realCompletedTrips = 0;
+    let realTotalEarnings = 0;
+    let realRating = null;
+    let realReviewCount = 0;
+
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+      const { data: riderRides } = await supabase
+        .from('rides')
+        .select('id, status, actual_fare, estimated_fare, fare, rating, rider_rating')
+        .or(`rider_id.eq.${effectiveId},rider_id.eq.${riderId || ''}`);
+
+      if (riderRides && Array.isArray(riderRides)) {
+        let ratingSum = 0;
+        for (const r of riderRides) {
+          if (r.status === 'completed' || r.status === 'done') {
+            realCompletedTrips++;
+            realTotalEarnings += parseFloat(r.actual_fare || r.estimated_fare || r.fare || 0);
+          }
+          const score = r.rider_rating || r.rating;
+          if (score && !isNaN(score)) {
+            ratingSum += parseFloat(score);
+            realReviewCount++;
+          }
+        }
+        if (realReviewCount > 0) {
+          realRating = parseFloat((ratingSum / realReviewCount).toFixed(1));
+        }
+      }
+    } catch (_) {}
+
+    const rawExp = app?.experience || (app?.emergency_contact_name && app.emergency_contact_name.startsWith('Exp:') ? app.emergency_contact_name.replace('Exp:', '').trim() : (user?.experience || '1-2 years'));
+    const emName = (app?.emergency_contact_name && !app.emergency_contact_name.startsWith('Exp:')) ? app.emergency_contact_name : (user?.emergency_name || user?.emergency_contact_name || '');
+    const emPhone = app?.emergency_contact_phone || user?.emergency_phone || user?.emergency_contact_phone || '';
+
     res.json({
       success: true,
       profile: {
@@ -877,11 +914,15 @@ router.get('/rider/profile', async (req, res) => {
         capacity: 3,
         station: station,
         city: app?.city || 'Ho',
-        rating: 4.9,
+        rating: realRating !== null ? realRating : 5.0,
+        reviewCount: realReviewCount,
+        reviewsCount: realReviewCount,
         acceptanceRate: '98%',
-        tripsCompleted: 84,
-        emergencyName: app?.emergency_contact_name || user?.emergency_name || '',
-        emergencyPhone: app?.emergency_contact_phone || user?.emergency_phone || '',
+        tripsCompleted: realCompletedTrips,
+        totalEarnings: Math.round(realTotalEarnings * 100) / 100,
+        experience: rawExp,
+        emergencyName: emName,
+        emergencyPhone: emPhone,
         joinedDate: app?.created_at || user?.created_at || new Date().toISOString()
       }
     });
@@ -903,6 +944,7 @@ router.put('/rider/profile', async (req, res) => {
       email, phone,
       licensePlate, vehiclePlate,
       station,
+      experience,
       emergencyName, emergencyPhone,
       emergency_name, emergency_phone
     } = req.body;
@@ -918,6 +960,11 @@ router.put('/rider/profile', async (req, res) => {
     if (full) updates.full_name = full;
     if (email) updates.email = email.toLowerCase().trim();
     if (phone) updates.phone = phone.trim();
+    if (experience) updates.experience = experience.trim();
+    const emName = emergencyName || emergency_name;
+    if (emName) updates.emergency_name = emName.trim();
+    const emPhone = emergencyPhone || emergency_phone;
+    if (emPhone) updates.emergency_phone = emPhone.trim();
 
     let updatedUser = null;
     if (targetId && targetId !== 'rider-demo' && targetId !== '—') {
@@ -940,10 +987,13 @@ router.put('/rider/profile', async (req, res) => {
         const plate = licensePlate || vehiclePlate;
         if (plate) appUpdates.license_plate = plate.trim();
         if (station) appUpdates.station = station.trim();
-        const emName = emergencyName || emergency_name;
         if (emName) appUpdates.emergency_contact_name = emName.trim();
-        const emPhone = emergencyPhone || emergency_phone;
         if (emPhone) appUpdates.emergency_contact_phone = emPhone.trim();
+
+        // Also update experience in metadata if present
+        if (experience) {
+          appUpdates.experience = experience.trim();
+        }
 
         await supabase
           .from('rider_applications')
@@ -967,6 +1017,7 @@ router.put('/rider/profile', async (req, res) => {
         phone: effectivePhone || '',
         licensePlate: licensePlate || vehiclePlate || 'ER1213131',
         station: station || 'Ho Central',
+        experience: experience || '1-2 years',
         emergencyName: emergencyName || emergency_name || '',
         emergencyPhone: emergencyPhone || emergency_phone || ''
       }
