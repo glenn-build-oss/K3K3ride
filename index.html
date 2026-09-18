@@ -188,14 +188,14 @@
         <img src="assets/k3k3 - wobbly.png" alt="K3K3 Logo" class="k3k3-circle-img">
       </div>
 
-      <!-- Designed & Wobbly K3K3 RIDE Lettering -->
+      <!-- Designed Static K3K3 RIDE Lettering -->
       <div class="k3k3-wobbly-title" aria-label="K3K3 RIDE">
-        <span class="wobble-char" style="--d: 0.0s;">K</span>
-        <span class="wobble-char" style="--d: 0.12s;">3</span>
-        <span class="wobble-char" style="--d: 0.24s;">K</span>
-        <span class="wobble-char" style="--d: 0.36s;">3</span>
+        <span class="wobble-char">K</span>
+        <span class="wobble-char">3</span>
+        <span class="wobble-char">K</span>
+        <span class="wobble-char">3</span>
         <span style="display:inline-block; width: 6px;"></span>
-        <span class="wobble-ride" style="--d: 0.48s;">RIDE</span>
+        <span class="wobble-ride">RIDE</span>
       </div>
 
       <div style="
@@ -260,9 +260,6 @@
     .wobble-char {
       display: inline-block;
       color: #FFFFFF;
-      transform-origin: center bottom;
-      animation: k3k3LetterWave 1.9s infinite ease-in-out;
-      animation-delay: var(--d);
       text-shadow: 0 3px 12px rgba(0,0,0,0.6);
     }
     .wobble-ride {
@@ -270,24 +267,7 @@
       color: #FFD60A;
       font-weight: 900;
       letter-spacing: 0.05em;
-      transform-origin: center bottom;
-      animation: k3k3LetterWave 1.9s infinite ease-in-out;
-      animation-delay: var(--d);
       text-shadow: 0 0 20px rgba(255, 214, 10, 0.65), 0 2px 8px rgba(0,0,0,0.8);
-    }
-    @keyframes k3k3LetterWave {
-      0%, 100% {
-        transform: translateY(0) rotate(0deg) scale(1);
-      }
-      25% {
-        transform: translateY(-4.5px) rotate(-3.5deg) scale(1.06);
-      }
-      50% {
-        transform: translateY(2px) rotate(2deg) scale(0.97);
-      }
-      75% {
-        transform: translateY(-2px) rotate(-1.5deg) scale(1.02);
-      }
     }
     @keyframes k3k3CircleWobble {
       0%, 100% {
