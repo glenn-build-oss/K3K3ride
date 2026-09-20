@@ -4892,14 +4892,14 @@
           <div class="tile-icon"><i class="fas fa-flag"></i></div>
           <span>Report Issue</span><small>Tell us what went wrong</small>
         </div>
-        <a class="support-tile" href="https://wa.me/233504842974?text=Hello%20K3K3%20Ride%20Business%20Support%20(%40k3k3rideservice)%2C%20I%20need%20assistance." target="_blank" rel="noopener">
+        <a class="support-tile" href="https://api.whatsapp.com/send?phone=233504842974&text=Hello%20K3K3%20Ride%20Business%20Support%2C%20I%20need%20assistance." onclick="openPassengerWhatsAppSupport(event)" target="_blank" rel="noopener">
           <div class="tile-icon" style="background:#D9FDD3">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366">
               <path
                 d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
             </svg>
           </div>
-          <span>WhatsApp Business</span><small>@k3k3rideservice · 0504842974</small>
+          <span>WhatsApp Business</span><small>Direct Support · 0504842974</small>
         </a>
         <div class="support-tile" onclick="document.getElementById('faqCard').scrollIntoView({behavior:'smooth'})">
           <div class="tile-icon"><i class="fas fa-circle-question"></i></div>
@@ -4930,9 +4930,12 @@
                 placeholder="Please describe the issue in as much detail as possible. Include time, location, driver name, or any other relevant information that will help us investigate…"
                 style="min-height:180px;resize:vertical"></textarea>
             </div>
-            <button class="form-save-btn" onclick="submitIssue()">
-              <i class="fas fa-paper-plane"></i> Submit Report
+            <button class="form-save-btn" onclick="submitIssue()" style="background:#25D366;color:#ffffff;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700">
+              <i class="fab fa-whatsapp" style="font-size:1.15rem"></i> Send Report to WhatsApp (0504842974)
             </button>
+            <div style="margin-top:10px;text-align:center;font-size:.78rem;color:var(--text-2)">
+              Direct WhatsApp Support: <a href="https://api.whatsapp.com/send?phone=233504842974&text=Hello%20K3K3%20Ride%20Support%2C%20I%20need%20assistance." onclick="openPassengerWhatsAppSupport(event)" style="color:#25D366;font-weight:700;text-decoration:none">0504842974</a> · Email: <a href="mailto:K3K3ride@gmail.com" style="color:var(--text-2)">K3K3ride@gmail.com</a>
+            </div>
           </div>
         </div>
         <div class="card" id="faqCard">
@@ -8147,34 +8150,55 @@
     }
 
     /* ══════════════════════════════════════════
-       Support — Email via mailto:
+       Support — Direct WhatsApp Support to 0504842974
     ══════════════════════════════════════════ */
+    function openPassengerWhatsAppSupport(event, customMsg) {
+      if (event && event.preventDefault) event.preventDefault();
+      const phone = '233504842974';
+      const s = getStoredSession() || {};
+      const name = `${s.fname || s.name || ''} ${s.lname || ''}`.trim() || 'Passenger';
+      const userPhone = s.phone || '';
+      const defaultText = `Hello K3K3 Support, I am a passenger (${name}${userPhone ? ' · ' + userPhone : ''}) and I need assistance.`;
+      const text = encodeURIComponent(customMsg || defaultText);
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        window.location.href = `whatsapp://send?phone=${phone}&text=${text}`;
+        setTimeout(() => {
+          window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
+        }, 1200);
+      } else {
+        window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
+      }
+    }
+
     function submitIssue() {
       const cat = document.getElementById('issueCategory').value;
       const desc = document.getElementById('issueDesc').value.trim();
       if (!cat) { showToast('Please select a category', 'error'); return; }
       if (!desc) { showToast('Please describe the issue', 'error'); return; }
-      if (desc.length < 20) { showToast('Please provide more detail (at least 20 characters)', 'error'); return; }
+      if (desc.length < 10) { showToast('Please provide more detail (at least 10 characters)', 'error'); return; }
 
       const userId = getUserId();
       const s = getStoredSession();
-      const name = s ? `${s.fname || s.name || ''} ${s.lname || ''}`.trim() : 'K3K3 User';
+      const name = s ? `${s.fname || s.name || ''} ${s.lname || ''}`.trim() : 'K3K3 Passenger';
+      const phoneNum = s ? (s.phone || '') : '';
 
-      const subject = encodeURIComponent('Report an Issue from K3K3');
-      const bodyText = `Category: ${cat}\n\nReported by: ${name}${userId ? ' (ID: ' + userId + ')' : ''}\n\n---\n\n${desc}`;
-      const body = encodeURIComponent(bodyText);
+      const waMessage = `*K3K3 Support Issue Report*\n\n*Category:* ${cat}\n*Name:* ${name}\n*Phone:* ${phoneNum || 'Not set'}\n*User ID:* ${userId || 'N/A'}\n\n*Issue Details:*\n${desc}`;
 
-      // Try to post to backend first
-      fetch(`${API}/support/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: cat, description: desc, user_id: userId, name })
-      }).catch(() => { }); // silently ignore if no endpoint
+      // Post to backend support audit endpoint if available
+      try {
+        fetch(`${API}/support/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: cat, description: desc, user_id: userId, name, phone: phoneNum })
+        }).catch(() => { });
+      } catch(_) {}
 
-      // Open email client
-      window.open(`mailto:K3K3ride@gmail.com?subject=${subject}&body=${body}`, '_blank');
+      // Open WhatsApp directly to 0504842974 (+233504842974)
+      openPassengerWhatsAppSupport(null, waMessage);
 
-      showToast('Report submitted. Opening your email app…', 'success');
+      showToast('Opening WhatsApp with your report for 0504842974...', 'success');
       document.getElementById('issueCategory').value = '';
       document.getElementById('issueDesc').value = '';
     }
