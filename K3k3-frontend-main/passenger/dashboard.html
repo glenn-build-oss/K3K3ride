@@ -3782,13 +3782,15 @@
         background: rgba(0, 0, 0, .58);
         z-index: 990;
         opacity: 0;
+        visibility: hidden;
         pointer-events: none;
-        transition: opacity .28s;
+        transition: opacity .28s, visibility .28s;
         backdrop-filter: blur(2px);
       }
 
       .drawer-overlay.show {
         opacity: 1;
+        visibility: visible;
         pointer-events: all;
       }
 
@@ -5399,19 +5401,6 @@
     </div>
   </div>
 
-  <!-- Location Permission Prompt -->
-  <div class="location-prompt" id="locationPrompt">
-    <div class="location-prompt-icon"><i class="fas fa-location-dot"></i></div>
-    <div class="location-prompt-body">
-      <h4>Enable Location Access</h4>
-      <p>K3K3 uses your location to find nearby riders and ensure accurate pickups. Your location is only shared when
-        you book a ride.</p>
-      <div class="location-prompt-btns">
-        <button class="loc-allow-btn" onclick="allowLocation()"><i class="fas fa-check"></i> Allow Access</button>
-        <button class="loc-deny-btn" onclick="denyLocation()">Not Now</button>
-      </div>
-    </div>
-  </div>
 
 
   <!-- ═══════════════════════════════════════
@@ -7887,6 +7876,7 @@
 
     function handleTripStatusChange(update) {
       console.log('[Trip Status Change]', update);
+      if (update.status === 'completed') {
         sessionStorage.removeItem('k3k3_active_trip');
         const card = document.getElementById('homeActiveTripCard');
         if (card) card.style.display = 'none';

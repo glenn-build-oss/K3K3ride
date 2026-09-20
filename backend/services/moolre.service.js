@@ -17,12 +17,14 @@ const MOOLRE_SENDER_ID_DEFAULT = 'K3K3ride';
  * Get the VAS key at call time so Vercel env vars are always fresh.
  */
 function getMoolreKey() {
-  return process.env.MOOLRE_SMS_VAS_KEY ||
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6MTI1NDksImV4cCI6MTk1NjUyNzk5OX0.GAzLoFSusOOqXbhmllJIGjVKhRM8kEDzJW7PzCsS9o4';
+  const key = process.env.MOOLRE_SMS_VAS_KEY ||
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2YXNpZCI6MTI1NDksImV4cCI6MTk1NjUyNzk5OX0.3I8lbPVaul2a-ss6gRZR9JZxWgoHxMgPy3ue7rXfnaI';
+  return typeof key === 'string' ? key.trim() : key;
 }
 
 function getMoolreSenderId() {
-  return process.env.MOOLRE_SENDER_ID || MOOLRE_SENDER_ID_DEFAULT;
+  const senderId = process.env.MOOLRE_SENDER_ID || MOOLRE_SENDER_ID_DEFAULT;
+  return typeof senderId === 'string' ? senderId.trim() : senderId;
 }
 
 /**
