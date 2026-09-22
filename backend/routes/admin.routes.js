@@ -1336,5 +1336,189 @@ router.get(['/notifications', '/api/admin/notifications'], async (req, res) => {
   }
 });
 
+// ─── Pricing & Routes CMS ───
+const pricingService = require('../services/pricing.service');
+
+// Get full pricing config (locations, route overrides, settings)
+router.get('/pricing', (req, res) => {
+  try {
+    const config = pricingService.getPricingConfig();
+    res.json(config);
+  } catch (err) {
+    console.error('[Admin] Error fetching pricing config:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Calculate fare test/preview endpoint
+router.post('/pricing/calculate', (req, res) => {
+  try {
+    const { from, to } = req.body;
+    const result = pricingService.calculateFare(from, to);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Update global pricing settings
+router.put('/pricing/settings', (req, res) => {
+  try {
+    const updated = pricingService.updateSettings(req.body);
+    res.json({ success: true, settings: updated });
+  } catch (err) {
+    console.error('[Admin] Error updating pricing settings:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Create location
+router.post('/locations', (req, res) => {
+  try {
+    const location = pricingService.createLocation(req.body);
+    res.status(201).json({ success: true, location });
+  } catch (err) {
+    console.error('[Admin] Error creating location:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Update location
+router.put('/locations/:id', (req, res) => {
+  try {
+    const location = pricingService.updateLocation(req.params.id, req.body);
+    res.json({ success: true, location });
+  } catch (err) {
+    console.error('[Admin] Error updating location:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Delete location
+router.delete('/locations/:id', (req, res) => {
+  try {
+    const result = pricingService.deleteLocation(req.params.id);
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error deleting location:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Create route fare override
+router.post('/routes', (req, res) => {
+  try {
+    const route = pricingService.createRouteFare(req.body);
+    res.status(201).json({ success: true, route });
+  } catch (err) {
+    console.error('[Admin] Error creating route fare:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Update route fare override
+router.put('/routes/:id', (req, res) => {
+  try {
+    const route = pricingService.updateRouteFare(req.params.id, req.body);
+    res.json({ success: true, route });
+  } catch (err) {
+    console.error('[Admin] Error updating route fare:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Delete route fare override
+router.delete('/routes/:id', (req, res) => {
+  try {
+    const result = pricingService.deleteRouteFare(req.params.id);
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error deleting route fare:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// ─── Roles & Permissions CMS ───
+const rolesService = require('../services/roles.service');
+
+// Get all roles, available pages, and staff assignments
+router.get('/roles', (req, res) => {
+  try {
+    const config = rolesService.getRolesConfig();
+    res.json({ success: true, ...config });
+  } catch (err) {
+    console.error('[Admin] Error fetching roles:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Create new custom role
+router.post('/roles', (req, res) => {
+  try {
+    const newRole = rolesService.createRole(req.body);
+    res.status(201).json({ success: true, role: newRole });
+  } catch (err) {
+    console.error('[Admin] Error creating role:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Update role permissions and allowed pages
+router.put('/roles/:id', (req, res) => {
+  try {
+    const updated = rolesService.updateRole(req.params.id, req.body);
+    res.json({ success: true, role: updated });
+  } catch (err) {
+    console.error('[Admin] Error updating role:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Delete custom role
+router.delete('/roles/:id', (req, res) => {
+  try {
+    const result = rolesService.deleteRole(req.params.id);
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error deleting role:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Get staff assignments
+router.get('/staff', (req, res) => {
+  try {
+    const staff = rolesService.getStaffAssignments();
+    res.json({ success: true, staff });
+  } catch (err) {
+    console.error('[Admin] Error fetching staff:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Assign staff member role
+router.put('/staff/assign', (req, res) => {
+  try {
+    const { email, roleId, name } = req.body;
+    const result = rolesService.assignStaffRole(email, roleId, name);
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error assigning staff role:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Verify page access for a given role
+router.post('/roles/check-access', (req, res) => {
+  try {
+    const { roleId, page } = req.body;
+    const allowed = rolesService.isPageAllowedForRole(roleId, page);
+    res.json({ success: true, roleId, page, allowed });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
+
 

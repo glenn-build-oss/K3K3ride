@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>K3K3 — Roles &amp; Permissions CMS | Admin</title>
+  <meta name="description" content="Manage admin roles, page access permissions, and staff assignments.">
+  <link rel="icon" type="image/png" href="../assets/k3k3.png">
+  <link rel="shortcut icon" href="../favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0c0d10;
+      --bg-2: #111318;
+      --bg-3: #181b22;
+      --bg-4: #1e2230;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-2: rgba(255, 255, 255, 0.14);
+      --yellow: #FFD60A;
+      --yellow-dk: #E6C000;
+      --yellow-lt: rgba(255, 214, 10, 0.1);
+      --yellow-bdr: rgba(255, 214, 10, 0.22);
+      --white: #fff;
+      --muted: rgba(255, 255, 255, 0.35);
+      --muted-2: rgba(255, 255, 255, 0.6);
+      --text: rgba(255, 255, 255, 0.9);
+      --green: #10B981;
+      --green-lt: rgba(16, 185, 129, 0.12);
+      --red: #EF4444;
+      --red-lt: rgba(239, 68, 68, 0.12);
+      --blue: #3B82F6;
+      --blue-lt: rgba(59, 130, 246, 0.15);
+      --purple: #8B5CF6;
+      --purple-lt: rgba(139, 92, 246, 0.15);
+      --sb-w: 260px;
+      --top-h: 64px;
+      --r: 10px;
+      --r-lg: 16px;
+      --r-xl: 22px;
+      --r-full: 999px;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SIDEBAR & LAYOUT ─── */
+    .sidebar {
+      width: var(--sb-w);
+      min-height: 100vh;
+      background: var(--bg-2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s var(--ease);
+    }
+    .sidebar-header { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .brand-logo { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,214,10,0.1); border: 1px solid rgba(255,214,10,0.25); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+    .brand-logo img { width: 32px; height: 32px; object-fit: contain; }
+    .brand-logo-fallback { font-weight: 900; font-size: 1.1rem; color: var(--yellow); }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-name { font-weight: 900; font-size: 1.15rem; color: var(--white); letter-spacing: -0.02em; line-height: 1.1; }
+    .brand-tag { font-size: 0.68rem; font-weight: 600; color: var(--yellow); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .sidebar-clock { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+    .clock-date { font-size: 0.7rem; color: var(--muted-2); font-weight: 500; }
+    .clock-time { font-family: 'Inter', monospace; font-size: 1.05rem; font-weight: 700; color: var(--white); letter-spacing: 1px; margin: 2px 0; }
+    .clock-time .colon { color: var(--yellow); opacity: 0.8; }
+    .clock-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; }
+    .nav-group-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 10px 6px; }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item .nav-link { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 8px; color: var(--muted-2); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; }
+    .nav-item:hover .nav-link { background: rgba(255,255,255,0.05); color: var(--white); }
+    .nav-item.active .nav-link { background: rgba(255,214,10,0.12); color: var(--yellow); font-weight: 600; border-left: 3px solid var(--yellow); }
+    .nav-icon { width: 18px; text-align: center; font-size: 0.9rem; color: inherit; }
+    .nav-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-badge { background: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: var(--r-full); }
+    .sidebar-footer { padding: 14px 16px; border-top: 1px solid var(--border); background: var(--bg-2); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .admin-profile-card { display: flex; align-items: center; gap: 10px; }
+    .admin-avatar-wrap { position: relative; }
+    .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-3); border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center; color: var(--yellow); font-size: 0.85rem; }
+    .online-dot { position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px; border-radius: 50%; background: var(--green); border: 2px solid var(--bg-2); }
+    .admin-info { flex: 1; overflow: hidden; }
+    .admin-name { font-size: 0.8rem; font-weight: 600; color: var(--white); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+    .admin-role { font-size: 0.68rem; color: var(--muted); }
+    .sidebar-logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.08); color: #F87171; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+    .sidebar-logout-btn:hover { background: rgba(239,68,68,0.2); color: #fff; }
+
+    .main-wrapper {
+      margin-left: var(--sb-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - var(--sb-w));
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.sidebar-open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0; width: 100%; }
+      .sidebar-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+        backdrop-filter: blur(4px); z-index: 850; opacity: 0; pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      .sidebar-overlay.overlay-visible { opacity: 1; pointer-events: auto; }
+    }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      height: var(--top-h);
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 500;
+    }
+    .topbar-title { font-size: 1.05rem; font-weight: 800; color: var(--white); display: flex; align-items: center; gap: 10px; }
+    .topbar-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── CONTENT CONTAINER ─── */
+    .content-area {
+      padding: 24px 28px 60px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ─── STATS HEADER ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border-2); }
+    .stat-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; flex-shrink: 0;
+    }
+    .stat-icon.yellow { background: var(--yellow-lt); color: var(--yellow); }
+    .stat-icon.green { background: var(--green-lt); color: var(--green); }
+    .stat-icon.blue { background: var(--blue-lt); color: var(--blue); }
+    .stat-icon.purple { background: var(--purple-lt); color: var(--purple); }
+    .stat-info .stat-val { font-size: 1.4rem; font-weight: 800; color: var(--white); line-height: 1.2; }
+    .stat-info .stat-lbl { font-size: 0.74rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+    /* ─── TABS ─── */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted-2);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 12px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--white); }
+    .tab-btn.active {
+      color: var(--yellow);
+      border-bottom-color: var(--yellow);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── ROLE CARDS GRID ─── */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .role-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .role-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+    .role-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .role-title-box { display: flex; align-items: center; gap: 10px; }
+    .role-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
+    .role-name { font-size: 1.1rem; font-weight: 800; color: var(--white); }
+    .role-badge {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--r-full);
+      background: rgba(255,255,255,0.08); color: var(--muted-2);
+    }
+    .role-desc { font-size: 0.82rem; color: var(--muted-2); line-height: 1.5; margin-bottom: 18px; flex: 1; }
+    .role-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+    }
+    .role-meta-label { color: var(--muted); }
+    .role-meta-val { font-weight: 700; color: var(--white); }
+    .page-chips-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 14px 0 20px;
+    }
+    .page-chip {
+      font-size: 0.7rem; font-weight: 600; padding: 4px 9px; border-radius: 6px;
+      background: var(--bg-3); border: 1px solid var(--border); color: var(--text);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .page-chip.landing {
+      border-color: var(--yellow-bdr); background: var(--yellow-lt); color: var(--yellow);
+    }
+    .role-actions {
+      display: flex; gap: 10px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border);
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn-action {
+      padding: 9px 16px; border-radius: var(--r); font-family: inherit; font-size: 0.82rem;
+      font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.2s; border: none; text-decoration: none;
+    }
+    .btn-primary { background: var(--yellow); color: #0c0d10; }
+    .btn-primary:hover { background: var(--yellow-dk); }
+    .btn-secondary { background: var(--bg-3); color: var(--white); border: 1px solid var(--border-2); }
+    .btn-secondary:hover { background: var(--bg-4); }
+    .btn-danger { background: var(--red-lt); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+    .btn-danger:hover { background: rgba(239,68,68,0.22); }
+    .btn-dark { background: rgba(255,255,255,0.06); color: var(--white); border: 1px solid var(--border); }
+    .btn-dark:hover { background: rgba(255,255,255,0.12); }
+
+    /* ─── DATA TABLES ─── */
+    .table-container {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .table-header-box {
+      padding: 16px 20px;
+      background: var(--bg-3);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .table-title { font-size: 0.95rem; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 8px; }
+    .cms-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.84rem;
+    }
+    .cms-table th {
+      background: rgba(0,0,0,0.2);
+      padding: 12px 18px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .cms-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .cms-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ─── MODALS ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(5px); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s var(--ease);
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r-lg);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--bg-2);
+      z-index: 10;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 800; color: var(--white); display: flex; align-items: center; gap: 10px; }
+    .modal-close {
+      background: transparent; border: none; color: var(--muted-2);
+      font-size: 1.2rem; cursor: pointer; padding: 4px; line-height: 1;
+    }
+    .modal-close:hover { color: var(--white); }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .modal-footer {
+      padding: 18px 24px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+      position: sticky; bottom: 0; background: var(--bg-2); z-index: 10;
+    }
+
+    /* ─── FORM FIELDS ─── */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 0.78rem; font-weight: 700; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-input, .form-select, .form-textarea {
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 14px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.86rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--yellow); }
+    .page-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 10px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+    .page-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .page-checkbox-item:hover { background: rgba(255,255,255,0.06); }
+    .page-checkbox-item input { accent-color: var(--yellow); width: 16px; height: 16px; cursor: pointer; }
+    .page-checkbox-item span { font-size: 0.8rem; color: var(--white); font-weight: 500; }
+
+    /* ─── TOAST NOTIFICATIONS ─── */
+    #rolesToastContainer {
+      position: fixed; bottom: 24px; right: 24px; z-index: 2000;
+      display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+    }
+    .roles-toast {
+      pointer-events: auto; background: var(--bg-3); border: 1px solid var(--border-2);
+      border-radius: var(--r); padding: 12px 18px; font-size: 0.84rem; font-weight: 600;
+      color: var(--white); box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex;
+      align-items: center; gap: 10px; animation: toastIn 0.25s var(--ease);
+    }
+    @keyframes toastIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .roles-toast.success { border-color: var(--green); }
+    .roles-toast.success i { color: var(--green); }
+    .roles-toast.error { border-color: var(--red); }
+    .roles-toast.error i { color: var(--red); }
+  </style>
+</head>
+<body>
+
+  <!-- Shared Sidebar Placeholder -->
+  <aside class="sidebar" id="k3k3Sidebar"></aside>
+
+  <!-- Main Layout -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button id="sidebarToggle" style="background:transparent;border:none;color:var(--white);font-size:1.1rem;cursor:pointer;display:none">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <div class="topbar-title"><i class="fas fa-user-shield" style="color:var(--yellow)"></i> Roles &amp; Permissions CMS</div>
+          <div class="topbar-sub">Manage User Roles, Access Control &amp; Dedicated Landing Pages</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn-action btn-primary" onclick="openCreateRoleModal()">
+          <i class="fas fa-plus"></i> Create New Role
+        </button>
+        <button class="btn-action btn-dark" onclick="reloadRolesData()" title="Refresh data">
+          <i class="fas fa-rotate"></i> Refresh
+        </button>
+        <a href="dashboard.html" class="btn-action btn-secondary">
+          <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="content-area">
+
+      <!-- Stats Grid -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon yellow"><i class="fas fa-shield-halved"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statTotalRoles">0</div>
+            <div class="stat-lbl">Active Roles</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-user-gear"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statStaffCount">0</div>
+            <div class="stat-lbl">Staff Assigned</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-layer-group"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statSystemRoles">3</div>
+            <div class="stat-lbl">System Protected Roles</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-file-code"></i></div>
+          <div class="stat-info">
+            <div class="stat-val" id="statPagesControlled">13</div>
+            <div class="stat-lbl">Managed Admin Pages</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab Navigation -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('roles')">
+          <i class="fas fa-id-badge"></i> System &amp; Custom Roles
+        </button>
+        <button class="tab-btn" onclick="switchTab('staff')">
+          <i class="fas fa-users-gear"></i> Staff Role Assignments
+        </button>
+        <button class="tab-btn" onclick="switchTab('matrix')">
+          <i class="fas fa-table-cells"></i> Page Access Matrix
+        </button>
+      </div>
+
+      <!-- Tab 1: Roles Grid -->
+      <div class="tab-panel active" id="tab-roles">
+        <div class="roles-grid" id="rolesGridContainer">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Tab 2: Staff Assignments -->
+      <div class="tab-panel" id="tab-staff">
+        <div class="table-container">
+          <div class="table-header-box">
+            <div class="table-title"><i class="fas fa-user-lock"></i> Staff Accounts &amp; Assigned Roles</div>
+            <button class="btn-action btn-secondary" onclick="openAssignStaffModal()">
+              <i class="fas fa-user-plus"></i> Assign Staff Role
+            </button>
+          </div>
+          <table class="cms-table">
+            <thead>
+              <tr>
+                <th>Staff Name</th>
+                <th>Email Address</th>
+                <th>Assigned Role</th>
+                <th>Dedicated Landing Page</th>
+                <th>Allowed Pages</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: Access Matrix -->
+      <div class="tab-panel" id="tab-matrix">
+        <div class="table-container">
+          <div class="table-header-box">
+            <div class="table-title"><i class="fas fa-table-columns"></i> Comprehensive Page Access Matrix</div>
+          </div>
+          <table class="cms-table" id="accessMatrixTable">
+            <thead id="matrixHead">
+              <!-- Populated by JavaScript -->
+            </thead>
+            <tbody id="matrixBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ─── MODAL: CREATE ROLE ─── -->
+  <div class="modal-overlay" id="createRoleModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fas fa-plus-circle" style="color:var(--yellow)"></i> Create New Admin Role</div>
+        <button class="modal-close" onclick="closeModal('createRoleModal')">&times;</button>
+      </div>
+      <form id="createRoleForm" onsubmit="handleCreateRoleSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Role Name *</label>
+            <input type="text" class="form-input" id="newRoleName" placeholder="e.g. Dispatcher Lead, Fleet Supervisor" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" id="newRoleDesc" rows="2" placeholder="Describe the responsibilities and scope of this role..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role Color</label>
+            <input type="color" class="form-input" id="newRoleColor" value="#EC4899" style="height:44px;padding:4px">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dedicated Landing Page *</label>
+            <select class="form-select" id="newRoleDefaultPage" required>
+              <!-- Populated by JavaScript -->
+            </select>
+          </div>
+          <div class="form-group">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <label class="form-label">Allowed Pages *</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn-action btn-dark" style="padding:4px 8px;font-size:0.7rem" onclick="toggleSelectAllPages('newRole', true)">Select All</button>
+                <button type="button" class="btn-action btn-dark" style="padding:4px 8px;font-size:0.7rem" onclick="toggleSelectAllPages('newRole', false)">Deselect All</button>
+              </div>
+            </div>
+            <div class="page-select-grid" id="newRolePagesGrid">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action btn-secondary" onclick="closeModal('createRoleModal')">Cancel</button>
+          <button type="submit" class="btn-action btn-primary"><i class="fas fa-check"></i> Create Role</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── MODAL: EDIT ROLE ─── -->
+  <div class="modal-overlay" id="editRoleModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fas fa-pen-to-square" style="color:var(--yellow)"></i> Edit Role Permissions</div>
+        <button class="modal-close" onclick="closeModal('editRoleModal')">&times;</button>
+      </div>
+      <form id="editRoleForm" onsubmit="handleEditRoleSubmit(event)">
+        <input type="hidden" id="editRoleId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Role Name *</label>
+            <input type="text" class="form-input" id="editRoleName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" id="editRoleDesc" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role Color</label>
+            <input type="color" class="form-input" id="editRoleColor" style="height:44px;padding:4px">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dedicated Landing Page *</label>
+            <select class="form-select" id="editRoleDefaultPage" required>
+              <!-- Populated by JavaScript -->
+            </select>
+          </div>
+          <div class="form-group">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <label class="form-label">Allowed Pages *</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn-action btn-dark" style="padding:4px 8px;font-size:0.7rem" onclick="toggleSelectAllPages('editRole', true)">Select All</button>
+                <button type="button" class="btn-action btn-dark" style="padding:4px 8px;font-size:0.7rem" onclick="toggleSelectAllPages('editRole', false)">Deselect All</button>
+              </div>
+            </div>
+            <div class="page-select-grid" id="editRolePagesGrid">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action btn-secondary" onclick="closeModal('editRoleModal')">Cancel</button>
+          <button type="submit" class="btn-action btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── MODAL: ASSIGN STAFF ROLE ─── -->
+  <div class="modal-overlay" id="assignStaffModal">
+    <div class="modal-box" style="max-width:500px">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fas fa-user-tag" style="color:var(--yellow)"></i> Assign Staff Role</div>
+        <button class="modal-close" onclick="closeModal('assignStaffModal')">&times;</button>
+      </div>
+      <form id="assignStaffForm" onsubmit="handleAssignStaffSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Staff Name</label>
+            <input type="text" class="form-input" id="staffNameInput" placeholder="e.g. John Doe">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-input" id="staffEmailInput" placeholder="staff@k3k3.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Select Role *</label>
+            <select class="form-select" id="staffRoleSelect" required>
+              <!-- Populated by JavaScript -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action btn-secondary" onclick="closeModal('assignStaffModal')">Cancel</button>
+          <button type="submit" class="btn-action btn-primary"><i class="fas fa-check"></i> Save Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="rolesToastContainer"></div>
+
+  <!-- Shared Sidebar Script -->
+  <script src="sidebar.js"></script>
+
+  <script>
+    // ── API Base Determination ──
+    const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+      ? 'http://localhost:8810'
+      : '';
+
+    let rolesData = { all_pages: [], roles: [], staff_assignments: [] };
+
+    function showToast(message, type = 'success') {
+      const c = document.getElementById('rolesToastContainer');
+      const t = document.createElement('div');
+      t.className = `roles-toast ${type}`;
+      t.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span>${message}</span>`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(20px)';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      const activePanel = document.getElementById(`tab-${tabId}`);
+      if (activePanel) activePanel.classList.add('active');
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('show');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    }
+
+    async function reloadRolesData() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/roles`);
+        if (!res.ok) throw new Error('Failed to fetch roles from server');
+        const data = await res.json();
+        rolesData = data;
+        renderAll();
+        showToast('Roles configuration updated', 'success');
+      } catch (err) {
+        console.error('Error fetching roles:', err);
+        showToast(err.message, 'error');
+      }
+    }
+
+    function renderAll() {
+      renderStats();
+      renderRolesGrid();
+      renderStaffTable();
+      renderAccessMatrix();
+      populatePageDropdowns();
+    }
+
+    function renderStats() {
+      document.getElementById('statTotalRoles').textContent = (rolesData.roles || []).length;
+      document.getElementById('statStaffCount').textContent = (rolesData.staff_assignments || []).length;
+      document.getElementById('statSystemRoles').textContent = (rolesData.roles || []).filter(r => r.is_system).length;
+      document.getElementById('statPagesControlled').textContent = (rolesData.all_pages || []).length;
+    }
+
+    function renderRolesGrid() {
+      const container = document.getElementById('rolesGridContainer');
+      const roles = rolesData.roles || [];
+      const allPages = rolesData.all_pages || [];
+
+      container.innerHTML = roles.map(role => {
+        const allowedCount = (role.allowed_pages || []).length;
+        const totalPages = allPages.length;
+        const isSystem = Boolean(role.is_system);
+
+        const pageChips = (role.allowed_pages || []).map(p => {
+          const isLanding = p === role.default_page;
+          const pageObj = allPages.find(ap => ap.file === p);
+          const label = pageObj ? pageObj.label : p;
+          const icon = pageObj ? pageObj.icon : 'fa-file';
+          return `<span class="page-chip${isLanding ? ' landing' : ''}">
+            <i class="fas ${icon}"></i> ${label}${isLanding ? ' &bull; Default' : ''}
+          </span>`;
+        }).join('');
+
+        return `
+          <div class="role-card">
+            <div class="role-card-header">
+              <div class="role-title-box">
+                <span class="role-color-dot" style="background:${role.color || '#FFD60A'};color:${role.color || '#FFD60A'}"></span>
+                <span class="role-name">${role.name}</span>
+              </div>
+              <span class="role-badge" style="border: 1px solid ${role.color || '#FFD60A'}40; color: ${role.color || '#FFD60A'}">
+                ${role.badge || (isSystem ? 'System' : 'Custom')}
+              </span>
+            </div>
+            <div class="role-desc">${role.description || 'No description provided.'}</div>
+
+            <div class="role-meta-row">
+              <span class="role-meta-label">Dedicated Landing Page:</span>
+              <span class="role-meta-val" style="color:var(--yellow)">${role.default_page}</span>
+            </div>
+            <div class="role-meta-row">
+              <span class="role-meta-label">Page Coverage:</span>
+              <span class="role-meta-val">${allowedCount} of ${totalPages} Pages</span>
+            </div>
+
+            <div class="page-chips-preview">${pageChips}</div>
+
+            <div class="role-actions">
+              <button class="btn-action btn-secondary" style="flex:1" onclick="openEditRoleModal('${role.id}')">
+                <i class="fas fa-sliders"></i> Edit Permissions
+              </button>
+              ${!isSystem ? `
+                <button class="btn-action btn-danger" onclick="handleDeleteRole('${role.id}', '${role.name.replace(/'/g, "\\'")}')" title="Delete custom role">
+                  <i class="fas fa-trash"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderStaffTable() {
+      const tbody = document.getElementById('staffTableBody');
+      const staff = rolesData.staff_assignments || [];
+      const roles = rolesData.roles || [];
+
+      if (!staff.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">No staff assigned yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = staff.map(s => {
+        const role = roles.find(r => r.id === s.role) || { name: s.role, color: '#FFD60A', default_page: 'dashboard.html', allowed_pages: [] };
+        return `
+          <tr>
+            <td style="font-weight:700;color:var(--white)">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--yellow);font-size:0.75rem">
+                  <i class="fas fa-user-shield"></i>
+                </div>
+                ${s.name || 'Staff Member'}
+              </div>
+            </td>
+            <td style="font-family:monospace;color:var(--muted-2)">${s.email}</td>
+            <td>
+              <span style="font-size:0.75rem;font-weight:700;padding:3px 9px;border-radius:var(--r-full);background:${role.color}18;color:${role.color};border:1px solid ${role.color}40">
+                ${role.name}
+              </span>
+            </td>
+            <td>
+              <span style="font-family:monospace;font-size:0.78rem;color:var(--yellow)">${role.default_page || 'dashboard.html'}</span>
+            </td>
+            <td>
+              <span class="role-badge">${(role.allowed_pages || []).length} pages</span>
+            </td>
+            <td>
+              <button class="btn-action btn-dark" style="padding:6px 12px;font-size:0.75rem" onclick="openReassignStaffModal('${s.email}', '${s.name.replace(/'/g, "\\'")}', '${s.role}')">
+                <i class="fas fa-user-pen"></i> Change Role
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderAccessMatrix() {
+      const thead = document.getElementById('matrixHead');
+      const tbody = document.getElementById('matrixBody');
+      const roles = rolesData.roles || [];
+      const pages = rolesData.all_pages || [];
+
+      thead.innerHTML = `
+        <tr>
+          <th style="min-width:220px">Admin Page</th>
+          <th style="min-width:140px">Category</th>
+          ${roles.map(r => `
+            <th style="text-align:center;min-width:120px;color:${r.color || '#FFD60A'}">
+              ${r.name}
+            </th>
+          `).join('')}
+        </tr>
+      `;
+
+      tbody.innerHTML = pages.map(page => {
+        const roleCheckCells = roles.map(role => {
+          const isAllowed = role.id === 'admin' || (role.allowed_pages || []).includes(page.file);
+          const isLanding = role.default_page === page.file;
+
+          return `
+            <td style="text-align:center">
+              ${isAllowed ? `
+                <div style="display:inline-flex;align-items:center;justify-content:center;gap:4px">
+                  <i class="fas fa-circle-check" style="color:var(--green);font-size:1.05rem"></i>
+                  ${isLanding ? `<span style="font-size:0.65rem;color:var(--yellow);font-weight:700;text-transform:uppercase">&bull; Land</span>` : ''}
+                </div>
+              ` : `
+                <i class="fas fa-circle-xmark" style="color:var(--muted);font-size:1.05rem;opacity:0.35"></i>
+              `}
+            </td>
+          `;
+        }).join('');
+
+        return `
+          <tr>
+            <td style="font-weight:600;color:var(--white)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <i class="fas ${page.icon || 'fa-file'}" style="color:var(--muted);width:16px;text-align:center"></i>
+                <div>
+                  <div>${page.label}</div>
+                  <div style="font-family:monospace;font-size:0.72rem;color:var(--muted)">${page.file}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="role-badge">${page.group || 'GENERAL'}</span>
+            </td>
+            ${roleCheckCells}
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function populatePageDropdowns() {
+      const allPages = rolesData.all_pages || [];
+      const newDefaultSelect = document.getElementById('newRoleDefaultPage');
+      const editDefaultSelect = document.getElementById('editRoleDefaultPage');
+      const staffRoleSelect = document.getElementById('staffRoleSelect');
+
+      const pageOptions = allPages.map(p => `<option value="${p.file}">${p.label} (${p.file})</option>`).join('');
+      newDefaultSelect.innerHTML = pageOptions;
+      editDefaultSelect.innerHTML = pageOptions;
+
+      staffRoleSelect.innerHTML = (rolesData.roles || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+
+      // Populate Page Checkbox Grid for Create Role
+      const newPagesGrid = document.getElementById('newRolePagesGrid');
+      newPagesGrid.innerHTML = allPages.map(p => `
+        <label class="page-checkbox-item">
+          <input type="checkbox" name="newRolePage" value="${p.file}" checked>
+          <span><i class="fas ${p.icon}" style="width:14px;color:var(--muted)"></i> ${p.label}</span>
+        </label>
+      `).join('');
+    }
+
+    function toggleSelectAllPages(prefix, selectAll) {
+      document.querySelectorAll(`input[name="${prefix}Page"]`).forEach(cb => {
+        cb.checked = selectAll;
+      });
+    }
+
+    function openCreateRoleModal() {
+      document.getElementById('createRoleForm').reset();
+      populatePageDropdowns();
+      openModal('createRoleModal');
+    }
+
+    function openEditRoleModal(roleId) {
+      const role = (rolesData.roles || []).find(r => r.id === roleId);
+      if (!role) return;
+
+      document.getElementById('editRoleId').value = role.id;
+      document.getElementById('editRoleName').value = role.name;
+      document.getElementById('editRoleDesc').value = role.description || '';
+      document.getElementById('editRoleColor').value = role.color || '#A855F7';
+      document.getElementById('editRoleDefaultPage').value = role.default_page || 'dashboard.html';
+
+      // Populate checkboxes
+      const editPagesGrid = document.getElementById('editRolePagesGrid');
+      const allPages = rolesData.all_pages || [];
+      const allowed = role.allowed_pages || [];
+
+      editPagesGrid.innerHTML = allPages.map(p => {
+        const isChecked = role.id === 'admin' || allowed.includes(p.file);
+        return `
+          <label class="page-checkbox-item">
+            <input type="checkbox" name="editRolePage" value="${p.file}" ${isChecked ? 'checked' : ''} ${role.id === 'admin' && p.file === 'dashboard.html' ? 'disabled' : ''}>
+            <span><i class="fas ${p.icon}" style="width:14px;color:var(--muted)"></i> ${p.label}</span>
+          </label>
+        `;
+      }).join('');
+
+      openModal('editRoleModal');
+    }
+
+    function openAssignStaffModal() {
+      document.getElementById('assignStaffForm').reset();
+      populatePageDropdowns();
+      openModal('assignStaffModal');
+    }
+
+    function openReassignStaffModal(email, name, roleId) {
+      document.getElementById('staffEmailInput').value = email;
+      document.getElementById('staffNameInput').value = name;
+      document.getElementById('staffRoleSelect').value = roleId;
+      openModal('assignStaffModal');
+    }
+
+    async function handleCreateRoleSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newRoleName').value.trim();
+      const description = document.getElementById('newRoleDesc').value.trim();
+      const color = document.getElementById('newRoleColor').value;
+      const default_page = document.getElementById('newRoleDefaultPage').value;
+
+      const checkedBoxes = Array.from(document.querySelectorAll('input[name="newRolePage"]:checked'));
+      const allowed_pages = checkedBoxes.map(cb => cb.value);
+
+      if (!allowed_pages.length) {
+        showToast('Please select at least one allowed page for this role.', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/roles`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, color, default_page, allowed_pages })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to create role');
+
+        closeModal('createRoleModal');
+        showToast(`Role "${name}" created successfully!`, 'success');
+        reloadRolesData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function handleEditRoleSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('editRoleId').value;
+      const name = document.getElementById('editRoleName').value.trim();
+      const description = document.getElementById('editRoleDesc').value.trim();
+      const color = document.getElementById('editRoleColor').value;
+      const default_page = document.getElementById('editRoleDefaultPage').value;
+
+      const checkedBoxes = Array.from(document.querySelectorAll('input[name="editRolePage"]:checked'));
+      const allowed_pages = checkedBoxes.map(cb => cb.value);
+
+      if (!allowed_pages.length) {
+        showToast('A role must have at least one allowed page.', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/roles/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, color, default_page, allowed_pages })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to update role');
+
+        closeModal('editRoleModal');
+        showToast(`Role "${name}" updated successfully!`, 'success');
+        reloadRolesData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function handleDeleteRole(id, name) {
+      if (!confirm(`Are you sure you want to delete the role "${name}"? This action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/roles/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to delete role');
+
+        showToast(`Role "${name}" deleted.`, 'success');
+        reloadRolesData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function handleAssignStaffSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('staffEmailInput').value.trim();
+      const name = document.getElementById('staffNameInput').value.trim();
+      const roleId = document.getElementById('staffRoleSelect').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/staff/assign`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, roleId, name })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to assign role');
+
+        closeModal('assignStaffModal');
+        showToast(`Staff role assigned to ${email}`, 'success');
+        reloadRolesData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ── Initial Boot ──
+    document.addEventListener('DOMContentLoaded', () => {
+      reloadRolesData();
+    });
+  </script>
+</body>
+</html>

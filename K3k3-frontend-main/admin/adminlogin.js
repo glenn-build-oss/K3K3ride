@@ -116,17 +116,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     localStorage.setItem('k3k3_admin_token', token);
                     localStorage.setItem('current_admin', JSON.stringify({
-                        id:        user.id || 1,
-                        name:      user.name || 'Admin',
-                        email:     user.email || email,
-                        role:      user.role || user.role_type || 'admin',
-                        loginTime: new Date().toISOString()
+                        id:           user.id || 1,
+                        name:         user.name || 'Admin',
+                        email:        user.email || email,
+                        role:         user.role || user.role_type || 'admin',
+                        roleName:     user.roleName || user.role_name || (user.role === 'admin' ? 'Super Admin' : user.role),
+                        defaultPage:  user.defaultPage || user.default_page || 'dashboard.html',
+                        allowedPages: user.allowedPages || user.allowed_pages || [],
+                        loginTime:    new Date().toISOString()
                     }));
 
                     showNotification('success', 'Welcome back, ' + (user.name || 'Admin') + '! Redirecting...', 'Login Successful');
 
                     setTimeout(function() {
-                        window.location.href = 'admin-dashboard.html';
+                        var target = user.defaultPage || user.default_page || 'dashboard.html';
+                        window.location.href = target;
                     }, 1000);
                 });
             } else {

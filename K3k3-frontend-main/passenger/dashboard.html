@@ -13,6 +13,9 @@
   <!-- Leaflet.js Live Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Mapbox GL JS for Interactive "Where are you going?" Pop-up -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <style>
     /* Live Responsive Map Styles */
     .p-map-card {
@@ -719,10 +722,12 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      pointer-events: none;
     }
 
     .confirm-modal-backdrop.show {
-      display: flex
+      display: flex;
+      pointer-events: all;
     }
 
     .confirm-modal {
@@ -825,8 +830,19 @@
       animation: slideUpPrompt .4s var(--ease);
     }
 
+    @media (max-width: 768px) {
+      .location-prompt {
+        bottom: calc(var(--nav-h, 64px) + 14px);
+        width: calc(100% - 24px);
+        padding: 16px 18px;
+        z-index: 700;
+      }
+    }
+
     .location-prompt.hidden {
-      display: none
+      display: none !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
     }
 
     @keyframes slideUpPrompt {
@@ -2901,6 +2917,94 @@
       color: var(--yellow)
     }
 
+    /* Mapbox Modal Styling */
+    .modal-zone-chips {
+      display: flex;
+      gap: 6px;
+      margin: -10px 0 16px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-zone-chip {
+      padding: 6px 13px;
+      border-radius: var(--r-full);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-2);
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .modal-zone-chip:hover {
+      border-color: var(--yellow);
+      color: var(--text);
+    }
+    .modal-zone-chip.active {
+      background: var(--yellow);
+      color: var(--black);
+      border-color: var(--yellow);
+      box-shadow: 0 2px 8px rgba(255,214,10,0.3);
+    }
+    .modal-mapbox-wrap {
+      width: 100%;
+      height: 195px;
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      margin-bottom: 16px;
+      position: relative;
+      background: #111318;
+    }
+    #modalMapboxMap {
+      width: 100%;
+      height: 100%;
+    }
+    .modal-mapbox-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      z-index: 2;
+      background: rgba(12, 13, 16, 0.88);
+      backdrop-filter: blur(4px);
+      padding: 3px 9px;
+      border-radius: var(--r-full);
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--yellow);
+      border: 1px solid var(--yellow-bdr);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      pointer-events: none;
+    }
+    .zone-indicator-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--r-full);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .zone-indicator-pill.in {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .zone-indicator-pill.out {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3B82F6;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
     .route-wrap {
       display: flex;
       align-items: center;
@@ -3728,13 +3832,20 @@
         align-items: center;
         justify-content: center;
         gap: 5px;
-        width: 38px;
-        height: 38px;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
         border-radius: 10px;
         border: 1.5px solid var(--border);
         background: var(--surface);
         cursor: pointer;
         transition: all .18s;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        position: relative;
+        z-index: 505;
       }
 
       .hamburger:hover {
@@ -3742,15 +3853,15 @@
       }
 
       .h-line {
-        width: 16px;
-        height: 2px;
+        width: 18px;
+        height: 2.5px;
         background: var(--text);
         border-radius: 2px;
         transition: all .25s;
       }
 
       .hamburger.open .h-line:nth-child(1) {
-        transform: translateY(7px) rotate(45deg);
+        transform: translateY(7.5px) rotate(45deg);
       }
 
       .hamburger.open .h-line:nth-child(2) {
@@ -3759,7 +3870,7 @@
       }
 
       .hamburger.open .h-line:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg);
+        transform: translateY(-7.5px) rotate(-45deg);
       }
 
       /* ── Sidebar → responsive drawer overlay ── */
@@ -3776,7 +3887,7 @@
       }
 
       .drawer-overlay {
-        display: block !important;
+        display: none !important;
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, .58);
@@ -3789,6 +3900,7 @@
       }
 
       .drawer-overlay.show {
+        display: block !important;
         opacity: 1;
         visibility: visible;
         pointer-events: all;
@@ -3827,6 +3939,8 @@
         z-index: 600;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, .08);
         padding-bottom: env(safe-area-inset-bottom, 0);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
 
       .nav-tab {
@@ -3848,6 +3962,9 @@
         transition: color .18s;
         padding-top: 8px;
         position: relative;
+        min-height: 48px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
 
       .nav-tab.active {
@@ -4930,11 +5047,11 @@
                 placeholder="Please describe the issue in as much detail as possible. Include time, location, driver name, or any other relevant information that will help us investigate…"
                 style="min-height:180px;resize:vertical"></textarea>
             </div>
-            <button class="form-save-btn" onclick="submitIssue()" style="background:#25D366;color:#ffffff;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700">
-              <i class="fab fa-whatsapp" style="font-size:1.15rem"></i> Send Report to WhatsApp (0504842974)
+            <button class="form-save-btn" onclick="submitIssue()" style="background:#25D366;color:#ffffff;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;cursor:pointer;touch-action:manipulation">
+              <i class="fab fa-whatsapp" style="font-size:1.15rem"></i> Send Report to Support
             </button>
             <div style="margin-top:10px;text-align:center;font-size:.78rem;color:var(--text-2)">
-              Direct WhatsApp Support: <a href="https://api.whatsapp.com/send?phone=233504842974&text=Hello%20K3K3%20Ride%20Support%2C%20I%20need%20assistance." onclick="openPassengerWhatsAppSupport(event)" style="color:#25D366;font-weight:700;text-decoration:none">0504842974</a> · Email: <a href="mailto:K3K3ride@gmail.com" style="color:var(--text-2)">K3K3ride@gmail.com</a>
+              Direct Support: <a href="#" onclick="openPassengerWhatsAppSupport(event)" style="color:#25D366;font-weight:700;text-decoration:none"><i class="fab fa-whatsapp"></i> Chat on WhatsApp</a> · Email: <a href="mailto:K3K3ride@gmail.com" style="color:var(--text-2)">K3K3ride@gmail.com</a>
             </div>
           </div>
         </div>
@@ -5432,7 +5549,14 @@
       <!-- STEP 1: Pick locations -->
       <div id="bookStep1">
         <div class="modal-title"><i class="fas fa-motorcycle"></i> Where are you going?</div>
-        <div style="font-size:.75rem;color:var(--muted);margin:-4px 0 18px;text-align:center">K3K3 Campus Routes • Ho, Volta Region</div>
+        <div style="font-size:.75rem;color:var(--muted);margin:-4px 0 14px;text-align:center">K3K3 Campus Routes • Ho, Volta Region</div>
+
+        <!-- Zone quick filter chips -->
+        <div class="modal-zone-chips" id="modalZoneChips">
+          <button type="button" class="modal-zone-chip active" id="mChipAll" onclick="setDestinationFilter('all', this)">All Stops</button>
+          <button type="button" class="modal-zone-chip" id="mChipIn" onclick="setDestinationFilter('in', this)"><i class="fas fa-graduation-cap"></i> In-Campus (₵3.00)</button>
+          <button type="button" class="modal-zone-chip" id="mChipOut" onclick="setDestinationFilter('out', this)"><i class="fas fa-city"></i> Out-Campus / Town</button>
+        </div>
 
         <!-- Pickup -->
         <div class="form-field">
@@ -5441,31 +5565,31 @@
             <div class="campus-select-dot pickup"></div>
             <select class="campus-select" id="pickupSelect" onchange="onLocationChange()">
               <option value="">Select pickup location…</option>
-              <optgroup label="Campuses & Hostels (Ho)">
+              <optgroup label="Campuses & Hostels (In-Campus)" id="pickupOptIn">
                 <option value="Ho Technical University (HSTU)">Ho Technical University (HSTU)</option>
                 <option value="HSTU Main Gate">HSTU Main Gate</option>
                 <option value="HSTU Student Hostel">HSTU Student Hostel</option>
                 <option value="Sokode Hostel">Sokode Hostel</option>
-                <option value="Cedi Auditorium">Cedi Auditorium (UHAS)</option>
+                <option value="Cedi Auditorium (UHAS)">Cedi Auditorium (UHAS)</option>
                 <option value="University of Health & Allied Sciences (UHAS)">UHAS Campus</option>
                 <option value="School of Hygiene">School of Hygiene</option>
                 <option value="Dave (Southern Campus)">Dave (Southern Campus)</option>
               </optgroup>
-              <optgroup label="Central & Commercial">
+              <optgroup label="Central & Commercial (Out-Campus)" id="pickupOptOutComm">
                 <option value="Ho Central">Ho Central</option>
                 <option value="Ho Central Market">Ho Central Market</option>
                 <option value="Ho Bus Terminal">Ho Bus Terminal</option>
                 <option value="Ho Town Centre">Ho Town Centre</option>
                 <option value="Ho Post Office">Ho Post Office</option>
-                <option value="Stadium">Ho Sports Stadium</option>
+                <option value="Ho Sports Stadium">Ho Sports Stadium</option>
                 <option value="Ho Jubilee Park">Ho Jubilee Park</option>
               </optgroup>
-              <optgroup label="Hospitals & Healthcare">
-                <option value="Trafalgar">Trafalgar (Ho Teaching Hospital)</option>
+              <optgroup label="Hospitals & Healthcare (Out-Campus)" id="pickupOptOutHosp">
+                <option value="Trafalgar (Ho Teaching Hospital)">Trafalgar (Ho Teaching Hospital)</option>
                 <option value="Volta Regional Hospital">Volta Regional Hospital</option>
                 <option value="Ho Municipal Hospital">Ho Municipal Hospital</option>
               </optgroup>
-              <optgroup label="Townships & Residential">
+              <optgroup label="Townships & Residential (Out-Campus)" id="pickupOptOutTown">
                 <option value="Dome Area">Dome Area</option>
                 <option value="Bankoe">Bankoe</option>
                 <option value="Ahoe">Ahoe</option>
@@ -5476,7 +5600,7 @@
                 <option value="Sokode Junction">Sokode Junction</option>
                 <option value="Fiave">Fiave</option>
                 <option value="Agorve">Agorve</option>
-                <option value="Barracks">Volta Barracks</option>
+                <option value="Volta Barracks">Volta Barracks</option>
                 <option value="Mirage">Mirage</option>
                 <option value="Guiness">Guiness</option>
                 <option value="Lokoe">Lokoe</option>
@@ -5493,31 +5617,31 @@
             <div class="campus-select-dot dest"></div>
             <select class="campus-select" id="destSelect" onchange="onLocationChange()">
               <option value="">Select destination…</option>
-              <optgroup label="Campuses & Hostels (Ho)">
+              <optgroup label="Campuses & Hostels (In-Campus)" id="destOptIn">
                 <option value="Ho Technical University (HSTU)">Ho Technical University (HSTU)</option>
                 <option value="HSTU Main Gate">HSTU Main Gate</option>
                 <option value="HSTU Student Hostel">HSTU Student Hostel</option>
                 <option value="Sokode Hostel">Sokode Hostel</option>
-                <option value="Cedi Auditorium">Cedi Auditorium (UHAS)</option>
+                <option value="Cedi Auditorium (UHAS)">Cedi Auditorium (UHAS)</option>
                 <option value="University of Health & Allied Sciences (UHAS)">UHAS Campus</option>
                 <option value="School of Hygiene">School of Hygiene</option>
                 <option value="Dave (Southern Campus)">Dave (Southern Campus)</option>
               </optgroup>
-              <optgroup label="Central & Commercial">
+              <optgroup label="Central & Commercial (Out-Campus)" id="destOptOutComm">
                 <option value="Ho Central">Ho Central</option>
                 <option value="Ho Central Market">Ho Central Market</option>
                 <option value="Ho Bus Terminal">Ho Bus Terminal</option>
                 <option value="Ho Town Centre">Ho Town Centre</option>
                 <option value="Ho Post Office">Ho Post Office</option>
-                <option value="Stadium">Ho Sports Stadium</option>
+                <option value="Ho Sports Stadium">Ho Sports Stadium</option>
                 <option value="Ho Jubilee Park">Ho Jubilee Park</option>
               </optgroup>
-              <optgroup label="Hospitals & Healthcare">
-                <option value="Trafalgar">Trafalgar (Ho Teaching Hospital)</option>
+              <optgroup label="Hospitals & Healthcare (Out-Campus)" id="destOptOutHosp">
+                <option value="Trafalgar (Ho Teaching Hospital)">Trafalgar (Ho Teaching Hospital)</option>
                 <option value="Volta Regional Hospital">Volta Regional Hospital</option>
                 <option value="Ho Municipal Hospital">Ho Municipal Hospital</option>
               </optgroup>
-              <optgroup label="Townships & Residential">
+              <optgroup label="Townships & Residential (Out-Campus)" id="destOptOutTown">
                 <option value="Dome Area">Dome Area</option>
                 <option value="Bankoe">Bankoe</option>
                 <option value="Ahoe">Ahoe</option>
@@ -5528,7 +5652,7 @@
                 <option value="Sokode Junction">Sokode Junction</option>
                 <option value="Fiave">Fiave</option>
                 <option value="Agorve">Agorve</option>
-                <option value="Barracks">Volta Barracks</option>
+                <option value="Volta Barracks">Volta Barracks</option>
                 <option value="Mirage">Mirage</option>
                 <option value="Guiness">Guiness</option>
                 <option value="Lokoe">Lokoe</option>
@@ -5538,10 +5662,26 @@
           </div>
         </div>
 
+        <!-- Interactive Mapbox Live Route Container -->
+        <div class="modal-mapbox-wrap" id="modalMapboxContainer">
+          <div id="modalMapboxMap"></div>
+          <div class="modal-mapbox-badge">
+            <i class="fas fa-map-marked-alt"></i> <span>Mapbox Interactive Route</span>
+          </div>
+        </div>
+
         <!-- Route preview (shown when both selected) -->
-        <div id="routePreviewBar" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--yellow-lt);border:1px solid var(--yellow-bdr);border-radius:var(--r);display:none;align-items:center;justify-content:space-between">
-          <div style="font-size:.82rem;font-weight:600;color:var(--text)" id="routePreviewLabel">—</div>
-          <div style="font-size:1.05rem;font-weight:900;color:var(--yellow)" id="routePreviewFare">—</div>
+        <div id="routePreviewBar" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--yellow-lt);border:1px solid var(--yellow-bdr);border-radius:var(--r);align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px" id="routePreviewLabel">—</div>
+            <div style="font-size:.72rem;margin-top:3px" id="routePreviewZone">
+              <span class="zone-indicator-pill in" id="routeZonePill">In-Campus Route</span>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:1.08rem;font-weight:900;color:var(--yellow)" id="routePreviewFare">—</div>
+            <div style="font-size:.72rem;font-weight:600;color:var(--text-2)" id="routePreviewAlone">—</div>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -5862,18 +6002,6 @@
     </div>
   </div>
 
-  <div class="confirm-modal-backdrop" id="logoutModal">
-    <div class="confirm-modal">
-      <div class="confirm-modal-icon"><i class="fas fa-sign-out-alt"></i></div>
-      <h3>Log Out?</h3>
-      <p>Are you sure you want to log out of your K3K3 account? You will need to sign in again to access your dashboard.
-      </p>
-      <div class="confirm-modal-btns">
-        <button class="confirm-cancel-btn" onclick="closeLogoutModal()">Stay</button>
-        <button class="confirm-ok-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Location Permission Prompt -->
   <div class="location-prompt hidden" id="locationPrompt">
@@ -6759,16 +6887,25 @@
       const d = document.getElementById('drawer');
       const o = document.getElementById('drawerOverlay');
       const b = document.getElementById('hamburgerBtn');
-      const open = d.classList.contains('open');
-      d.classList.toggle('open', !open);
-      o.classList.toggle('show', !open);
-      if (b) b.classList.toggle('open', !open);
+      if (!d) return;
+      const isOpen = d.classList.contains('open');
+      if (isOpen) {
+        d.classList.remove('open');
+        if (o) o.classList.remove('show');
+        if (b) b.classList.remove('open');
+      } else {
+        d.classList.add('open');
+        if (o) o.classList.add('show');
+        if (b) b.classList.add('open');
+      }
     }
     function closeDrawer() {
-      ['drawer', 'drawerOverlay'].forEach(id => {
-        const el = document.getElementById(id); if (el) { el.classList.remove('open', 'show'); }
-      });
-      const b = document.getElementById('hamburgerBtn'); if (b) b.classList.remove('open');
+      const d = document.getElementById('drawer');
+      const o = document.getElementById('drawerOverlay');
+      const b = document.getElementById('hamburgerBtn');
+      if (d) d.classList.remove('open');
+      if (o) o.classList.remove('show');
+      if (b) b.classList.remove('open');
     }
 
     /* ══════════════════════════════════════════
@@ -6905,8 +7042,9 @@
         if (routePreview) routePreview.style.display = 'none';
       }
 
-      // Focus the pickup select
+      // Focus the pickup select and initialize modal Mapbox container
       setTimeout(() => document.getElementById('pickupSelect')?.focus(), 150);
+      setTimeout(initModalMapbox, 180);
     }
     function closeBookModal() {
       const modal = document.getElementById('bookModal');
@@ -7130,19 +7268,266 @@
       return [6.6012, 0.4688]; // Default to Ho Central
     }
 
-    // Default fallback fare when route not in matrix
-    const DEFAULT_CAMPUS_FARE = 3.00;
-    const ALONE_MULTIPLIER = 3; // Ride alone = shared fare × 3
+    // ── Pricing Settings & Mapbox Configuration ──
+    let DEFAULT_CAMPUS_FARE = 3.00;
+    let _inCampusBaseFare = 3.00;
+    let _outCampusBaseFare = 4.00;
+    let ALONE_MULTIPLIER = 3.0; // Ride alone = shared fare × 3
+    let _aloneMultiplier = 3.0;
+    let _modalMapboxToken = window.MAPBOX_PUBLIC_TOKEN || '';
+    let _modalMapbox = null;
+    let _modalPickupMarker = null;
+    let _modalDestMarker = null;
+    let _routeDetails = null;
+
+    // Load active locations, route overrides, and settings dynamically from backend
+    async function loadDynamicPricing() {
+      try {
+        const res = await fetch(`${API}/pricing`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.settings) {
+          if (data.settings.in_campus_base_fare) {
+            DEFAULT_CAMPUS_FARE = Number(data.settings.in_campus_base_fare);
+            _inCampusBaseFare = Number(data.settings.in_campus_base_fare);
+          }
+          if (data.settings.out_campus_base_fare) _outCampusBaseFare = Number(data.settings.out_campus_base_fare);
+          if (data.settings.alone_multiplier) {
+            ALONE_MULTIPLIER = Number(data.settings.alone_multiplier);
+            _aloneMultiplier = Number(data.settings.alone_multiplier);
+          }
+          if (data.settings.mapbox_public_token) _modalMapboxToken = String(data.settings.mapbox_public_token).trim();
+        }
+        if (Array.isArray(data.routes) && data.routes.length) {
+          CAMPUS_FARES.length = 0;
+          data.routes.forEach(r => {
+            CAMPUS_FARES.push({ a: r.from, b: r.to, fare: r.fare, zone_type: r.zone_type });
+          });
+        }
+        if (Array.isArray(data.locations) && data.locations.length) {
+          data.locations.forEach(l => {
+            if (l.name && typeof l.lat === 'number' && typeof l.lng === 'number') {
+              HO_COORDINATES[l.name] = [l.lat, l.lng];
+            }
+          });
+        }
+      } catch (_) {}
+    }
+
+    function setDestinationFilter(zone, btn) {
+      document.querySelectorAll('.modal-zone-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const inGrp = document.getElementById('destOptIn');
+      const outComm = document.getElementById('destOptOutComm');
+      const outHosp = document.getElementById('destOptOutHosp');
+      const outTown = document.getElementById('destOptOutTown');
+
+      const show = el => { if (el) el.style.display = ''; };
+      const hide = el => { if (el) el.style.display = 'none'; };
+
+      if (zone === 'in') {
+        show(inGrp); hide(outComm); hide(outHosp); hide(outTown);
+      } else if (zone === 'out') {
+        hide(inGrp); show(outComm); show(outHosp); show(outTown);
+      } else {
+        show(inGrp); show(outComm); show(outHosp); show(outTown);
+      }
+    }
+
+    function initModalMapbox() {
+      const container = document.getElementById('modalMapboxMap');
+      if (!container) return;
+
+      if (_modalMapbox) {
+        _modalMapbox.resize();
+        return;
+      }
+
+      if (typeof mapboxgl === 'undefined') return;
+
+      try {
+        mapboxgl.accessToken = _modalMapboxToken;
+        _modalMapbox = new mapboxgl.Map({
+          container: 'modalMapboxMap',
+          style: 'mapbox://styles/mapbox/dark-v11',
+          center: [0.4688, 6.6012],
+          zoom: 12.6,
+          attributionControl: false
+        });
+
+        _modalMapbox.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+
+        _modalMapbox.on('load', () => {
+          _modalMapbox.resize();
+          const p = (document.getElementById('pickupSelect')?.value || '').trim();
+          const d = (document.getElementById('destSelect')?.value || '').trim();
+          if (p && d) updateModalMapboxRoute(p, d);
+        });
+
+        // Clicking on Mapbox map to choose/adjust points
+        _modalMapbox.on('click', (e) => {
+          const clickedLng = e.lngLat.lng;
+          const clickedLat = e.lngLat.lat;
+          const closest = findClosestHoLandmark(clickedLat, clickedLng);
+
+          const pSel = document.getElementById('pickupSelect');
+          const dSel = document.getElementById('destSelect');
+
+          if (!pSel.value) {
+            pSel.value = closest;
+            showToast(`Pickup set to ${closest}`);
+            onLocationChange();
+          } else if (!dSel.value) {
+            dSel.value = closest;
+            showToast(`Destination set to ${closest}`);
+            onLocationChange();
+          } else {
+            dSel.value = closest;
+            showToast(`Updated destination to ${closest}`);
+            onLocationChange();
+          }
+        });
+      } catch (err) {
+        console.warn('Mapbox modal initialization warning:', err);
+      }
+    }
+
+    function findClosestHoLandmark(lat, lng) {
+      let closest = 'Ho Central Market';
+      let minDist = Infinity;
+
+      for (const [name, coords] of Object.entries(HO_COORDINATES)) {
+        const dLat = coords[0] - lat;
+        const dLng = coords[1] - lng;
+        const dist = dLat * dLat + dLng * dLng;
+        if (dist < minDist) {
+          minDist = dist;
+          closest = name;
+        }
+      }
+      return closest;
+    }
+
+    function updateModalMapboxRoute(pickup, dest) {
+      if (!_modalMapbox) {
+        initModalMapbox();
+        return;
+      }
+
+      const pCoords = getHoCoordinate(pickup) || [6.6012, 0.4688];
+      const dCoords = getHoCoordinate(dest) || [6.6050, 0.4700];
+
+      // Remove previous markers
+      if (_modalPickupMarker) { _modalPickupMarker.remove(); _modalPickupMarker = null; }
+      if (_modalDestMarker) { _modalDestMarker.remove(); _modalDestMarker = null; }
+
+      // Green Pickup Marker
+      const pEl = document.createElement('div');
+      pEl.style.width = '16px';
+      pEl.style.height = '16px';
+      pEl.style.borderRadius = '50%';
+      pEl.style.background = '#10B981';
+      pEl.style.border = '2.5px solid #ffffff';
+      pEl.style.boxShadow = '0 0 10px rgba(16,185,129,0.8)';
+      _modalPickupMarker = new mapboxgl.Marker(pEl).setLngLat([pCoords[1], pCoords[0]]).addTo(_modalMapbox);
+
+      // Yellow Destination Marker
+      const dEl = document.createElement('div');
+      dEl.style.width = '16px';
+      dEl.style.height = '16px';
+      dEl.style.borderRadius = '50%';
+      dEl.style.background = '#FFD60A';
+      dEl.style.border = '2.5px solid #ffffff';
+      dEl.style.boxShadow = '0 0 10px rgba(255,214,10,0.8)';
+      _modalDestMarker = new mapboxgl.Marker(dEl).setLngLat([dCoords[1], dCoords[0]]).addTo(_modalMapbox);
+
+      // GeoJSON Route Line
+      const routeGeoJSON = {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [pCoords[1], pCoords[0]],
+            [dCoords[1], dCoords[0]]
+          ]
+        }
+      };
+
+      if (_modalMapbox.getSource('modalRouteSrc')) {
+        _modalMapbox.getSource('modalRouteSrc').setData(routeGeoJSON);
+      } else if (_modalMapbox.isStyleLoaded()) {
+        _modalMapbox.addSource('modalRouteSrc', { type: 'geojson', data: routeGeoJSON });
+        _modalMapbox.addLayer({
+          id: 'modalRouteLine',
+          type: 'line',
+          source: 'modalRouteSrc',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#FFD60A', 'line-width': 4, 'line-opacity': 0.9 }
+        });
+      }
+
+      // Auto-fit bounds
+      const bounds = new mapboxgl.LngLatBounds();
+      bounds.extend([pCoords[1], pCoords[0]]);
+      bounds.extend([dCoords[1], dCoords[0]]);
+      _modalMapbox.fitBounds(bounds, { padding: 45, maxZoom: 15, duration: 600 });
+    }
 
     function getCampusFare(from, to) {
       if (!from || !to || from === to) return null;
       const f = from.trim().toLowerCase();
       const t = to.trim().toLowerCase();
+
+      // 1. Check configured matrix overrides (A ↔ B)
       const match = CAMPUS_FARES.find(r =>
         (r.a.toLowerCase() === f && r.b.toLowerCase() === t) ||
-        (r.a.toLowerCase() === t && r.b.toLowerCase() === f)
+        (r.a.toLowerCase() === t && r.b.toLowerCase() === f) ||
+        (f.includes(r.a.toLowerCase()) && t.includes(r.b.toLowerCase())) ||
+        (t.includes(r.a.toLowerCase()) && f.includes(r.b.toLowerCase()))
       );
-      return match ? match.fare : DEFAULT_CAMPUS_FARE;
+
+      if (match && typeof match.fare === 'number') {
+        const fare = match.fare;
+        _routeDetails = {
+          fare,
+          shared_fare: fare,
+          alone_fare: +(fare * _aloneMultiplier).toFixed(2),
+          zone_type: match.zone_type || 'out',
+          is_override: true,
+          label: match.zone_type === 'in' ? 'In-Campus Route' : 'Out-Campus Corridor'
+        };
+        return fare;
+      }
+
+      // 2. Classify by In-Campus vs Out-Campus
+      const inKeywords = ['technical', 'hstu', 'htu', 'uhas', 'cedi', 'hygiene', 'dave', 'hostel', 'campus'];
+      const isFromIn = inKeywords.some(k => f.includes(k));
+      const isToIn   = inKeywords.some(k => t.includes(k));
+
+      if (isFromIn && isToIn) {
+        const fare = _inCampusBaseFare;
+        _routeDetails = {
+          fare,
+          shared_fare: fare,
+          alone_fare: +(fare * _aloneMultiplier).toFixed(2),
+          zone_type: 'in',
+          is_override: false,
+          label: 'In-Campus Route'
+        };
+        return fare;
+      }
+
+      const fare = _outCampusBaseFare;
+      _routeDetails = {
+        fare,
+        shared_fare: fare,
+        alone_fare: +(fare * _aloneMultiplier).toFixed(2),
+        zone_type: 'out',
+        is_override: false,
+        label: 'Out-Campus / Town Route'
+      };
+      return fare;
     }
 
     // ── State ──
@@ -7175,13 +7560,24 @@
       _pickupVal = pickup;
       _destVal = dest;
 
-      // Show preview bar
-      if (previewBar) {
+      // Update Mapbox live route in modal
+      updateModalMapboxRoute(pickup, dest);
+
+      // Show preview bar with In/Out details
+      if (previewBar && _routeDetails) {
         previewBar.style.display = 'flex';
         const lbl = document.getElementById('routePreviewLabel');
         const fareEl = document.getElementById('routePreviewFare');
+        const zonePill = document.getElementById('routeZonePill');
+        const aloneEl = document.getElementById('routePreviewAlone');
+
         if (lbl) lbl.textContent = `${pickup} → ${dest}`;
-        if (fareEl) fareEl.textContent = `₵${_campusFare.toFixed(2)} / person`;
+        if (fareEl) fareEl.textContent = `₵${_campusFare.toFixed(2)}`;
+        if (aloneEl) aloneEl.textContent = `Shared: ₵${_campusFare.toFixed(2)} · Alone: ₵${_routeDetails.alone_fare.toFixed(2)}`;
+        if (zonePill) {
+          zonePill.className = `zone-indicator-pill ${_routeDetails.zone_type}`;
+          zonePill.textContent = _routeDetails.label;
+        }
       }
 
       // Preview dynamic route on live map and auto-fit bounds (not centered to static point)
@@ -7199,7 +7595,7 @@
       if (!_campusFare || !_pickupVal || !_destVal) return;
 
       const sharedFare = _campusFare.toFixed(2);
-      const aloneFare  = (_campusFare * ALONE_MULTIPLIER).toFixed(2);
+      const aloneFare  = (_routeDetails?.alone_fare ? _routeDetails.alone_fare.toFixed(2) : (_campusFare * _aloneMultiplier).toFixed(2));
 
       document.getElementById('strip-from').textContent = _pickupVal;
       document.getElementById('strip-to').textContent   = _destVal;
@@ -8000,6 +8396,7 @@
     // Call initPassengerSocket & initPassengerMap on page load
     document.addEventListener('DOMContentLoaded', () => {
       initPassengerSocket();
+      loadDynamicPricing();
       setTimeout(() => initPassengerMap(), 250);
       // Restore active trip if one exists in sessionStorage
       try {
@@ -8724,6 +9121,50 @@
     </div>`).join('');
     }
     function toggleFaq(i) { document.getElementById('faq-' + i).classList.toggle('open'); }
+
+    /* ── Report Issue & Support ── */
+    function submitIssue() {
+      const categoryEl = document.getElementById('issueCategory');
+      const descEl = document.getElementById('issueDesc');
+      const category = (categoryEl ? categoryEl.value : '').trim();
+      const desc = (descEl ? descEl.value : '').trim();
+
+      if (!category || !desc) {
+        showToast('Please select an issue category and enter a description.', 'error');
+        return;
+      }
+
+      let passengerName = 'Passenger';
+      let passengerPhone = '';
+      try {
+        const u = JSON.parse(localStorage.getItem('k3k3_user') || '{}');
+        if (u.name || u.fullName) passengerName = u.name || u.fullName;
+        if (u.phone) passengerPhone = u.phone;
+      } catch (_) {}
+
+      const timeStr = new Date().toLocaleString('en-GB');
+      const message = `*K3K3 Ride Issue Report*\n` +
+        `• *Category:* ${category}\n` +
+        `• *Passenger:* ${passengerName}${passengerPhone ? ' (' + passengerPhone + ')' : ''}\n` +
+        `• *Reported:* ${timeStr}\n\n` +
+        `*Details:*\n${desc}`;
+
+      const targetNumber = '233504842974';
+      const waUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(message)}`;
+
+      if (categoryEl) categoryEl.value = '';
+      if (descEl) descEl.value = '';
+
+      showToast('Opening WhatsApp to submit your report...', 'success');
+      window.open(waUrl, '_blank');
+    }
+
+    function openPassengerWhatsAppSupport(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const targetNumber = '233504842974';
+      const defaultMsg = encodeURIComponent('Hello K3K3 Ride Support, I need assistance.');
+      window.open(`https://wa.me/${targetNumber}?text=${defaultMsg}`, '_blank');
+    }
 
     /* ──  Tabs ── */
     function switchTab(btn, panelId) {

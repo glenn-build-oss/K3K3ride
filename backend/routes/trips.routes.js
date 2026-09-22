@@ -502,4 +502,27 @@ router.put('/:id/decline', (req, res) => {
   }
 });
 
+// ─── Public Pricing & Route Discovery Endpoints ───
+const pricingService = require('../services/pricing.service');
+
+router.get('/pricing', (req, res) => {
+  try {
+    const config = pricingService.getPricingConfig();
+    res.json(config);
+  } catch (err) {
+    console.error('[Trips] Error fetching pricing config:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post('/pricing/calculate', (req, res) => {
+  try {
+    const { from, to } = req.body;
+    const result = pricingService.calculateFare(from, to);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

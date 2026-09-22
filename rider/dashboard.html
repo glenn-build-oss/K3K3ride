@@ -454,15 +454,18 @@
 
     .hamburger-btn {
       display:none;
-      width:40px;height:40px;
+      width:44px;height:44px;
+      min-width:44px;min-height:44px;
       border-radius:50%;
       border:none;
       background:var(--surface);
       color:var(--text-2);
-      font-size:1rem;
+      font-size:1.05rem;
       cursor:pointer;
       display:flex;align-items:center;justify-content:center;
       transition:all .18s;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
     }
     .hamburger-btn:hover { background:var(--surface-2);color:var(--text) }
 
@@ -3056,12 +3059,13 @@ function showSec(name) {
 function toggleSidebar() {
   const sb       = el('sidebar');
   const ov       = el('sbOverlay');
-  const isMobile = window.innerWidth <= 768;
+  if (!sb) return;
+  const isMobile = window.innerWidth <= 900;
 
   if (isMobile) {
     const open = sb.classList.contains('open');
     sb.classList.toggle('open', !open);
-    ov.classList.toggle('show', !open);
+    if (ov) ov.classList.toggle('show', !open);
   } else {
     const collapsed = document.body.classList.toggle('sidebar-collapsed');
     localStorage.setItem('k3k3_rider_sb_collapsed', collapsed ? '1' : '0');
@@ -3079,7 +3083,7 @@ function updateCollapseIcon(collapsed) {
 }
 
 function restoreSidebarState() {
-  if (window.innerWidth <= 768) return;
+  if (window.innerWidth <= 900) return;
   const saved = localStorage.getItem('k3k3_rider_sb_collapsed');
   if (saved === '1') {
     document.body.classList.add('sidebar-collapsed');
@@ -3088,8 +3092,10 @@ function restoreSidebarState() {
 }
 
 function closeSidebar() {
-  el('sidebar').classList.remove('open');
-  el('sbOverlay').classList.remove('show');
+  const sb = el('sidebar');
+  const ov = el('sbOverlay');
+  if (sb) sb.classList.remove('open');
+  if (ov) ov.classList.remove('show');
 }
 
 /* ════════════════════════════════════════

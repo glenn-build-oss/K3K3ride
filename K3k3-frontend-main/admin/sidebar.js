@@ -15,6 +15,36 @@
     ? 'http://localhost:8810'
     : '';
 
+  /* ── Current Session & RBAC ── */
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('current_admin') || '{}');
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function checkRouteGuard(currentPage, user) {
+    if (!user || !user.role) return;
+    if (user.role === 'admin') return; // Super Admin has universal access
+
+    const allowed = user.allowedPages || user.allowed_pages;
+    if (Array.isArray(allowed) && allowed.length > 0) {
+      const pageFile = (currentPage || '').toLowerCase();
+      if (!pageFile || pageFile === 'adminlogin.html') return;
+
+      const isAllowed = allowed.some(p => p.toLowerCase() === pageFile);
+      if (!isAllowed) {
+        console.warn(`[K3K3 RBAC] Access denied for role "${user.role}" on page: ${currentPage}`);
+        const fallback = user.defaultPage || user.default_page || allowed[0] || 'dashboard.html';
+        if (fallback.toLowerCase() !== pageFile) {
+          alert(`Access Restricted\n\nYour assigned role (${user.roleName || user.role}) does not have permission to access this page.\nRedirecting to your workspace...`);
+          window.location.replace(fallback);
+        }
+      }
+    }
+  }
+
   /* ── Sidebar HTML ── */
   const NAV_LINKS = [
     { group: 'MAIN', items: [
@@ -28,8 +58,10 @@
       { href: 'rider-applications.html', icon: 'fa-user-plus',  label: 'Rider Applications', badgeId: 'sidebar-pending-badge' },
       { href: 'rider-management.html',   icon: 'fa-id-card',    label: 'Rider Management'   },
       { href: 'live-riders.html',        icon: 'fa-motorcycle', label: 'Live Riders'        },
+      { href: 'pricing-cms.html',        icon: 'fa-tags',       label: 'Routes & Pricing CMS' },
       { href: 'payment-management.html', icon: 'fa-credit-card',label: 'Payments'           },
       { href: 'moolre-overview.html',    icon: 'fa-bolt',       label: 'Moolre Overview'    },
+      { href: 'roles-management.html',   icon: 'fa-user-shield',label: 'Roles & Permissions'},
     ]},
     { group: 'SYSTEM', items: [
       { href: 'system-settings.html',    icon: 'fa-cog',        label: 'Settings'           },
@@ -38,7 +70,19 @@
 
   function buildSidebar(sidebar) {
     const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
-    const navHtml = NAV_LINKS.map(group => `
+    const user = getCurrentUser();
+    const allowed = (user.role && user.role !== 'admin' && (user.allowedPages || user.allowed_pages))
+      ? (user.allowedPages || user.allowed_pages)
+      : null;
+
+    const visibleGroups = NAV_LINKS.map(group => {
+      const items = allowed
+        ? group.items.filter(item => allowed.includes(item.href))
+        : group.items;
+      return { group: group.group, items };
+    }).filter(group => group.items.length > 0);
+
+    const navHtml = visibleGroups.map(group => `
       <div class="nav-group">
         <div class="nav-group-label">${group.group}</div>
         <ul class="nav-list">
@@ -57,6 +101,8 @@
           }).join('')}
         </ul>
       </div>`).join('');
+
+    const roleDisplayName = user.roleName || (user.role === 'admin' ? 'Super Admin' : (user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Super Admin'));
 
     sidebar.innerHTML = `
       <div class="sidebar-header">
@@ -89,8 +135,8 @@
             <span class="online-dot"></span>
           </div>
           <div class="admin-info">
-            <div class="admin-name" id="shared-admin-name">Admin</div>
-            <div class="admin-role">Super Admin</div>
+            <div class="admin-name" id="shared-admin-name">${user.name || 'Admin'}</div>
+            <div class="admin-role" id="shared-admin-role">${roleDisplayName}</div>
           </div>
         </div>
         <button class="sidebar-logout-btn" id="shared-logout-btn">
@@ -187,8 +233,53 @@
     } catch (_) {}
   }
 
+  /* ── Sidebar Styles ── */
+  function injectSidebarStyles() {
+    if (document.getElementById('k3k3-sidebar-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'k3k3-sidebar-styles';
+    style.textContent = `
+      .sidebar-header { padding: 20px 18px 16px; border-bottom: 1px solid var(--border, rgba(255,255,255,0.08)); flex-shrink: 0; }
+      .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+      .brand-logo { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,214,10,0.1); border: 1px solid rgba(255,214,10,0.25); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+      .brand-logo img { width: 32px; height: 32px; object-fit: contain; }
+      .brand-logo-fallback { font-weight: 900; font-size: 1.1rem; color: #FFD60A; }
+      .brand-text { display: flex; flex-direction: column; }
+      .brand-name { font-weight: 900; font-size: 1.15rem; color: #fff; letter-spacing: -0.02em; line-height: 1.1; }
+      .brand-tag { font-size: 0.68rem; font-weight: 600; color: #FFD60A; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+      .sidebar-clock { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; text-align: center; }
+      .clock-date { font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: 500; }
+      .clock-time { font-family: 'Inter', monospace; font-size: 1.05rem; font-weight: 700; color: #fff; letter-spacing: 1px; margin: 2px 0; }
+      .clock-time .colon { color: #FFD60A; opacity: 0.8; }
+      .clock-label { font-size: 0.62rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.05em; }
+      .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; }
+      .nav-group-label { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 10px 6px; }
+      .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+      .nav-item .nav-link { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; }
+      .nav-item:hover .nav-link { background: rgba(255,255,255,0.05); color: #fff; }
+      .nav-item.active .nav-link { background: rgba(255,214,10,0.12); color: #FFD60A; font-weight: 600; border-left: 3px solid #FFD60A; }
+      .nav-icon { width: 18px; text-align: center; font-size: 0.9rem; color: inherit; }
+      .nav-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .nav-badge { background: #EF4444; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 999px; }
+      .sidebar-footer { padding: 14px 16px; border-top: 1px solid var(--border, rgba(255,255,255,0.08)); background: var(--bg-2, #111318); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+      .admin-profile-card { display: flex; align-items: center; gap: 10px; }
+      .admin-avatar-wrap { position: relative; }
+      .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: #181b22; border: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; color: #FFD60A; font-size: 0.85rem; }
+      .online-dot { position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px; border-radius: 50%; background: #10B981; border: 2px solid #111318; }
+      .admin-info { flex: 1; overflow: hidden; }
+      .admin-name { font-size: 0.8rem; font-weight: 600; color: #fff; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+      .admin-role { font-size: 0.68rem; color: rgba(255,255,255,0.35); }
+      .sidebar-logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.08); color: #F87171; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+      .sidebar-logout-btn:hover { background: rgba(239,68,68,0.2); color: #fff; }
+    `;
+    document.head.appendChild(style);
+  }
+
   /* ── Main init (DOMContentLoaded) ── */
   function init() {
+    injectSidebarStyles();
+    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+    checkRouteGuard(currentPage, getCurrentUser());
     const sidebar = document.getElementById('k3k3Sidebar');
     if (sidebar && !sidebar.dataset.built) {
       buildSidebar(sidebar);

@@ -1,0 +1,200 @@
+{
+  "all_pages": [
+    {
+      "file": "dashboard.html",
+      "label": "Dashboard",
+      "icon": "fa-tachometer-alt",
+      "group": "MAIN",
+      "description": "Overview of metrics, active rides, and system vitals"
+    },
+    {
+      "file": "analytics.html",
+      "label": "Analytics",
+      "icon": "fa-chart-pie",
+      "group": "MAIN",
+      "description": "Performance charts, ride heatmaps, and trip statistics"
+    },
+    {
+      "file": "ride-monitoring.html",
+      "label": "Live Tracking",
+      "icon": "fa-map-marked-alt",
+      "group": "MAIN",
+      "description": "Real-time interactive GPS map of active trips and kekes"
+    },
+    {
+      "file": "trips.html",
+      "label": "Trips",
+      "icon": "fa-route",
+      "group": "MAIN",
+      "description": "Searchable history of all completed, cancelled, and active trips"
+    },
+    {
+      "file": "customers.html",
+      "label": "Customers",
+      "icon": "fa-users",
+      "group": "MAIN",
+      "description": "Passenger directory, trip counts, and customer support history"
+    },
+    {
+      "file": "rider-applications.html",
+      "label": "Rider Applications",
+      "icon": "fa-user-plus",
+      "group": "OPERATIONS",
+      "description": "Driver application review, vetting, and license approval"
+    },
+    {
+      "file": "rider-management.html",
+      "label": "Rider Management",
+      "icon": "fa-id-card",
+      "group": "OPERATIONS",
+      "description": "Rider status, suspension, documentation, and fleet oversight"
+    },
+    {
+      "file": "live-riders.html",
+      "label": "Live Riders",
+      "icon": "fa-motorcycle",
+      "group": "OPERATIONS",
+      "description": "Online rider status, battery, GPS location, and dispatch readiness"
+    },
+    {
+      "file": "pricing-cms.html",
+      "label": "Routes & Pricing CMS",
+      "icon": "fa-tags",
+      "group": "OPERATIONS",
+      "description": "In/Out campus fares, route fare overrides, and Mapbox tokens"
+    },
+    {
+      "file": "roles-management.html",
+      "label": "Roles & Permissions",
+      "icon": "fa-user-shield",
+      "group": "OPERATIONS",
+      "description": "Manage admin roles, page visibility, and staff assignments"
+    },
+    {
+      "file": "payment-management.html",
+      "label": "Payments",
+      "icon": "fa-credit-card",
+      "group": "OPERATIONS",
+      "description": "Transactions, revenue tracking, driver payouts, and refunds"
+    },
+    {
+      "file": "moolre-overview.html",
+      "label": "Moolre Overview",
+      "icon": "fa-bolt",
+      "group": "OPERATIONS",
+      "description": "Moolre payment gateway logs, OTP telemetry, and USSD health"
+    },
+    {
+      "file": "system-settings.html",
+      "label": "Settings",
+      "icon": "fa-cog",
+      "group": "SYSTEM",
+      "description": "Platform configurations, API keys, and maintenance mode"
+    }
+  ],
+  "roles": [
+    {
+      "id": "admin",
+      "name": "Super Admin",
+      "description": "Full platform authority. Access to all dashboards, revenue, fleet controls, and role management.",
+      "default_page": "dashboard.html",
+      "allowed_pages": [
+        "dashboard.html",
+        "analytics.html",
+        "ride-monitoring.html",
+        "trips.html",
+        "customers.html",
+        "rider-applications.html",
+        "rider-management.html",
+        "live-riders.html",
+        "pricing-cms.html",
+        "roles-management.html",
+        "payment-management.html",
+        "moolre-overview.html",
+        "system-settings.html"
+      ],
+      "permissions": [
+        "*"
+      ],
+      "is_system": true,
+      "color": "#FFD60A",
+      "badge": "Full Access"
+    },
+    {
+      "id": "finance",
+      "name": "Finance Team",
+      "description": "Financial oversight, revenue tracking, transaction monitoring, Moolre reconciliation, and driver payouts.",
+      "default_page": "payment-management.html",
+      "allowed_pages": [
+        "payment-management.html",
+        "moolre-overview.html",
+        "analytics.html",
+        "trips.html"
+      ],
+      "permissions": [
+        "view:finances",
+        "export:reports",
+        "manage:payouts",
+        "view:trips"
+      ],
+      "is_system": true,
+      "color": "#10B981",
+      "badge": "Finance Only"
+    },
+    {
+      "id": "support",
+      "name": "Support Team",
+      "description": "Customer care, live GPS dispatch tracking, customer issues, rider application assistance, and trip audits.",
+      "default_page": "ride-monitoring.html",
+      "allowed_pages": [
+        "ride-monitoring.html",
+        "customers.html",
+        "trips.html",
+        "live-riders.html",
+        "rider-management.html",
+        "rider-applications.html"
+      ],
+      "permissions": [
+        "view:trips",
+        "manage:tickets",
+        "view:riders",
+        "view:customers",
+        "review:applications"
+      ],
+      "is_system": true,
+      "color": "#3B82F6",
+      "badge": "Support Only"
+    }
+  ],
+  "staff_assignments": [
+    {
+      "id": "staff-admin-01",
+      "email": "admin@k3k3.com",
+      "name": "Super Admin",
+      "role": "admin",
+      "assigned_at": "2026-09-22T00:00:00.000Z"
+    },
+    {
+      "id": "staff-fin-01",
+      "email": "finance@k3k3.com",
+      "name": "Finance Lead",
+      "role": "finance",
+      "assigned_at": "2026-09-22T00:00:00.000Z"
+    },
+    {
+      "id": "staff-sup-01",
+      "email": "support@k3k3.com",
+      "name": "Customer Support",
+      "role": "support",
+      "assigned_at": "2026-09-22T00:00:00.000Z"
+    },
+    {
+      "id": "staff_1790040311211",
+      "email": "audit@k3k3.com",
+      "name": "Auditor",
+      "role": "finance",
+      "assigned_at": "2026-09-22T01:25:11.211Z",
+      "updated_at": "2026-09-22T11:52:44.553Z"
+    }
+  ]
+}

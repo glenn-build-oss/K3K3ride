@@ -1,0 +1,570 @@
+{
+  "locations": [
+    {
+      "id": "loc_htu_main",
+      "name": "Ho Technical University (HSTU)",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.6276,
+      "lng": 0.4735,
+      "address": "Sokode Estates, Ho",
+      "icon": "fa-graduation-cap",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_htu_gate",
+      "name": "HSTU Main Gate",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.628,
+      "lng": 0.473,
+      "address": "Sokode, Ho",
+      "icon": "fa-university",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_htu_hostel",
+      "name": "HSTU Student Hostel",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.627,
+      "lng": 0.474,
+      "address": "HSTU Campus, Sokode",
+      "icon": "fa-bed",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_htu_eng",
+      "name": "HSTU Engineering Block",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.6275,
+      "lng": 0.4738,
+      "address": "HSTU Campus, Sokode",
+      "icon": "fa-cogs",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_sokode_hostel",
+      "name": "Sokode Hostel",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.627,
+      "lng": 0.474,
+      "address": "Sokode, Ho",
+      "icon": "fa-bed",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_cedi_aud",
+      "name": "Cedi Auditorium (UHAS)",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.609,
+      "lng": 0.466,
+      "address": "UHAS Main Campus, Ho",
+      "icon": "fa-landmark",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_uhas",
+      "name": "University of Health & Allied Sciences (UHAS)",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.609,
+      "lng": 0.466,
+      "address": "UHAS Road, Ho",
+      "icon": "fa-university",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_hygiene",
+      "name": "School of Hygiene",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.6045,
+      "lng": 0.4695,
+      "address": "Near Ho Teaching Hospital",
+      "icon": "fa-school",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_dave_campus",
+      "name": "Dave (Southern Campus)",
+      "zone_type": "in",
+      "category": "Campuses & Hostels",
+      "lat": 6.592,
+      "lng": 0.461,
+      "address": "Dave, Ho",
+      "icon": "fa-university",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_ho_central",
+      "name": "Ho Central",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.6012,
+      "lng": 0.4688,
+      "address": "Commercial High St, Ho",
+      "icon": "fa-city",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_ho_market",
+      "name": "Ho Central Market",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.6018,
+      "lng": 0.4685,
+      "address": "Main Market Corridors, Ho",
+      "icon": "fa-store",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_bus_terminal",
+      "name": "Ho Bus Terminal",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.601,
+      "lng": 0.467,
+      "address": "Main Lorry Station, Ho",
+      "icon": "fa-bus",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_town_centre",
+      "name": "Ho Town Centre",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.6005,
+      "lng": 0.468,
+      "address": "Town Centre, Ho",
+      "icon": "fa-map-pin",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_post_office",
+      "name": "Ho Post Office",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.6012,
+      "lng": 0.4688,
+      "address": "Ho Central",
+      "icon": "fa-envelope",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_stadium",
+      "name": "Ho Sports Stadium",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.604,
+      "lng": 0.4665,
+      "address": "Stadium Road, Ho",
+      "icon": "fa-trophy",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_jubilee",
+      "name": "Ho Jubilee Park",
+      "zone_type": "out",
+      "category": "Central & Commercial",
+      "lat": 6.6,
+      "lng": 0.466,
+      "address": "Jubilee Park, Ho",
+      "icon": "fa-tree",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_trafalgar",
+      "name": "Trafalgar (Ho Teaching Hospital)",
+      "zone_type": "out",
+      "category": "Hospitals & Healthcare",
+      "lat": 6.605,
+      "lng": 0.47,
+      "address": "Trafalgar, Ho",
+      "icon": "fa-hospital",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_volta_regional",
+      "name": "Volta Regional Hospital",
+      "zone_type": "out",
+      "category": "Hospitals & Healthcare",
+      "lat": 6.6055,
+      "lng": 0.4705,
+      "address": "Regional Road, Ho",
+      "icon": "fa-clinic-medical",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_municipal_hosp",
+      "name": "Ho Municipal Hospital",
+      "zone_type": "out",
+      "category": "Hospitals & Healthcare",
+      "lat": 6.6048,
+      "lng": 0.4698,
+      "address": "Hospital Rd, Ho",
+      "icon": "fa-hospital-alt",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_ahoe",
+      "name": "Ahoe",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.607,
+      "lng": 0.473,
+      "address": "Ahoe Suburb, Ho",
+      "icon": "fa-home",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_dome",
+      "name": "Dome Area",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.61,
+      "lng": 0.472,
+      "address": "Dome, Ho",
+      "icon": "fa-map-pin",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_bankoe",
+      "name": "Bankoe",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.613,
+      "lng": 0.476,
+      "address": "Bankoe, Ho",
+      "icon": "fa-home",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_kpehe",
+      "name": "Kpehe",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.598,
+      "lng": 0.464,
+      "address": "Kpehe, Ho",
+      "icon": "fa-home",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_barracks",
+      "name": "Volta Barracks",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.618,
+      "lng": 0.482,
+      "address": "Volta Barracks, Ho",
+      "icon": "fa-shield-alt",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_mawuli_est",
+      "name": "Mawuli Estates",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.603,
+      "lng": 0.475,
+      "address": "Mawuli Estates, Ho",
+      "icon": "fa-building",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_mawuli_sch",
+      "name": "Mawuli School",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.603,
+      "lng": 0.4705,
+      "address": "Mawuli Road, Ho",
+      "icon": "fa-school",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_sokode_est",
+      "name": "Sokode Estates",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.6258,
+      "lng": 0.471,
+      "address": "Sokode, Ho",
+      "icon": "fa-home",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_sokode_junc",
+      "name": "Sokode Junction",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.6265,
+      "lng": 0.4718,
+      "address": "Sokode Main Junction, Ho",
+      "icon": "fa-road",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_fiave",
+      "name": "Fiave",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.615,
+      "lng": 0.478,
+      "address": "Fiave, Ho",
+      "icon": "fa-home",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_mirage",
+      "name": "Mirage",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.6025,
+      "lng": 0.467,
+      "address": "Mirage, Ho",
+      "icon": "fa-map-pin",
+      "is_active": true,
+      "is_popular": true
+    },
+    {
+      "id": "loc_guiness",
+      "name": "Guiness",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.611,
+      "lng": 0.471,
+      "address": "Guiness Depot Area, Ho",
+      "icon": "fa-warehouse",
+      "is_active": true,
+      "is_popular": false
+    },
+    {
+      "id": "loc_lokoe",
+      "name": "Lokoe",
+      "zone_type": "out",
+      "category": "Townships & Residential",
+      "lat": 6.589,
+      "lng": 0.458,
+      "address": "Lokoe, Ho",
+      "icon": "fa-home",
+      "is_active": true,
+      "is_popular": true
+    }
+  ],
+  "routes": [
+    {
+      "id": "rf_1",
+      "from": "School of Hygiene",
+      "to": "Trafalgar (Ho Teaching Hospital)",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Intra-health campus fixed fare"
+    },
+    {
+      "id": "rf_2",
+      "from": "School of Hygiene",
+      "to": "Guiness",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Campus corridor"
+    },
+    {
+      "id": "rf_3",
+      "from": "Trafalgar (Ho Teaching Hospital)",
+      "to": "Ahoe",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Standard campus connection"
+    },
+    {
+      "id": "rf_4",
+      "from": "Trafalgar (Ho Teaching Hospital)",
+      "to": "Ho Sports Stadium",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Hospital to Stadium"
+    },
+    {
+      "id": "rf_5",
+      "from": "Ahoe",
+      "to": "Ho Technical University (HSTU)",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Ahoe to HTU"
+    },
+    {
+      "id": "rf_6",
+      "from": "Ahoe",
+      "to": "Volta Barracks",
+      "fare": 3.5,
+      "zone_type": "out",
+      "notes": "Out-campus uphill route"
+    },
+    {
+      "id": "rf_7",
+      "from": "Ahoe",
+      "to": "Ho Central Market",
+      "fare": 3,
+      "zone_type": "out",
+      "notes": "Ahoe to Central Market"
+    },
+    {
+      "id": "rf_8",
+      "from": "Ho Technical University (HSTU)",
+      "to": "Mirage",
+      "fare": 3,
+      "zone_type": "out",
+      "notes": "HTU to Mirage junction"
+    },
+    {
+      "id": "rf_9",
+      "from": "Mirage",
+      "to": "Lokoe",
+      "fare": 3.4,
+      "zone_type": "out",
+      "notes": "Extended out-campus corridor"
+    },
+    {
+      "id": "rf_10",
+      "from": "Cedi Auditorium (UHAS)",
+      "to": "Sokode Hostel",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "UHAS campus to hostel"
+    },
+    {
+      "id": "rf_11",
+      "from": "Cedi Auditorium (UHAS)",
+      "to": "Trafalgar (Ho Teaching Hospital)",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "UHAS to Teaching Hospital"
+    },
+    {
+      "id": "rf_12",
+      "from": "Cedi Auditorium (UHAS)",
+      "to": "School of Hygiene",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "UHAS to Hygiene"
+    },
+    {
+      "id": "rf_13",
+      "from": "Dave (Southern Campus)",
+      "to": "Trafalgar (Ho Teaching Hospital)",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Dave campus to hospital"
+    },
+    {
+      "id": "rf_14",
+      "from": "Dave (Southern Campus)",
+      "to": "Ahoe",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Dave campus to Ahoe"
+    },
+    {
+      "id": "rf_15",
+      "from": "Dave (Southern Campus)",
+      "to": "Ho Central Market",
+      "fare": 3,
+      "zone_type": "out",
+      "notes": "Dave campus to Central Market"
+    },
+    {
+      "id": "rf_16",
+      "from": "Mawuli Estates",
+      "to": "Trafalgar (Ho Teaching Hospital)",
+      "fare": 3,
+      "zone_type": "out",
+      "notes": "Mawuli Estates to hospital"
+    },
+    {
+      "id": "rf_17",
+      "from": "Mawuli Estates",
+      "to": "Ahoe",
+      "fare": 3,
+      "zone_type": "out",
+      "notes": "Mawuli Estates to Ahoe"
+    },
+    {
+      "id": "rf_18",
+      "from": "Sokode Hostel",
+      "to": "Trafalgar (Ho Teaching Hospital)",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Sokode hostel to hospital"
+    },
+    {
+      "id": "rf_19",
+      "from": "Sokode Hostel",
+      "to": "Ahoe",
+      "fare": 3,
+      "zone_type": "in",
+      "notes": "Sokode hostel to Ahoe"
+    },
+    {
+      "id": "rf_20",
+      "from": "Ho Technical University (HSTU)",
+      "to": "Ho Central Market",
+      "fare": 4,
+      "zone_type": "out",
+      "notes": "Main HTU campus to Ho Central Market"
+    },
+    {
+      "id": "rf_21",
+      "from": "HSTU Main Gate",
+      "to": "Ho Central Market",
+      "fare": 4,
+      "zone_type": "out",
+      "notes": "HTU Gate to Ho Central Market"
+    }
+  ],
+  "settings": {
+    "in_campus_base_fare": 3,
+    "out_campus_base_fare": 4,
+    "alone_multiplier": 3,
+    "minimum_fare": 3,
+    "per_km_rate": 1.8,
+    "mapbox_public_token": "",
+    "currency_symbol": "₵",
+    "currency_code": "GHS",
+    "updated_at": "2026-09-22T11:52:45.509Z"
+  },
+  "version": "1.0.0"
+}

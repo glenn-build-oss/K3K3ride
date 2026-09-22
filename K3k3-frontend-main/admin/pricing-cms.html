@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>K3K3 — Routes & Pricing CMS | Admin</title>
+  <meta name="description" content="Manage K3K3 campus locations, in/out zone classifications, route fare matrix overrides, and Mapbox configuration." />
+  <link rel="icon" type="image/png" href="../assets/k3k3.png" />
+  <link rel="shortcut icon" href="../favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+
+  <style>
+    :root {
+      --bg: #0c0d10;
+      --bg-2: #111318;
+      --bg-3: #181b22;
+      --bg-4: #1e2230;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-2: rgba(255, 255, 255, 0.14);
+      --yellow: #FFD60A;
+      --yellow-dk: #E6C000;
+      --yellow-lt: rgba(255, 214, 10, 0.1);
+      --yellow-bdr: rgba(255, 214, 10, 0.25);
+      --white: #fff;
+      --muted: rgba(255, 255, 255, 0.4);
+      --muted-2: rgba(255, 255, 255, 0.7);
+      --text: rgba(255, 255, 255, 0.92);
+      --green: #10B981;
+      --green-lt: rgba(16, 185, 129, 0.15);
+      --green-bdr: rgba(16, 185, 129, 0.3);
+      --red: #EF4444;
+      --red-lt: rgba(239, 68, 68, 0.15);
+      --blue: #3B82F6;
+      --blue-lt: rgba(59, 130, 246, 0.15);
+      --sb-w: 260px;
+      --top-h: 64px;
+      --r: 10px;
+      --r-lg: 16px;
+      --r-xl: 22px;
+      --r-full: 999px;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SIDEBAR & LAYOUT ─── */
+    .sidebar {
+      width: var(--sb-w);
+      min-height: 100vh;
+      background: var(--bg-2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s var(--ease);
+    }
+    .sidebar-header { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .brand-logo { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,214,10,0.1); border: 1px solid rgba(255,214,10,0.25); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+    .brand-logo img { width: 32px; height: 32px; object-fit: contain; }
+    .brand-logo-fallback { font-weight: 900; font-size: 1.1rem; color: var(--yellow); }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-name { font-weight: 900; font-size: 1.15rem; color: var(--white); letter-spacing: -0.02em; line-height: 1.1; }
+    .brand-tag { font-size: 0.68rem; font-weight: 600; color: var(--yellow); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .sidebar-clock { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+    .clock-date { font-size: 0.7rem; color: var(--muted-2); font-weight: 500; }
+    .clock-time { font-family: 'Inter', monospace; font-size: 1.05rem; font-weight: 700; color: var(--white); letter-spacing: 1px; margin: 2px 0; }
+    .clock-time .colon { color: var(--yellow); opacity: 0.8; }
+    .clock-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; }
+    .nav-group-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 10px 6px; }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .nav-item .nav-link { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 8px; color: var(--muted-2); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; }
+    .nav-item:hover .nav-link { background: rgba(255,255,255,0.05); color: var(--white); }
+    .nav-item.active .nav-link { background: rgba(255,214,10,0.12); color: var(--yellow); font-weight: 600; border-left: 3px solid var(--yellow); }
+    .nav-icon { width: 18px; text-align: center; font-size: 0.9rem; color: inherit; }
+    .nav-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-badge { background: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: var(--r-full); }
+    .sidebar-footer { padding: 14px 16px; border-top: 1px solid var(--border); background: var(--bg-2); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .admin-profile-card { display: flex; align-items: center; gap: 10px; }
+    .admin-avatar-wrap { position: relative; }
+    .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-3); border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center; color: var(--yellow); font-size: 0.85rem; }
+    .online-dot { position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px; border-radius: 50%; background: var(--green); border: 2px solid var(--bg-2); }
+    .admin-info { flex: 1; overflow: hidden; }
+    .admin-name { font-size: 0.8rem; font-weight: 600; color: var(--white); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+    .admin-role { font-size: 0.68rem; color: var(--muted); }
+    .sidebar-logout-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.08); color: #F87171; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+    .sidebar-logout-btn:hover { background: rgba(239,68,68,0.2); color: #fff; }
+
+    .main-wrapper {
+      margin-left: var(--sb-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - var(--sb-w));
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.sidebar-open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0; width: 100%; }
+      .sidebar-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+        backdrop-filter: blur(4px); z-index: 850; opacity: 0; pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      .sidebar-overlay.overlay-visible { opacity: 1; pointer-events: auto; }
+    }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      height: var(--top-h);
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 500;
+    }
+    .topbar-title { font-size: 1.05rem; font-weight: 800; color: var(--white); display: flex; align-items: center; gap: 10px; }
+    .topbar-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── CONTENT CONTAINER ─── */
+    .content-area {
+      padding: 24px 28px 60px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ─── STATS HEADER ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border-2); }
+    .stat-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .stat-icon.yellow { background: var(--yellow-lt); color: var(--yellow); }
+    .stat-icon.green  { background: var(--green-lt);  color: var(--green); }
+    .stat-icon.blue   { background: var(--blue-lt);   color: var(--blue); }
+    .stat-val { font-size: 1.55rem; font-weight: 900; color: var(--white); line-height: 1.1; }
+    .stat-lbl { font-size: 0.74rem; color: var(--muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ─── TAB NAVIGATION ─── */
+    .cms-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .cms-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted-2);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: var(--r) var(--r) 0 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .cms-tab-btn:hover { color: var(--white); background: rgba(255,255,255,0.03); }
+    .cms-tab-btn.active {
+      color: var(--yellow);
+      border-bottom-color: var(--yellow);
+      background: var(--yellow-lt);
+    }
+    .tab-badge {
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: var(--r-full);
+      background: var(--bg-4);
+      color: var(--white);
+    }
+
+    /* ─── CARD SECTIONS ─── */
+    .card-panel {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .panel-title { font-size: 1.1rem; font-weight: 800; color: var(--white); display: flex; align-items: center; gap: 10px; }
+    .panel-desc { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+
+    /* ─── ACTION BUTTONS ─── */
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: var(--r);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-yellow { background: var(--yellow); color: #000; }
+    .btn-yellow:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,214,10,0.3); }
+    .btn-dark { background: var(--bg-3); color: var(--white); border: 1px solid var(--border-2); }
+    .btn-dark:hover { background: var(--bg-4); }
+
+    /* ─── SEARCH & FILTER TOOLBAR ─── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 8px 14px;
+      flex: 1;
+      max-width: 380px;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.84rem;
+      width: 100%;
+    }
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill-btn {
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: var(--r-full);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-btn:hover { color: var(--white); }
+    .pill-btn.active {
+      background: var(--yellow-lt);
+      border-color: var(--yellow-bdr);
+      color: var(--yellow);
+      font-weight: 800;
+    }
+
+    /* ─── DATA TABLE ─── */
+    .table-responsive {
+      overflow-x: auto;
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.84rem;
+    }
+    table.data-table th {
+      background: var(--bg-3);
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    table.data-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    table.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Badges */
+    .zone-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--r-full);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .zone-badge.in { background: var(--green-lt); color: var(--green); border: 1px solid var(--green-bdr); }
+    .zone-badge.out { background: var(--blue-lt); color: #60A5FA; border: 1px solid rgba(96,165,250,0.3); }
+
+    .action-icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      color: var(--muted-2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .action-icon-btn:hover { background: var(--bg-4); color: var(--white); }
+    .action-icon-btn.delete:hover { background: var(--red-lt); color: var(--red); border-color: var(--red); }
+
+    /* ─── MODALS ─── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; animation: fadeIn 0.2s var(--ease); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal-card {
+      background: var(--bg-2);
+      border: 1.5px solid var(--border-2);
+      border-radius: var(--r-xl);
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      overflow: hidden;
+      animation: slideUp 0.25s var(--ease);
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body { padding: 24px; max-height: 78vh; overflow-y: auto; }
+    .modal-foot {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-3);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-input, .form-select {
+      width: 100%;
+      height: 42px;
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r);
+      padding: 0 14px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--yellow); }
+
+    /* ─── TOAST NOTIFICATIONS ─── */
+    #cmsToastContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .cms-toast {
+      pointer-events: auto;
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      border-radius: var(--r);
+      padding: 12px 18px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--white);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastSlide 0.25s var(--ease);
+    }
+    @keyframes toastSlide { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .cms-toast.success { border-color: var(--green); }
+    .cms-toast.success i { color: var(--green); }
+    .cms-toast.error { border-color: var(--red); }
+    .cms-toast.error i { color: var(--red); }
+
+    /* ─── MAPBOX SIMULATOR CONTAINER ─── */
+    #simMapContainer {
+      width: 100%;
+      height: 380px;
+      border-radius: var(--r);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Shared Sidebar Placeholder -->
+  <aside class="sidebar" id="k3k3Sidebar"></aside>
+
+  <!-- Main Layout -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button id="sidebarToggle" style="background:transparent;border:none;color:var(--white);font-size:1.1rem;cursor:pointer;display:none">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <div class="topbar-title"><i class="fas fa-tags" style="color:var(--yellow)"></i> Routes &amp; Pricing CMS</div>
+          <div class="topbar-sub">Manage Campus Locations, In/Out Zone Fares &amp; Mapbox Configuration</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn-action btn-dark" onclick="reloadCMSData()" title="Refresh data from server">
+          <i class="fas fa-rotate"></i> Refresh
+        </button>
+        <a href="dashboard.html" class="btn-action btn-dark">
+          <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="content-area">
+
+      <!-- Stats Header -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon yellow"><i class="fas fa-map-location-dot"></i></div>
+          <div>
+            <div class="stat-val" id="statLocations">—</div>
+            <div class="stat-lbl">Active Stops</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-graduation-cap"></i></div>
+          <div>
+            <div class="stat-val" id="statInCampus">—</div>
+            <div class="stat-lbl">In-Campus Stations</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-city"></i></div>
+          <div>
+            <div class="stat-val" id="statOutCampus">—</div>
+            <div class="stat-lbl">Out-Campus / Town</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow"><i class="fas fa-route"></i></div>
+          <div>
+            <div class="stat-val" id="statRoutes">—</div>
+            <div class="stat-lbl">Route Fare Matrix</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-coins"></i></div>
+          <div>
+            <div class="stat-val" id="statBaseFares">₵3.00 / ₵4.00</div>
+            <div class="stat-lbl">Base Rates (In / Out)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CMS Tabs -->
+      <nav class="cms-tabs">
+        <button class="cms-tab-btn active" onclick="switchTab('locations')">
+          <i class="fas fa-map-pin"></i> Locations &amp; Stops <span class="tab-badge" id="badgeLocations">0</span>
+        </button>
+        <button class="cms-tab-btn" onclick="switchTab('routes')">
+          <i class="fas fa-route"></i> Route Fare Matrix Overrides <span class="tab-badge" id="badgeRoutes">0</span>
+        </button>
+        <button class="cms-tab-btn" onclick="switchTab('settings')">
+          <i class="fas fa-sliders"></i> Global Pricing &amp; Mapbox
+        </button>
+        <button class="cms-tab-btn" onclick="switchTab('simulator')">
+          <i class="fas fa-compass"></i> Live Mapbox Route Simulator
+        </button>
+      </nav>
+
+      <!-- ════ TAB 1: LOCATIONS & STOPS ════ -->
+      <section id="tab-locations" class="card-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title"><i class="fas fa-location-dot" style="color:var(--yellow)"></i> Pickup &amp; Destination Stops</div>
+            <div class="panel-desc">All landmarks available in the passenger "Where are you going?" popup, categorized by In-Campus and Out-Campus zones.</div>
+          </div>
+          <button class="btn-action btn-yellow" onclick="openAddLocationModal()">
+            <i class="fas fa-plus"></i> Add New Location
+          </button>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fas fa-magnifying-glass" style="color:var(--muted)"></i>
+            <input type="text" id="locSearchInput" placeholder="Search locations or addresses…" oninput="renderLocationsTable()" />
+          </div>
+          <div class="filter-pills">
+            <button class="pill-btn active" onclick="filterLocZone('all', this)">All</button>
+            <button class="pill-btn" onclick="filterLocZone('in', this)">In-Campus (HTU/UHAS/Hostels)</button>
+            <button class="pill-btn" onclick="filterLocZone('out', this)">Out-Campus / Town</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Location Name</th>
+                <th>Zone Classification</th>
+                <th>Category</th>
+                <th>Coordinates (Lat, Lng)</th>
+                <th>Address</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="locationsTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Loading locations catalog…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ════ TAB 2: ROUTE FARE MATRIX OVERRIDES ════ -->
+      <section id="tab-routes" class="card-panel" style="display:none">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title"><i class="fas fa-exchange-alt" style="color:var(--yellow)"></i> Route Fare Matrix Overrides</div>
+            <div class="panel-desc">Custom fixed rates for specific corridor pairs that supersede standard base calculation. Symmetric (A ↔ B).</div>
+          </div>
+          <button class="btn-action btn-yellow" onclick="openAddRouteModal()">
+            <i class="fas fa-plus"></i> Add Route Override
+          </button>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fas fa-magnifying-glass" style="color:var(--muted)"></i>
+            <input type="text" id="routeSearchInput" placeholder="Search route pairs…" oninput="renderRoutesTable()" />
+          </div>
+          <div class="filter-pills">
+            <button class="pill-btn active" onclick="filterRouteZone('all', this)">All Routes</button>
+            <button class="pill-btn" onclick="filterRouteZone('in', this)">In-Campus Routes</button>
+            <button class="pill-btn" onclick="filterRouteZone('out', this)">Out-Campus Routes</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Origin (From)</th>
+                <th>Destination (To)</th>
+                <th>Fixed Fare (Shared)</th>
+                <th>Ride Alone (3x)</th>
+                <th>Zone Type</th>
+                <th>Notes</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="routesTableBody">
+              <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Loading route overrides…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ════ TAB 3: GLOBAL PRICING & MAPBOX ════ -->
+      <section id="tab-settings" class="card-panel" style="display:none">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title"><i class="fas fa-sliders" style="color:var(--yellow)"></i> Global Fare Policies &amp; Mapbox Configuration</div>
+            <div class="panel-desc">Configure default base rates, alone multipliers, and live Mapbox map access tokens.</div>
+          </div>
+          <button class="btn-action btn-yellow" onclick="saveGlobalSettings()">
+            <i class="fas fa-save"></i> Save Settings
+          </button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:20px;margin-bottom:24px">
+          <div class="form-group">
+            <label class="form-label">In-Campus Base Fare (₵)</label>
+            <input type="number" step="0.5" min="1" class="form-input" id="cfgInFare" />
+            <small style="color:var(--muted);font-size:0.72rem;display:block;margin-top:4px">Standard fare between any two campus/hostel locations (Default: ₵3.00).</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Out-Campus / Town Base Fare (₵)</label>
+            <input type="number" step="0.5" min="1" class="form-input" id="cfgOutFare" />
+            <small style="color:var(--muted);font-size:0.72rem;display:block;margin-top:4px">Standard fare when trip crosses campus boundaries or connects to town (Default: ₵4.00).</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ride Alone Multiplier</label>
+            <input type="number" step="0.1" min="1" max="5" class="form-input" id="cfgAloneMult" />
+            <small style="color:var(--muted);font-size:0.72rem;display:block;margin-top:4px">Multiplied against shared fare for exclusive charter (Default: 3.0x).</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Minimum Fare Floor (₵)</label>
+            <input type="number" step="0.5" min="1" class="form-input" id="cfgMinFare" />
+            <small style="color:var(--muted);font-size:0.72rem;display:block;margin-top:4px">Lowest allowable charge for any booking.</small>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-3);border:1px solid var(--border-2);border-radius:var(--r);padding:20px;margin-top:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div>
+              <div style="font-weight:800;font-size:0.95rem;color:var(--white)"><i class="fas fa-map" style="color:#60A5FA"></i> Mapbox GL JS Public Token</div>
+              <div style="font-size:0.75rem;color:var(--muted)">Required to render high-definition Mapbox maps in the passenger popup and simulator.</div>
+            </div>
+            <button class="btn-action btn-dark" onclick="testMapboxToken()">
+              <i class="fas fa-vial"></i> Test Token
+            </button>
+          </div>
+          <input type="text" class="form-input" id="cfgMapboxToken" placeholder="pk.eyJ1Ijo..." style="font-family:monospace;font-size:0.82rem" />
+          <div id="mapboxTokenStatus" style="font-size:0.78rem;margin-top:8px;font-weight:600"></div>
+        </div>
+      </section>
+
+      <!-- ════ TAB 4: LIVE MAPBOX ROUTE SIMULATOR ════ -->
+      <section id="tab-simulator" class="card-panel" style="display:none">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title"><i class="fas fa-compass" style="color:var(--yellow)"></i> Live Mapbox Route &amp; Fare Simulator</div>
+            <div class="panel-desc">Test how the passenger "Where are you going?" popup renders routes and calculates fares with your active pricing rules.</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+          <div class="form-group">
+            <label class="form-label">Pickup Location</label>
+            <select class="form-select" id="simPickup" onchange="runSimulator()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Destination Location</label>
+            <select class="form-select" id="simDest" onchange="runSimulator()"></select>
+          </div>
+        </div>
+
+        <!-- Simulation Result Pill Banner -->
+        <div id="simResultBanner" style="background:var(--bg-3);border:1px solid var(--yellow-bdr);border-radius:var(--r);padding:14px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase">Trip Classification</div>
+            <div style="font-size:1.1rem;font-weight:900;color:var(--white)" id="simClassification">—</div>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase">Shared Rate</div>
+            <div style="font-size:1.35rem;font-weight:900;color:var(--yellow)" id="simSharedFare">—</div>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase">Ride Alone Rate (3x)</div>
+            <div style="font-size:1.35rem;font-weight:900;color:#60A5FA" id="simAloneFare">—</div>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase">Pricing Mechanism</div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--muted-2)" id="simMechanism">—</div>
+          </div>
+        </div>
+
+        <!-- Simulator Map -->
+        <div id="simMapContainer"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ════ MODAL: ADD / EDIT LOCATION ════ -->
+  <div class="modal-backdrop" id="locationModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div style="font-weight:800;font-size:1rem;color:var(--white)" id="locModalTitle">Add New Location</div>
+        <button onclick="closeModal('locationModal')" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="locEditId" />
+        <div class="form-group">
+          <label class="form-label">Location / Landmark Name *</label>
+          <input type="text" class="form-input" id="locName" placeholder="e.g. HSTU Main Gate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zone Classification *</label>
+          <select class="form-select" id="locZone">
+            <option value="in">In-Campus (HTU / UHAS / Hostels / Academic Area)</option>
+            <option value="out">Out-Campus (Town / Central / Hospital / Residential)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="locCategory">
+            <option value="Campuses &amp; Hostels">Campuses &amp; Hostels</option>
+            <option value="Central &amp; Commercial">Central &amp; Commercial</option>
+            <option value="Hospitals &amp; Healthcare">Hospitals &amp; Healthcare</option>
+            <option value="Townships &amp; Residential">Townships &amp; Residential</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Latitude</label>
+            <input type="number" step="0.0001" class="form-input" id="locLat" placeholder="6.6012" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Longitude</label>
+            <input type="number" step="0.0001" class="form-input" id="locLng" placeholder="0.4688" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address / Landmark Detail</label>
+          <input type="text" class="form-input" id="locAddress" placeholder="e.g. Sokode Estates, Ho" />
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <input type="checkbox" id="locPopular" style="width:18px;height:18px;accent-color:var(--yellow)" />
+          <label for="locPopular" style="font-size:0.85rem;color:var(--white);font-weight:600">Feature as Quick Destination chip in passenger modal</label>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-action btn-dark" onclick="closeModal('locationModal')">Cancel</button>
+        <button class="btn-action btn-yellow" onclick="submitLocationForm()">Save Location</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL: ADD / EDIT ROUTE OVERRIDE ════ -->
+  <div class="modal-backdrop" id="routeModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div style="font-weight:800;font-size:1rem;color:var(--white)" id="routeModalTitle">Add Route Fare Override</div>
+        <button onclick="closeModal('routeModal')" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="routeEditId" />
+        <div class="form-group">
+          <label class="form-label">Origin Location (From) *</label>
+          <select class="form-select" id="routeFrom"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Destination Location (To) *</label>
+          <select class="form-select" id="routeTo"></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Fixed Fare (Shared) * (₵)</label>
+            <input type="number" step="0.1" min="1" class="form-input" id="routeFare" placeholder="3.50" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone Type</label>
+            <select class="form-select" id="routeZone">
+              <option value="in">In-Campus</option>
+              <option value="out">Out-Campus</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Operational Notes</label>
+          <input type="text" class="form-input" id="routeNotes" placeholder="e.g. Uphill terrain or special student rate" />
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-action btn-dark" onclick="closeModal('routeModal')">Cancel</button>
+        <button class="btn-action btn-yellow" onclick="submitRouteForm()">Save Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL: DELETE CONFIRMATION ════ -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal-card" style="max-width:420px">
+      <div class="modal-head">
+        <div style="font-weight:800;font-size:1rem;color:var(--red)"><i class="fas fa-trash"></i> Confirm Deletion</div>
+        <button onclick="closeModal('deleteModal')" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center">
+        <p id="deleteModalPrompt" style="font-size:0.9rem;color:var(--text);margin-bottom:12px">Are you sure you want to delete this item?</p>
+        <small style="color:var(--muted);font-size:0.75rem">This action cannot be undone.</small>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-action btn-dark" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="btn-action" id="confirmDeleteBtn" style="background:var(--red);color:#fff">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="cmsToastContainer"></div>
+
+  <!-- Sidebar Injector -->
+  <script src="sidebar.js"></script>
+
+  <!-- ════ CMS JAVASCRIPT LOGIC ════ -->
+  <script>
+    const API_BASE = (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+      ? 'http://localhost:8810'
+      : '';
+
+    let cmsData = { locations: [], routes: [], settings: {} };
+    let currentTab = 'locations';
+    let locZoneFilter = 'all';
+    let routeZoneFilter = 'all';
+    let simMap = null;
+    let simMarkers = [];
+
+    // ── Toast Utility ──
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('cmsToastContainer');
+      const toast = document.createElement('div');
+      toast.className = `cms-toast ${type}`;
+      toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    // ── Tab Switching ──
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.cms-tab-btn').forEach((btn, idx) => {
+        const tabs = ['locations', 'routes', 'settings', 'simulator'];
+        btn.classList.toggle('active', tabs[idx] === tab);
+      });
+
+      ['locations', 'routes', 'settings', 'simulator'].forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) el.style.display = (t === tab) ? 'block' : 'none';
+      });
+
+      if (tab === 'simulator') {
+        setTimeout(initSimulatorMap, 150);
+      }
+    }
+
+    // ── Fetch CMS Data ──
+    async function reloadCMSData() {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/pricing`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        cmsData = data;
+        updateUI();
+        showToast('Pricing & routes synchronized');
+      } catch (err) {
+        console.error('Failed to load CMS data:', err);
+        showToast('Failed to connect to backend pricing service', 'error');
+      }
+    }
+
+    function updateUI() {
+      const locs = cmsData.locations || [];
+      const routes = cmsData.routes || [];
+      const st = cmsData.settings || {};
+
+      // Update counters
+      const inCount = locs.filter(l => l.zone_type === 'in').length;
+      const outCount = locs.filter(l => l.zone_type === 'out').length;
+
+      document.getElementById('statLocations').textContent = locs.length;
+      document.getElementById('statInCampus').textContent = inCount;
+      document.getElementById('statOutCampus').textContent = outCount;
+      document.getElementById('statRoutes').textContent = routes.length;
+      document.getElementById('statBaseFares').textContent = `₵${(st.in_campus_base_fare || 3).toFixed(2)} / ₵${(st.out_campus_base_fare || 4).toFixed(2)}`;
+
+      document.getElementById('badgeLocations').textContent = locs.length;
+      document.getElementById('badgeRoutes').textContent = routes.length;
+
+      // Populate Settings Inputs
+      document.getElementById('cfgInFare').value = st.in_campus_base_fare || 3;
+      document.getElementById('cfgOutFare').value = st.out_campus_base_fare || 4;
+      document.getElementById('cfgAloneMult').value = st.alone_multiplier || 3.0;
+      document.getElementById('cfgMinFare').value = st.minimum_fare || 3;
+      document.getElementById('cfgMapboxToken').value = st.mapbox_public_token || '';
+
+      // Populate Simulator dropdowns
+      populateSelect('simPickup', locs);
+      populateSelect('simDest', locs);
+      populateSelect('routeFrom', locs);
+      populateSelect('routeTo', locs);
+
+      // Default simulator selection
+      const pSel = document.getElementById('simPickup');
+      const dSel = document.getElementById('simDest');
+      if (pSel && pSel.options.length > 0 && !pSel.value) pSel.selectedIndex = 0;
+      if (dSel && dSel.options.length > 1 && !dSel.value) dSel.selectedIndex = 1;
+
+      renderLocationsTable();
+      renderRoutesTable();
+      runSimulator();
+    }
+
+    function populateSelect(elemId, locations) {
+      const sel = document.getElementById(elemId);
+      if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = locations.map(l => `<option value="${l.name}">${l.name} (${l.zone_type === 'in' ? 'In-Campus' : 'Out-Campus'})</option>`).join('');
+      if (cur) sel.value = cur;
+    }
+
+    // ── Table Renderers ──
+    function filterLocZone(zone, btn) {
+      locZoneFilter = zone;
+      btn.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLocationsTable();
+    }
+
+    function renderLocationsTable() {
+      const tbody = document.getElementById('locationsTableBody');
+      const q = (document.getElementById('locSearchInput')?.value || '').toLowerCase().trim();
+      let list = cmsData.locations || [];
+
+      if (locZoneFilter !== 'all') {
+        list = list.filter(l => l.zone_type === locZoneFilter);
+      }
+      if (q) {
+        list = list.filter(l => l.name.toLowerCase().includes(q) || (l.address && l.address.toLowerCase().includes(q)));
+      }
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No locations found matching filter</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(l => `
+        <tr>
+          <td>
+            <div style="font-weight:700;color:var(--white);display:flex;align-items:center;gap:8px">
+              <i class="fas ${l.icon || 'fa-map-pin'}" style="color:var(--yellow);width:16px"></i>
+              ${l.name}
+              ${l.is_popular ? '<span style="font-size:0.65rem;background:var(--yellow-lt);color:var(--yellow);padding:2px 6px;border-radius:4px;font-weight:800">POPULAR</span>' : ''}
+            </div>
+          </td>
+          <td>
+            <span class="zone-badge ${l.zone_type}">
+              <i class="fas ${l.zone_type === 'in' ? 'fa-graduation-cap' : 'fa-city'}"></i>
+              ${l.zone_type === 'in' ? 'In-Campus' : 'Out-Campus / Town'}
+            </span>
+          </td>
+          <td><span style="color:var(--muted-2);font-size:0.8rem">${l.category || 'Standard'}</span></td>
+          <td><span style="font-family:monospace;font-size:0.75rem;color:var(--muted)">${l.lat.toFixed(4)}, ${l.lng.toFixed(4)}</span></td>
+          <td><span style="color:var(--muted-2);font-size:0.78rem">${l.address || '—'}</span></td>
+          <td style="text-align:right">
+            <button class="action-icon-btn" onclick="openEditLocationModal('${l.id}')" title="Edit location">
+              <i class="fas fa-pencil"></i>
+            </button>
+            <button class="action-icon-btn delete" onclick="confirmDeleteLocation('${l.id}', '${l.name}')" title="Delete location">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterRouteZone(zone, btn) {
+      routeZoneFilter = zone;
+      btn.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderRoutesTable();
+    }
+
+    function renderRoutesTable() {
+      const tbody = document.getElementById('routesTableBody');
+      const q = (document.getElementById('routeSearchInput')?.value || '').toLowerCase().trim();
+      let list = cmsData.routes || [];
+      const mult = cmsData.settings?.alone_multiplier || 3.0;
+
+      if (routeZoneFilter !== 'all') {
+        list = list.filter(r => r.zone_type === routeZoneFilter);
+      }
+      if (q) {
+        list = list.filter(r => r.from.toLowerCase().includes(q) || r.to.toLowerCase().includes(q) || (r.notes && r.notes.toLowerCase().includes(q)));
+      }
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No route overrides found</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(r => `
+        <tr>
+          <td><strong style="color:var(--white)">${r.from}</strong></td>
+          <td><strong style="color:var(--white)">${r.to}</strong></td>
+          <td><span style="font-weight:800;color:var(--yellow);font-size:0.95rem">₵${r.fare.toFixed(2)}</span></td>
+          <td><span style="font-weight:800;color:#60A5FA;font-size:0.95rem">₵${(r.fare * mult).toFixed(2)}</span></td>
+          <td>
+            <span class="zone-badge ${r.zone_type}">
+              ${r.zone_type === 'in' ? 'In-Campus' : 'Out-Campus'}
+            </span>
+          </td>
+          <td><span style="font-size:0.78rem;color:var(--muted-2)">${r.notes || '—'}</span></td>
+          <td style="text-align:right">
+            <button class="action-icon-btn" onclick="openEditRouteModal('${r.id}')" title="Edit route override">
+              <i class="fas fa-pencil"></i>
+            </button>
+            <button class="action-icon-btn delete" onclick="confirmDeleteRoute('${r.id}', '${r.from} ↔ ${r.to}')" title="Delete override">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Location Modal & Operations ──
+    function openAddLocationModal() {
+      document.getElementById('locModalTitle').textContent = 'Add New Location';
+      document.getElementById('locEditId').value = '';
+      document.getElementById('locName').value = '';
+      document.getElementById('locZone').value = 'in';
+      document.getElementById('locCategory').value = 'Campuses & Hostels';
+      document.getElementById('locLat').value = '6.6012';
+      document.getElementById('locLng').value = '0.4688';
+      document.getElementById('locAddress').value = '';
+      document.getElementById('locPopular').checked = false;
+      openModal('locationModal');
+    }
+
+    function openEditLocationModal(id) {
+      const loc = (cmsData.locations || []).find(l => l.id === id);
+      if (!loc) return;
+      document.getElementById('locModalTitle').textContent = 'Edit Location';
+      document.getElementById('locEditId').value = loc.id;
+      document.getElementById('locName').value = loc.name;
+      document.getElementById('locZone').value = loc.zone_type;
+      document.getElementById('locCategory').value = loc.category || 'Campuses & Hostels';
+      document.getElementById('locLat').value = loc.lat;
+      document.getElementById('locLng').value = loc.lng;
+      document.getElementById('locAddress').value = loc.address || '';
+      document.getElementById('locPopular').checked = Boolean(loc.is_popular);
+      openModal('locationModal');
+    }
+
+    async function submitLocationForm() {
+      const id = document.getElementById('locEditId').value;
+      const name = document.getElementById('locName').value.trim();
+      const zone_type = document.getElementById('locZone').value;
+      const category = document.getElementById('locCategory').value;
+      const lat = parseFloat(document.getElementById('locLat').value) || 6.6012;
+      const lng = parseFloat(document.getElementById('locLng').value) || 0.4688;
+      const address = document.getElementById('locAddress').value.trim();
+      const is_popular = document.getElementById('locPopular').checked;
+
+      if (!name) { showToast('Location name is required', 'error'); return; }
+
+      const payload = { name, zone_type, category, lat, lng, address, is_popular };
+      const url = id ? `${API_BASE}/api/admin/locations/${id}` : `${API_BASE}/api/admin/locations`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Request failed');
+        closeModal('locationModal');
+        showToast(id ? 'Location updated successfully' : 'Location created successfully');
+        reloadCMSData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function confirmDeleteLocation(id, name) {
+      document.getElementById('deleteModalPrompt').textContent = `Are you sure you want to delete "${name}"?`;
+      document.getElementById('confirmDeleteBtn').onclick = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/locations/${id}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete');
+          closeModal('deleteModal');
+          showToast('Location deleted successfully');
+          reloadCMSData();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      };
+      openModal('deleteModal');
+    }
+
+    // ── Route Override Modal & Operations ──
+    function openAddRouteModal() {
+      document.getElementById('routeModalTitle').textContent = 'Add Route Fare Override';
+      document.getElementById('routeEditId').value = '';
+      document.getElementById('routeFare').value = '3.50';
+      document.getElementById('routeZone').value = 'out';
+      document.getElementById('routeNotes').value = '';
+      openModal('routeModal');
+    }
+
+    function openEditRouteModal(id) {
+      const r = (cmsData.routes || []).find(x => x.id === id);
+      if (!r) return;
+      document.getElementById('routeModalTitle').textContent = 'Edit Route Override';
+      document.getElementById('routeEditId').value = r.id;
+      document.getElementById('routeFrom').value = r.from;
+      document.getElementById('routeTo').value = r.to;
+      document.getElementById('routeFare').value = r.fare;
+      document.getElementById('routeZone').value = r.zone_type;
+      document.getElementById('routeNotes').value = r.notes || '';
+      openModal('routeModal');
+    }
+
+    async function submitRouteForm() {
+      const id = document.getElementById('routeEditId').value;
+      const from = document.getElementById('routeFrom').value;
+      const to = document.getElementById('routeTo').value;
+      const fare = parseFloat(document.getElementById('routeFare').value);
+      const zone_type = document.getElementById('routeZone').value;
+      const notes = document.getElementById('routeNotes').value.trim();
+
+      if (!from || !to) { showToast('Origin and Destination are required', 'error'); return; }
+      if (from === to) { showToast('Origin and Destination cannot be the same place', 'error'); return; }
+      if (isNaN(fare) || fare <= 0) { showToast('Valid fare amount is required', 'error'); return; }
+
+      const payload = { from, to, fare, zone_type, notes };
+      const url = id ? `${API_BASE}/api/admin/routes/${id}` : `${API_BASE}/api/admin/routes`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Request failed');
+        closeModal('routeModal');
+        showToast(id ? 'Route override updated' : 'Route override created');
+        reloadCMSData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function confirmDeleteRoute(id, label) {
+      document.getElementById('deleteModalPrompt').textContent = `Are you sure you want to delete route override "${label}"?`;
+      document.getElementById('confirmDeleteBtn').onclick = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/routes/${id}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete');
+          closeModal('deleteModal');
+          showToast('Route override removed');
+          reloadCMSData();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      };
+      openModal('deleteModal');
+    }
+
+    // ── Global Settings & Mapbox ──
+    async function saveGlobalSettings() {
+      const in_campus_base_fare = parseFloat(document.getElementById('cfgInFare').value) || 3;
+      const out_campus_base_fare = parseFloat(document.getElementById('cfgOutFare').value) || 4;
+      const alone_multiplier = parseFloat(document.getElementById('cfgAloneMult').value) || 3.0;
+      const minimum_fare = parseFloat(document.getElementById('cfgMinFare').value) || 3;
+      const mapbox_public_token = document.getElementById('cfgMapboxToken').value.trim();
+
+      const payload = { in_campus_base_fare, out_campus_base_fare, alone_multiplier, minimum_fare, mapbox_public_token };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/pricing/settings`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Failed to save');
+        showToast('Pricing settings saved & live in passenger apps');
+        reloadCMSData();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function testMapboxToken() {
+      const token = document.getElementById('cfgMapboxToken').value.trim();
+      const statusEl = document.getElementById('mapboxTokenStatus');
+      if (!token) {
+        statusEl.innerHTML = '<span style="color:var(--red)"><i class="fas fa-times"></i> Token is empty</span>';
+        return;
+      }
+
+      statusEl.innerHTML = '<span style="color:var(--yellow)"><i class="fas fa-spinner fa-spin"></i> Validating token against Mapbox API…</span>';
+      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/Ho.json?access_token=${token}&limit=1`)
+        .then(r => {
+          if (r.ok) {
+            statusEl.innerHTML = '<span style="color:var(--green)"><i class="fas fa-check-circle"></i> Mapbox Token is valid &amp; authenticated!</span>';
+          } else {
+            statusEl.innerHTML = '<span style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i> Token rejected by Mapbox (Code: ' + r.status + ')</span>';
+          }
+        })
+        .catch(() => {
+          statusEl.innerHTML = '<span style="color:var(--red)"><i class="fas fa-times"></i> Network error testing token</span>';
+        });
+    }
+
+    // ── Live Simulator & Mapbox Rendering ──
+    function initSimulatorMap() {
+      const container = document.getElementById('simMapContainer');
+      if (!container || simMap) return;
+
+      const token = (cmsData.settings?.mapbox_public_token || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+      mapboxgl.accessToken = token;
+
+      try {
+        simMap = new mapboxgl.Map({
+          container: 'simMapContainer',
+          style: 'mapbox://styles/mapbox/dark-v11',
+          center: [0.4688, 6.6012],
+          zoom: 12.5
+        });
+
+        simMap.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
+        simMap.on('load', () => {
+          runSimulator();
+        });
+      } catch (err) {
+        console.error('Failed to init Mapbox in simulator:', err);
+        container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted)">Mapbox preview unavailable: ${err.message}</div>`;
+      }
+    }
+
+    function runSimulator() {
+      const from = document.getElementById('simPickup')?.value;
+      const to = document.getElementById('simDest')?.value;
+      if (!from || !to) return;
+
+      const fromLoc = (cmsData.locations || []).find(l => l.name === from);
+      const toLoc = (cmsData.locations || []).find(l => l.name === to);
+
+      // Local fare calculation matching backend
+      const res = calculateLocalFare(from, to);
+
+      document.getElementById('simClassification').innerHTML = `
+        <span class="zone-badge ${res.zone_type}">${res.zone_type === 'in' ? 'In-Campus Corridor' : 'Out-Campus Corridor'}</span>
+      `;
+      document.getElementById('simSharedFare').textContent = `₵${res.shared_fare.toFixed(2)}`;
+      document.getElementById('simAloneFare').textContent = `₵${res.alone_fare.toFixed(2)}`;
+      document.getElementById('simMechanism').textContent = res.is_override ? `Custom Pair Matrix Override (ID: ${res.route_id || 'Override'})` : `Standard ${res.zone_type === 'in' ? 'In-Campus' : 'Out-Campus'} Base Policy`;
+
+      // Update Mapbox Map if active
+      if (simMap && fromLoc && toLoc) {
+        simMarkers.forEach(m => m.remove());
+        simMarkers = [];
+
+        // Pickup Marker (Green)
+        const pEl = document.createElement('div');
+        pEl.style.width = '18px';
+        pEl.style.height = '18px';
+        pEl.style.borderRadius = '50%';
+        pEl.style.background = '#10B981';
+        pEl.style.border = '3px solid #ffffff';
+        pEl.style.boxShadow = '0 0 10px rgba(16,185,129,0.7)';
+        const pMarker = new mapboxgl.Marker(pEl).setLngLat([fromLoc.lng, fromLoc.lat]).addTo(simMap);
+        simMarkers.push(pMarker);
+
+        // Dest Marker (Yellow)
+        const dEl = document.createElement('div');
+        dEl.style.width = '18px';
+        dEl.style.height = '18px';
+        dEl.style.borderRadius = '50%';
+        dEl.style.background = '#FFD60A';
+        dEl.style.border = '3px solid #ffffff';
+        dEl.style.boxShadow = '0 0 10px rgba(255,214,10,0.7)';
+        const dMarker = new mapboxgl.Marker(dEl).setLngLat([toLoc.lng, toLoc.lat]).addTo(simMap);
+        simMarkers.push(dMarker);
+
+        // Draw Line
+        const geojson = {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: [[fromLoc.lng, fromLoc.lat], [toLoc.lng, toLoc.lat]]
+          }
+        };
+
+        if (simMap.getSource('simRoute')) {
+          simMap.getSource('simRoute').setData(geojson);
+        } else {
+          simMap.addSource('simRoute', { type: 'geojson', data: geojson });
+          simMap.addLayer({
+            id: 'simRouteLayer',
+            type: 'line',
+            source: 'simRoute',
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: { 'line-color': '#FFD60A', 'line-width': 4, 'line-opacity': 0.85 }
+          });
+        }
+
+        // Fit Bounds
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend([fromLoc.lng, fromLoc.lat]);
+        bounds.extend([toLoc.lng, toLoc.lat]);
+        simMap.fitBounds(bounds, { padding: 60, maxZoom: 15 });
+      }
+    }
+
+    function calculateLocalFare(from, to) {
+      const routes = cmsData.routes || [];
+      const st = cmsData.settings || {};
+      const aloneMult = st.alone_multiplier || 3.0;
+
+      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const fN = norm(from);
+      const tN = norm(to);
+
+      // Check route override
+      const match = routes.find(r => {
+        const rfFrom = norm(r.from);
+        const rfTo = norm(r.to);
+        return (rfFrom === fN && rfTo === tN) || (rfFrom === tN && rfTo === fN);
+      });
+
+      if (match) {
+        return {
+          fare: match.fare,
+          shared_fare: match.fare,
+          alone_fare: match.fare * aloneMult,
+          zone_type: match.zone_type || 'out',
+          is_override: true,
+          route_id: match.id
+        };
+      }
+
+      const fLoc = (cmsData.locations || []).find(l => norm(l.name) === fN);
+      const tLoc = (cmsData.locations || []).find(l => norm(l.name) === tN);
+
+      if (fLoc?.zone_type === 'in' && tLoc?.zone_type === 'in') {
+        const fare = st.in_campus_base_fare || 3.0;
+        return { fare, shared_fare: fare, alone_fare: fare * aloneMult, zone_type: 'in', is_override: false };
+      }
+
+      const fare = st.out_campus_base_fare || 4.0;
+      return { fare, shared_fare: fare, alone_fare: fare * aloneMult, zone_type: 'out', is_override: false };
+    }
+
+    // ── Modal Helpers ──
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('show');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    }
+
+    // ── Initial Boot ──
+    document.addEventListener('DOMContentLoaded', () => {
+      reloadCMSData();
+    });
+  </script>
+</body>
+</html>
