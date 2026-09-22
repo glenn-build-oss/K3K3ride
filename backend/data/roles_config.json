@@ -170,23 +170,28 @@
     {
       "id": "staff-admin-01",
       "email": "admin@k3k3.com",
-      "name": "Super Admin",
+      "name": "K3K3 Admin",
       "role": "admin",
-      "assigned_at": "2026-09-22T00:00:00.000Z"
+      "assigned_at": "2026-09-22T00:00:00.000Z",
+      "updated_at": "2026-09-22T14:50:00.000Z"
     },
     {
       "id": "staff-fin-01",
       "email": "finance@k3k3.com",
-      "name": "Finance Lead",
+      "name": "Sarah Connor",
       "role": "finance",
-      "assigned_at": "2026-09-22T00:00:00.000Z"
+      "assigned_at": "2026-09-22T00:00:00.000Z",
+      "password_hash": "$2a$10$CclrICAwGjT6qeGcb9nGve1xtX/FHiB/ISScuZCtxwKzvF6Jpletm",
+      "password_updated_at": "2026-09-22T18:47:25.531Z",
+      "updated_at": "2026-09-22T18:47:25.531Z"
     },
     {
       "id": "staff-sup-01",
       "email": "support@k3k3.com",
-      "name": "Customer Support",
+      "name": "John Doe",
       "role": "support",
-      "assigned_at": "2026-09-22T00:00:00.000Z"
+      "assigned_at": "2026-09-22T00:00:00.000Z",
+      "updated_at": "2026-09-22T13:58:02.077Z"
     },
     {
       "id": "staff_1790040311211",
@@ -195,6 +200,15 @@
       "role": "finance",
       "assigned_at": "2026-09-22T01:25:11.211Z",
       "updated_at": "2026-09-22T11:52:44.553Z"
+    },
+    {
+      "id": "staff_1790102664753",
+      "email": "staff.audit.test@k3k3.com",
+      "name": "Audit Officer",
+      "role": "finance",
+      "assigned_at": "2026-09-22T18:44:24.753Z",
+      "password_hash": "$2a$10$5XJ118vnsXbj/xstzwO9XuxOtv.qiFvI2VpEYRQppoP75XyoVZ.8C",
+      "password_updated_at": "2026-09-22T18:44:24.759Z"
     }
   ]
 }

@@ -195,24 +195,44 @@
     });
   }
 
-  /* ── Admin name ── */
+  /* ── Admin name & role title sync ── */
   function setAdminName() {
     try {
       const data = JSON.parse(localStorage.getItem('current_admin') || '{}');
-      if (data.name) {
-        ['shared-admin-name','heroAdminName','sidebarAdminName','heroAdminNameBanner','topbar-admin-name'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = data.name;
-        });
-        // topbar-admin-name spans
-        document.querySelectorAll('.topbar-admin-name').forEach(el => el.textContent = data.name);
-      }
+      const name = data.name || (data.role === 'admin' ? 'K3K3 Admin' : 'Staff');
+      ['shared-admin-name','heroAdminName','sidebarAdminName','heroAdminNameBanner','topbar-admin-name'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = name;
+      });
+      document.querySelectorAll('.topbar-admin-name').forEach(el => el.textContent = name);
+
+      const roleDisplayName = data.roleName || (data.role === 'admin' ? 'Super Admin' : (data.role ? (data.role.charAt(0).toUpperCase() + data.role.slice(1)) : 'Super Admin'));
+      ['shared-admin-role','sidebarAdminRole','topbar-admin-role'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = roleDisplayName;
+      });
+      document.querySelectorAll('.topbar-admin-role').forEach(el => el.textContent = roleDisplayName);
     } catch (_) {}
   }
+  window.k3k3SetAdminName = setAdminName;
 
-  /* ── Logout ── */
+  /* ── Logout with audit logging ── */
   function wireLogout() {
-    const logoutFn = () => { localStorage.clear(); window.location.href = LOGOUT_URL; };
+    const logoutFn = () => {
+      try {
+        const user = getCurrentUser();
+        if (user && user.email) {
+          fetch(`${API_BASE}/api/auth/admin/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email, name: user.name, role: user.role }),
+            keepalive: true
+          }).catch(() => {});
+        }
+      } catch (_) {}
+      localStorage.clear();
+      window.location.href = LOGOUT_URL;
+    };
     ['shared-logout-btn','sidebarLogoutBtn','topbarLogoutBtn'].forEach(id => {
       const btn = document.getElementById(id);
       if (btn) btn.addEventListener('click', logoutFn);

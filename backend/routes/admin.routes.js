@@ -1496,15 +1496,37 @@ router.get('/staff', (req, res) => {
   }
 });
 
-// Assign staff member role
-router.put('/staff/assign', (req, res) => {
+// Assign staff member role and optional login password
+router.put('/staff/assign', async (req, res) => {
   try {
-    const { email, roleId, name } = req.body;
-    const result = rolesService.assignStaffRole(email, roleId, name);
+    const { email, roleId, name, password } = req.body;
+    const result = await rolesService.assignStaffRole(email, roleId, name, password);
     res.json(result);
   } catch (err) {
     console.error('[Admin] Error assigning staff role:', err);
     res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Get staff activity & session logs (for Super Admin audit)
+router.get('/staff/logs', (req, res) => {
+  try {
+    const logs = rolesService.getStaffActivityLogs(req.query);
+    res.json({ success: true, logs });
+  } catch (err) {
+    console.error('[Admin] Error fetching staff logs:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Clear staff activity logs
+router.delete('/staff/logs', (req, res) => {
+  try {
+    const result = rolesService.clearStaffActivityLogs();
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error clearing staff logs:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

@@ -898,6 +898,7 @@
                 const user = data.user || {};
                 const userEmail = user.email || adminEmail || 'admin@k3k3.com';
                 const userName = user.name || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : userEmail.split('@')[0]) || 'Admin';
+                const defaultPage = user.defaultPage || user.default_page || 'dashboard.html';
 
                 localStorage.setItem('k3k3_admin_token', token);
                 localStorage.setItem('current_admin', JSON.stringify({
@@ -905,14 +906,20 @@
                     name: userName,
                     email: userEmail,
                     role: user.role || user.role_type || 'admin',
+                    roleName: user.roleName || (user.role === 'admin' ? 'Super Admin' : user.role),
+                    defaultPage: defaultPage,
+                    allowedPages: user.allowedPages || user.allowed_pages || [],
                     loginTime: new Date().toISOString()
                 }));
-            } catch(err) { console.warn('Storage error:', err); }
 
-            showToast('Welcome back! Redirecting to dashboard...', 'success');
-            setTimeout(function() {
-                window.location.href = 'admin-dashboard.html';
-            }, 800);
+                showToast(`Welcome back, ${userName}! Redirecting to workspace...`, 'success');
+                setTimeout(function() {
+                    window.location.href = defaultPage;
+                }, 800);
+            } catch(err) {
+                console.warn('Storage error:', err);
+                window.location.href = 'dashboard.html';
+            }
         }
 
         function backToCredentials() {

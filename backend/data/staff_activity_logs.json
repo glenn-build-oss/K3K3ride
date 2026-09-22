@@ -1,0 +1,79 @@
+[
+  {
+    "id": "log_1790102846764_pph7i",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "LOGOUT",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "Staff member signed out",
+    "timestamp": "2026-09-22T18:47:26.764Z"
+  },
+  {
+    "id": "log_1790102846746_s14ic",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "Direct credential login (OTP bypassed)",
+    "timestamp": "2026-09-22T18:47:26.746Z"
+  },
+  {
+    "id": "log_1790102845534_yxy20",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "PASSWORD_UPDATE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Finance Team (password changed)",
+    "timestamp": "2026-09-22T18:47:25.534Z"
+  },
+  {
+    "id": "log_1790102844925_bqb0g",
+    "email": "admin@k3k3.com",
+    "name": "K3K3 Admin",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "Direct credential login (OTP bypassed)",
+    "timestamp": "2026-09-22T18:47:24.925Z"
+  },
+  {
+    "id": "log_1790102665548_jkbff",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "LOGOUT",
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 Test Suite",
+    "details": "Automated test staff logout",
+    "timestamp": "2026-09-22T18:44:25.548Z"
+  },
+  {
+    "id": "log_1790102665540_eocx0",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 Test Suite",
+    "details": "Automated test staff login",
+    "timestamp": "2026-09-22T18:44:25.540Z"
+  },
+  {
+    "id": "log_1790102664760_hxi8k",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "ROLE_CHANGE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "New staff member added with role Finance Team",
+    "timestamp": "2026-09-22T18:44:24.760Z"
+  }
+]

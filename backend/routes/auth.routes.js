@@ -1127,9 +1127,17 @@ router.post('/admin/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials or unauthorized role.' });
     }
 
-    // Verify password
+    // Verify password via rolesService (checks custom password hash in roles_config.json, bcrypt, and master fallbacks)
     let passwordMatch = false;
-    if (admin.password_hash) {
+    const staffVerify = await rolesService.verifyStaffPassword(cleanEmail, password);
+    if (staffVerify.valid) {
+      passwordMatch = true;
+      if (staffVerify.staff) {
+        if (!admin) admin = {};
+        if (staffVerify.staff.name) admin.first_name = staffVerify.staff.name;
+        admin.role = staffVerify.staff.role || admin.role;
+      }
+    } else if (admin && admin.password_hash) {
       passwordMatch = await bcrypt.compare(password, admin.password_hash);
     }
     if (!passwordMatch && (password === 'admin123' || password === 'admin@123' || password === 'admin' || password === 'k3k3@2026')) {
@@ -1140,6 +1148,8 @@ router.post('/admin/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
+    const adminDisplayName = admin.first_name || assignedStaff?.name || roleDef.name || 'Admin';
+
     // ─── ADMIN 2FA OTP SECURITY ENFORCEMENT ───
     const isOtpEnabled = process.env.ADMIN_OTP_ENABLED !== 'false';
 
@@ -1148,6 +1158,18 @@ router.post('/admin/login', async (req, res) => {
       if (admin.id) {
         try { await updateUserLastLogin(admin.id); } catch (_) {}
       }
+
+      // Log staff login activity
+      rolesService.logStaffActivity({
+        email: cleanEmail,
+        name: adminDisplayName,
+        role: admin.role,
+        action: 'LOGIN',
+        ip: req.ip || req.connection?.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        details: 'Direct credential login (OTP bypassed)'
+      });
+
       const token = generateToken(admin);
       return res.json({
         success: true,
@@ -1156,10 +1178,10 @@ router.post('/admin/login', async (req, res) => {
         token,
         user: {
           id: admin.id,
-          email: admin.email,
+          email: admin.email || cleanEmail,
           firstName: admin.first_name,
           lastName: admin.last_name,
-          name: `${admin.first_name || ''} ${admin.last_name || ''}`.trim() || roleDef.name,
+          name: adminDisplayName,
           role: admin.role,
           roleName: roleDef.name,
           defaultPage: roleDef.default_page,
@@ -1376,7 +1398,18 @@ router.post('/admin/verify-otp', async (req, res) => {
       try { await updateUserLastLogin(admin.id); } catch (_) {}
     }
     
-    const token = generateToken(admin);
+    const adminDisplayName = `${admin.first_name || ''} ${admin.last_name || ''}`.trim() || roleDef.name;
+
+    // Log staff login activity
+    rolesService.logStaffActivity({
+      email: cleanEmail,
+      name: adminDisplayName,
+      role: admin.role,
+      action: 'LOGIN',
+      ip: req.ip || req.connection?.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      details: '2FA OTP verified login'
+    });
 
     res.json({
       success: true,
@@ -1387,7 +1420,7 @@ router.post('/admin/verify-otp', async (req, res) => {
         email: admin.email,
         firstName: admin.first_name,
         lastName: admin.last_name,
-        name: `${admin.first_name || ''} ${admin.last_name || ''}`.trim() || roleDef.name,
+        name: adminDisplayName,
         role: admin.role,
         roleName: roleDef.name,
         defaultPage: roleDef.default_page,
@@ -1397,6 +1430,31 @@ router.post('/admin/verify-otp', async (req, res) => {
 
   } catch (err) {
     console.error('[Auth] Error in admin/verify-otp:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/auth/admin/logout
+ * Log admin / staff session logout in audit logs.
+ */
+router.post('/admin/logout', (req, res) => {
+  try {
+    const { email, name, role } = req.body;
+    if (email) {
+      rolesService.logStaffActivity({
+        email: String(email).trim().toLowerCase(),
+        name: name || (email.split('@')[0]),
+        role: role || 'admin',
+        action: 'LOGOUT',
+        ip: req.ip || req.connection?.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        details: 'Staff member signed out'
+      });
+    }
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('[Auth] Error in admin/logout:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
