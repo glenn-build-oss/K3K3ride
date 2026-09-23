@@ -175,13 +175,23 @@ function isPageAllowedForRole(roleId, pageFilename) {
   if (!role) return false;
 
   const allowed = (role.allowed_pages || []).map(p => path.basename(p).toLowerCase());
-  return allowed.includes(cleanPage);
+  return allowed.includes(cleanPage) ||
+    (cleanPage === 'admin-dashboard.html' && allowed.includes('dashboard.html')) ||
+    (cleanPage === 'dashboard.html' && allowed.includes('admin-dashboard.html')) ||
+    (cleanPage === 'moolre-overview.html' && allowed.includes('payment-management.html')) ||
+    (cleanPage === 'payment-management.html' && allowed.includes('moolre-overview.html'));
 }
 
 /**
  * Creates a new custom role.
  */
-function createRole({ name, description, color, defaultPage, allowedPages }) {
+function createRole(payload = {}) {
+  const name = payload.name;
+  const description = payload.description;
+  const color = payload.color;
+  let defaultPage = payload.defaultPage || payload.default_page;
+  const allowedPages = payload.allowedPages || payload.allowed_pages;
+
   if (!name || !name.trim()) throw new Error('Role name is required');
 
   const config = readConfig();
@@ -240,16 +250,18 @@ function updateRole(id, updates) {
   if (typeof updates.description === 'string') existing.description = updates.description.trim();
   if (updates.color) existing.color = updates.color;
 
-  if (Array.isArray(updates.allowed_pages)) {
-    let sanitized = updates.allowed_pages.filter(p => validPages.includes(p));
+  const allowedInput = updates.allowedPages || updates.allowed_pages;
+  if (Array.isArray(allowedInput)) {
+    let sanitized = allowedInput.filter(p => validPages.includes(p));
     if (existing.id === 'admin' && !sanitized.includes('dashboard.html')) {
       sanitized.unshift('dashboard.html');
     }
     existing.allowed_pages = sanitized;
   }
 
-  if (updates.default_page && validPages.includes(updates.default_page)) {
-    existing.default_page = updates.default_page;
+  const defaultPageInput = updates.defaultPage || updates.default_page;
+  if (defaultPageInput && validPages.includes(defaultPageInput)) {
+    existing.default_page = defaultPageInput;
   } else if (!existing.allowed_pages.includes(existing.default_page)) {
     existing.default_page = existing.allowed_pages[0] || 'dashboard.html';
   }

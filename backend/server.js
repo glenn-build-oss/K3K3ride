@@ -7,6 +7,9 @@
  * Port: 8810 (configurable via .env)
  */
 
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 require('dotenv').config();
 
 const http = require('http');
@@ -157,10 +160,31 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ─── Static uploads and frontend serving ───
-const path = require('path');
 const fs = require('fs');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads/applications', express.static(path.join(__dirname, 'uploads', 'applications')));
+
+// URL Aliases for admin pages
+app.use((req, res, next) => {
+  const cleanPath = req.path.toLowerCase();
+  if (cleanPath === '/dashboard.html' || cleanPath === '/admin/dashboard.html' || cleanPath === '/admin-dashboard.html' || cleanPath === '/admin/admin-dashboard.html') {
+    return res.sendFile(path.join(__dirname, '..', 'admin', 'admin-dashboard.html'));
+  }
+  if (cleanPath === '/payment-management.html' || cleanPath === '/admin/payment-management.html') {
+    return res.sendFile(path.join(__dirname, '..', 'admin', 'moolre-overview.html'));
+  }
+  if (cleanPath === '/pricing-cms.html') {
+    return res.sendFile(path.join(__dirname, '..', 'admin', 'pricing-cms.html'));
+  }
+  if (cleanPath === '/roles-management.html') {
+    return res.sendFile(path.join(__dirname, '..', 'admin', 'roles-management.html'));
+  }
+  if (cleanPath === '/moolre-overview.html') {
+    return res.sendFile(path.join(__dirname, '..', 'admin', 'moolre-overview.html'));
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 // Direct serving fallback for bare app_* document filenames or /admin/app_* requests

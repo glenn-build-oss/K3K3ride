@@ -1,5 +1,115 @@
 [
   {
+    "id": "log_1790128085279_qeqjm",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "LOGOUT",
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 Test Suite",
+    "details": "Automated test staff logout",
+    "timestamp": "2026-09-23T01:48:05.279Z"
+  },
+  {
+    "id": "log_1790128085273_lk8xy",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 Test Suite",
+    "details": "Automated test staff login",
+    "timestamp": "2026-09-23T01:48:05.273Z"
+  },
+  {
+    "id": "log_1790128084847_cba9g",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "PASSWORD_UPDATE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Finance Team (password changed)",
+    "timestamp": "2026-09-23T01:48:04.847Z"
+  },
+  {
+    "id": "log_1790128054834_m7dgo",
+    "email": "audit@k3k3.com",
+    "name": "Auditor",
+    "role": "finance",
+    "action": "ROLE_CHANGE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Finance Team",
+    "timestamp": "2026-09-23T01:47:34.834Z"
+  },
+  {
+    "id": "log_1790128016140_0qbhz",
+    "email": "audit@k3k3.com",
+    "name": "Auditor",
+    "role": "finance",
+    "action": "ROLE_CHANGE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Finance Team",
+    "timestamp": "2026-09-23T01:46:56.140Z"
+  },
+  {
+    "id": "log_1790126813007_e5u5g",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+    "details": "Direct credential login (OTP bypassed)",
+    "timestamp": "2026-09-23T01:26:53.007Z"
+  },
+  {
+    "id": "log_1790126795596_b5jqp",
+    "email": "admin@k3k3.com",
+    "name": "K3K3",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+    "details": "Direct credential login (OTP bypassed)",
+    "timestamp": "2026-09-23T01:26:35.596Z"
+  },
+  {
+    "id": "log_1790126347248_60dha",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+    "details": "Direct credential login (OTP bypassed)",
+    "timestamp": "2026-09-23T01:19:07.249Z"
+  },
+  {
+    "id": "log_1790126315953_pe7vj",
+    "email": "admin@k3k3.com",
+    "name": "K3K3 Admin",
+    "role": "admin",
+    "action": "LOGOUT",
+    "ip": "::1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+    "details": "Staff member signed out",
+    "timestamp": "2026-09-23T01:18:35.953Z"
+  },
+  {
+    "id": "log_1790126306236_l1fny",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "PASSWORD_UPDATE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Finance Team (password changed)",
+    "timestamp": "2026-09-23T01:18:26.236Z"
+  },
+  {
     "id": "log_1790102846764_pph7i",
     "email": "finance@k3k3.com",
     "name": "Sarah Connor",

@@ -33,7 +33,14 @@
       const pageFile = (currentPage || '').toLowerCase();
       if (!pageFile || pageFile === 'adminlogin.html') return;
 
-      const isAllowed = allowed.some(p => p.toLowerCase() === pageFile);
+      const isAllowed = allowed.some(p => {
+        const lp = p.toLowerCase();
+        return lp === pageFile ||
+          (pageFile === 'admin-dashboard.html' && lp === 'dashboard.html') ||
+          (pageFile === 'dashboard.html' && lp === 'admin-dashboard.html') ||
+          (pageFile === 'moolre-overview.html' && lp === 'payment-management.html') ||
+          (pageFile === 'payment-management.html' && lp === 'moolre-overview.html');
+      });
       if (!isAllowed) {
         console.warn(`[K3K3 RBAC] Access denied for role "${user.role}" on page: ${currentPage}`);
         const fallback = user.defaultPage || user.default_page || allowed[0] || 'dashboard.html';
@@ -87,7 +94,9 @@
         <div class="nav-group-label">${group.group}</div>
         <ul class="nav-list">
           ${group.items.map(item => {
-            const isActive = currentPage === item.href;
+            const isActive = (currentPage === item.href) ||
+              (item.href === 'dashboard.html' && (currentPage === 'admin-dashboard.html' || currentPage === 'dashboard.html')) ||
+              (item.href === 'payment-management.html' && (currentPage === 'payment-management.html' || currentPage === 'moolre-overview.html'));
             const badge = item.badgeId
               ? `<span class="nav-badge pending-badge" id="${item.badgeId}" style="display:none">0</span>`
               : '';

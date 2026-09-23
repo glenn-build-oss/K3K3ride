@@ -89,7 +89,7 @@ async function runTests() {
   console.log('[PASS] Successfully deleted custom role');
 
   // Test 7: Staff Role Assignment
-  const assignResult = rolesService.assignStaffRole('audit@k3k3.com', 'finance', 'Auditor');
+  const assignResult = await rolesService.assignStaffRole('audit@k3k3.com', 'finance', 'Auditor');
   assert.strictEqual(assignResult.success, true);
   const staffList = rolesService.getStaffAssignments();
   const foundStaff = staffList.find(s => s.email === 'audit@k3k3.com');

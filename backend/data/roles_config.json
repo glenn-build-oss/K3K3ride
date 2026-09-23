@@ -100,6 +100,7 @@
       "default_page": "dashboard.html",
       "allowed_pages": [
         "dashboard.html",
+        "admin-dashboard.html",
         "analytics.html",
         "ride-monitoring.html",
         "trips.html",
@@ -181,9 +182,9 @@
       "name": "Sarah Connor",
       "role": "finance",
       "assigned_at": "2026-09-22T00:00:00.000Z",
-      "password_hash": "$2a$10$CclrICAwGjT6qeGcb9nGve1xtX/FHiB/ISScuZCtxwKzvF6Jpletm",
-      "password_updated_at": "2026-09-22T18:47:25.531Z",
-      "updated_at": "2026-09-22T18:47:25.531Z"
+      "password_hash": "$2a$10$5bLI6bN5CYoVzdgUB4naiOF67F62Zi01qYk9bEmfPY7fIDpq4Yb4S",
+      "password_updated_at": "2026-09-23T01:18:26.233Z",
+      "updated_at": "2026-09-23T01:18:26.233Z"
     },
     {
       "id": "staff-sup-01",
@@ -199,7 +200,7 @@
       "name": "Auditor",
       "role": "finance",
       "assigned_at": "2026-09-22T01:25:11.211Z",
-      "updated_at": "2026-09-22T11:52:44.553Z"
+      "updated_at": "2026-09-23T01:47:34.831Z"
     },
     {
       "id": "staff_1790102664753",
@@ -207,8 +208,9 @@
       "name": "Audit Officer",
       "role": "finance",
       "assigned_at": "2026-09-22T18:44:24.753Z",
-      "password_hash": "$2a$10$5XJ118vnsXbj/xstzwO9XuxOtv.qiFvI2VpEYRQppoP75XyoVZ.8C",
-      "password_updated_at": "2026-09-22T18:44:24.759Z"
+      "password_hash": "$2a$10$L.93ifFfZ1x6NDWGrvoZy.8TyQDN.ZRNiY3bRLiHzg5zg4q8qpgFi",
+      "password_updated_at": "2026-09-23T01:48:04.845Z",
+      "updated_at": "2026-09-23T01:48:04.845Z"
     }
   ]
 }

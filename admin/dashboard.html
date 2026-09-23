@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=admin-dashboard.html">
+  <title>K3K3 — Admin Dashboard</title>
+  <script>
+    (function() {
+      var target = 'admin-dashboard.html' + (window.location.search || '') + (window.location.hash || '');
+      window.location.replace(target);
+    })();
+  </script>
+  <style>
+    body {
+      background: #0c0d10;
+      color: #fff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,214,10,0.2);
+      border-top-color: #FFD60A;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    a { color: #FFD60A; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <p>Loading K3K3 Admin Dashboard...</p>
+  <p style="font-size:0.85rem;color:rgba(255,255,255,0.5)">
+    If you are not redirected automatically, <a href="admin-dashboard.html">click here</a>.
+  </p>
+</body>
+</html>

@@ -3,6 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const net = require('net');
 
+try {
+  require('dotenv').config({ path: path.join(__dirname, 'backend', '.env') });
+  require('dotenv').config({ path: path.join(__dirname, '.env.local') });
+} catch (_) {}
+
 const PORT = process.env.PORT || 8081;
 const BACKEND_PORT = process.env.BACKEND_PORT || 8810;
 const ROOT = __dirname;
@@ -88,11 +93,12 @@ const server = http.createServer((req, res) => {
   let url = req.url.split('?')[0];
   if (url === '/') url = '/index.html';
 
-  const filePath = path.join(ROOT, decodeURIComponent(url));
+  const decodedUrl = decodeURIComponent(url);
 
   // Serve manifest.json with the correct MIME type for PWA
   if (url === '/manifest.json') {
-    fs.readFile(filePath, (err, data) => {
+    const manifestPath = path.join(ROOT, 'manifest.json');
+    fs.readFile(manifestPath, (err, data) => {
       if (err) { res.writeHead(404); res.end('Not found'); return; }
       res.writeHead(200, {
         'Content-Type': 'application/manifest+json',
@@ -103,15 +109,58 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) { res.writeHead(404); res.end('Not found'); return; }
-    const ext = path.extname(filePath);
+  // Alias mappings to eliminate 404s for dashboard and payment management
+  let targetPath = null;
+  const lowerUrl = decodedUrl.toLowerCase();
+
+  if (lowerUrl === '/dashboard.html' || lowerUrl === '/admin/dashboard.html' || lowerUrl === '/admin-dashboard.html' || lowerUrl === '/admin/admin-dashboard.html') {
+    targetPath = path.join(ROOT, 'admin', 'admin-dashboard.html');
+  } else if (lowerUrl === '/payment-management.html' || lowerUrl === '/admin/payment-management.html') {
+    targetPath = path.join(ROOT, 'admin', 'moolre-overview.html');
+  } else if (lowerUrl === '/pricing-cms.html') {
+    targetPath = path.join(ROOT, 'admin', 'pricing-cms.html');
+  } else if (lowerUrl === '/roles-management.html') {
+    targetPath = path.join(ROOT, 'admin', 'roles-management.html');
+  } else if (lowerUrl === '/moolre-overview.html') {
+    targetPath = path.join(ROOT, 'admin', 'moolre-overview.html');
+  }
+
+  if (targetPath && fs.existsSync(targetPath)) {
+    const ext = path.extname(targetPath);
     res.writeHead(200, {
-      'Content-Type': MIME[ext] || 'application/octet-stream',
+      'Content-Type': MIME[ext] || 'text/html',
       'Cache-Control': 'no-cache'
     });
-    res.end(data);
+    fs.createReadStream(targetPath).pipe(res);
+    return;
+  }
+
+  // General static file lookup with fallback to admin folder
+  const candidatePaths = [
+    path.join(ROOT, decodedUrl.startsWith('/') ? decodedUrl.slice(1) : decodedUrl),
+    path.join(ROOT, 'admin', path.basename(decodedUrl))
+  ];
+
+  let resolvedFile = null;
+  for (const p of candidatePaths) {
+    if (fs.existsSync(p) && fs.statSync(p).isFile()) {
+      resolvedFile = p;
+      break;
+    }
+  }
+
+  if (!resolvedFile) {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+    return;
+  }
+
+  const ext = path.extname(resolvedFile);
+  res.writeHead(200, {
+    'Content-Type': MIME[ext] || 'application/octet-stream',
+    'Cache-Control': 'no-cache'
   });
+  fs.createReadStream(resolvedFile).pipe(res);
 });
 
 // Proxy WebSocket upgrade requests (Socket.io & WS) to backend server
