@@ -19,7 +19,8 @@ const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'K3K3ride <onboarding
  * @returns {boolean}
  */
 function isResendConfigured() {
-  return Boolean(RESEND_API_KEY && RESEND_API_KEY.startsWith('re_'));
+  const key = process.env.RESEND_API_KEY || '';
+  return Boolean(key && key.startsWith('re_'));
 }
 
 /**
@@ -33,6 +34,9 @@ function isResendConfigured() {
  */
 function sendEmail({ to, subject, html, text }) {
   return new Promise((resolve) => {
+    const apiKey = process.env.RESEND_API_KEY || '';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'K3K3ride <onboarding@resend.dev>';
+
     if (!isResendConfigured()) {
       console.warn('[Resend] RESEND_API_KEY is not configured in .env. Email dispatch skipped.');
       return resolve({
@@ -43,7 +47,7 @@ function sendEmail({ to, subject, html, text }) {
     }
 
     const payload = JSON.stringify({
-      from: RESEND_FROM_EMAIL,
+      from: fromEmail,
       to: [to],
       subject: subject,
       html: html,
@@ -56,7 +60,7 @@ function sendEmail({ to, subject, html, text }) {
       path: '/emails',
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload)
       }
