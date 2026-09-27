@@ -38,7 +38,7 @@
       --r: 10px;
       --r-lg: 16px;
       --r-xl: 22px;
-      --r-full: 999px;
+      --r-full: 10px;
       --ease: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -756,6 +756,43 @@
     </div>
   </div>
 
+  <!-- ─── MODAL: DELETE STAFF CONFIRMATION ─── -->
+  <div class="modal-overlay" id="deleteStaffModal">
+    <div class="modal-box" style="max-width:440px">
+      <div class="modal-header">
+        <div class="modal-title" style="color:var(--rose)">
+          <i class="fas fa-user-xmark" style="color:var(--rose)"></i> Remove Staff Member
+        </div>
+        <button class="modal-close" onclick="closeModal('deleteStaffModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text);font-size:0.9rem;line-height:1.5;margin-bottom:14px">
+          Are you sure you want to remove <strong id="deleteStaffTargetName" style="color:var(--white)"></strong> from staff?
+        </p>
+        <div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.8rem">
+            <span style="color:var(--muted)">Email:</span>
+            <span id="deleteStaffTargetEmail" style="font-family:monospace;color:var(--muted-2)"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+            <span style="color:var(--muted)">Assigned Role:</span>
+            <span id="deleteStaffTargetRole" style="font-weight:700"></span>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--rose);background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.25);padding:10px 12px;border-radius:var(--r-md);display:flex;align-items:flex-start;gap:8px">
+          <i class="fas fa-triangle-exclamation" style="margin-top:2px"></i>
+          <span>This will permanently revoke all portal access and credentials for this account.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-action btn-secondary" onclick="closeModal('deleteStaffModal')">Cancel</button>
+        <button type="button" id="confirmDeleteStaffBtn" class="btn-action btn-danger" onclick="executeStaffDeletion()">
+          <i class="fas fa-trash"></i> Delete Account
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="rolesToastContainer"></div>
 
@@ -794,12 +831,26 @@
 
     function openModal(id) {
       const el = document.getElementById(id);
-      if (el) el.classList.add('show');
+      if (!el) return;
+      el.classList.add('show');
+      if (!el._backdropBound) {
+        el.addEventListener('click', (e) => {
+          if (e.target === el) closeModal(id);
+        });
+        el._backdropBound = true;
+      }
     }
+
     function closeModal(id) {
       const el = document.getElementById(id);
       if (el) el.classList.remove('show');
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+      }
+    });
 
     async function reloadRolesData() {
       try {
@@ -902,6 +953,8 @@
       tbody.innerHTML = staff.map(s => {
         const role = roles.find(r => r.id === s.role) || { name: s.role, color: '#FFD60A', default_page: 'dashboard.html', allowed_pages: [] };
         const safeName = (s.name || '').replace(/'/g, "\\'");
+        const safeRoleName = (role.name || s.role).replace(/'/g, "\\'");
+        const isPrimaryAdmin = s.email && s.email.toLowerCase() === 'admin@k3k3.com';
         const passwordBadge = s.has_password
           ? `<span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:var(--r-full);background:rgba(16,185,129,0.14);color:#10B981;border:1px solid rgba(16,185,129,0.3);display:inline-flex;align-items:center;gap:4px"><i class="fas fa-key"></i> Set</span>`
           : `<span style="font-size:0.72rem;color:var(--muted);padding:2px 8px;border-radius:var(--r-full);background:rgba(255,255,255,0.04);border:1px solid var(--border)">Default</span>`;
@@ -937,6 +990,15 @@
                 <button class="btn-action btn-secondary" style="padding:5px 10px;font-size:0.75rem" onclick="filterAndShowStaffLogs('${s.email}')" title="View activity logs for this user">
                   <i class="fas fa-clipboard-list"></i> Logs
                 </button>
+                ${isPrimaryAdmin ? `
+                  <button class="btn-action" style="padding:5px 10px;font-size:0.75rem;opacity:0.35;cursor:not-allowed;" title="Primary Super Admin account is protected" disabled>
+                    <i class="fas fa-lock"></i>
+                  </button>
+                ` : `
+                  <button class="btn-action btn-danger" style="padding:5px 10px;font-size:0.75rem" onclick="openDeleteStaffModal('${s.email}', '${safeName}', '${safeRoleName}')" title="Delete staff account &amp; revoke access">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                `}
               </div>
             </td>
           </tr>
@@ -1217,6 +1279,59 @@
         fetchActivityLogs();
       } catch (err) {
         showToast(err.message, 'error');
+      }
+    }
+
+    // ─── Staff Deletion Handlers ───
+    let pendingDeleteStaff = null;
+
+    function openDeleteStaffModal(email, name, roleName) {
+      if (!email) return;
+      if (email.toLowerCase() === 'admin@k3k3.com') {
+        showToast('The primary Super Admin account (admin@k3k3.com) cannot be deleted.', 'error');
+        return;
+      }
+
+      pendingDeleteStaff = { email, name: name || email, roleName: roleName || 'Staff' };
+      const nameEl = document.getElementById('deleteStaffTargetName');
+      const emailEl = document.getElementById('deleteStaffTargetEmail');
+      const roleEl = document.getElementById('deleteStaffTargetRole');
+      if (nameEl) nameEl.textContent = pendingDeleteStaff.name;
+      if (emailEl) emailEl.textContent = pendingDeleteStaff.email;
+      if (roleEl) roleEl.textContent = pendingDeleteStaff.roleName;
+
+      openModal('deleteStaffModal');
+    }
+
+    async function executeStaffDeletion() {
+      if (!pendingDeleteStaff || !pendingDeleteStaff.email) return;
+      const { email, name } = pendingDeleteStaff;
+      const btn = document.getElementById('confirmDeleteStaffBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/staff/${encodeURIComponent(email)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed to remove staff member');
+
+        closeModal('deleteStaffModal');
+        showToast(`Staff member "${name}" removed successfully.`, 'success');
+        pendingDeleteStaff = null;
+        reloadRolesData();
+        fetchActivityLogs();
+      } catch (err) {
+        console.error('Error deleting staff member:', err);
+        showToast(err.message, 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-trash"></i> Delete Account';
+        }
       }
     }
 

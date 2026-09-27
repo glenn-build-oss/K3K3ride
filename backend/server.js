@@ -132,6 +132,26 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Rider confirms passenger pickup (Stage 4: in_progress transition)
+  socket.on('trip:pickup', async (data, ack) => {
+    if (!data?.tripId || !data?.riderId) {
+      if (typeof ack === 'function') ack({ success: false, error: 'Missing tripId or riderId' });
+      return;
+    }
+    const result = await dispatchService.pickupPassenger(data.tripId, data.riderId);
+    if (typeof ack === 'function') ack(result);
+  });
+
+  // Rider completes trip (Stage 5: completed transition)
+  socket.on('trip:complete', async (data, ack) => {
+    if (!data?.tripId || !data?.riderId) {
+      if (typeof ack === 'function') ack({ success: false, error: 'Missing tripId or riderId' });
+      return;
+    }
+    const result = await dispatchService.completeRide(data.tripId, data.riderId, data.actualFare);
+    if (typeof ack === 'function') ack(result);
+  });
+
   // Disconnect
   socket.on('disconnect', (reason) => {
     console.log(`[Socket.io] Client disconnected: ${socket.id} (${reason})`);
@@ -167,19 +187,34 @@ app.use('/uploads/applications', express.static(path.join(__dirname, 'uploads', 
 // URL Aliases for admin pages
 app.use((req, res, next) => {
   const cleanPath = req.path.toLowerCase();
-  if (cleanPath === '/dashboard.html' || cleanPath === '/admin/dashboard.html' || cleanPath === '/admin-dashboard.html' || cleanPath === '/admin/admin-dashboard.html') {
+  const dashboardPages = [
+    '/dashboard.html', '/admin/dashboard.html',
+    '/admin-dashboard.html', '/admin/admin-dashboard.html',
+    '/ride-monitoring.html', '/admin/ride-monitoring.html',
+    '/trips.html', '/admin/trips.html',
+    '/customers.html', '/admin/customers.html',
+    '/rider-applications.html', '/admin/rider-applications.html',
+    '/rider-management.html', '/admin/rider-management.html',
+    '/live-riders.html', '/admin/live-riders.html',
+    '/analytics.html', '/admin/analytics.html',
+    '/system-settings.html', '/admin/system-settings.html'
+  ];
+
+  if (dashboardPages.includes(cleanPath)) {
     return res.sendFile(path.join(__dirname, '..', 'admin', 'admin-dashboard.html'));
   }
   if (cleanPath === '/payment-management.html' || cleanPath === '/admin/payment-management.html') {
+    const payPath = path.join(__dirname, '..', 'admin', 'payment-management.html');
+    if (fs.existsSync(payPath)) return res.sendFile(payPath);
     return res.sendFile(path.join(__dirname, '..', 'admin', 'moolre-overview.html'));
   }
-  if (cleanPath === '/pricing-cms.html') {
+  if (cleanPath === '/pricing-cms.html' || cleanPath === '/admin/pricing-cms.html') {
     return res.sendFile(path.join(__dirname, '..', 'admin', 'pricing-cms.html'));
   }
-  if (cleanPath === '/roles-management.html') {
+  if (cleanPath === '/roles-management.html' || cleanPath === '/admin/roles-management.html') {
     return res.sendFile(path.join(__dirname, '..', 'admin', 'roles-management.html'));
   }
-  if (cleanPath === '/moolre-overview.html') {
+  if (cleanPath === '/moolre-overview.html' || cleanPath === '/admin/moolre-overview.html') {
     return res.sendFile(path.join(__dirname, '..', 'admin', 'moolre-overview.html'));
   }
   next();

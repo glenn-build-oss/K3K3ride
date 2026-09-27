@@ -174,7 +174,7 @@
       "name": "K3K3 Admin",
       "role": "admin",
       "assigned_at": "2026-09-22T00:00:00.000Z",
-      "updated_at": "2026-09-22T14:50:00.000Z"
+      "updated_at": "2026-09-23T13:21:39.268Z"
     },
     {
       "id": "staff-fin-01",
@@ -189,18 +189,12 @@
     {
       "id": "staff-sup-01",
       "email": "support@k3k3.com",
-      "name": "John Doe",
+      "name": "Akua Ofori Ataa Apeakorang",
       "role": "support",
       "assigned_at": "2026-09-22T00:00:00.000Z",
-      "updated_at": "2026-09-22T13:58:02.077Z"
-    },
-    {
-      "id": "staff_1790040311211",
-      "email": "audit@k3k3.com",
-      "name": "Auditor",
-      "role": "finance",
-      "assigned_at": "2026-09-22T01:25:11.211Z",
-      "updated_at": "2026-09-23T01:47:34.831Z"
+      "updated_at": "2026-09-26T12:57:44.724Z",
+      "password_hash": "$2a$10$B3e3jfBGrV1uD4BTPFT7XeCTOsCE4kmBt6hTcn.j/SLYfuBHtS3q2",
+      "password_updated_at": "2026-09-26T12:57:44.724Z"
     },
     {
       "id": "staff_1790102664753",

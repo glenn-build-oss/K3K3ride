@@ -177,7 +177,7 @@ body {
   border: none;
   padding: 12px 24px;
   font-size: 1rem;
-  border-radius: 25px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
 }
@@ -341,7 +341,7 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 2rem;
-  border-radius: 50px;
+  border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
@@ -400,7 +400,7 @@ body {
   padding: 16px 32px;
   font-size: 1.1rem;
   font-weight: 700;
-  border-radius: 50px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
@@ -413,7 +413,7 @@ body {
   padding: 14px 30px;
   font-size: 1.1rem;
   font-weight: 700;
-  border-radius: 50px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -1003,7 +1003,7 @@ footer {
   border: none;
   padding: 15px 35px;
   font-size: 1.1rem;
-  border-radius: 30px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
 }
@@ -1282,7 +1282,7 @@ footer {
   border: none;
   padding: 15px 35px;
   font-size: 1.1rem;
-  border-radius: 30px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
 }

@@ -121,6 +121,9 @@ function loadConfig() {
       if (!_cache.locations || !Array.isArray(_cache.locations)) _cache.locations = DEFAULT_LOCATIONS;
       if (!_cache.routes || !Array.isArray(_cache.routes)) _cache.routes = DEFAULT_ROUTE_FARES;
       if (!_cache.settings || typeof _cache.settings !== 'object') _cache.settings = DEFAULT_SETTINGS;
+      if (!_cache.settings.mapbox_public_token && (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN)) {
+        _cache.settings.mapbox_public_token = (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN).trim();
+      }
       return _cache;
     }
   } catch (err) {

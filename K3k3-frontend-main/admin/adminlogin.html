@@ -25,7 +25,7 @@
             --red: #EF4444;
             --r: 12px;
             --r-lg: 18px;
-            --r-full: 999px;
+            --r-full: 10px;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -678,7 +678,7 @@
                                 <i class="fas fa-shield-halved" style="font-size:1.5rem;color:var(--yellow-dk)"></i>
                             </div>
                             <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Two-Factor Authentication</p>
-                            <p id="otpMsg" style="font-size:0.82rem;color:var(--text-2);line-height:1.5;">A 6-digit verification code has been sent to your registered phone.</p>
+                            <p id="otpMsg" style="font-size:0.82rem;color:var(--text-2);line-height:1.5;">Admin OTP has been sent to k3k3ride@gmail.com. Enter it below.</p>
                         </div>
 
                         <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
@@ -828,12 +828,13 @@
                 const data = await res.json();
 
                 if (data.success && data.requires2FA) {
+                    const destEmail = data.email || 'k3k3ride@gmail.com';
                     document.getElementById('otpMsg').textContent =
-                        `A 6-digit code has been sent to your phone ending in ${data.phoneMask || '****'}. Enter it below.`;
+                        `Admin OTP has been sent to ${destEmail}. Enter it below.`;
                     document.getElementById('credentialsStep').style.display = 'none';
                     document.getElementById('otpStep').style.display = '';
                     document.getElementById('a1').focus();
-                    showToast('Verification code sent to your phone', 'success');
+                    showToast(`Admin OTP has been sent to ${destEmail}`, 'success');
                 } else if (data.success) {
                     // Direct login (OTP disabled)
                     storeAdminSession(data);

@@ -791,15 +791,37 @@ async function updateRideStatus(rideId, statusOrData, additionalData = {}) {
     updateData[timestampField] = new Date().toISOString();
   }
 
-  const { data, error } = await requireSupabase()
+  const safeUpdateData = {};
+  for (const [k, v] of Object.entries(updateData)) {
+    if (ALLOWED_RIDE_COLUMNS.has(k)) {
+      safeUpdateData[k] = v;
+    }
+  }
+
+  if (Object.keys(safeUpdateData).length === 0) {
+    return { id: rideId, status };
+  }
+
+  let { data, error } = await requireSupabase()
     .from('rides')
-    .update(updateData)
+    .update(safeUpdateData)
     .eq('id', rideId)
     .select()
     .single();
 
   if (error) {
     console.error('[Supabase] Error updating ride status:', error);
+    // Resilient fallback: If rider_id violates foreign key constraint, update status without rider_id
+    if (error.code === '23503' && safeUpdateData.rider_id) {
+      delete safeUpdateData.rider_id;
+      const retry = await requireSupabase()
+        .from('rides')
+        .update(safeUpdateData)
+        .eq('id', rideId)
+        .select()
+        .single();
+      if (!retry.error) return retry.data;
+    }
     return null;
   }
 

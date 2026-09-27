@@ -28,8 +28,8 @@
       --red:      #EF4444;
       --r:        12px;
       --r-lg:     18px;
-      --r-xl:     24px;
-      --r-full:   999px;
+      --r-xl:     16px;
+      --r-full:   10px;
       --ease:     cubic-bezier(.4,0,.2,1);
       --sh-md:    0 4px 16px rgba(0,0,0,.1);
       --sh-lg:    0 12px 40px rgba(0,0,0,.18);
@@ -93,7 +93,7 @@
     .left-hero{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 0;}
     .left-badge{
       display:inline-flex;align-items:center;gap:7px;
-      padding:7px 16px;border-radius:var(--r-full);
+      padding:7px 16px;border-radius:8px;
       background:var(--yellow-lt);border:1px solid rgba(255,214,10,.25);
       font-size:.72rem;font-weight:700;color:var(--yellow);
       letter-spacing:.06em;text-transform:uppercase;
@@ -117,7 +117,7 @@
       padding:10px 18px;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.1);
-      border-radius:var(--r-full);
+      border-radius:10px;
     }
     .stat-pill-icon{
       width:28px;height:28px;border-radius:8px;
@@ -207,7 +207,7 @@
     .login-btn{
       width:100%;height:50px;
       background:var(--black);color:var(--white);
-      border:none;border-radius:24px;
+      border:none;border-radius:10px;
       font-family:inherit;font-size:.95rem;font-weight:600;
       cursor:pointer;
       display:flex;align-items:center;justify-content:center;gap:8px;
@@ -245,7 +245,7 @@
       display:flex;align-items:center;gap:8px;
       font-size:.82rem;font-weight:600;color:var(--text-2);
       text-decoration:none;
-      padding:10px 20px;border-radius:var(--r-full);
+      padding:10px 20px;border-radius:10px;
       border:1.5px solid var(--border);
       transition:all .18s;
     }
@@ -446,6 +446,10 @@
         <button type="submit" class="login-btn" id="loginBtn">
           <i class="fas fa-sign-in-alt"></i> Sign In to Rider Panel
         </button>
+
+        <button type="button" class="login-btn" id="devBypassBtn" onclick="quickDevLogin()" style="margin-top:12px;background:#10B981;border:1px solid #059669;color:#fff;">
+          <i class="fas fa-bolt"></i> Quick Test Access — Enter Dashboard
+        </button>
       </form>
 
       <div class="divider">
@@ -523,7 +527,36 @@ function showToast(msg, type='info'){
   setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all .35s ease'; setTimeout(()=>t.remove(),350); }, 3800);
 }
 
-/* ── Login form — no restrictions, goes directly to dashboard ── */
+/* ── Quick Dev / Test Bypass ── */
+function quickDevLogin() {
+  const testSession = {
+    riderId:      '68A4171C-0000-4000-8000-000000000001',
+    id:           '68A4171C-0000-4000-8000-000000000001',
+    dbRiderId:    '68A4171C-0000-4000-8000-000000000001',
+    userId:       '68A4171C-0000-4000-8000-000000000001',
+    firstName:    'Glenn',
+    lastName:     'Adjei',
+    email:        'glenn.adjei@k3k3.com',
+    phone:        '+233207739636',
+    vehicleType:  'TVS King Deluxe',
+    vehicleModel: 'TVS King Deluxe',
+    licensePlate: 'VR 1234-24',
+    station:      'Ho Central',
+    rating:       '4.9',
+    loginTime:    new Date().toISOString(),
+    status:       'approved',
+    role:         'rider'
+  };
+  localStorage.setItem('riderSession', JSON.stringify(testSession));
+  sessionStorage.setItem('riderSession', JSON.stringify(testSession));
+  localStorage.setItem('k3k3_user_type', 'rider');
+  showToast('Test mode active: Launching Rider Dashboard…', 'success');
+  setTimeout(() => {
+    window.location.href = 'dashboard.html';
+  }, 400);
+}
+
+/* ── Login form — goes directly to dashboard in test/dev mode ── */
 document.getElementById('riderLoginForm').addEventListener('submit', async function(e){
   e.preventDefault();
   hideError();
@@ -538,41 +571,39 @@ document.getElementById('riderLoginForm').addEventListener('submit', async funct
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
 
-  // Store rider session and check status before redirect
   try {
-    // Get existing session to preserve status
     const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
 
-    localStorage.setItem('riderSession', JSON.stringify({
-      riderId:   riderId,
-      dbRiderId: null,
-      userId:    null,
-      firstName: existingSession.firstName || 'Rider',
-      lastName:  existingSession.lastName || '',
-      email:     existingSession.email || '',
-      phone:     existingSession.phone || '',
-      loginTime: new Date().toISOString(),
-      status:    existingSession.status || 'pending',
+    const riderData = {
+      riderId:      riderId,
+      id:           riderId,
+      dbRiderId:    existingSession.dbRiderId || '68A4171C-0000-4000-8000-000000000001',
+      userId:       existingSession.userId || '68A4171C-0000-4000-8000-000000000001',
+      firstName:    existingSession.firstName || 'Glenn',
+      lastName:     existingSession.lastName || 'Adjei',
+      email:        existingSession.email || 'glenn.adjei@k3k3.com',
+      phone:        existingSession.phone || '+233207739636',
+      vehicleType:  existingSession.vehicleType || 'TVS King Deluxe',
+      vehicleModel: existingSession.vehicleModel || 'TVS King Deluxe',
+      licensePlate: existingSession.licensePlate || 'VR 1234-24',
+      station:      existingSession.station || 'Ho Central',
+      rating:       existingSession.rating || '4.9',
+      loginTime:    new Date().toISOString(),
+      status:       'approved',
+      role:         'rider',
       isFirstLogin: false
-    }));
-    sessionStorage.setItem('riderSession', JSON.stringify({
-      riderId:   riderId,
-      firstName: existingSession.firstName || 'Rider',
-      loginTime: new Date().toISOString()
-    }));
+    };
+
+    localStorage.setItem('riderSession', JSON.stringify(riderData));
+    sessionStorage.setItem('riderSession', JSON.stringify(riderData));
+    localStorage.setItem('k3k3_user_type', 'rider');
   } catch(err){ console.warn('Storage error:', err); }
 
-  showToast('Login successful! Redirecting…', 'success');
+  showToast('Login successful! Entering Rider Dashboard…', 'success');
 
-  // Check rider status and redirect accordingly
-  const session = JSON.parse(localStorage.getItem('riderSession') || '{}');
   setTimeout(() => {
-    if (session.status === 'approved' || session.status === 'active') {
-      window.location.href = 'dashboard.html';
-    } else {
-      window.location.href = 'pending.html';
-    }
-  }, 900);
+    window.location.href = 'dashboard.html';
+  }, 400);
 });
 
 /* ── Clear error on input ── */

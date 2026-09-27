@@ -480,6 +480,9 @@
     <button id="tab-flow" class="tab-btn" onclick="switchTab('flow')">
       <i class="fa fa-diagram-project"></i> Payment Flow
     </button>
+    <button id="tab-gateway" class="tab-btn" onclick="switchTab('gateway')">
+      <i class="fa fa-tower-broadcast"></i> Moolre Live Gateway
+    </button>
   </div>
 
   <!-- ════════════════════════════════════════════════════════════════════
@@ -741,14 +744,14 @@
         <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
         <div class="flow-step">
           <i class="fa fa-building-columns" style="color:var(--info)"></i>
-          <span class="step-label">K3K3 Receives</span>
-          <span class="step-sub">Deducts 15% commission</span>
+          <span class="step-label">K3K3 Retains 10%</span>
+          <span class="step-sub">Moolre business wallet</span>
         </div>
         <span class="flow-arrow"><i class="fa fa-arrow-right"></i></span>
         <div class="flow-step">
           <i class="fa fa-wallet" style="color:#a78bfa"></i>
-          <span class="step-label">Rider Gets Paid</span>
-          <span class="step-sub">85% via Disbursement</span>
+          <span class="step-label">Rider Gets 90%</span>
+          <span class="step-sub">Direct MoMo disbursement</span>
         </div>
       </div>
 
@@ -764,7 +767,7 @@
               <strong>SMS API</strong>
             </div>
             <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
-              <li>✔ OTP delivery on login</li>
+              <li>✔ Dual OTP delivery (SMS + Email)</li>
               <li>✔ Booking confirmation (passenger + rider)</li>
               <li>✔ Trip status updates</li>
               <li>✔ Payment receipt to passenger</li>
@@ -779,7 +782,7 @@
             </div>
             <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
               <li>✔ Passenger: Request a ride</li>
-              <li>✔ Passenger: Pay for ride</li>
+              <li>✔ Passenger: Pay for ride via MoMo</li>
               <li>✔ Passenger: Check ride status</li>
               <li>✔ Rider: Go online / offline</li>
               <li>✔ Rider: Check earnings</li>
@@ -791,9 +794,10 @@
               <strong>Collections API</strong>
             </div>
             <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
-              <li>✔ Initiate MoMo prompt (passenger)</li>
-              <li>✔ Receive payment confirmation webhook</li>
-              <li>✔ Poll collection status</li>
+              <li>✔ POST /open/transact/payment (USSD Prompt)</li>
+              <li>✔ MTN MoMo (13), Telecel (6), AT (7)</li>
+              <li>✔ Auto-fallback simulation in dev mode</li>
+              <li>✔ Instant admin alert chime on receipt</li>
             </ul>
           </div>
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;">
@@ -802,13 +806,118 @@
               <strong>Disbursements API</strong>
             </div>
             <ul style="font-size:12px;color:var(--muted);list-style:none;line-height:2;">
-              <li>✔ Auto-pay rider earnings (85%)</li>
-              <li>✔ Triggered by collection webhook</li>
-              <li>✔ Poll disbursement status</li>
-              <li>✔ Commission: 15% retained by K3K3</li>
+              <li>✔ Auto-pay rider net earnings (90%)</li>
+              <li>✔ Platform fee: 10% retained in K3K3 wallet</li>
+              <li>✔ Direct to Rider's registered MoMo number</li>
+              <li>✔ Real-time status in Admin Dashboard</li>
             </ul>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       TAB 5: MOOLRE LIVE GATEWAY & USSD TESTING
+  ═════════════════════════════════════════════════════════════════════ -->
+  <section id="panel-gateway" class="tab-panel">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:24px;">
+      <!-- Interactive MoMo Collection Prompt Card -->
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa fa-mobile-retro"></i> Test MoMo USSD Prompt (Collect)</div>
+          <span class="badge badge-active"><i class="fa fa-bolt"></i> Live API</span>
+        </div>
+        <div style="padding:20px;">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+            Dispatch a real USSD push approval prompt to any Ghana Mobile Money subscriber.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Payer Phone Number (0XXXXXXXXX)</label>
+              <input type="text" id="momo-test-phone" placeholder="e.g. 0244123456" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:monospace;" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Amount (GH₵)</label>
+                <input type="number" id="momo-test-amount" value="5.00" step="0.50" min="1" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);" />
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Network Channel</label>
+                <select id="momo-test-channel" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+                  <option value="13">13 — MTN Mobile Money</option>
+                  <option value="6">6 — Telecel Cash</option>
+                  <option value="7">7 — AT Money</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Reference Note</label>
+              <input type="text" id="momo-test-ref" placeholder="Admin MoMo Test Collection" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);" />
+            </div>
+            <button class="btn btn-primary" onclick="sendTestMoMoPrompt()" style="margin-top:6px;width:100%;justify-content:center;">
+              <i class="fa fa-paper-plane"></i> Send USSD Push Prompt
+            </button>
+            <div id="momo-test-feedback" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Rider MoMo Payout Card -->
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa fa-wallet"></i> Direct Rider MoMo Payout (Disburse)</div>
+          <span class="badge badge-active" style="background:rgba(16,185,129,0.15);color:var(--success);"><i class="fa fa-arrow-up-right-from-square"></i> 90% Net</span>
+        </div>
+        <div style="padding:20px;">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+            Disburse earnings directly into a rider's personal Mobile Money wallet. 10% platform fee is preserved in K3K3 business account.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Rider MoMo Phone (0XXXXXXXXX)</label>
+              <input type="text" id="payout-test-phone" placeholder="e.g. 0551234567" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:monospace;" />
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Disbursement Amount (GH₵)</label>
+              <input type="number" id="payout-test-amount" value="13.50" step="0.50" min="1" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);" />
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;">Disbursement Reference</label>
+              <input type="text" id="payout-test-ref" placeholder="Manual Rider MoMo Settlement" style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);" />
+            </div>
+            <button class="btn btn-primary" onclick="sendTestRiderPayout()" style="margin-top:6px;width:100%;justify-content:center;background:linear-gradient(135deg,#10b981,#059669);">
+              <i class="fa fa-hand-holding-dollar"></i> Disburse to Rider MoMo
+            </button>
+            <div id="payout-test-feedback" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moolre Gateway Transactions Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa fa-list-check"></i> Gateway API Transactions (POST /open/account/status)</div>
+        <button class="btn btn-ghost" onclick="loadGatewayTransactions()"><i class="fa fa-rotate"></i> Refresh Gateway</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tx ID</th>
+              <th>Status</th>
+              <th>Amount</th>
+              <th>Payer / Recipient</th>
+              <th>Channel</th>
+              <th>External Ref</th>
+              <th>Date / Time</th>
+            </tr>
+          </thead>
+          <tbody id="gateway-tbody">
+            <tr><td colspan="7"><div class="empty-state"><div class="spinner"></div><p>Querying Moolre gateway transactions...</p></div></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -833,6 +942,7 @@
     if (name === 'payments') loadPayments();
     if (name === 'otp')      loadOTPLogs();
     if (name === 'ussd')     loadUSSDSessions();
+    if (name === 'gateway')  loadGatewayTransactions();
   }
 
   // ── Fetch helpers ─────────────────────────────────────────────────────────
@@ -1044,6 +1154,123 @@
       (!q  || (s.phone||'').includes(q) || (s.session_id||'').includes(q)) &&
       (!st || (st === 'active' ? !s.ended : s.ended))
     ));
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MOOLRE LIVE GATEWAY & USSD TESTING
+  // ══════════════════════════════════════════════════════════════════════════
+
+  async function loadGatewayTransactions() {
+    const tbody = document.getElementById('gateway-tbody');
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="spinner"></div><p>Querying Moolre gateway transactions...</p></div></td></tr>`;
+
+    const data = await apiFetch('/admin/moolre/transactions?limit=50');
+    const txs = data?.transactions || [];
+
+    if (!txs.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa fa-list-check"></i><p>No transactions returned by Moolre gateway.</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = txs.map(t => {
+      const isSuccess = t.status === 1 || t.status === 'success' || t.status === 'completed';
+      const badgeCls = isSuccess ? 'badge-active' : 'badge-ended';
+      const statusLabel = isSuccess ? 'Successful' : (t.status || 'Pending');
+      return `<tr>
+        <td class="mono" style="font-size:11px;">${t.transactionid || t.id || '—'}</td>
+        <td><span class="badge ${badgeCls}">${statusLabel}</span></td>
+        <td><strong>GHS ${fmt(t.amount)}</strong></td>
+        <td class="mono">${t.payer || t.recipient || t.phone || '—'}</td>
+        <td><code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:11px;">Channel ${t.channel || 'MoMo'}</code></td>
+        <td class="mono" style="font-size:11px;">${t.externalref || '—'}</td>
+        <td style="color:var(--muted);font-size:12px;">${fmtDt(t.date || t.created_at)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function sendTestMoMoPrompt() {
+    const phone = document.getElementById('momo-test-phone').value.trim();
+    const amount = document.getElementById('momo-test-amount').value.trim();
+    const channel = document.getElementById('momo-test-channel').value;
+    const ref = document.getElementById('momo-test-ref').value.trim();
+    const feedback = document.getElementById('momo-test-feedback');
+
+    if (!phone || !amount) {
+      alert('Please enter both phone number and amount');
+      return;
+    }
+
+    feedback.style.display = 'block';
+    feedback.style.background = 'rgba(245,158,11,0.15)';
+    feedback.style.color = 'var(--warning)';
+    feedback.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Initiating USSD Push prompt via Moolre API...';
+
+    try {
+      const cleanPath = '/admin/moolre/collect';
+      const url = API_BASE ? API_BASE + (cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath) : cleanPath;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, amount, channel, reference: ref, skipOtp: false })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        feedback.style.background = 'rgba(34,197,94,0.15)';
+        feedback.style.color = 'var(--success)';
+        feedback.innerHTML = `<strong><i class="fa fa-circle-check"></i> Prompt Sent!</strong> ${data.message || 'Customer received USSD approval prompt.'}<br/><small class="mono">Ref: ${data.externalRef || data.data || '—'}</small>`;
+      } else {
+        feedback.style.background = 'rgba(239,68,68,0.15)';
+        feedback.style.color = 'var(--danger)';
+        feedback.innerHTML = `<strong><i class="fa fa-triangle-exclamation"></i> Collection Failed:</strong> ${data.error || data.message || 'Moolre error'}`;
+      }
+    } catch (err) {
+      feedback.style.background = 'rgba(239,68,68,0.15)';
+      feedback.style.color = 'var(--danger)';
+      feedback.innerHTML = `<strong><i class="fa fa-circle-xmark"></i> Request Error:</strong> ${err.message}`;
+    }
+  }
+
+  async function sendTestRiderPayout() {
+    const phone = document.getElementById('payout-test-phone').value.trim();
+    const amount = document.getElementById('payout-test-amount').value.trim();
+    const ref = document.getElementById('payout-test-ref').value.trim();
+    const feedback = document.getElementById('payout-test-feedback');
+
+    if (!phone || !amount) {
+      alert('Please enter both rider phone and amount');
+      return;
+    }
+
+    feedback.style.display = 'block';
+    feedback.style.background = 'rgba(245,158,11,0.15)';
+    feedback.style.color = 'var(--warning)';
+    feedback.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Disbursing to rider MoMo wallet via Moolre...';
+
+    try {
+      const cleanPath = '/admin/moolre/payout';
+      const url = API_BASE ? API_BASE + (cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath) : cleanPath;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ riderPhone: phone, amount, reference: ref })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        feedback.style.background = 'rgba(34,197,94,0.15)';
+        feedback.style.color = 'var(--success)';
+        feedback.innerHTML = `<strong><i class="fa fa-circle-check"></i> Disbursed Successfully!</strong> GH₵ ${data.amount} sent to Rider MoMo: ${data.riderPhone}<br/><small class="mono">Reference: ${data.reference}</small>`;
+      } else {
+        feedback.style.background = 'rgba(239,68,68,0.15)';
+        feedback.style.color = 'var(--danger)';
+        feedback.innerHTML = `<strong><i class="fa fa-triangle-exclamation"></i> Payout Failed:</strong> ${data.error || data.message || 'Moolre error'}`;
+      }
+    } catch (err) {
+      feedback.style.background = 'rgba(239,68,68,0.15)';
+      feedback.style.color = 'var(--danger)';
+      feedback.innerHTML = `<strong><i class="fa fa-circle-xmark"></i> Request Error:</strong> ${err.message}`;
+    }
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────

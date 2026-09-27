@@ -113,15 +113,29 @@ const server = http.createServer((req, res) => {
   let targetPath = null;
   const lowerUrl = decodedUrl.toLowerCase();
 
-  if (lowerUrl === '/dashboard.html' || lowerUrl === '/admin/dashboard.html' || lowerUrl === '/admin-dashboard.html' || lowerUrl === '/admin/admin-dashboard.html') {
+  const dashboardPages = [
+    '/dashboard.html', '/admin/dashboard.html',
+    '/admin-dashboard.html', '/admin/admin-dashboard.html',
+    '/ride-monitoring.html', '/admin/ride-monitoring.html',
+    '/trips.html', '/admin/trips.html',
+    '/customers.html', '/admin/customers.html',
+    '/rider-applications.html', '/admin/rider-applications.html',
+    '/rider-management.html', '/admin/rider-management.html',
+    '/live-riders.html', '/admin/live-riders.html',
+    '/analytics.html', '/admin/analytics.html',
+    '/system-settings.html', '/admin/system-settings.html'
+  ];
+
+  if (dashboardPages.includes(lowerUrl)) {
     targetPath = path.join(ROOT, 'admin', 'admin-dashboard.html');
   } else if (lowerUrl === '/payment-management.html' || lowerUrl === '/admin/payment-management.html') {
-    targetPath = path.join(ROOT, 'admin', 'moolre-overview.html');
-  } else if (lowerUrl === '/pricing-cms.html') {
+    targetPath = path.join(ROOT, 'admin', 'payment-management.html');
+    if (!fs.existsSync(targetPath)) targetPath = path.join(ROOT, 'admin', 'moolre-overview.html');
+  } else if (lowerUrl === '/pricing-cms.html' || lowerUrl === '/admin/pricing-cms.html') {
     targetPath = path.join(ROOT, 'admin', 'pricing-cms.html');
-  } else if (lowerUrl === '/roles-management.html') {
+  } else if (lowerUrl === '/roles-management.html' || lowerUrl === '/admin/roles-management.html') {
     targetPath = path.join(ROOT, 'admin', 'roles-management.html');
-  } else if (lowerUrl === '/moolre-overview.html') {
+  } else if (lowerUrl === '/moolre-overview.html' || lowerUrl === '/admin/moolre-overview.html') {
     targetPath = path.join(ROOT, 'admin', 'moolre-overview.html');
   }
 

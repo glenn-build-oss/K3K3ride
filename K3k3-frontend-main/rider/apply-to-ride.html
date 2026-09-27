@@ -89,7 +89,7 @@
       border: 1px solid rgba(255,214,10,0.3);
       color: var(--k3k3-yellow);
       padding: 0.4rem 1.1rem;
-      border-radius: 100px;
+      border-radius: 8px;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -434,7 +434,7 @@
     }
     .btn {
       padding: 0.85rem 2rem;
-      border-radius: 24px;
+      border-radius: 10px;
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
@@ -752,8 +752,11 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="phone">Phone Number <span class="req">*</span></label>
+              <label for="phone">Phone Number (Mobile Money) <span class="req">*</span></label>
               <input type="tel" id="phone" name="phone" placeholder="024 123 4567" maxlength="10" inputmode="numeric">
+              <span class="field-hint" style="color:#b45309;font-weight:600;display:flex;align-items:center;gap:4px;margin-top:4px;">
+                <i class="fas fa-wallet" style="color:#f59e0b;"></i> Use your active Mobile Money number (MTN, Telecel, or AT) so your ride earnings are paid directly into your MoMo wallet!
+              </span>
             </div>
             <div class="form-group">
               <label for="dateOfBirth">Date of Birth <span class="req">*</span></label>

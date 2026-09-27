@@ -187,13 +187,125 @@ async function sendEmailOTP({ to, code, role = 'user', purpose = 'Account Verifi
 
   const subject = `Your K3K3 Verification Code: ${code}`;
   const html = buildOtpEmailHtml(code, `${role.toUpperCase()} ${purpose}`);
-
   return await sendEmail({ to, subject, html });
+}
+
+/**
+ * Builds HTML template for staff activity notification (sign-in / sign-out).
+ */
+function buildStaffActivityEmailHtml({ name, email, department, role, action, ip, userAgent, timestamp }) {
+  const isLogin = (action || '').toUpperCase() === 'LOGIN';
+  const actionLabel = isLogin ? 'Signed In' : 'Signed Out';
+  const badgeBg = isLogin ? '#10B981' : '#F97316';
+  const badgeText = isLogin ? 'SESSION ACTIVE' : 'SESSION ENDED';
+  const dateStr = timestamp ? new Date(timestamp).toUTCString() : new Date().toUTCString();
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K3K3 Staff Activity Alert</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0c0d10;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#f1f5f9;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0c0d10;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:540px;background-color:#14171f;border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#FFD60A 0%,#E6C000 100%);padding:24px 32px;text-align:center;">
+              <h1 style="margin:0;font-size:24px;font-weight:900;color:#0c0d10;letter-spacing:-0.5px;">K3K3<span style="font-weight:400;">ride</span></h1>
+              <p style="margin:4px 0 0 0;font-size:11px;font-weight:800;color:#332900;text-transform:uppercase;letter-spacing:1px;">Security &amp; Audit Trail</p>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding:32px 32px 24px;">
+              <div style="display:inline-block;padding:4px 10px;border-radius:20px;background:${badgeBg}22;border:1px solid ${badgeBg}66;color:${badgeBg};font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:14px;">
+                ${badgeText}
+              </div>
+              <h2 style="margin:0 0 8px;font-size:20px;font-weight:800;color:#ffffff;">
+                Staff Member ${actionLabel}
+              </h2>
+              <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#94a3b8;">
+                This notification was generated because a staff member account accessed the K3K3 Admin Portal.
+              </p>
+
+              <!-- Activity Card -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#0c0d10;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;margin-bottom:24px;">
+                <tr>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;width:35%;">Staff Name</td>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#ffffff;font-size:13px;font-weight:700;">${name || 'Staff Member'}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">Email Address</td>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#FFD60A;font-family:monospace;font-size:13px;">${email}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">Department / Role</td>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#38bdf8;font-size:13px;font-weight:600;">${department || role || 'Operations'}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">Action Type</td>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:${badgeBg};font-size:13px;font-weight:800;">${actionLabel.toUpperCase()}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">Timestamp</td>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#cbd5e1;font-size:12px;">${dateStr}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">IP Address</td>
+                  <td style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#94a3b8;font-family:monospace;font-size:12px;">${ip || '127.0.0.1'}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 18px;color:#64748b;font-size:12px;font-weight:700;">Device / Browser</td>
+                  <td style="padding:12px 18px;color:#94a3b8;font-size:11px;line-height:1.4;">${userAgent || 'Browser'}</td>
+                </tr>
+              </table>
+
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#64748b;">
+                This audit log is automatically dispatched to the Super Admin alert inbox (<span style="color:#FFD60A;">k3k3ride@gmail.com</span>). No action is required unless this activity is unrecognized.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid rgba(255,255,255,0.06);background:#0e1017;padding:18px 32px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#475569;">
+                &copy; ${new Date().getFullYear()} K3K3ride Admin Security &bull; Ho, Volta Region, Ghana
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+/**
+ * Sends a staff login/logout audit notification to k3k3ride@gmail.com via Resend.
+ */
+async function sendStaffActivityNotification({ name, email, department, role, action, ip, userAgent, timestamp }) {
+  const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+  const isLogin = (action || '').toUpperCase() === 'LOGIN';
+  const actionLabel = isLogin ? 'Sign-in' : 'Sign-out';
+  const subject = `[K3K3 Staff Alert] ${actionLabel}: ${name || email} (${department || role || 'Staff'})`;
+  const html = buildStaffActivityEmailHtml({ name, email, department, role, action, ip, userAgent, timestamp });
+
+  return await sendEmail({ to: notifyEmail, subject, html });
 }
 
 module.exports = {
   isResendConfigured,
   sendEmail,
   sendEmailOTP,
-  buildOtpEmailHtml
+  sendStaffActivityNotification,
+  buildOtpEmailHtml,
+  buildStaffActivityEmailHtml
 };

@@ -9,7 +9,15 @@
 
 const express = require('express');
 const router = express.Router();
-const { sendSMS, checkSMSBalance, checkSenderIdStatus, checkSMSStatus } = require('../services/moolre.service');
+const { 
+  sendSMS, 
+  checkSMSBalance, 
+  checkSenderIdStatus, 
+  checkSMSStatus,
+  listTransactions,
+  requestMoMoPayment,
+  disburseToRiderMoMo
+} = require('../services/moolre.service');
 const { normalizePhone } = require('../utils/phone');
 const { 
   createRiderApplication,
@@ -1042,6 +1050,73 @@ router.get(['/moolre/sender-status', '/api/admin/moolre/sender-status'], async (
 });
 
 /**
+ * GET /api/admin/moolre/transactions
+ * Fetch recent transaction records directly from Moolre gateway (POST /open/account/status)
+ */
+router.get(['/moolre/transactions', '/api/admin/moolre/transactions'], async (req, res) => {
+  try {
+    const { status, limit } = req.query;
+    const result = await listTransactions({ status, limit: limit ? parseInt(limit, 10) : 50 });
+    res.json(result);
+  } catch (error) {
+    console.error('[Admin] Error fetching Moolre transactions:', error);
+    res.status(500).json({ success: false, error: error.message, transactions: [] });
+  }
+});
+
+/**
+ * POST /api/admin/moolre/collect
+ * Test or manual trigger for USSD MoMo collection prompt via Moolre API
+ */
+router.post(['/moolre/collect', '/api/admin/moolre/collect'], async (req, res) => {
+  try {
+    const { phone, amount, channel, reference, skipOtp } = req.body;
+    if (!phone || !amount) {
+      return res.status(400).json({ success: false, error: 'Phone and amount are required' });
+    }
+
+    const result = await requestMoMoPayment({
+      phone,
+      amount,
+      channel,
+      reference,
+      skipOtp: skipOtp !== undefined ? Boolean(skipOtp) : false
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('[Admin] Error in Moolre MoMo collection:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * POST /api/admin/moolre/payout
+ * Test or manual trigger for Rider MoMo payout
+ */
+router.post(['/moolre/payout', '/api/admin/moolre/payout'], async (req, res) => {
+  try {
+    const { riderPhone, amount, channel, reference, tripId } = req.body;
+    if (!riderPhone || !amount) {
+      return res.status(400).json({ success: false, error: 'Rider phone and amount are required' });
+    }
+
+    const result = await disburseToRiderMoMo({
+      riderPhone,
+      amount,
+      channel,
+      reference,
+      tripId
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('[Admin] Error in rider MoMo payout:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
  * GET /api/ussd/stats & GET /api/ussd/sessions
  * Real USSD metrics (defaulting cleanly without mock strings)
  */
@@ -1504,6 +1579,21 @@ router.put('/staff/assign', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error('[Admin] Error assigning staff role:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Delete staff member assignment
+router.delete(['/staff/:identifier', '/staff'], (req, res) => {
+  try {
+    const identifier = req.params.identifier || req.body?.email || req.body?.id || req.query?.email || req.query?.id;
+    if (!identifier) {
+      return res.status(400).json({ success: false, error: 'Staff identifier (email or ID) is required' });
+    }
+    const result = rolesService.deleteStaffAssignment(identifier);
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error deleting staff member:', err);
     res.status(400).json({ success: false, error: err.message });
   }
 });

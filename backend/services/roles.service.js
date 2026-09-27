@@ -35,7 +35,7 @@ function readConfig() {
 }
 
 /**
- * Persists configuration to disk atomically.
+ * Persists configuration to disk atomically and safely on all platforms.
  * @param {object} config
  */
 function writeConfig(config) {
@@ -44,9 +44,19 @@ function writeConfig(config) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
+    const data = JSON.stringify(config, null, 2);
     const tempPath = `${CONFIG_PATH}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempPath, JSON.stringify(config, null, 2), 'utf8');
-    fs.renameSync(tempPath, CONFIG_PATH);
+    fs.writeFileSync(tempPath, data, 'utf8');
+    try {
+      if (fs.existsSync(CONFIG_PATH)) {
+        fs.unlinkSync(CONFIG_PATH);
+      }
+      fs.renameSync(tempPath, CONFIG_PATH);
+    } catch (_) {
+      // Fallback for Windows lock/permission issues
+      fs.writeFileSync(CONFIG_PATH, data, 'utf8');
+      try { fs.unlinkSync(tempPath); } catch (__) {}
+    }
     return true;
   } catch (err) {
     console.error('[RolesService] Error writing config file:', err);
@@ -70,7 +80,7 @@ function readLogs() {
 }
 
 /**
- * Persists staff activity logs to disk atomically.
+ * Persists staff activity logs to disk atomically and safely on all platforms.
  */
 function writeLogs(logs) {
   try {
@@ -78,9 +88,19 @@ function writeLogs(logs) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
+    const data = JSON.stringify(logs, null, 2);
     const tempPath = `${LOGS_PATH}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempPath, JSON.stringify(logs, null, 2), 'utf8');
-    fs.renameSync(tempPath, LOGS_PATH);
+    fs.writeFileSync(tempPath, data, 'utf8');
+    try {
+      if (fs.existsSync(LOGS_PATH)) {
+        fs.unlinkSync(LOGS_PATH);
+      }
+      fs.renameSync(tempPath, LOGS_PATH);
+    } catch (_) {
+      // Fallback for Windows lock/permission issues
+      fs.writeFileSync(LOGS_PATH, data, 'utf8');
+      try { fs.unlinkSync(tempPath); } catch (__) {}
+    }
     return true;
   } catch (err) {
     console.error('[RolesService] Error writing staff activity logs:', err);
@@ -411,6 +431,70 @@ async function assignStaffRole(email, roleId, name = '', password = '') {
   return { success: true, email: cleanEmail, role: roleId, name: finalName };
 }
 
+/**
+ * Deletes a staff member assignment.
+ * Safeguards:
+ *  - Primary super admin (admin@k3k3.com) cannot be deleted.
+ *  - If the staff is a Super Admin, cannot delete if they are the last remaining Super Admin.
+ * Records a STAFF_DELETED audit log.
+ * @param {string} identifier Staff email or ID
+ * @returns {object} { success: true, deleted_email, deleted_id, name }
+ */
+function deleteStaffAssignment(identifier) {
+  if (!identifier || !String(identifier).trim()) {
+    throw new Error('Staff identifier (email or ID) is required');
+  }
+  const cleanId = String(identifier).trim().toLowerCase();
+
+  const config = readConfig();
+  config.staff_assignments = config.staff_assignments || [];
+
+  const staffIdx = config.staff_assignments.findIndex(s => 
+    (s.email && s.email.toLowerCase() === cleanId) || 
+    (s.id && s.id.toLowerCase() === cleanId)
+  );
+
+  if (staffIdx === -1) {
+    throw new Error(`Staff member not found: ${identifier}`);
+  }
+
+  const target = config.staff_assignments[staffIdx];
+
+  // Safeguard 1: Primary super admin cannot be deleted
+  if (target.email && target.email.toLowerCase() === 'admin@k3k3.com') {
+    throw new Error('Cannot delete primary super admin account (admin@k3k3.com)');
+  }
+
+  // Safeguard 2: Cannot delete last remaining super admin
+  if (target.role === 'admin') {
+    const adminCount = config.staff_assignments.filter(s => s.role === 'admin').length;
+    if (adminCount <= 1) {
+      throw new Error('Cannot delete the last remaining Super Admin staff account');
+    }
+  }
+
+  // Remove from staff_assignments
+  config.staff_assignments.splice(staffIdx, 1);
+  writeConfig(config);
+
+  // Record audit log
+  logStaffActivity({
+    email: target.email,
+    name: target.name,
+    role: target.role,
+    action: 'STAFF_DELETED',
+    details: `Staff account "${target.name}" (${target.email}) was permanently removed from role "${target.role}"`
+  });
+
+  return {
+    success: true,
+    deleted_email: target.email,
+    deleted_id: target.id,
+    name: target.name,
+    role: target.role
+  };
+}
+
 module.exports = {
   getRolesConfig,
   getRole,
@@ -422,6 +506,7 @@ module.exports = {
   getStaffByEmailInternal,
   verifyStaffPassword,
   assignStaffRole,
+  deleteStaffAssignment,
   logStaffActivity,
   getStaffActivityLogs,
   clearStaffActivityLogs

@@ -76,7 +76,7 @@ body {
     color: var(--k3k3-dark);
     font-weight: bold;
     padding: 8px 20px;
-    border-radius: 30px;
+    border-radius: 8px;
     transition: var(--transition);
     border: 2px solid transparent;
 }
@@ -818,7 +818,7 @@ body {
 .btn-secondary {
     padding: 14px 32px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;

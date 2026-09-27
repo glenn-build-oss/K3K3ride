@@ -27,8 +27,8 @@
             --green: #10B981;
             --r: 12px;
             --r-lg: 18px;
-            --r-xl: 24px;
-            --r-full: 999px;
+            --r-xl: 16px;
+            --r-full: 10px;
         }
 
         *, *::before, *::after {
@@ -367,7 +367,7 @@
             background: var(--black);
             color: var(--white);
             border: none;
-            border-radius: var(--r-full);
+            border-radius: 10px;
             padding: 8px 18px;
             font-family: inherit;
             font-size: 0.82rem;
@@ -955,7 +955,19 @@
                         </div>
 
                         <div class="field-group">
-                            <label class="field-label" for="signupPhone">Phone Number</label>
+                            <label class="field-label" for="signupEmail">Email Address</label>
+                            <input
+                                type="email"
+                                id="signupEmail"
+                                class="text-input"
+                                placeholder="e.g. kofi@gmail.com"
+                                autocomplete="email"
+                                required
+                            >
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="signupPhone">Phone Number (MoMo Enabled)</label>
                             <div class="phone-field-wrap">
                                 <input
                                     type="tel"
@@ -1050,6 +1062,11 @@
             showSignup();
         }
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
         async function handleSendOTP(e) {
             e.preventDefault();
             const phone = document.getElementById('phoneInput').value.trim();
@@ -1078,14 +1095,18 @@
                     document.getElementById('verifyStep').classList.add('show');
                     document.getElementById('d1').focus();
 
-                    if (data._otp) {
-                        // SMS not working yet — show OTP directly on screen
+                    if (data.emailDelivery) {
+                        const targetEmail = data.targetEmail || 'your email';
                         document.getElementById('otpSentMsg').innerHTML =
-                            `⚠️ SMS not active yet. Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${data._otp}</strong><br><small>Enter this code below to log in.</small>`;
+                            `<i class="fas fa-envelope-circle-check" style="color:var(--yellow);margin-right:6px"></i> We sent a 6-digit code to <strong>${escapeHtml(targetEmail)}</strong> and SMS to +233 ${phone.replace(/^0/, '')}.<br><small style="color:var(--text-muted);margin-top:4px;display:block">Enter the code below to log in.</small>`;
+                        showToast('Verification code sent to your email and SMS!', 'success');
+                    } else if (data._otp) {
+                        document.getElementById('otpSentMsg').innerHTML =
+                            `Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${data._otp}</strong><br><small>Enter this code below to log in.</small>`;
                         showToast(`Your OTP: ${data._otp}`, 'info');
                     } else {
                         document.getElementById('otpSentMsg').textContent =
-                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')}. Enter it below.`;
+                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')} and your email. Enter it below.`;
                         showToast('Verification code sent!', 'success');
                     }
                 } else {
@@ -1213,6 +1234,8 @@
                         localStorage.setItem('k3k3_user_name', displayName);
                         localStorage.setItem('k3k3_token', data.token);
                         sessionStorage.removeItem('k3k3_signup_name');
+                        sessionStorage.removeItem('k3k3_loc_prompt_dismissed');
+                        sessionStorage.removeItem('k3k3_loc_granted');
                     } catch (err) {
                         console.warn('Storage error:', err);
                     }
@@ -1264,10 +1287,15 @@
         async function handleSignup(e) {
             e.preventDefault();
             const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
             const phone = document.getElementById('signupPhone').value.trim();
 
             if (!fullName || fullName.length < 2) {
                 showToast('Please enter your full name.', 'error');
+                return;
+            }
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('Please enter a valid email address.', 'error');
                 return;
             }
             const cleanPhone = phone.replace(/\D/g, '');
@@ -1284,7 +1312,7 @@
                 const res = await fetch(`${API_BASE}/api/auth/passenger/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, fullName })
+                    body: JSON.stringify({ phone, fullName, email })
                 });
                 const data = await res.json();
 
@@ -1292,15 +1320,27 @@
                     currentPhone = phone;
                     try {
                         sessionStorage.setItem('k3k3_signup_name', fullName);
+                        sessionStorage.setItem('k3k3_signup_email', email);
                     } catch(e) {}
 
-                    showToast('Verification code sent! Please verify your number.', 'success');
+                    showToast('Verification code sent to your email and SMS!', 'success');
 
                     // Switch to login section and show OTP step
                     document.getElementById('signupSection').classList.add('step-hidden');
                     document.getElementById('loginSection').classList.remove('step-hidden');
-                    document.getElementById('otpSentMsg').textContent =
-                        `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')}. Enter it below.`;
+
+                    if (data.emailDelivery) {
+                        document.getElementById('otpSentMsg').innerHTML =
+                            `<i class="fas fa-envelope-circle-check" style="color:var(--yellow);margin-right:6px"></i> Verification code sent to <strong>${escapeHtml(email)}</strong> and SMS to +233 ${phone.replace(/^0/, '')}.<br><small style="color:var(--text-muted);margin-top:4px;display:block">Enter the 6-digit code below to finish setup.</small>`;
+                    } else if (data._otp || data._devOTP) {
+                        const code = data._otp || data._devOTP;
+                        document.getElementById('otpSentMsg').innerHTML =
+                            `Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${code}</strong><br><small>Enter this code below to log in.</small>`;
+                    } else {
+                        document.getElementById('otpSentMsg').textContent =
+                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')} and ${email}. Enter it below.`;
+                    }
+
                     document.getElementById('phoneStep').style.display = 'none';
                     document.getElementById('verifyStep').classList.add('show');
                     document.getElementById('d1').focus();

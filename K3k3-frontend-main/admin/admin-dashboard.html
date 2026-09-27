@@ -28,8 +28,8 @@
   --purple:#8B5CF6;--purple-lt:rgba(139,92,246,.12);
   --teal:#06B6D4;--teal-lt:rgba(6,182,212,.12);
   --orange:#F97316;--orange-lt:rgba(249,115,22,.12);
-  --sb-w:260px;--sb-w-col:68px;--top-h:62px;
-  --r:10px;--r-lg:16px;--r-xl:22px;--r-full:999px;
+  --sb-w:260px;--sb-w-col:68px;--top-h:62px;--hnav-h:50px;
+  --r:10px;--r-lg:16px;--r-xl:22px;--r-full:10px;
   --ease:cubic-bezier(.4,0,.2,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -117,8 +117,75 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .tb-admin-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-dk));color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0}
 .tb-admin-name{font-size:.78rem;font-weight:700;color:var(--white)}
 
+/* ─────────── HORIZONTAL NAV BAR ─────────── */
+.horizontal-nav-bar{
+  position:fixed;
+  top:var(--top-h);
+  left:0;
+  right:0;
+  height:var(--hnav-h);
+  background:rgba(17,19,24,0.96);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  z-index:750;
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  box-shadow:0 4px 16px rgba(0,0,0,0.28);
+}
+.horizontal-nav-bar::-webkit-scrollbar{display:none}
+.h-nav-track{display:flex;align-items:center;gap:8px;min-width:max-content}
+.h-nav-tab{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 14px;
+  border-radius:var(--r-full);
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  color:var(--muted-2);
+  font-family:inherit;
+  font-size:.78rem;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .18s var(--ease);
+  user-select:none;
+}
+.h-nav-tab:hover{
+  background:rgba(255,255,255,0.08);
+  color:var(--white);
+  border-color:rgba(255,255,255,0.18);
+  transform:translateY(-1px);
+}
+.h-nav-tab:active{transform:translateY(0)}
+.h-nav-tab.active{
+  background:var(--yellow-lt);
+  color:var(--yellow);
+  border-color:var(--yellow-bdr);
+  font-weight:700;
+  box-shadow:0 0 12px rgba(255,214,10,0.14);
+}
+.h-nav-tab i{font-size:.8rem;opacity:.85}
+.h-nav-tab.active i{opacity:1;color:var(--yellow)}
+.h-nav-badge{
+  font-size:.62rem;
+  font-weight:800;
+  padding:1px 6px;
+  border-radius:99px;
+  line-height:1.3;
+}
+.h-nav-badge.red{background:var(--red);color:var(--white)}
+.h-nav-badge.green{background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.h-nav-badge.yellow{background:var(--yellow-lt);color:var(--yellow);border:1px solid var(--yellow-bdr)}
+.h-nav-badge.purple{background:rgba(139,92,246,.15);color:#A78BFA;border:1px solid rgba(139,92,246,.3)}
+
 /* ─────────── MAIN ─────────── */
-.main-content{margin-left:0;margin-top:var(--top-h);padding:24px 28px;min-height:calc(100vh - var(--top-h))}
+.main-content{margin-left:0;margin-top:calc(var(--top-h) + var(--hnav-h));padding:24px 28px;min-height:calc(100vh - var(--top-h) - var(--hnav-h))}
 .dash-section{display:none}
 .dash-section.active{display:block;animation:fadeUp .22s var(--ease)}
 
@@ -177,7 +244,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .card-header{display:flex;align-items:center;justify-content:space-between;padding:15px 20px 13px;border-bottom:1px solid var(--border)}
 .card-title{font-size:.9rem;font-weight:800;color:var(--white)}
 .card-sub{font-size:.68rem;color:var(--muted);margin-top:1px}
-.card-action{font-size:.74rem;font-weight:600;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:var(--r-full);padding:5px 12px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.card-action{font-size:.74rem;font-weight:600;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--border-2);border-radius:8px;padding:5px 12px;cursor:pointer;transition:all .18s;white-space:nowrap}
 .card-action:hover{border-color:var(--yellow-bdr);color:var(--yellow)}
 .card-body{padding:16px 20px}
 
@@ -297,7 +364,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 /* Application rows */
 .app-actions{margin-left:auto;display:flex;gap:6px}
-.app-btn{padding:5px 12px;border-radius:var(--r-full);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;border:none;transition:all .18s}
+.app-btn{padding:5px 12px;border-radius:8px;font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;border:none;transition:all .18s}
 .app-btn.approve{background:var(--green-lt);color:var(--green);border:1px solid rgba(16,185,129,.25)}
 .app-btn.approve:hover{background:rgba(16,185,129,.2)}
 .app-btn.decline{background:var(--red-lt);color:var(--red);border:1px solid rgba(239,68,68,.25)}
@@ -321,7 +388,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .modal-title{font-size:1.05rem;font-weight:900;color:var(--white)}
 .modal-sub{font-size:.8rem;color:var(--muted);margin-top:4px}
 .modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:10px}
-.modal-btn{flex:1;padding:12px;border-radius:var(--r-full);font-family:inherit;font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.modal-btn{flex:1;padding:12px;border-radius:10px;font-family:inherit;font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .2s}
 .modal-btn.secondary{background:rgba(255,255,255,.06);color:var(--muted-2)}
 .modal-btn.secondary:hover{background:rgba(255,255,255,.1)}
 .modal-btn.danger{background:var(--red);color:var(--white)}
@@ -342,10 +409,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .sec-title{font-size:1.2rem;font-weight:900;color:var(--white)}
 .sec-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
 .filter-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.ftab{padding:6px 14px;border-radius:var(--r-full);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .18s;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid transparent}
+.ftab{padding:6px 14px;border-radius:8px;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .18s;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid transparent}
 .ftab.active{background:var(--yellow-lt);color:var(--yellow);border-color:var(--yellow-bdr)}
 .ftab:hover:not(.active){background:rgba(255,255,255,.08);color:var(--white)}
-.btn-secondary{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r-full);background:rgba(255,255,255,.06);color:var(--muted-2);font-family:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--border-2);cursor:pointer;transition:all .18s}
+.btn-secondary{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;background:rgba(255,255,255,.06);color:var(--muted-2);font-family:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--border-2);cursor:pointer;transition:all .18s}
 .btn-secondary:hover{background:rgba(255,255,255,.1);color:var(--white)}
 .earn-big{font-size:2.4rem;font-weight:900;color:var(--yellow);letter-spacing:-.5px;display:flex;align-items:baseline;gap:4px}
 .earn-curr{font-size:1.1rem;color:rgba(255,214,10,.6);font-weight:700}
@@ -594,6 +661,46 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     </div>
   </div>
 </header>
+
+<!-- ════ HORIZONTAL NAVIGATION BAR (TABS) ════ -->
+<nav class="horizontal-nav-bar" id="horizontalNavBar" aria-label="Admin Navigation Tabs">
+  <div class="h-nav-track">
+    <button type="button" class="h-nav-tab active" id="hNav-dashboard" onclick="showSec('dashboard')">
+      <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-trips" onclick="showSec('trips')">
+      <i class="fas fa-route"></i><span>All Trips</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-riders" onclick="showSec('riders')">
+      <i class="fas fa-motorcycle"></i><span>Riders</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-passengers" onclick="showSec('passengers')">
+      <i class="fas fa-users"></i><span>Passengers</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-applications" onclick="showSec('applications')">
+      <i class="fas fa-user-plus"></i><span>Applications</span>
+      <span class="h-nav-badge red" id="hNavAppsBadge">3</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-payments" onclick="showSec('payments')">
+      <i class="fas fa-coins"></i><span>Payments</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-moolre" onclick="showSec('moolre')">
+      <i class="fas fa-bolt" style="color:var(--yellow)"></i><span>Moolre Overview</span>
+      <span class="h-nav-badge green">LIVE</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-pricing" onclick="window.location.href='pricing-cms.html'">
+      <i class="fas fa-tags" style="color:var(--yellow)"></i><span>Pricing CMS</span>
+      <span class="h-nav-badge yellow">MAPBOX</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-roles" onclick="window.location.href='roles-management.html'">
+      <i class="fas fa-user-shield" style="color:#A78BFA"></i><span>Roles &amp; Permissions</span>
+      <span class="h-nav-badge purple">RBAC</span>
+    </button>
+    <button type="button" class="h-nav-tab" id="hNav-messages" onclick="showSec('messages')">
+      <i class="fas fa-paper-plane" style="color:#60A5FA"></i><span>Messaging &amp; SMS</span>
+    </button>
+  </div>
+</nav>
 
 <!-- ════ MAIN ════ -->
 <main class="main-content">
@@ -1228,7 +1335,7 @@ function escapeJs(str){
   return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
-/* ── Web Audio Real-Time Notification Chimes ── */
+/* ── Web Audio Real-Time Notification Chimes & Audio Unlock ── */
 let adminAudioCtx = null;
 let adminSoundEnabled = localStorage.getItem('k3k3_admin_sound_enabled') !== 'false';
 
@@ -1243,8 +1350,17 @@ function getAdminAudioContext() {
   return adminAudioCtx;
 }
 
-['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evt => {
-  document.addEventListener(evt, () => { getAdminAudioContext(); }, { once: false, passive: true });
+function unlockAdminAudio() {
+  const ctx = getAdminAudioContext();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().then(() => {
+      console.log('[Admin Audio] AudioContext unlocked');
+    }).catch(() => {});
+  }
+}
+
+['click', 'touchstart', 'keydown', 'pointerdown', 'focus'].forEach(evt => {
+  document.addEventListener(evt, unlockAdminAudio, { passive: true });
 });
 
 function toggleAdminSoundAlerts() {
@@ -1252,6 +1368,7 @@ function toggleAdminSoundAlerts() {
   localStorage.setItem('k3k3_admin_sound_enabled', String(adminSoundEnabled));
   updateAdminSoundUI();
   if (adminSoundEnabled) {
+    unlockAdminAudio();
     testAdminAlertChime();
     showToast('🔊 Audio alerts active', 'success');
   } else {
@@ -1276,6 +1393,7 @@ function updateAdminSoundUI() {
 }
 
 function testAdminAlertChime() {
+  unlockAdminAudio();
   playAdminNotificationChime('application');
   showToast('🔔 Sound Alert Test: Chime played successfully!', 'info');
 }
@@ -1291,7 +1409,7 @@ function playAdminNotificationChime(type = 'notification') {
 
     const now = ctx.currentTime;
     const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(0.4, now);
+    masterGain.gain.setValueAtTime(0.45, now);
     masterGain.connect(ctx.destination);
 
     if (type === 'application') {
@@ -1309,7 +1427,30 @@ function playAdminNotificationChime(type = 'notification') {
         osc.frequency.setValueAtTime(n.freq, now + n.time);
 
         noteGain.gain.setValueAtTime(0.001, now + n.time);
-        noteGain.gain.linearRampToValueAtTime(0.35, now + n.time + 0.02);
+        noteGain.gain.linearRampToValueAtTime(0.4, now + n.time + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
+
+        osc.connect(noteGain);
+        noteGain.connect(masterGain);
+
+        osc.start(now + n.time);
+        osc.stop(now + n.time + n.dur);
+      });
+    } else if (type === 'trip' || type === 'payment') {
+      // 3-note upbeat success ping: G5 (784Hz) -> C6 (1046Hz) -> E6 (1318Hz)
+      const notes = [
+        { freq: 783.99, time: 0.00, dur: 0.20 },
+        { freq: 1046.50, time: 0.10, dur: 0.25 },
+        { freq: 1318.51, time: 0.22, dur: 0.50 }
+      ];
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(n.freq, now + n.time);
+
+        noteGain.gain.setValueAtTime(0.001, now + n.time);
+        noteGain.gain.linearRampToValueAtTime(0.38, now + n.time + 0.02);
         noteGain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
 
         osc.connect(noteGain);
@@ -1331,7 +1472,7 @@ function playAdminNotificationChime(type = 'notification') {
         osc.frequency.setValueAtTime(n.freq, now + n.time);
 
         noteGain.gain.setValueAtTime(0.001, now + n.time);
-        noteGain.gain.linearRampToValueAtTime(0.3, now + n.time + 0.02);
+        noteGain.gain.linearRampToValueAtTime(0.35, now + n.time + 0.02);
         noteGain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
 
         osc.connect(noteGain);
@@ -1342,7 +1483,7 @@ function playAdminNotificationChime(type = 'notification') {
       });
     }
   } catch (err) {
-    console.warn('[Admin Sound] Audio synthesis failed:', err);
+    console.warn('[Admin Sound] Audio synthesis note:', err.message);
   }
 }
 
@@ -1371,7 +1512,10 @@ function triggerAdminAlert(type, { title, message, badge = 'ALERT', actionSec = 
   // 1. Play synthesized audio chime
   playAdminNotificationChime(type);
 
-  // 2. Animate bell icon in navbar
+  // 2. Flash document title
+  flashTabTitle(`🔔 ${title}`);
+
+  // 3. Animate bell icon in navbar
   const bellBtn = el('tbNotifBtn');
   if (bellBtn) {
     bellBtn.classList.remove('ringing');
@@ -1380,18 +1524,18 @@ function triggerAdminAlert(type, { title, message, badge = 'ALERT', actionSec = 
     setTimeout(() => bellBtn.classList.remove('ringing'), 3500);
   }
 
-  // 3. Highlight top and drawer badges
+  // 4. Highlight top and drawer badges
   const badgeDot = el('notifBadgeDot');
   if (badgeDot) badgeDot.style.display = 'inline-block';
 
-  // 4. Display high-contrast floating live banner
+  // 5. Display high-contrast floating live banner
   const container = el('adminLiveAlertContainer');
   if (container) {
     const card = document.createElement('div');
     card.className = 'admin-live-alert-card';
     card.innerHTML = `
       <div class="alert-icon-ring">
-        <i class="fas ${type === 'application' ? 'fa-id-card' : 'fa-bell'}"></i>
+        <i class="fas ${type === 'application' ? 'fa-id-card' : (type === 'payment' ? 'fa-wallet' : (type === 'trip' ? 'fa-route' : 'fa-bell'))}"></i>
       </div>
       <div class="alert-body">
         <span class="alert-badge-tag">${escapeHtml(badge)}</span>
@@ -2009,12 +2153,171 @@ const SEC_S={
   messages:'Direct SMS & fleet announcements'
 };
 
+/* ── Role-Based Access Control (RBAC) ── */
+function getCurrentAdminUser() {
+  try {
+    return JSON.parse(localStorage.getItem('current_admin') || '{}');
+  } catch (_) {
+    return {};
+  }
+}
+
+const SECTION_PAGE_MAP = {
+  dashboard: ['dashboard.html', 'admin-dashboard.html', 'analytics.html'],
+  trips: ['trips.html'],
+  riders: ['ride-monitoring.html', 'live-riders.html', 'rider-management.html'],
+  passengers: ['customers.html'],
+  applications: ['rider-applications.html'],
+  payments: ['payment-management.html'],
+  moolre: ['moolre-overview.html', 'payment-management.html'],
+  pricing: ['pricing-cms.html'],
+  roles: ['roles-management.html'],
+  messages: ['system-settings.html']
+};
+
+function isSectionAllowed(secName, user) {
+  if (!user || !user.role) return true;
+  if (user.role === 'admin') return true; // Super Admin has universal access
+  
+  const allowed = (user.allowedPages || user.allowed_pages || []).map(p => p.toLowerCase());
+  if (!allowed.length) return false;
+
+  const targetPages = SECTION_PAGE_MAP[secName] || [secName + '.html'];
+  return targetPages.some(page => allowed.includes(page.toLowerCase()));
+}
+
+async function applyRoleRestrictions() {
+  const user = getCurrentAdminUser();
+  const token = localStorage.getItem('k3k3_admin_token');
+  
+  // If not authenticated, redirect to login
+  if (!token && !user.email) {
+    window.location.replace('adminlogin.html');
+    return;
+  }
+
+  // Fetch live role definitions from backend to immediately apply "Edit Permissions" updates
+  try {
+    const backend = (typeof API_BASE !== 'undefined' && API_BASE) ? API_BASE : ((window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname)) ? 'http://localhost:8810' : '');
+    const res = await fetch(`${backend}/api/admin/roles`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.roles) {
+        const liveRole = data.roles.find(r => r.id === user.role);
+        if (liveRole) {
+          user.allowedPages = liveRole.allowed_pages || [];
+          user.defaultPage = liveRole.default_page || user.defaultPage;
+          user.roleName = liveRole.name || user.roleName;
+          localStorage.setItem('current_admin', JSON.stringify(user));
+        }
+      }
+    }
+  } catch (_) {}
+
+  // Update role display
+  const roleDisplayName = user.roleName || (user.role === 'admin' ? 'Super Admin' : (user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Staff'));
+  setEl('menuUserRole', roleDisplayName);
+  const topSub = el('topbarSub');
+  if (topSub && user.role !== 'admin') {
+    topSub.textContent = `Portal • ${roleDisplayName}`;
+  }
+
+  // If Super Admin, everything is enabled
+  if (user.role === 'admin') {
+    startDashboardPolling();
+    return;
+  }
+
+  // Restrict navigation tabs and dropdown menu items
+  const navTabs = [
+    { sec: 'dashboard', hNav: 'hNav-dashboard', menu: 'navDashboard' },
+    { sec: 'trips', hNav: 'hNav-trips', menu: 'navTrips' },
+    { sec: 'riders', hNav: 'hNav-riders', menu: 'navRiders' },
+    { sec: 'passengers', hNav: 'hNav-passengers', menu: 'navPassengers' },
+    { sec: 'applications', hNav: 'hNav-applications', menu: 'navApplications' },
+    { sec: 'payments', hNav: 'hNav-payments', menu: 'navPayments' },
+    { sec: 'moolre', hNav: 'hNav-moolre', menu: 'navMoolre' },
+    { sec: 'pricing', hNav: 'hNav-pricing', menu: 'navPricing' },
+    { sec: 'roles', hNav: 'hNav-roles', menu: 'navRoles' },
+    { sec: 'messages', hNav: 'hNav-messages', menu: 'navMessages' }
+  ];
+
+  let firstAllowedSec = null;
+  navTabs.forEach(tab => {
+    const allowed = isSectionAllowed(tab.sec, user);
+    const hEl = el(tab.hNav);
+    const mEl = el(tab.menu);
+    if (!allowed) {
+      if (hEl) hEl.style.display = 'none';
+      if (mEl) mEl.style.display = 'none';
+    } else {
+      if (hEl) hEl.style.display = '';
+      if (mEl) mEl.style.display = '';
+      if (!firstAllowedSec && tab.sec !== 'pricing' && tab.sec !== 'roles') {
+        firstAllowedSec = tab.sec;
+      }
+    }
+  });
+
+  // Determine starting section based on URL or user's defaultPage
+  const path = window.location.pathname.toLowerCase();
+  let requestedSec = null;
+  if (path.includes('ride-monitoring') || path.includes('live-riders') || path.includes('rider-management')) {
+    requestedSec = 'riders';
+  } else if (path.includes('trips')) {
+    requestedSec = 'trips';
+  } else if (path.includes('customers')) {
+    requestedSec = 'passengers';
+  } else if (path.includes('applications')) {
+    requestedSec = 'applications';
+  } else if (path.includes('payment') || path.includes('moolre')) {
+    requestedSec = 'payments';
+  }
+
+  // Check URL query parameters (e.g. ?sec=trips)
+  const urlParams = new URLSearchParams(window.location.search);
+  const qSec = urlParams.get('sec');
+  if (qSec) requestedSec = qSec;
+
+  // If no requested section, check user.defaultPage
+  if (!requestedSec && user.defaultPage) {
+    const dp = user.defaultPage.toLowerCase();
+    for (const [sKey, pList] of Object.entries(SECTION_PAGE_MAP)) {
+      if (pList.some(p => p.toLowerCase() === dp)) {
+        requestedSec = sKey;
+        break;
+      }
+    }
+  }
+
+  // If requested section is allowed, show it; otherwise switch to firstAllowedSec
+  const targetSec = (requestedSec && isSectionAllowed(requestedSec, user)) ? requestedSec : firstAllowedSec;
+  if (targetSec && targetSec !== 'dashboard') {
+    showSec(targetSec);
+  } else if (isSectionAllowed('dashboard', user)) {
+    showSec('dashboard');
+    startDashboardPolling();
+  } else if (firstAllowedSec) {
+    showSec(firstAllowedSec);
+  }
+}
+
 function showSec(name, filter){
+  const user = getCurrentAdminUser();
+  if (user && user.role && user.role !== 'admin') {
+    if (!isSectionAllowed(name, user)) {
+      showToast(`Access Restricted: Your assigned role (${user.roleName || user.role}) does not have permission to view this section.`, 'error');
+      return;
+    }
+  }
+
   document.querySelectorAll('.dash-section').forEach(s=>s.classList.remove('active'));
   el('sec-'+name)?.classList.add('active');
   curSec=name;
   document.querySelectorAll('.menu-item').forEach(n=>n.classList.remove('active'));
   el('nav'+name.charAt(0).toUpperCase()+name.slice(1))?.classList.add('active');
+  document.querySelectorAll('.h-nav-tab').forEach(t=>t.classList.remove('active'));
+  el('hNav-'+name)?.classList.add('active');
   setEl('topbarTitle',SEC_T[name]||name);
   setEl('topbarSub',SEC_S[name]||'');
   closeMenu();
@@ -2076,13 +2379,48 @@ function showToast(msg,type='info'){
 
 /* ── Admin name ── */
 function loadAdminName(){
-  const n=localStorage.getItem('k3k3_admin_name')||'Admin';const i=n.charAt(0).toUpperCase();
+  let n = localStorage.getItem('k3k3_admin_name');
+  let roleName = 'Super Admin';
+  try {
+    const raw = localStorage.getItem('current_admin');
+    if (raw) {
+      const u = JSON.parse(raw);
+      if (u.name) n = u.name;
+      if (u.roleName) roleName = u.roleName;
+    }
+  } catch(_) {}
+  if (!n) n = 'Admin';
+  const i = n.charAt(0).toUpperCase();
   ['menuAvatar','topAdminAv'].forEach(id=>setEl(id,i));
   ['menuUserName','topAdminName'].forEach(id=>setEl(id,n));
-  const inp=el('adminDisplayName');if(inp)inp.value=n;
+  setEl('menuUserRole', roleName);
+  const inp = el('adminDisplayName'); if(inp) inp.value = n;
 }
 function updateAdminName(){const v=el('adminDisplayName')?.value?.trim();if(!v){showToast('Enter a name','error');return;}localStorage.setItem('k3k3_admin_name',v);loadAdminName();showToast('Name updated ✓','success');}
-function doLogout(){closeModal('logoutModal');showToast('Logging out…','info');setTimeout(()=>window.location.href='adminlogin.html',900);}
+function doLogout(){
+  closeModal('logoutModal');
+  showToast('Signing out…','info');
+  try {
+    const raw = localStorage.getItem('current_admin');
+    const user = raw ? JSON.parse(raw) : null;
+    const email = user?.email || localStorage.getItem('k3k3_admin_email');
+    const name = user?.name || localStorage.getItem('k3k3_admin_name');
+    const role = user?.role || 'admin';
+    if (email) {
+      const backend = (typeof API_BASE !== 'undefined' && API_BASE) ? API_BASE : ((window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname)) ? 'http://localhost:8810' : '');
+      fetch(`${backend}/api/auth/admin/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, role }),
+        keepalive: true
+      }).catch(()=>{});
+    }
+  } catch (_) {}
+  localStorage.removeItem('k3k3_admin_token');
+  localStorage.removeItem('current_admin');
+  localStorage.removeItem('k3k3_admin_name');
+  setTimeout(()=>window.location.href='adminlogin.html',800);
+}
 
 
 /* ── Dashboard ── */
@@ -2142,6 +2480,7 @@ async function loadDashboard(){
   setEl('kpiCompRate',allTrips.length?Math.round(comp.length/allTrips.length*100)+'% completion rate':'0%');
   setEl('kpiApps',pending.length);
   setEl('appsBadge',pending.length);
+  setEl('hNavAppsBadge',pending.length);
 
   // Update Moolre Command Center widget with live Moolre API metrics
   if (moolreRes?.success) {
@@ -2323,11 +2662,33 @@ async function checkSystemHealth(){
 /* ── Live Notifications Drawer (SMS, WhatsApp, Driver Apps, Trips) ── */
 let allNotifs = [];
 let curNotifFilter = 'all';
+let alertedNotifIds = new Set();
+let isInitialNotifLoad = true;
 
-async function loadNotifications(){
+async function loadNotifications(silent = false){
   try {
     const res = await apiFetch('/admin/notifications');
-    allNotifs = res?.notifications || [];
+    const incomingNotifs = res?.notifications || [];
+
+    if (!isInitialNotifLoad && !silent) {
+      // Find new unread notifications that haven't been alerted yet
+      const newItems = incomingNotifs.filter(n => n.id && !alertedNotifIds.has(String(n.id)));
+      if (newItems.length > 0) {
+        const latest = newItems[0];
+        triggerAdminAlert(latest.type === 'app' ? 'application' : (latest.type === 'ride' ? 'trip' : 'notification'), {
+          title: latest.title || 'New Admin Notification',
+          message: latest.body || 'New administrative alert received.',
+          badge: latest.badge || 'NOTICE',
+          actionSec: latest.type === 'app' ? 'applications' : (latest.type === 'ride' ? 'trips' : (latest.type === 'sms' ? 'messages' : null))
+        });
+      }
+    }
+
+    incomingNotifs.forEach(n => {
+      if (n.id) alertedNotifIds.add(String(n.id));
+    });
+    isInitialNotifLoad = false;
+    allNotifs = incomingNotifs;
     
     // Update badge dot and count pill
     const countPill = el('notifCountPill');
@@ -3063,13 +3424,13 @@ const APP_CSS=`
 .app-summary{display:flex;gap:16px;margin-bottom:12px;font-size:.78rem;color:var(--muted)}
 .app-summary-item{display:flex;align-items:center;gap:4px}
 .app-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)}
-.app-btn-view{padding:6px 14px;border-radius:var(--r-full);border:1px solid var(--border-2);background:transparent;color:var(--white);font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-view{padding:6px 14px;border-radius:8px;border:1px solid var(--border-2);background:transparent;color:var(--white);font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
 .app-btn-view:hover{border-color:var(--yellow);color:var(--yellow)}
-.app-btn-approve{padding:6px 16px;border-radius:var(--r-full);border:none;background:var(--green);color:var(--white);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-approve{padding:6px 16px;border-radius:8px;border:none;background:var(--green);color:var(--white);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
 .app-btn-approve:hover{background:#059669;transform:translateY(-1px)}
-.app-btn-decline{padding:6px 16px;border-radius:var(--r-full);border:none;background:var(--red-lt);color:var(--red);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid rgba(239,68,68,.25);display:flex;align-items:center;gap:6px;transition:all .18s}
+.app-btn-decline{padding:6px 16px;border-radius:8px;border:none;background:var(--red-lt);color:var(--red);font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid rgba(239,68,68,.25);display:flex;align-items:center;gap:6px;transition:all .18s}
 .app-btn-decline:hover{background:var(--red);color:var(--white)}
-.app-btn-delete{padding:6px 12px;border-radius:var(--r-full);border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;margin-left:auto}
+.app-btn-delete{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;margin-left:auto}
 .app-btn-delete:hover{border-color:var(--red);color:var(--red);background:var(--red-lt)}
 .app-notes{font-size:.72rem;color:var(--muted);padding:6px 10px;background:var(--bg-4);border-radius:var(--r);margin-top:8px;border-left:2px solid var(--border-2)}
 @media(max-width:480px){
@@ -4153,16 +4514,43 @@ function initAdminSocket(){
       loadRiders(curRiderFilter || 'all');
     });
 
-    // Real-time trip progress update (acceptance, arrival, in-progress, completion)
+    // Real-time trip progress update (acceptance, arrival, in-progress, completion, payments)
     adminSocket.on('admin:trip_update', (data) => {
       console.log('[Admin Socket] Real-time trip update:', data);
       loadLive();
       loadAllTrips();
       loadMoolreData();
-      if(data?.type === 'trip_completed'){
-        showToast(`Trip ${String(data.tripId).substring(0, 8)} completed! Revenue updated.`, 'success');
-      } else if(data?.type === 'trip_accepted'){
-        showToast(`Trip accepted by Rider ${data.rider?.name || ''}!`, 'info');
+
+      if (data?.type === 'trip_completed') {
+        const fareStr = data.fare ? ` · ₵${parseFloat(data.fare).toFixed(2)}` : '';
+        triggerAdminAlert('trip', {
+          title: 'Trip Completed! Revenue Updated',
+          message: `Trip ${String(data.tripId || '').substring(0, 8)} successfully completed${fareStr}. Platform fee collected.`,
+          badge: 'COMPLETED',
+          actionSec: 'trips'
+        });
+      } else if (data?.type === 'trip_accepted') {
+        const riderName = data.rider?.name || 'Driver';
+        triggerAdminAlert('trip', {
+          title: 'Trip Accepted by Driver',
+          message: `Rider ${riderName} accepted Trip ${String(data.tripId || '').substring(0, 8)}. En route to pickup.`,
+          badge: 'ACCEPTED',
+          actionSec: 'live'
+        });
+      } else if (data?.type === 'trip_requested') {
+        triggerAdminAlert('trip', {
+          title: 'New Campus Ride Requested!',
+          message: `${data.pickup || 'Pickup'} → ${data.dest || 'Dropoff'} (₵${parseFloat(data.fare || 5).toFixed(2)})`,
+          badge: 'NEW TRIP',
+          actionSec: 'live'
+        });
+      } else if (data?.type === 'payment_collected') {
+        triggerAdminAlert('payment', {
+          title: 'MoMo Payment Collected!',
+          message: `GH₵${parseFloat(data.amount || 0).toFixed(2)} collected via Mobile Money. Platform commission credited.`,
+          badge: 'MOMO PAYMENT',
+          actionSec: 'moolre'
+        });
       }
     });
 
@@ -4486,7 +4874,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadAdminName();
   initAdminSocket();
   updateAdminSoundUI();
-  startDashboardPolling(); // Start with dashboard polling
+  applyRoleRestrictions();
 });
 document.addEventListener('click',e=>{
   const dd=el('notifDropdown');
