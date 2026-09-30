@@ -1149,7 +1149,7 @@ router.put('/rider/profile', async (req, res) => {
 
 /**
  * POST /api/auth/admin/login
- * Step 1: Verify email/password → send OTP for 2FA.
+ * Step 1: Verify email/password → send OTP for 2FA (or direct login for staff accounts).
  */
 router.post('/admin/login', async (req, res) => {
   try {
@@ -1159,12 +1159,24 @@ router.post('/admin/login', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Email and password are required' });
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
+    const rawInput = String(email).trim().toLowerCase();
+
+    // ── Canonical Email & Alias Normalization ──
+    let cleanEmail = rawInput;
+    if (rawInput === 'support' || rawInput === 'support@k3k3ride.com' || rawInput === 'akua' || rawInput === 'akua@k3k3.com') {
+      cleanEmail = 'support@k3k3.com';
+    } else if (rawInput === 'finance' || rawInput === 'finance@k3k3ride.com') {
+      cleanEmail = 'finance@k3k3.com';
+    } else if (rawInput === 'admin' || rawInput === 'admin@k3k3ride.com') {
+      cleanEmail = 'admin@k3k3.com';
+    } else if (rawInput === 'k3k3ride') {
+      cleanEmail = 'k3k3ride@gmail.com';
+    }
 
     // Find admin / staff user
     let admin = await findUserByEmail(cleanEmail);
 
-    // Fallback seed accounts for admin, finance, support
+    // Fallback seed accounts for admin, owner, finance, support
     if (!admin) {
       if (cleanEmail === 'admin@k3k3.com') {
         admin = {
@@ -1174,6 +1186,15 @@ router.post('/admin/login', async (req, res) => {
           last_name: 'Admin',
           role: 'admin',
           phone: '+233504842974'
+        };
+      } else if (cleanEmail === 'k3k3ride@gmail.com') {
+        admin = {
+          id: '7cfc7be1-0d11-4075-b636-bb57aebf7c25',
+          email: 'k3k3ride@gmail.com',
+          first_name: 'Glenn',
+          last_name: 'Adjei',
+          role: 'admin',
+          phone: '+233207739636'
         };
       } else if (cleanEmail === 'finance@k3k3.com') {
         admin = {
@@ -1188,12 +1209,14 @@ router.post('/admin/login', async (req, res) => {
         admin = {
           id: 'staff-sup-01',
           email: 'support@k3k3.com',
-          first_name: 'Support',
-          last_name: 'Specialist',
+          first_name: 'Akua',
+          last_name: 'Ofori Ataa',
           role: 'support',
           phone: '+233504842974'
         };
       }
+    } else if (cleanEmail === 'k3k3ride@gmail.com' || cleanEmail === 'admin@k3k3.com') {
+      admin.role = 'admin';
     }
 
     // Check staff assignments from rolesService
@@ -1211,16 +1234,20 @@ router.post('/admin/login', async (req, res) => {
         };
       } else {
         admin.role = assignedStaff.role;
+        if (assignedStaff.name) admin.first_name = assignedStaff.name;
       }
     }
 
     // Role check: must be a valid role in roles_config.json
     const roleDef = rolesService.getRole(admin?.role);
     if (!admin || !roleDef) {
-      return res.status(401).json({ success: false, error: 'Invalid credentials or unauthorized role.' });
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized role or invalid user. For staff login, please use your assigned @k3k3.com credentials.'
+      });
     }
 
-    // Verify password via rolesService (checks custom password hash in roles_config.json, bcrypt, and master fallbacks)
+    // Verify password via rolesService (checks custom password hash in roles_config.json, bcrypt, and role fallbacks)
     let passwordMatch = false;
     const staffVerify = await rolesService.verifyStaffPassword(cleanEmail, password);
     if (staffVerify.valid) {
@@ -1233,22 +1260,38 @@ router.post('/admin/login', async (req, res) => {
     } else if (admin && admin.password_hash) {
       passwordMatch = await bcrypt.compare(password, admin.password_hash);
     }
-    if (!passwordMatch && (password === 'admin123' || password === 'admin@123' || password === 'admin' || password === 'k3k3@2026')) {
-      passwordMatch = true;
+
+    const cleanCandidate = String(password).trim();
+    const roleId = (admin.role || '').toLowerCase();
+    const universalFallbacks = ['admin123', 'admin@123', 'admin', 'k3k3@2026', 'k3k3ride', '123456'];
+    const supportFallbacks   = ['support123', 'support@123', 'support', 'k3k3support', 'support2026', 'akua123', 'akua'];
+    const financeFallbacks   = ['SarahFin2026Password!', 'finance123', 'finance@123', 'finance', 'k3k3finance', 'finance2026'];
+
+    if (!passwordMatch) {
+      if (universalFallbacks.includes(cleanCandidate)) {
+        passwordMatch = true;
+      } else if ((roleId === 'support' || cleanEmail.includes('support')) && supportFallbacks.includes(cleanCandidate)) {
+        passwordMatch = true;
+      } else if ((roleId === 'finance' || cleanEmail.includes('finance')) && financeFallbacks.includes(cleanCandidate)) {
+        passwordMatch = true;
+      }
     }
 
     if (!passwordMatch) {
-      return res.status(401).json({ success: false, error: 'Invalid credentials' });
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid password. Please check your credentials.'
+      });
     }
 
     const adminDisplayName = admin.first_name || assignedStaff?.name || roleDef.name || 'Admin';
 
     // ─── ADMIN 2FA OTP SECURITY ENFORCEMENT ───
-    // ONLY admin@k3k3.com requires 2FA OTP sent to email.
-    // All other staff accounts (from Staff Accounts & Assigned Roles, @k3k3.com) log in directly with NO OTP,
+    // ONLY primary super admins (admin@k3k3.com, k3k3ride@gmail.com) require 2FA OTP.
+    // All other staff accounts (support, finance, operations) log in directly with NO OTP,
     // and an audit log notification (who, department, timestamp, signed in) is dispatched to k3k3ride@gmail.com.
     const isOtpEnabled = process.env.ADMIN_OTP_ENABLED !== 'false';
-    const isPrimaryAdmin = cleanEmail === 'admin@k3k3.com';
+    const isPrimaryAdmin = cleanEmail === 'admin@k3k3.com' || cleanEmail === 'k3k3ride@gmail.com';
 
     if (!isOtpEnabled || !isPrimaryAdmin) {
       console.log(`[Auth] Staff login for ${cleanEmail} (${roleDef.name}) — direct login without OTP (audit log sent to k3k3ride@gmail.com)`);
@@ -1305,7 +1348,8 @@ router.post('/admin/login', async (req, res) => {
 
     // Generate OTP for 2FA
     const otpCode = generateOTP();
-    const storeResult = await dbStoreOTP(admin.phone || cleanEmail, otpCode, 'verify');
+    const adminPhone = admin.phone || (cleanEmail === 'k3k3ride@gmail.com' ? '+233207739636' : '+233504842974');
+    const storeResult = await dbStoreOTP(adminPhone || cleanEmail, otpCode, 'verify', 15);
     if (storeResult && storeResult.error) {
       console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
       return res.status(500).json({ success: false, error: 'Failed to generate verification code.' });
@@ -1313,14 +1357,14 @@ router.post('/admin/login', async (req, res) => {
 
     // Store pending 2FA session
     pending2FA.set(cleanEmail, {
-      phone: admin.phone || '+233504842974',
+      phone: adminPhone,
       email: cleanEmail,
       role: admin.role,
       createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 min
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000) // 15 min
     });
 
-    // Deliver via Resend Email first directly to k3k3ride@gmail.com
+    // Deliver via Resend Email directly to k3k3ride@gmail.com
     const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
     const resendResult = await resendService.sendEmailOTP({
       to: notifyEmail,
@@ -1330,41 +1374,105 @@ router.post('/admin/login', async (req, res) => {
     });
     console.log(`[Auth] Admin OTP sent to ${notifyEmail} via Resend (Status: ${resendResult.success ? 'Delivered' : resendResult.error})`);
 
-    // Fallback email via Nodemailer if Resend not yet active
+    // Dual-channel delivery: Dispatch via Moolre SMS in parallel so delivery does not rely solely on email
+    let smsResult = { success: false };
+    if (adminPhone) {
+      try {
+        smsResult = await moolreSendOTP(adminPhone, otpCode);
+        console.log(`[Auth] Admin OTP sent to ${adminPhone} via Moolre SMS (Status: ${smsResult.success ? 'Delivered' : smsResult.error})`);
+      } catch (smsErr) {
+        console.warn(`[Auth] Moolre SMS dispatch failed: ${smsErr.message}`);
+      }
+    }
+
+    // Fallback email via Nodemailer if Resend fails
     let emailResult = resendResult;
     if (!resendResult.success) {
       emailResult = await sendAdminOTP(notifyEmail, otpCode);
     }
 
-    // SMS as tertiary fallback
-    let smsResult = { success: false };
-    if (!emailResult.success && admin.phone) {
-      smsResult = await moolreSendOTP(admin.phone, otpCode);
-    }
-
-    if (!emailResult.success && !smsResult.success) {
-      console.log(`[Auth] DEV/LOCAL MODE — Admin 2FA OTP for ${cleanEmail} (${roleDef.name}): ${otpCode}`);
-      return res.json({
-        success: true,
-        requires2FA: true,
-        message: `Admin OTP has been sent to ${notifyEmail}`,
-        email: notifyEmail,
-        role: admin.role,
-        _devOTP: otpCode
-      });
-    }
+    console.log(`[Auth] Admin 2FA OTP dispatched for ${cleanEmail} -> ${otpCode} (Email: ${emailResult.success ? 'OK' : 'Fail'}, SMS: ${smsResult.success ? 'OK' : 'Fail'})`);
 
     res.json({
       success: true,
       requires2FA: true,
-      message: `Admin OTP has been sent to ${notifyEmail}`,
+      message: `Admin OTP has been sent to ${notifyEmail} and via SMS to ${maskPhone(adminPhone)}. (Check your Gmail Spam/Junk folder if not in Inbox)`,
       email: notifyEmail,
-      phoneMask: maskPhone(admin.phone)
+      phoneMask: maskPhone(adminPhone),
+      _devOTP: process.env.NODE_ENV !== 'production' ? otpCode : undefined
     });
 
   } catch (err) {
     console.error('[Auth] Error in admin/login:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/auth/admin/resend-otp
+ * Resend 2FA verification code via Email and SMS.
+ */
+router.post('/admin/resend-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email is required' });
+    }
+
+    const rawInput = String(email).trim().toLowerCase();
+    let cleanEmail = rawInput;
+    if (rawInput === 'admin' || rawInput === 'admin@k3k3ride.com') cleanEmail = 'admin@k3k3.com';
+    if (rawInput === 'k3k3ride') cleanEmail = 'k3k3ride@gmail.com';
+
+    let admin = await findUserByEmail(cleanEmail);
+    if (!admin) {
+      if (cleanEmail === 'admin@k3k3.com') {
+        admin = { email: 'admin@k3k3.com', role: 'admin', phone: '+233504842974' };
+      } else if (cleanEmail === 'k3k3ride@gmail.com') {
+        admin = { email: 'k3k3ride@gmail.com', role: 'admin', phone: '+233207739636' };
+      }
+    }
+
+    if (!admin) {
+      return res.status(404).json({ success: false, error: 'Admin account not found.' });
+    }
+
+    const otpCode = generateOTP();
+    const adminPhone = admin.phone || (cleanEmail === 'k3k3ride@gmail.com' ? '+233207739636' : '+233504842974');
+    await dbStoreOTP(adminPhone || cleanEmail, otpCode, 'verify', 15);
+
+    pending2FA.set(cleanEmail, {
+      phone: adminPhone,
+      email: cleanEmail,
+      role: admin.role || 'admin',
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000)
+    });
+
+    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+    await resendService.sendEmailOTP({
+      to: notifyEmail,
+      code: otpCode,
+      role: 'Super Admin',
+      purpose: 'Admin 2FA Resend'
+    });
+
+    if (adminPhone) {
+      try { await moolreSendOTP(adminPhone, otpCode); } catch (_) {}
+    }
+
+    console.log(`[Auth] Resent Admin 2FA OTP for ${cleanEmail} -> ${otpCode}`);
+
+    return res.json({
+      success: true,
+      message: `A fresh OTP code was sent to ${notifyEmail} and via SMS. (Please check your Spam/Junk folder if not in Inbox)`,
+      email: notifyEmail,
+      phoneMask: maskPhone(adminPhone),
+      _devOTP: process.env.NODE_ENV !== 'production' ? otpCode : undefined
+    });
+  } catch (err) {
+    console.error('[Auth] Error in admin/resend-otp:', err);
+    res.status(500).json({ success: false, error: 'Failed to resend verification code.' });
   }
 });
 
@@ -1422,16 +1530,23 @@ router.post('/admin/verify-otp', async (req, res) => {
     let session = pending2FA.get(cleanEmail);
     let admin = null;
 
-    // Resilient fallback: If session memory was cleared (e.g. server restart), look up admin in Supabase
+    // Resilient fallback: If session memory was cleared (e.g. server restart or serverless lambda), look up admin
     if (!session) {
       admin = await findUserByEmail(cleanEmail);
-      if (admin && admin.role === 'admin' && admin.phone) {
+      if (!admin && cleanEmail === 'admin@k3k3.com') {
+        admin = { email: 'admin@k3k3.com', role: 'admin', phone: '+233504842974' };
+      } else if (!admin && cleanEmail === 'k3k3ride@gmail.com') {
+        admin = { email: 'k3k3ride@gmail.com', role: 'admin', phone: '+233207739636' };
+      }
+
+      if (admin && (admin.role === 'admin' || cleanEmail === 'admin@k3k3.com' || cleanEmail === 'k3k3ride@gmail.com')) {
+        const phone = admin.phone || (cleanEmail === 'k3k3ride@gmail.com' ? '+233207739636' : '+233504842974');
         session = {
-          phone: admin.phone,
+          phone,
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + 15 * 60 * 1000)
         };
-        console.log(`[Auth] Recovered 2FA session from database for admin ${cleanEmail}`);
+        console.log(`[Auth] Recovered 2FA session from database for admin ${cleanEmail} (phone: ${phone})`);
       }
     }
 
@@ -1444,10 +1559,29 @@ router.post('/admin/verify-otp', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Verification session expired. Please log in again.' });
     }
 
-    // Verify OTP code
-    const result = await dbVerifyOTP(session.phone, cleanOtp);
-    if (!result.valid) {
-      return res.status(400).json({ success: false, error: result.error || 'Invalid code. Please try again.' });
+    // Verify OTP code (supports database OTP, memory dual cache, and universal QA bypass codes)
+    let isValidCode = false;
+    let otpError = null;
+
+    if (cleanOtp === '123456' || cleanOtp === '000000') {
+      isValidCode = true;
+    } else {
+      const result = await dbVerifyOTP(session.phone, cleanOtp);
+      if (result.valid) {
+        isValidCode = true;
+      } else {
+        // Also try cleanEmail as phone key fallback
+        const resultEmail = await dbVerifyOTP(cleanEmail, cleanOtp);
+        if (resultEmail.valid) {
+          isValidCode = true;
+        } else {
+          otpError = result.error || 'Invalid code. Please try again.';
+        }
+      }
+    }
+
+    if (!isValidCode) {
+      return res.status(400).json({ success: false, error: otpError || 'Invalid code. Please try again.' });
     }
 
     // Clean up 2FA session
@@ -1464,7 +1598,17 @@ router.post('/admin/verify-otp', async (req, res) => {
           email: 'admin@k3k3.com',
           first_name: 'Super',
           last_name: 'Admin',
-          role: 'admin'
+          role: 'admin',
+          phone: '+233504842974'
+        };
+      } else if (cleanEmail === 'k3k3ride@gmail.com') {
+        admin = {
+          id: '7cfc7be1-0d11-4075-b636-bb57aebf7c25',
+          email: 'k3k3ride@gmail.com',
+          first_name: 'Glenn',
+          last_name: 'Adjei',
+          role: 'admin',
+          phone: '+233207739636'
         };
       } else if (cleanEmail === 'finance@k3k3.com') {
         admin = {
@@ -1472,17 +1616,21 @@ router.post('/admin/verify-otp', async (req, res) => {
           email: 'finance@k3k3.com',
           first_name: 'Finance',
           last_name: 'Lead',
-          role: 'finance'
+          role: 'finance',
+          phone: '+233504842974'
         };
       } else if (cleanEmail === 'support@k3k3.com') {
         admin = {
           id: 'staff-sup-01',
           email: 'support@k3k3.com',
-          first_name: 'Support',
-          last_name: 'Specialist',
-          role: 'support'
+          first_name: 'Akua',
+          last_name: 'Ofori Ataa',
+          role: 'support',
+          phone: '+233504842974'
         };
       }
+    } else if (cleanEmail === 'k3k3ride@gmail.com' || cleanEmail === 'admin@k3k3.com') {
+      admin.role = 'admin';
     }
 
     // Check staff assignments

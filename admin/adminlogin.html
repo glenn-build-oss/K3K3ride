@@ -669,6 +669,13 @@
                             <i class="fas fa-sign-in-alt"></i>
                             Login to Admin Panel
                         </button>
+
+                        <div style="margin-top:16px;padding:12px 14px;border-radius:var(--r);background:rgba(255,214,10,0.08);border:1px solid rgba(255,214,10,0.22);font-size:0.75rem;color:var(--text-2);line-height:1.45;">
+                            <div style="font-weight:700;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:6px;">
+                                <i class="fas fa-shield-alt" style="color:var(--yellow-dk);"></i> Staff Access
+                            </div>
+                            Support and Finance teams sign in directly with assigned credentials (e.g. <code>support@k3k3.com</code>). 2FA OTP is required for Super Admin only.
+                        </div>
                     </div>
 
                     <!-- Step 2: OTP Verification (hidden initially) -->
@@ -678,7 +685,7 @@
                                 <i class="fas fa-shield-halved" style="font-size:1.5rem;color:var(--yellow-dk)"></i>
                             </div>
                             <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;">Two-Factor Authentication</p>
-                            <p id="otpMsg" style="font-size:0.82rem;color:var(--text-2);line-height:1.5;">Admin OTP has been sent to k3k3ride@gmail.com. Enter it below.</p>
+                            <p id="otpMsg" style="font-size:0.82rem;color:var(--text-2);line-height:1.5;">Admin OTP has been sent to k3k3ride@gmail.com and via SMS. Enter it below.</p>
                         </div>
 
                         <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
@@ -700,8 +707,11 @@
                             Verify & Login
                         </button>
 
-                        <div style="text-align:center;margin-top:14px;">
-                            <button type="button" onclick="backToCredentials()" style="background:none;border:none;color:var(--text-2);font-size:0.82rem;cursor:pointer;font-family:inherit;">
+                        <div style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:16px;">
+                            <button type="button" id="resendOtpBtn" onclick="resendAdminOTP()" style="background:none;border:1px solid rgba(255,214,10,0.35);border-radius:var(--r);padding:7px 14px;color:var(--text);font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+                                <i class="fas fa-redo"></i> Resend Code
+                            </button>
+                            <button type="button" onclick="backToCredentials()" style="background:none;border:none;color:var(--text-2);font-size:0.82rem;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
                                 <i class="fas fa-arrow-left"></i> Back to login
                             </button>
                         </div>
@@ -829,26 +839,95 @@
 
                 if (data.success && data.requires2FA) {
                     const destEmail = data.email || 'k3k3ride@gmail.com';
-                    document.getElementById('otpMsg').textContent =
-                        `Admin OTP has been sent to ${destEmail}. Enter it below.`;
+                    const phoneNotice = data.phoneMask ? ` &amp; SMS to <strong>${data.phoneMask}</strong>` : '';
+                    document.getElementById('otpMsg').innerHTML = `
+                        Admin 2FA code sent to <strong>${destEmail}</strong>${phoneNotice}.<br>
+                        <span style="display:inline-block;margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,0.12);color:#d97706;font-size:0.78rem;font-weight:600;">
+                            <i class="fas fa-exclamation-triangle"></i> Not in inbox? Please check your Gmail <strong>Spam / Junk</strong> folder.
+                        </span>
+                    `;
                     document.getElementById('credentialsStep').style.display = 'none';
                     document.getElementById('otpStep').style.display = '';
                     document.getElementById('a1').focus();
-                    showToast(`Admin OTP has been sent to ${destEmail}`, 'success');
+                    showToast(`Admin OTP dispatched to ${destEmail}`, 'success');
+                    if (data._devOTP) {
+                        console.log('%c[K3K3 2FA Dev Code]: ' + data._devOTP, 'color: #10B981; font-weight: bold; font-size: 14px;');
+                    }
                 } else if (data.success) {
-                    // Direct login (OTP disabled)
+                    // Direct login (OTP disabled or staff account)
                     storeAdminSession(data);
                 } else {
-                    showError(data.error || data.detail || 'Invalid credentials.');
+                    showError(data.error || data.detail || 'Invalid credentials. Please verify your email and password.');
                 }
             } catch (err) {
                 console.error('Admin login error:', err);
-                showError('Cannot reach server. Please try again.');
+                showError('Cannot reach server. Please ensure the backend is active.');
             }
 
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Admin Panel';
         });
+
+        // ── Resend Admin OTP ──
+        async function resendAdminOTP() {
+            hideOtpError();
+            const targetEmail = adminEmail || sessionStorage.getItem('k3k3_pending_admin_email') || document.getElementById('username')?.value?.trim();
+            if (!targetEmail) {
+                showOtpError('Session missing. Please go back and enter your email again.');
+                return;
+            }
+
+            const resendBtn = document.getElementById('resendOtpBtn');
+            if (resendBtn) {
+                resendBtn.disabled = true;
+                resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/admin/resend-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: targetEmail })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Fresh OTP dispatched to email & SMS', 'success');
+                    const destEmail = data.email || targetEmail;
+                    const phoneNotice = data.phoneMask ? ` &amp; SMS to <strong>${data.phoneMask}</strong>` : '';
+                    document.getElementById('otpMsg').innerHTML = `
+                        Fresh code sent to <strong>${destEmail}</strong>${phoneNotice}.<br>
+                        <span style="display:inline-block;margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,0.12);color:#d97706;font-size:0.78rem;font-weight:600;">
+                            <i class="fas fa-exclamation-triangle"></i> Not in inbox? Please check your Gmail <strong>Spam / Junk</strong> folder.
+                        </span>
+                    `;
+                    if (data._devOTP) {
+                        console.log('%c[K3K3 2FA Dev Code]: ' + data._devOTP, 'color: #10B981; font-weight: bold; font-size: 14px;');
+                    }
+                } else {
+                    showOtpError(data.error || 'Failed to resend verification code.');
+                }
+            } catch (err) {
+                console.error('Resend OTP error:', err);
+                showOtpError('Network error while resending OTP.');
+            } finally {
+                if (resendBtn) {
+                    let cooldown = 30;
+                    resendBtn.disabled = true;
+                    resendBtn.innerHTML = `<i class="fas fa-clock"></i> Resend (${cooldown}s)`;
+                    const interval = setInterval(() => {
+                        cooldown--;
+                        if (cooldown <= 0) {
+                            clearInterval(interval);
+                            resendBtn.disabled = false;
+                            resendBtn.innerHTML = '<i class="fas fa-redo"></i> Resend Code';
+                        } else {
+                            resendBtn.innerHTML = `<i class="fas fa-clock"></i> Resend (${cooldown}s)`;
+                        }
+                    }, 1000);
+                }
+            }
+        }
 
         // ── Step 2: Verify OTP ──
         async function verifyAdminOTP() {

@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else {
                 return response.json().then(function(errData) {
-                    var msg = (errData && errData.detail) ? errData.detail : 'Invalid credentials. Please try again.';
+                    var msg = (errData && (errData.error || errData.detail)) ? (errData.error || errData.detail) : 'Invalid credentials. Please verify your email and password.';
                     showNotification('error', msg, 'Login Failed');
                     if (loginBtn) {
                         loginBtn.disabled = false;

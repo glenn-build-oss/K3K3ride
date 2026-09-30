@@ -177,6 +177,14 @@
       "updated_at": "2026-09-23T13:21:39.268Z"
     },
     {
+      "id": "staff-admin-02",
+      "email": "k3k3ride@gmail.com",
+      "name": "Glenn Adjei",
+      "role": "admin",
+      "assigned_at": "2026-09-20T00:00:00.000Z",
+      "updated_at": "2026-09-30T18:56:50.000Z"
+    },
+    {
       "id": "staff-fin-01",
       "email": "finance@k3k3.com",
       "name": "Sarah Connor",
@@ -192,9 +200,9 @@
       "name": "Akua Ofori Ataa Apeakorang",
       "role": "support",
       "assigned_at": "2026-09-22T00:00:00.000Z",
-      "updated_at": "2026-09-26T12:57:44.724Z",
-      "password_hash": "$2a$10$B3e3jfBGrV1uD4BTPFT7XeCTOsCE4kmBt6hTcn.j/SLYfuBHtS3q2",
-      "password_updated_at": "2026-09-26T12:57:44.724Z"
+      "updated_at": "2026-09-30T19:00:00.000Z",
+      "password_hash": "$2a$10$/kZDHFEidSYwfCwZLvexyOafwpOgBXh1jxDCf3Kn5g75j29YL/iXS",
+      "password_updated_at": "2026-09-30T19:00:00.000Z"
     },
     {
       "id": "staff_1790102664753",
