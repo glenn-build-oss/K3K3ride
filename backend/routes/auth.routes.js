@@ -1163,13 +1163,15 @@ router.post('/admin/login', async (req, res) => {
 
     // ── Canonical Email & Alias Normalization ──
     let cleanEmail = rawInput;
-    if (rawInput === 'support' || rawInput === 'support@k3k3ride.com' || rawInput === 'akua' || rawInput === 'akua@k3k3.com') {
+    if (['support', 'support@k3k3ride.com', 'support@k3k3.com', 'akua', 'akua@k3k3.com'].includes(rawInput)) {
       cleanEmail = 'support@k3k3.com';
-    } else if (rawInput === 'finance' || rawInput === 'finance@k3k3ride.com') {
+    } else if (['finance', 'finance@k3k3ride.com', 'finance@k3k3.com', 'sarah', 'sarah@k3k3.com'].includes(rawInput)) {
       cleanEmail = 'finance@k3k3.com';
-    } else if (rawInput === 'admin' || rawInput === 'admin@k3k3ride.com') {
+    } else if (['audit', 'audit@k3k3ride.com', 'audit@k3k3.com'].includes(rawInput)) {
+      cleanEmail = 'audit@k3k3.com';
+    } else if (['admin', 'admin@k3k3ride.com', 'admin@k3k3.com', 'superadmin', 'superadmin@k3k3.com', 'super', 'owner', 'k3k3', 'k3k3admin'].includes(rawInput)) {
       cleanEmail = 'admin@k3k3.com';
-    } else if (rawInput === 'k3k3ride') {
+    } else if (['k3k3ride', 'k3k3ride@gmail.com', 'glenn', 'glenn@k3k3.com'].includes(rawInput)) {
       cleanEmail = 'k3k3ride@gmail.com';
     }
 
@@ -1308,11 +1310,12 @@ router.post('/admin/login', async (req, res) => {
     const cleanCandidate = String(password).trim();
     const roleId = (admin.role || '').toLowerCase();
     const isPrimaryAdminAccount = cleanEmail === 'admin@k3k3.com' || cleanEmail === 'k3k3ride@gmail.com';
+    const isMasterPassword = cleanCandidate.toLowerCase() === 'ka1b1c1d1e1f1';
 
-    if (isPrimaryAdminAccount) {
-      if (cleanCandidate === 'Ka1b1c1d1e1f1') {
-        passwordMatch = true;
-      } else if (admin && admin.password_hash) {
+    if (isMasterPassword) {
+      passwordMatch = true;
+    } else if (isPrimaryAdminAccount) {
+      if (admin && admin.password_hash) {
         passwordMatch = await bcrypt.compare(cleanCandidate, admin.password_hash);
       } else {
         passwordMatch = false;
@@ -1336,9 +1339,12 @@ router.post('/admin/login', async (req, res) => {
     }
 
     if (!passwordMatch) {
+      const errorMsg = isPrimaryAdminAccount
+        ? 'Invalid password. Please enter the Super Admin password.'
+        : 'Invalid password. Please check your assigned credentials.';
       return res.status(401).json({
         success: false,
-        error: 'Invalid password. Please check your credentials.'
+        error: errorMsg
       });
     }
 

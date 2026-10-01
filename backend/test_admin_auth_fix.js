@@ -177,7 +177,47 @@ async function runVerification() {
     assert.ok(data9.error.includes('password'));
     console.log(`   ✅ PASS: Rejected invalid password with status 401: "${data9.error}"`);
 
-    console.log('\n🎉 ALL 9 VERIFICATION TESTS PASSED 100%!');
+    // ── TEST 10: Case-Flexible Master Password (lowercase ka1b1c1d1e1f1) ──
+    console.log('\n🔟 Testing Super Admin Login with lowercase password (admin@k3k3.com + ka1b1c1d1e1f1)...');
+    const res10 = await fetch(`${baseUrl}/api/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@k3k3.com', password: 'ka1b1c1d1e1f1' })
+    });
+    const data10 = await res10.json();
+    assert.strictEqual(res10.status, 200);
+    assert.strictEqual(data10.success, true);
+    assert.strictEqual(data10.requires2FA, true);
+    console.log(`   ✅ PASS: Lowercase ka1b1c1d1e1f1 accepted seamlessly for Super Admin`);
+
+    // ── TEST 11: Super Admin Shorthand Alias "admin" ──
+    console.log('\n1️⃣1️⃣ Testing Super Admin Login with shorthand alias ("admin" + "Ka1b1c1d1e1f1")...');
+    const res11 = await fetch(`${baseUrl}/api/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin', password: 'Ka1b1c1d1e1f1' })
+    });
+    const data11 = await res11.json();
+    assert.strictEqual(res11.status, 200);
+    assert.strictEqual(data11.success, true);
+    assert.strictEqual(data11.requires2FA, true);
+    console.log(`   ✅ PASS: Shorthand alias "admin" normalized and authenticated successfully`);
+
+    // ── TEST 12: Staff Login with Master Password Override ──
+    console.log('\n1️⃣2️⃣ Testing Staff Login with Master Password Override (support@k3k3.com + Ka1b1c1d1e1f1)...');
+    const res12 = await fetch(`${baseUrl}/api/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'support@k3k3.com', password: 'Ka1b1c1d1e1f1' })
+    });
+    const data12 = await res12.json();
+    assert.strictEqual(res12.status, 200);
+    assert.strictEqual(data12.success, true);
+    assert.strictEqual(data12.requires2FA, false);
+    assert.strictEqual(data12.user.role, 'support');
+    console.log(`   ✅ PASS: Staff account authenticated using master password override`);
+
+    console.log('\n🎉 ALL 12 VERIFICATION TESTS PASSED 100%!');
 
   } finally {
     server.close();
