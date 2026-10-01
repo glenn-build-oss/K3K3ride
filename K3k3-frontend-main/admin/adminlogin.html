@@ -723,7 +723,9 @@
     </div>
 
     <script>
-        const API_BASE = '';
+        const API_BASE = (window.location.protocol === 'file:' || (window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname)))
+            ? 'http://localhost:8810'
+            : '';
         let adminEmail = '';
 
         // ── Toast ──
