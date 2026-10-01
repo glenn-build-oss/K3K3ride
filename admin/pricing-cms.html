@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>K3K3 — Routes & Pricing CMS | Admin</title>
   <meta name="description" content="Manage K3K3 campus locations, in/out zone classifications, route fare matrix overrides, and Mapbox configuration." />
+
+  <!-- ── Synchronous RBAC Route Guard: Only Super Admin Allowed ── -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('current_admin');
+        var token = localStorage.getItem('k3k3_admin_token');
+        if (!token && !raw) {
+          window.location.replace('adminlogin.html');
+          return;
+        }
+        var user = JSON.parse(raw || '{}');
+        var role = (user.role || '').toLowerCase();
+        var allowed = (user.allowedPages || user.allowed_pages || []).map(function(p){ return p.toLowerCase(); });
+
+        if (role !== 'admin' && !allowed.includes('pricing-cms.html')) {
+          var fallback = user.defaultPage || (role === 'support' ? 'ride-monitoring.html' : (role === 'audit' ? 'trips.html' : 'payment-management.html'));
+          alert('Access Restricted\n\nYour assigned role (' + (user.roleName || user.role) + ') does not have permission to access Routes & Pricing CMS.\nRedirecting to your workspace...');
+          window.location.replace(fallback);
+        }
+      } catch(_) {}
+    })();
+  </script>
   <link rel="icon" type="image/png" href="../assets/k3k3.png" />
   <link rel="shortcut icon" href="../favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />

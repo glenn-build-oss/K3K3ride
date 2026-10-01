@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>K3K3 — Roles &amp; Permissions CMS | Admin</title>
   <meta name="description" content="Manage admin roles, page access permissions, and staff assignments.">
+
+  <!-- ── Synchronous RBAC Route Guard: Only Super Admin and Audit Allowed ── -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('current_admin');
+        var token = localStorage.getItem('k3k3_admin_token');
+        if (!token && !raw) {
+          window.location.replace('adminlogin.html');
+          return;
+        }
+        var user = JSON.parse(raw || '{}');
+        var role = (user.role || '').toLowerCase();
+        var allowed = (user.allowedPages || user.allowed_pages || []).map(function(p){ return p.toLowerCase(); });
+
+        // If neither admin nor audit with roles-management permission, immediately reject
+        if (role !== 'admin' && !allowed.includes('roles-management.html')) {
+          var fallback = user.defaultPage || (role === 'support' ? 'ride-monitoring.html' : 'payment-management.html');
+          alert('Access Restricted\n\nYour assigned role (' + (user.roleName || user.role) + ') does not have permission to access Roles & Permissions CMS.\nRedirecting to your workspace...');
+          window.location.replace(fallback);
+        }
+      } catch(_) {}
+    })();
+  </script>
   <link rel="icon" type="image/png" href="../assets/k3k3.png">
   <link rel="shortcut icon" href="../favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -508,7 +532,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px">
-        <button class="btn-action btn-primary" onclick="openCreateRoleModal()">
+        <button class="btn-action btn-primary" id="btnTopCreateRole" onclick="openCreateRoleModal()">
           <i class="fas fa-plus"></i> Create New Role
         </button>
         <button class="btn-action btn-dark" onclick="reloadRolesData()" title="Refresh data">
@@ -522,6 +546,15 @@
 
     <!-- Content Area -->
     <main class="content-area">
+
+      <!-- Audit Mode Banner (shown for Audit & Compliance role) -->
+      <div id="auditModeBanner" style="display:none;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);color:#C4B5FD;padding:12px 18px;border-radius:10px;margin-bottom:18px;align-items:center;gap:12px;font-size:0.85rem;">
+        <i class="fas fa-shield-halved" style="font-size:1.25rem;color:#A78BFA;flex-shrink:0;"></i>
+        <div>
+          <strong style="color:#E9D5FF">Audit &amp; Compliance Mode Active:</strong>
+          <span style="color:#C4B5FD"> You have read-only access to view Staff Accounts, Page Matrix, and the Activity Audit Trail. Role creation, credential mutation, and log clearing are reserved for Super Admin.</span>
+        </div>
+      </div>
 
       <!-- Stats Grid -->
       <section class="stats-grid">
@@ -583,7 +616,7 @@
         <div class="table-container">
           <div class="table-header-box">
             <div class="table-title"><i class="fas fa-user-lock"></i> Staff Accounts &amp; Assigned Roles</div>
-            <button class="btn-action btn-secondary" onclick="openAssignStaffModal()">
+            <button class="btn-action btn-secondary" id="btnAssignStaffRole" onclick="openAssignStaffModal()">
               <i class="fas fa-user-plus"></i> Assign Staff Role
             </button>
           </div>
@@ -658,7 +691,7 @@
               <button class="btn-action btn-dark" style="padding:6px 12px;font-size:0.75rem" onclick="fetchActivityLogs()" title="Refresh Logs">
                 <i class="fas fa-rotate"></i> Refresh
               </button>
-              <button class="btn-action btn-danger" style="padding:6px 12px;font-size:0.75rem" onclick="clearActivityLogs()" title="Clear Audit Trail">
+              <button class="btn-action btn-danger" id="btnClearStaffLogs" style="padding:6px 12px;font-size:0.75rem" onclick="clearActivityLogs()" title="Clear Audit Trail">
                 <i class="fas fa-trash-can"></i> Clear Logs
               </button>
             </div>
@@ -1000,16 +1033,22 @@
 
             <div class="page-chips-preview">${pageChips}</div>
 
-            <div class="role-actions">
-              <button class="btn-action btn-secondary" style="flex:1" onclick="openEditRoleModal('${role.id}')">
-                <i class="fas fa-sliders"></i> Edit Permissions
-              </button>
-              ${!isSystem ? `
-                <button class="btn-action btn-danger" onclick="handleDeleteRole('${role.id}', '${role.name.replace(/'/g, "\\'")}')" title="Delete custom role">
-                  <i class="fas fa-trash"></i>
+            ${(getCurrentUserSafe().role === 'admin') ? `
+              <div class="role-actions">
+                <button class="btn-action btn-secondary" style="flex:1" onclick="openEditRoleModal('${role.id}')">
+                  <i class="fas fa-sliders"></i> Edit Permissions
                 </button>
-              ` : ''}
-            </div>
+                ${!isSystem ? `
+                  <button class="btn-action btn-danger" onclick="handleDeleteRole('${role.id}', '${role.name.replace(/'/g, "\\'")}')" title="Delete custom role">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                ` : ''}
+              </div>
+            ` : `
+              <div class="role-actions">
+                <span style="font-size:0.75rem;color:var(--muted);padding:8px 0;"><i class="fas fa-lock" style="color:var(--yellow);margin-right:5px"></i> Super Admin Managed (Read-Only)</span>
+              </div>
+            `}
           </div>
         `;
       }).join('');
@@ -1019,6 +1058,7 @@
       const tbody = document.getElementById('staffTableBody');
       const staff = rolesData.staff_assignments || [];
       const roles = rolesData.roles || [];
+      const isSuperAdmin = (getCurrentUserSafe().role === 'admin');
 
       if (!staff.length) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No staff assigned yet.</td></tr>`;
@@ -1059,19 +1099,25 @@
             </td>
             <td>
               <div style="display:flex;align-items:center;gap:6px">
-                <button class="btn-action btn-dark" style="padding:5px 10px;font-size:0.75rem" onclick="openReassignStaffModal('${s.email}', '${safeName}', '${s.role}')" title="Edit name, role, and password">
-                  <i class="fas fa-user-pen"></i> Edit &amp; Password
-                </button>
-                <button class="btn-action btn-secondary" style="padding:5px 10px;font-size:0.75rem" onclick="filterAndShowStaffLogs('${s.email}')" title="View activity logs for this user">
-                  <i class="fas fa-clipboard-list"></i> Logs
-                </button>
-                ${isPrimaryAdmin ? `
-                  <button class="btn-action" style="padding:5px 10px;font-size:0.75rem;opacity:0.35;cursor:not-allowed;" title="Primary Super Admin account is protected" disabled>
-                    <i class="fas fa-lock"></i>
+                ${isSuperAdmin ? `
+                  <button class="btn-action btn-dark" style="padding:5px 10px;font-size:0.75rem" onclick="openReassignStaffModal('${s.email}', '${safeName}', '${s.role}')" title="Edit name, role, and password">
+                    <i class="fas fa-user-pen"></i> Edit &amp; Password
                   </button>
+                  <button class="btn-action btn-secondary" style="padding:5px 10px;font-size:0.75rem" onclick="filterAndShowStaffLogs('${s.email}')" title="View activity logs for this user">
+                    <i class="fas fa-clipboard-list"></i> Logs
+                  </button>
+                  ${isPrimaryAdmin ? `
+                    <button class="btn-action" style="padding:5px 10px;font-size:0.75rem;opacity:0.35;cursor:not-allowed;" title="Primary Super Admin account is protected" disabled>
+                      <i class="fas fa-lock"></i>
+                    </button>
+                  ` : `
+                    <button class="btn-action btn-danger" style="padding:5px 10px;font-size:0.75rem" onclick="openDeleteStaffModal('${s.email}', '${safeName}', '${safeRoleName}')" title="Delete staff account &amp; revoke access">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  `}
                 ` : `
-                  <button class="btn-action btn-danger" style="padding:5px 10px;font-size:0.75rem" onclick="openDeleteStaffModal('${s.email}', '${safeName}', '${safeRoleName}')" title="Delete staff account &amp; revoke access">
-                    <i class="fas fa-trash"></i>
+                  <button class="btn-action btn-secondary" style="padding:5px 10px;font-size:0.75rem" onclick="filterAndShowStaffLogs('${s.email}')" title="View activity logs for this user">
+                    <i class="fas fa-clipboard-list"></i> View Logs
                   </button>
                 `}
               </div>
@@ -1541,8 +1587,28 @@
       }
     }
 
+    function getCurrentUserSafe() {
+      try {
+        return JSON.parse(localStorage.getItem('current_admin') || '{}');
+      } catch (_) {
+        return {};
+      }
+    }
+
     // ── Initial Boot ──
     document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUserSafe();
+      if (user.role && user.role !== 'admin') {
+        const btnCreate = document.getElementById('btnTopCreateRole');
+        if (btnCreate) btnCreate.style.display = 'none';
+        const btnAssign = document.getElementById('btnAssignStaffRole');
+        if (btnAssign) btnAssign.style.display = 'none';
+        const btnClear = document.getElementById('btnClearStaffLogs');
+        if (btnClear) btnClear.style.display = 'none';
+        const banner = document.getElementById('auditModeBanner');
+        if (banner) banner.style.display = 'flex';
+        switchTab('logs');
+      }
       reloadRolesData();
       fetchActivityLogs();
     });

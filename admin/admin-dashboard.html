@@ -542,6 +542,55 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .export-btn.excel i{color:#10B981}
 .export-btn.pdf i{color:#EF4444}
 </style>
+<!-- ── Pre-render RBAC Guard: Strictly enforce role restrictions before DOM paint ── -->
+<script>
+  (function() {
+    try {
+      var raw = localStorage.getItem('current_admin');
+      var token = localStorage.getItem('k3k3_admin_token');
+      if (!token && !raw) {
+        window.location.replace('adminlogin.html');
+        return;
+      }
+      var user = JSON.parse(raw || '{}');
+      if (user.role && user.role !== 'admin') {
+        var css = '#sec-dashboard, #hNav-dashboard, #navDashboard { display: none !important; }';
+        var allowed = (user.allowedPages || user.allowed_pages || []).map(function(p){ return p.toLowerCase(); });
+        if (!allowed.some(function(p){ return p.includes('payment') || p.includes('analytics'); })) {
+          css += ' #sec-payments, #hNav-payments, #navPayments { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('moolre'); })) {
+          css += ' #sec-moolre, #hNav-moolre, #navMoolre { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('pricing'); })) {
+          css += ' #hNav-pricing, #navPricing { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('roles'); })) {
+          css += ' #hNav-roles, #navRoles { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('setting'); })) {
+          css += ' #sec-messages, #hNav-messages, #navMessages { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('trip'); })) {
+          css += ' #sec-trips, #hNav-trips, #navTrips { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('rider') || p.includes('monitoring'); })) {
+          css += ' #sec-riders, #hNav-riders, #navRiders { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('customer'); })) {
+          css += ' #sec-passengers, #hNav-passengers, #navPassengers { display: none !important; }';
+        }
+        if (!allowed.some(function(p){ return p.includes('application'); })) {
+          css += ' #sec-applications, #hNav-applications, #navApplications { display: none !important; }';
+        }
+        var s = document.createElement('style');
+        s.id = 'k3k3-rbac-prerender-guard';
+        s.textContent = css;
+        document.head.appendChild(s);
+      }
+    } catch(_) {}
+  })();
+</script>
 </head>
 <body>
 <div id="adminLiveAlertContainer"></div>
@@ -2115,13 +2164,13 @@ function getCurrentAdminUser() {
 }
 
 const SECTION_PAGE_MAP = {
-  dashboard: ['dashboard.html', 'admin-dashboard.html', 'analytics.html'],
+  dashboard: ['dashboard.html', 'admin-dashboard.html'],
   trips: ['trips.html'],
   riders: ['ride-monitoring.html', 'live-riders.html', 'rider-management.html'],
   passengers: ['customers.html'],
   applications: ['rider-applications.html'],
-  payments: ['payment-management.html'],
-  moolre: ['moolre-overview.html', 'payment-management.html'],
+  payments: ['payment-management.html', 'analytics.html'],
+  moolre: ['moolre-overview.html'],
   pricing: ['pricing-cms.html'],
   roles: ['roles-management.html'],
   messages: ['system-settings.html']
@@ -2138,33 +2187,9 @@ function isSectionAllowed(secName, user) {
   return targetPages.some(page => allowed.includes(page.toLowerCase()));
 }
 
-async function applyRoleRestrictions() {
-  const user = getCurrentAdminUser();
-  const token = localStorage.getItem('k3k3_admin_token');
-  
-  // If not authenticated, redirect to login
-  if (!token && !user.email) {
-    window.location.replace('adminlogin.html');
-    return;
-  }
-
-  // Fetch live role definitions from backend to immediately apply "Edit Permissions" updates
-  try {
-    const backend = (typeof API_BASE !== 'undefined' && API_BASE) ? API_BASE : ((window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname)) ? 'http://localhost:8810' : '');
-    const res = await fetch(`${backend}/api/admin/roles`, { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.roles) {
-        const liveRole = data.roles.find(r => r.id === user.role);
-        if (liveRole) {
-          user.allowedPages = liveRole.allowed_pages || [];
-          user.defaultPage = liveRole.default_page || user.defaultPage;
-          user.roleName = liveRole.name || user.roleName;
-          localStorage.setItem('current_admin', JSON.stringify(user));
-        }
-      }
-    }
-  } catch (_) {}
+function applyRoleRestrictionsSync(user) {
+  if (!user) user = getCurrentAdminUser();
+  if (!user || !user.role) return;
 
   // Update role display
   const roleDisplayName = user.roleName || (user.role === 'admin' ? 'Super Admin' : (user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Staff'));
@@ -2176,7 +2201,6 @@ async function applyRoleRestrictions() {
 
   // If Super Admin, everything is enabled
   if (user.role === 'admin') {
-    startDashboardPolling();
     return;
   }
 
@@ -2212,24 +2236,8 @@ async function applyRoleRestrictions() {
   });
 
   // Determine starting section based on URL or user's defaultPage
-  const path = window.location.pathname.toLowerCase();
-  let requestedSec = null;
-  if (path.includes('ride-monitoring') || path.includes('live-riders') || path.includes('rider-management')) {
-    requestedSec = 'riders';
-  } else if (path.includes('trips')) {
-    requestedSec = 'trips';
-  } else if (path.includes('customers')) {
-    requestedSec = 'passengers';
-  } else if (path.includes('applications')) {
-    requestedSec = 'applications';
-  } else if (path.includes('payment') || path.includes('moolre')) {
-    requestedSec = 'payments';
-  }
-
-  // Check URL query parameters (e.g. ?sec=trips)
   const urlParams = new URLSearchParams(window.location.search);
-  const qSec = urlParams.get('sec');
-  if (qSec) requestedSec = qSec;
+  let requestedSec = urlParams.get('section') || urlParams.get('sec') || (window.location.hash ? window.location.hash.replace('#', '') : null);
 
   // If no requested section, check user.defaultPage
   if (!requestedSec && user.defaultPage) {
@@ -2248,10 +2256,51 @@ async function applyRoleRestrictions() {
     showSec(targetSec);
   } else if (isSectionAllowed('dashboard', user)) {
     showSec('dashboard');
-    startDashboardPolling();
   } else if (firstAllowedSec) {
     showSec(firstAllowedSec);
   }
+}
+
+async function applyRoleRestrictions() {
+  const user = getCurrentAdminUser();
+  const token = localStorage.getItem('k3k3_admin_token');
+  
+  // If not authenticated, redirect to login
+  if (!token && !user.email) {
+    window.location.replace('adminlogin.html');
+    return;
+  }
+
+  // Apply synchronously first using local cached credentials for zero latency
+  applyRoleRestrictionsSync(user);
+
+  if (user.role === 'admin') {
+    startDashboardPolling();
+    return;
+  }
+
+  // Fetch live role definitions from backend to immediately apply "Edit Permissions" updates
+  try {
+    const backend = (typeof API_BASE !== 'undefined' && API_BASE) ? API_BASE : ((window.location.port !== '8810' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname)) ? 'http://localhost:8810' : '');
+    const res = await fetch(`${backend}/api/admin/roles`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.roles) {
+        const liveRole = data.roles.find(r => r.id === user.role);
+        if (liveRole) {
+          const oldAllowed = JSON.stringify(user.allowedPages || []);
+          const newAllowed = JSON.stringify(liveRole.allowed_pages || []);
+          user.allowedPages = liveRole.allowed_pages || [];
+          user.defaultPage = liveRole.default_page || user.defaultPage;
+          user.roleName = liveRole.name || user.roleName;
+          localStorage.setItem('current_admin', JSON.stringify(user));
+          if (oldAllowed !== newAllowed) {
+            applyRoleRestrictionsSync(user);
+          }
+        }
+      }
+    }
+  } catch (_) {}
 }
 
 function showSec(name, filter){

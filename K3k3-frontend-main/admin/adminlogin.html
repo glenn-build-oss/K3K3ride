@@ -987,15 +987,16 @@
 
                 let targetUrl = defaultPage;
                 const sectionMap = {
-                    'ride-monitoring.html': 'admin-dashboard.html#riders',
-                    'live-riders.html': 'admin-dashboard.html#riders',
-                    'rider-management.html': 'admin-dashboard.html#riders',
-                    'trips.html': 'admin-dashboard.html#trips',
-                    'customers.html': 'admin-dashboard.html#passengers',
-                    'rider-applications.html': 'admin-dashboard.html#applications',
-                    'dashboard.html': 'admin-dashboard.html',
-                    'analytics.html': 'admin-dashboard.html',
-                    'system-settings.html': 'admin-dashboard.html#messages'
+                    'ride-monitoring.html': 'admin-dashboard.html?section=riders#riders',
+                    'live-riders.html': 'admin-dashboard.html?section=riders#riders',
+                    'rider-management.html': 'admin-dashboard.html?section=riders#riders',
+                    'trips.html': 'admin-dashboard.html?section=trips#trips',
+                    'customers.html': 'admin-dashboard.html?section=passengers#passengers',
+                    'rider-applications.html': 'admin-dashboard.html?section=applications#applications',
+                    'payment-management.html': 'admin-dashboard.html?section=payments#payments',
+                    'dashboard.html': 'admin-dashboard.html?section=dashboard#dashboard',
+                    'analytics.html': (user.role === 'admin') ? 'admin-dashboard.html?section=dashboard#dashboard' : 'admin-dashboard.html?section=payments#payments',
+                    'system-settings.html': 'admin-dashboard.html?section=messages#messages'
                 };
                 if (sectionMap[defaultPage]) {
                     targetUrl = sectionMap[defaultPage];

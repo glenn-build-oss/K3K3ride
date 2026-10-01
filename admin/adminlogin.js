@@ -129,7 +129,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     showNotification('success', 'Welcome back, ' + (user.name || 'Admin') + '! Redirecting...', 'Login Successful');
 
                     setTimeout(function() {
-                        var target = user.defaultPage || user.default_page || 'dashboard.html';
+                        var dp = (user.defaultPage || user.default_page || 'dashboard.html').toLowerCase();
+                        var target = dp;
+                        var sectionMap = {
+                            'ride-monitoring.html': 'admin-dashboard.html?section=riders#riders',
+                            'live-riders.html': 'admin-dashboard.html?section=riders#riders',
+                            'rider-management.html': 'admin-dashboard.html?section=riders#riders',
+                            'trips.html': 'admin-dashboard.html?section=trips#trips',
+                            'customers.html': 'admin-dashboard.html?section=passengers#passengers',
+                            'rider-applications.html': 'admin-dashboard.html?section=applications#applications',
+                            'payment-management.html': 'admin-dashboard.html?section=payments#payments',
+                            'dashboard.html': 'admin-dashboard.html?section=dashboard#dashboard',
+                            'analytics.html': (user.role === 'admin') ? 'admin-dashboard.html?section=dashboard#dashboard' : 'admin-dashboard.html?section=payments#payments',
+                            'system-settings.html': 'admin-dashboard.html?section=messages#messages'
+                        };
+                        if (sectionMap[dp]) {
+                            target = sectionMap[dp];
+                        }
                         window.location.href = target;
                     }, 1000);
                 });

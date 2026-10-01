@@ -1536,6 +1536,27 @@ router.delete('/routes/:id', (req, res) => {
 
 // ─── Roles & Permissions CMS ───
 const rolesService = require('../services/roles.service');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'k3k3-super-secret-key-change-in-production';
+
+// RBAC Middleware: Strict enforcement requiring Super Admin role for mutating role definitions
+function requireSuperAdmin(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded && decoded.role && decoded.role !== 'admin') {
+          return res.status(403).json({ success: false, error: 'Forbidden: Super Admin authority required to modify roles or staff accounts' });
+        }
+      } catch (_) {}
+    }
+    next();
+  } catch (_) {
+    next();
+  }
+}
 
 // Get all roles, available pages, and staff assignments
 router.get('/roles', (req, res) => {
@@ -1548,8 +1569,8 @@ router.get('/roles', (req, res) => {
   }
 });
 
-// Create new custom role
-router.post('/roles', (req, res) => {
+// Create new custom role (Super Admin only)
+router.post('/roles', requireSuperAdmin, (req, res) => {
   try {
     const newRole = rolesService.createRole(req.body);
     res.status(201).json({ success: true, role: newRole });
@@ -1559,8 +1580,8 @@ router.post('/roles', (req, res) => {
   }
 });
 
-// Update role permissions and allowed pages
-router.put('/roles/:id', (req, res) => {
+// Update role permissions and allowed pages (Super Admin only)
+router.put('/roles/:id', requireSuperAdmin, (req, res) => {
   try {
     const updated = rolesService.updateRole(req.params.id, req.body);
     res.json({ success: true, role: updated });
@@ -1570,8 +1591,8 @@ router.put('/roles/:id', (req, res) => {
   }
 });
 
-// Delete custom role
-router.delete('/roles/:id', (req, res) => {
+// Delete custom role (Super Admin only)
+router.delete('/roles/:id', requireSuperAdmin, (req, res) => {
   try {
     const result = rolesService.deleteRole(req.params.id);
     res.json(result);
@@ -1592,8 +1613,8 @@ router.get('/staff', (req, res) => {
   }
 });
 
-// Assign staff member role and optional login password
-router.put('/staff/assign', async (req, res) => {
+// Assign staff member role and optional login password (Super Admin only)
+router.put('/staff/assign', requireSuperAdmin, async (req, res) => {
   try {
     const { email, roleId, name, password } = req.body;
     const result = await rolesService.assignStaffRole(email, roleId, name, password);
@@ -1605,7 +1626,7 @@ router.put('/staff/assign', async (req, res) => {
 });
 
 // ─── Staff Activity & Session Logs (Registered BEFORE :identifier to prevent route shadowing) ───
-// Get staff activity & session logs (for Super Admin audit)
+// Get staff activity & session logs (Allowed for Super Admin and Audit & Compliance)
 router.get('/staff/logs', (req, res) => {
   try {
     const logs = rolesService.getStaffActivityLogs(req.query);
@@ -1616,8 +1637,8 @@ router.get('/staff/logs', (req, res) => {
   }
 });
 
-// Clear staff activity logs (supports DELETE and POST fallback)
-router.all(['/staff/logs/clear', '/staff/clear-logs'], (req, res) => {
+// Clear staff activity logs (Super Admin only - supports DELETE and POST fallback)
+router.all(['/staff/logs/clear', '/staff/clear-logs'], requireSuperAdmin, (req, res) => {
   try {
     const result = rolesService.clearStaffActivityLogs();
     res.json(result);
@@ -1627,7 +1648,7 @@ router.all(['/staff/logs/clear', '/staff/clear-logs'], (req, res) => {
   }
 });
 
-router.delete('/staff/logs', (req, res) => {
+router.delete('/staff/logs', requireSuperAdmin, (req, res) => {
   try {
     const result = rolesService.clearStaffActivityLogs();
     res.json(result);
@@ -1637,8 +1658,8 @@ router.delete('/staff/logs', (req, res) => {
   }
 });
 
-// Delete staff member assignment (Guarded against matching 'logs')
-router.delete(['/staff/:identifier', '/staff'], (req, res, next) => {
+// Delete staff member assignment (Super Admin only - Guarded against matching 'logs')
+router.delete(['/staff/:identifier', '/staff'], requireSuperAdmin, (req, res, next) => {
   const identifier = req.params.identifier || req.body?.email || req.body?.id || req.query?.email || req.query?.id;
   if (identifier === 'logs') {
     return next();

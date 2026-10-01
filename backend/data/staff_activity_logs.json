@@ -1,5 +1,82 @@
 [
   {
+    "id": "log_1790863815415_ba2hj",
+    "email": "audit@k3k3.com",
+    "name": "Audit Officer",
+    "role": "audit",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T14:10:15.415Z"
+  },
+  {
+    "id": "log_1790863814295_jgyve",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T14:10:14.295Z"
+  },
+  {
+    "id": "log_1790863812354_24ns7",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T14:10:12.354Z"
+  },
+  {
+    "id": "log_1790863810765_czs0c",
+    "email": "admin@k3k3.com",
+    "name": "K3K3 admin",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "node",
+    "details": "2FA OTP verified login",
+    "timestamp": "2026-10-01T14:10:10.765Z"
+  },
+  {
+    "id": "log_1790859938821_7vd2i",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T13:05:38.822Z"
+  },
+  {
+    "id": "log_1790859842561_cqg9b",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "PASSWORD_UPDATE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Support Team (password changed)",
+    "timestamp": "2026-10-01T13:04:02.561Z"
+  },
+  {
+    "id": "log_1790858715430_z9jlu",
+    "email": "admin@k3k3.com",
+    "name": "K3K3 admin",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "details": "2FA OTP verified login",
+    "timestamp": "2026-10-01T12:45:15.430Z"
+  },
+  {
     "id": "log_1790857832124_r0b6b",
     "email": "support@k3k3.com",
     "name": "Akua Ofori Ataa Apeakorang",

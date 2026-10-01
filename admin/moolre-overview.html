@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>K3K3ride — Moolre Overview | Admin</title>
   <meta name="description" content="Admin oversight for K3K3ride Moolre integrations — payments, OTP logs, and USSD sessions."/>
+
+  <!-- ── Synchronous RBAC Route Guard: Only Admin, Finance, and Audit Allowed ── -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('current_admin');
+        var token = localStorage.getItem('k3k3_admin_token');
+        if (!token && !raw) {
+          window.location.replace('adminlogin.html');
+          return;
+        }
+        var user = JSON.parse(raw || '{}');
+        var role = (user.role || '').toLowerCase();
+        var allowed = (user.allowedPages || user.allowed_pages || []).map(function(p){ return p.toLowerCase(); });
+
+        if (role !== 'admin' && !allowed.includes('moolre-overview.html') && !allowed.includes('payment-management.html')) {
+          var fallback = user.defaultPage || (role === 'support' ? 'ride-monitoring.html' : 'dashboard.html');
+          alert('Access Restricted\n\nYour assigned role (' + (user.roleName || user.role) + ') does not have permission to access Moolre Overview & Payments.\nRedirecting to your workspace...');
+          window.location.replace(fallback);
+        }
+      } catch(_) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>

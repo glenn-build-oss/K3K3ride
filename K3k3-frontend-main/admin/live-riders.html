@@ -3,10 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=admin-dashboard.html#riders">
-  <title>K3K3 — Live Riders Fleet</title>
+  <title>K3K3 — Live Online Riders</title>
   <script>
     (function() {
+      try {
+        var raw = localStorage.getItem('current_admin');
+        var token = localStorage.getItem('k3k3_admin_token');
+        if (!token && !raw) {
+          window.location.replace('adminlogin.html');
+          return;
+        }
+        var user = JSON.parse(raw || '{}');
+        var role = (user.role || '').toLowerCase();
+        var allowed = (user.allowedPages || user.allowed_pages || []).map(function(p){ return p.toLowerCase(); });
+        var targetFile = 'live-riders.html'.toLowerCase();
+
+        // Super Admin always allowed
+        if (role !== 'admin') {
+          var isAllowed = allowed.includes(targetFile);
+          if (!isAllowed) {
+            var fb = user.defaultPage || 'payment-management.html';
+            alert('Access Restricted\n\nYour assigned role (' + (user.roleName || user.role) + ') does not have permission to access Live Online Riders.\nRedirecting to your workspace...');
+            window.location.replace(fb);
+            return;
+          }
+        }
+      } catch(_) {}
       var target = 'admin-dashboard.html?section=riders' + (window.location.hash || '#riders');
       window.location.replace(target);
     })();
@@ -19,6 +41,6 @@
 </head>
 <body>
   <div class="spinner"></div>
-  <p>Loading Live Riders Fleet...</p>
+  <p>Loading Live Online Riders...</p>
 </body>
 </html>

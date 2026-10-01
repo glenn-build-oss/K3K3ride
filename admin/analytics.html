@@ -3,12 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=admin-dashboard.html#dashboard">
   <title>K3K3 — Performance Analytics</title>
   <script>
     (function() {
-      var target = 'admin-dashboard.html?section=dashboard' + (window.location.hash || '#dashboard');
-      window.location.replace(target);
+      try {
+        var raw = localStorage.getItem('current_admin');
+        var token = localStorage.getItem('k3k3_admin_token');
+        if (!token && !raw) {
+          window.location.replace('adminlogin.html');
+          return;
+        }
+        var user = JSON.parse(raw || '{}');
+        var role = (user.role || '').toLowerCase();
+        var allowed = (user.allowedPages || user.allowed_pages || []).map(function(p){ return p.toLowerCase(); });
+
+        if (role !== 'admin' && !allowed.includes('analytics.html')) {
+          var fb = user.defaultPage || 'ride-monitoring.html';
+          alert('Access Restricted\n\nYour assigned role (' + (user.roleName || user.role) + ') does not have permission to access Analytics.\nRedirecting to your workspace...');
+          window.location.replace(fb);
+          return;
+        }
+
+        // Finance and Audit route to payments analytics, Super Admin routes to dashboard
+        var targetSection = (role === 'admin') ? 'dashboard' : 'payments';
+        window.location.replace('admin-dashboard.html?section=' + targetSection + '#' + targetSection);
+        return;
+      } catch(_) {}
+      window.location.replace('admin-dashboard.html?section=payments#payments');
     })();
   </script>
   <style>
@@ -19,6 +40,6 @@
 </head>
 <body>
   <div class="spinner"></div>
-  <p>Loading Performance Analytics...</p>
+  <p>Loading Analytics...</p>
 </body>
 </html>

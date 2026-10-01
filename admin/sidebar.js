@@ -28,22 +28,20 @@
     if (!user || !user.role) return;
     if (user.role === 'admin') return; // Super Admin has universal access
 
-    const allowed = user.allowedPages || user.allowed_pages;
+    const allowed = (user.allowedPages || user.allowed_pages || []).map(p => p.toLowerCase());
     if (Array.isArray(allowed) && allowed.length > 0) {
       const pageFile = (currentPage || '').toLowerCase();
       if (!pageFile || pageFile === 'adminlogin.html') return;
 
-      const isAllowed = allowed.some(p => {
-        const lp = p.toLowerCase();
+      const isAllowed = allowed.some(lp => {
         return lp === pageFile ||
-          (pageFile === 'admin-dashboard.html' && lp === 'dashboard.html') ||
-          (pageFile === 'dashboard.html' && lp === 'admin-dashboard.html') ||
-          (pageFile === 'moolre-overview.html' && lp === 'payment-management.html') ||
-          (pageFile === 'payment-management.html' && lp === 'moolre-overview.html');
+          (pageFile === 'admin-dashboard.html' && ['trips.html', 'ride-monitoring.html', 'live-riders.html', 'rider-management.html', 'customers.html', 'rider-applications.html', 'payment-management.html', 'analytics.html'].includes(lp)) ||
+          (pageFile === 'moolre-overview.html' && (lp === 'payment-management.html' || lp === 'moolre-overview.html')) ||
+          (pageFile === 'payment-management.html' && (lp === 'payment-management.html' || lp === 'moolre-overview.html'));
       });
       if (!isAllowed) {
         console.warn(`[K3K3 RBAC] Access denied for role "${user.role}" on page: ${currentPage}`);
-        const fallback = user.defaultPage || user.default_page || allowed[0] || 'dashboard.html';
+        const fallback = user.defaultPage || user.default_page || allowed[0] || 'admin-dashboard.html';
         if (fallback.toLowerCase() !== pageFile) {
           alert(`Access Restricted\n\nYour assigned role (${user.roleName || user.role}) does not have permission to access this page.\nRedirecting to your workspace...`);
           window.location.replace(fallback);
