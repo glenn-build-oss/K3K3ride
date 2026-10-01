@@ -94,12 +94,12 @@ async function runVerification() {
     assert.strictEqual(data4b.user.role, 'audit');
     console.log(`   ✅ PASS: Audit logged in directly without OTP as "${data4b.user.name}"`);
 
-    // ── TEST 5: Super Admin 2FA Dispatch (admin@k3k3.com) ──
-    console.log('\n5️⃣ Testing Super Admin 2FA Dispatch (admin@k3k3.com + admin123)...');
+    // ── TEST 5: Super Admin 2FA Dispatch (admin@k3k3.com + Ka1b1c1d1e1f1) ──
+    console.log('\n5️⃣ Testing Super Admin 2FA Dispatch (admin@k3k3.com + Ka1b1c1d1e1f1)...');
     const res5 = await fetch(`${baseUrl}/api/auth/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'admin@k3k3.com', password: 'admin123' })
+      body: JSON.stringify({ email: 'admin@k3k3.com', password: 'Ka1b1c1d1e1f1' })
     });
     const data5 = await res5.json();
     assert.strictEqual(res5.status, 200);
@@ -110,19 +110,31 @@ async function runVerification() {
     assert.ok(data5.message.includes('k3k3ride@gmail.com'));
     console.log(`   ✅ PASS: Admin 2FA OTP dispatched strictly to ${data5.email} with ZERO SMS`);
 
-    // ── TEST 6: Super Admin Login via k3k3ride@gmail.com ──
-    console.log('\n6️⃣ Testing Super Admin Login via owner email (k3k3ride@gmail.com + k3k3@2026)...');
+    // ── TEST 5B: Confirm admin123 is REJECTED for admin (Ka1b1c1d1e1f1 only) ──
+    console.log('\n5️⃣B Testing that admin123 is REJECTED for admin (Ka1b1c1d1e1f1 only)...');
+    const res5b = await fetch(`${baseUrl}/api/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@k3k3.com', password: 'admin123' })
+    });
+    const data5b = await res5b.json();
+    assert.strictEqual(res5b.status, 401);
+    assert.strictEqual(data5b.success, false);
+    console.log(`   ✅ PASS: admin123 strictly rejected for Super Admin (Ka1b1c1d1e1f1 only)`);
+
+    // ── TEST 6: Super Admin Login via k3k3ride@gmail.com + Ka1b1c1d1e1f1 ──
+    console.log('\n6️⃣ Testing Super Admin Login via owner email (k3k3ride@gmail.com + Ka1b1c1d1e1f1)...');
     const res6 = await fetch(`${baseUrl}/api/auth/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'k3k3ride@gmail.com', password: 'k3k3@2026' })
+      body: JSON.stringify({ email: 'k3k3ride@gmail.com', password: 'Ka1b1c1d1e1f1' })
     });
     const data6 = await res6.json();
     assert.strictEqual(res6.status, 200);
     assert.strictEqual(data6.success, true);
     assert.strictEqual(data6.requires2FA, true);
     assert.strictEqual(data6.phoneMask, null);
-    console.log(`   ✅ PASS: k3k3ride@gmail.com recognized as Super Admin and initiated email-only 2FA`);
+    console.log(`   ✅ PASS: k3k3ride@gmail.com authenticated strictly with Ka1b1c1d1e1f1 and initiated email-only 2FA`);
 
     // ── TEST 7: Resend OTP API ──
     console.log('\n7️⃣ Testing POST /api/auth/admin/resend-otp...');

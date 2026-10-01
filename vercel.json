@@ -36,6 +36,14 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/admin/(ride-monitoring|live-riders|rider-management|rider-applications|trips|customers|analytics|system-settings|dashboard)(\\.html)?",
+      "dest": "/admin/admin-dashboard.html"
+    },
+    {
+      "src": "/(ride-monitoring|live-riders|rider-management|rider-applications|trips|customers|analytics|system-settings|dashboard)(\\.html)?",
+      "dest": "/admin/admin-dashboard.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }

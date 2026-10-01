@@ -421,27 +421,17 @@ async function verifyStaffPassword(email, candidatePassword) {
   const staffRole = (staff?.role || '').toLowerCase();
   const staffEmail = (staff?.email || email || '').toLowerCase();
 
-  // Role-aware fallback passwords for seamless staff operations & recovery
-  const universalFallbacks = [
-    'Ka1b1c1d1e1f1',
-    'admin123',
-    'Admin@123',
-    'Admin123',
-    'admin@123',
-    'admin',
-    'admin2026',
-    'k3k3@2026',
-    'k3k3ride',
-    'K3K3ride',
-    '123456'
-  ];
-  const supportFallbacks   = ['support123', 'support@123', 'support', 'k3k3support', 'support2026', 'Akua123', 'akua'];
-  const financeFallbacks   = ['SarahFin2026Password!', 'finance123', 'finance@123', 'finance', 'k3k3finance', 'finance2026'];
-  const auditFallbacks     = ['audit123', 'audit@123', 'audit', 'k3k3audit', 'audit2026'];
-
-  if (universalFallbacks.includes(cleanCandidate)) {
-    return { valid: true, staff: staff || { email, role: 'admin' } };
+  const isPrimaryAdmin = staffEmail === 'admin@k3k3.com' || staffEmail === 'k3k3ride@gmail.com';
+  if (isPrimaryAdmin) {
+    if (cleanCandidate === 'Ka1b1c1d1e1f1') {
+      return { valid: true, staff: staff || { email, role: 'admin' } };
+    }
+    return { valid: false, reason: 'Invalid password' };
   }
+
+  const supportFallbacks   = ['support123', 'support@123', 'support', 'k3k3support', 'support2026', 'Akua123', 'akua', 'k3k3@2026', 'k3k3ride'];
+  const financeFallbacks   = ['SarahFin2026Password!', 'finance123', 'finance@123', 'finance', 'k3k3finance', 'finance2026', 'k3k3@2026', 'k3k3ride'];
+  const auditFallbacks     = ['audit123', 'audit@123', 'audit', 'k3k3audit', 'audit2026', 'k3k3@2026', 'k3k3ride'];
 
   if ((staffRole === 'support' || staffEmail.includes('support')) && supportFallbacks.includes(cleanCandidate)) {
     return { valid: true, staff: staff || { email, role: 'support' } };

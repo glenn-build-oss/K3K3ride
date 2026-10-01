@@ -310,7 +310,7 @@ VALUES (
     'K3K3 Admin',
     'admin',
     'active',
-    '$2a$10$g8vW3/MXRImz9PWUihmsNuMxTfN3yB5nT4WQvk0WTVlZ2bxTAnpbO' -- Password: Ka1b1c1d1e1f1
+    '$2a$10$J2LGRnWd0NyW7GfadcXwLuEdosxx1oq7rgH3p8hXd3uuVRHaBCUQ6' -- Password: Ka1b1c1d1e1f1
 )
 ON CONFLICT (email) 
 DO UPDATE SET 

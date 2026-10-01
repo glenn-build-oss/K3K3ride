@@ -985,13 +985,29 @@
                     loginTime: new Date().toISOString()
                 }));
 
+                let targetUrl = defaultPage;
+                const sectionMap = {
+                    'ride-monitoring.html': 'admin-dashboard.html#riders',
+                    'live-riders.html': 'admin-dashboard.html#riders',
+                    'rider-management.html': 'admin-dashboard.html#riders',
+                    'trips.html': 'admin-dashboard.html#trips',
+                    'customers.html': 'admin-dashboard.html#passengers',
+                    'rider-applications.html': 'admin-dashboard.html#applications',
+                    'dashboard.html': 'admin-dashboard.html',
+                    'analytics.html': 'admin-dashboard.html',
+                    'system-settings.html': 'admin-dashboard.html#messages'
+                };
+                if (sectionMap[defaultPage]) {
+                    targetUrl = sectionMap[defaultPage];
+                }
+
                 showToast(`Welcome back, ${userName}! Redirecting to workspace...`, 'success');
                 setTimeout(function() {
-                    window.location.href = defaultPage;
+                    window.location.href = targetUrl;
                 }, 800);
             } catch(err) {
                 console.warn('Storage error:', err);
-                window.location.href = 'dashboard.html';
+                window.location.href = 'admin-dashboard.html';
             }
         }
 
