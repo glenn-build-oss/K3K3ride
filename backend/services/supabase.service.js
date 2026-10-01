@@ -1771,6 +1771,10 @@ if (process.env.VERCEL !== '1' && typeof setInterval !== 'undefined') {
 }
 
 module.exports = {
+  // Core client
+  supabase,
+  requireSupabase,
+
   // User operations
   findUserByPhone,
   findAllUsersByPhone,

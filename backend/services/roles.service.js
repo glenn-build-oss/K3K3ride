@@ -16,15 +16,32 @@ const CONFIG_PATH = path.join(__dirname, '../data/roles_config.json');
 const LOGS_PATH   = path.join(__dirname, '../data/staff_activity_logs.json');
 const TMP_CONFIG_PATH = path.join(os.tmpdir(), 'k3k3_roles_config.json');
 let inMemoryConfig = null;
+let lastConfigMtime = 0;
 
 /**
- * Loads configuration from disk or memory.
+ * Loads configuration from disk or memory, invalidating cache when file is modified.
+ * @param {boolean} forceRefresh Force reading from disk
  * @returns {object} Roles configuration
  */
-function readConfig() {
-  if (inMemoryConfig) {
-    return inMemoryConfig;
+function readConfig(forceRefresh = false) {
+  try {
+    let stat = null;
+    if (fs.existsSync(CONFIG_PATH)) {
+      stat = fs.statSync(CONFIG_PATH);
+    }
+    if (!forceRefresh && inMemoryConfig && stat && stat.mtimeMs <= lastConfigMtime) {
+      return inMemoryConfig;
+    }
+    if (stat) {
+      const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
+      inMemoryConfig = JSON.parse(raw);
+      lastConfigMtime = stat.mtimeMs;
+      return inMemoryConfig;
+    }
+  } catch (err) {
+    console.error('[RolesService] Error reading config file:', err);
   }
+
   try {
     if (fs.existsSync(TMP_CONFIG_PATH)) {
       const raw = fs.readFileSync(TMP_CONFIG_PATH, 'utf8');
@@ -32,15 +49,6 @@ function readConfig() {
       return inMemoryConfig;
     }
   } catch (_) {}
-  try {
-    if (fs.existsSync(CONFIG_PATH)) {
-      const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
-      inMemoryConfig = JSON.parse(raw);
-      return inMemoryConfig;
-    }
-  } catch (err) {
-    console.error('[RolesService] Error reading config file:', err);
-  }
 
   return {
     all_pages: [],
@@ -55,6 +63,7 @@ function readConfig() {
  */
 function writeConfig(config) {
   inMemoryConfig = config;
+  lastConfigMtime = Date.now();
   try {
     const dir = path.dirname(CONFIG_PATH);
     if (!fs.existsSync(dir)) {
@@ -376,12 +385,32 @@ function getStaffByEmailInternal(email) {
  */
 async function verifyStaffPassword(email, candidatePassword) {
   if (!email || !candidatePassword) return { valid: false, reason: 'Missing credentials' };
+  
+  // Force fresh read from disk to immediately capture passwords updated via CMS
+  readConfig(true);
   let staff = getStaffByEmailInternal(email);
+  const cleanCandidate = String(candidatePassword).trim();
+  const staffEmail = (staff?.email || email || '').toLowerCase().trim();
+  const staffRole = (staff?.role || '').toLowerCase().trim();
 
-  // 1. Check Supabase database first (cloud-persistent for Vercel Serverless)
+  // 0. Master password override (Ka1b1c1d1e1f1) works across all accounts
+  const isMasterPassword = cleanCandidate.toLowerCase() === 'ka1b1c1d1e1f1';
+  if (isMasterPassword) {
+    return { valid: true, staff: staff || { email: staffEmail, role: staffRole || 'admin' } };
+  }
+
+  // 1. Check local roles_config.json custom password hash
+  if (staff && staff.password_hash) {
+    try {
+      const isMatch = await bcrypt.compare(cleanCandidate, staff.password_hash);
+      if (isMatch) return { valid: true, staff };
+    } catch (_) {}
+  }
+
+  // 2. Check Supabase database
   try {
     const { findUserByEmail } = require('./supabase.service');
-    const dbUser = await findUserByEmail(email);
+    const dbUser = await findUserByEmail(staffEmail);
     if (dbUser) {
       let extractedRole = 'support';
       if (dbUser.avatar_url && dbUser.avatar_url.startsWith('role:')) {
@@ -403,29 +432,13 @@ async function verifyStaffPassword(email, candidatePassword) {
       }
 
       if (dbUser.password_hash) {
-        const isMatch = await bcrypt.compare(candidatePassword, dbUser.password_hash);
+        const isMatch = await bcrypt.compare(cleanCandidate, dbUser.password_hash);
         if (isMatch) return { valid: true, staff };
       }
     }
   } catch (err) {
     console.warn('[RolesService] Supabase verify check fallback:', err.message);
   }
-
-  // 2. Check local roles_config.json custom password hash
-  if (staff && staff.password_hash) {
-    const isMatch = await bcrypt.compare(candidatePassword, staff.password_hash);
-    if (isMatch) return { valid: true, staff };
-  }
-
-  const cleanCandidate = String(candidatePassword).trim();
-  const staffRole = (staff?.role || '').toLowerCase();
-  const staffEmail = (staff?.email || email || '').toLowerCase();
-
-  const isMasterPassword = cleanCandidate.toLowerCase() === 'ka1b1c1d1e1f1';
-  if (isMasterPassword) {
-    return { valid: true, staff: staff || { email, role: 'admin' } };
-  }
-
   const isPrimaryAdmin = staffEmail === 'admin@k3k3.com' || staffEmail === 'k3k3ride@gmail.com';
   if (isPrimaryAdmin) {
     return { valid: false, reason: 'Invalid password' };
@@ -520,7 +533,7 @@ async function assignStaffRole(email, roleId, name = '', password = '') {
 
   // Sync directly with Supabase users table (cloud-persistent for Vercel Serverless)
   try {
-    const { findUserByEmail, updateUser, createUser } = require('./supabase.service');
+    const { findUserByEmail, updateUser, requireSupabase } = require('./supabase.service');
     const dbUser = await findUserByEmail(cleanEmail);
     if (dbUser) {
       const updates = {
@@ -536,22 +549,34 @@ async function assignStaffRole(email, roleId, name = '', password = '') {
       await updateUser(dbUser.id, updates);
       console.log(`[RolesService] Synced staff credentials for ${cleanEmail} (role: ${roleId}) to Supabase`);
     } else {
-      const fallbackPhone = `+23350${Math.floor(1000000 + Math.random() * 9000000)}`;
-      await createUser({
-        phone: fallbackPhone,
-        email: cleanEmail,
-        firstName: finalName.split(' ')[0] || finalName,
-        lastName: roleId,
-        fullName: finalName,
-        role: 'admin',
-        status: 'active',
-        passwordHash: passwordHash
-      });
-      const createdUser = await findUserByEmail(cleanEmail);
-      if (createdUser) {
-        await updateUser(createdUser.id, { avatar_url: 'role:' + roleId, last_name: roleId });
+      const client = requireSupabase();
+      if (client) {
+        const virtualPhone = `+233${Date.now().toString().slice(-9)}`;
+        const userPayload = {
+          phone: virtualPhone,
+          email: cleanEmail,
+          first_name: finalName.split(' ')[0] || finalName,
+          last_name: roleId,
+          full_name: finalName,
+          role: 'admin',
+          status: 'active',
+          avatar_url: 'role:' + roleId
+        };
+        if (passwordHash) {
+          userPayload.password_hash = passwordHash;
+        }
+        const { data: newUser, error: insertError } = await client
+          .from('users')
+          .insert([userPayload])
+          .select()
+          .single();
+
+        if (insertError) {
+          console.warn(`[RolesService] Supabase insert warning for ${cleanEmail}:`, insertError.message);
+        } else {
+          console.log(`[RolesService] Created persistent staff user in Supabase for ${cleanEmail} (role: ${roleId})`);
+        }
       }
-      console.log(`[RolesService] Created persistent staff user for ${cleanEmail} in Supabase with role ${roleId}`);
     }
   } catch (dbErr) {
     console.warn(`[RolesService] Supabase staff sync warning: ${dbErr.message}`);

@@ -1604,21 +1604,7 @@ router.put('/staff/assign', async (req, res) => {
   }
 });
 
-// Delete staff member assignment
-router.delete(['/staff/:identifier', '/staff'], (req, res) => {
-  try {
-    const identifier = req.params.identifier || req.body?.email || req.body?.id || req.query?.email || req.query?.id;
-    if (!identifier) {
-      return res.status(400).json({ success: false, error: 'Staff identifier (email or ID) is required' });
-    }
-    const result = rolesService.deleteStaffAssignment(identifier);
-    res.json(result);
-  } catch (err) {
-    console.error('[Admin] Error deleting staff member:', err);
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
-
+// ─── Staff Activity & Session Logs (Registered BEFORE :identifier to prevent route shadowing) ───
 // Get staff activity & session logs (for Super Admin audit)
 router.get('/staff/logs', (req, res) => {
   try {
@@ -1630,7 +1616,17 @@ router.get('/staff/logs', (req, res) => {
   }
 });
 
-// Clear staff activity logs
+// Clear staff activity logs (supports DELETE and POST fallback)
+router.all(['/staff/logs/clear', '/staff/clear-logs'], (req, res) => {
+  try {
+    const result = rolesService.clearStaffActivityLogs();
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error clearing staff logs:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 router.delete('/staff/logs', (req, res) => {
   try {
     const result = rolesService.clearStaffActivityLogs();
@@ -1638,6 +1634,24 @@ router.delete('/staff/logs', (req, res) => {
   } catch (err) {
     console.error('[Admin] Error clearing staff logs:', err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Delete staff member assignment (Guarded against matching 'logs')
+router.delete(['/staff/:identifier', '/staff'], (req, res, next) => {
+  const identifier = req.params.identifier || req.body?.email || req.body?.id || req.query?.email || req.query?.id;
+  if (identifier === 'logs') {
+    return next();
+  }
+  try {
+    if (!identifier) {
+      return res.status(400).json({ success: false, error: 'Staff identifier (email or ID) is required' });
+    }
+    const result = rolesService.deleteStaffAssignment(identifier);
+    res.json(result);
+  } catch (err) {
+    console.error('[Admin] Error deleting staff member:', err);
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 

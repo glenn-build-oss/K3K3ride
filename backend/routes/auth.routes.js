@@ -1216,7 +1216,7 @@ router.post('/admin/login', async (req, res) => {
           role: 'support',
           phone: '+233504842974'
         };
-      } else if (cleanEmail === 'audit@k3k3.com' || cleanEmail === 'audit' || cleanEmail === 'staff.audit.test@k3k3.com') {
+      } else if (cleanEmail === 'audit@k3k3.com' || cleanEmail === 'audit') {
         admin = {
           id: 'staff-audit-01',
           email: 'audit@k3k3.com',
