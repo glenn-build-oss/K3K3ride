@@ -36,6 +36,7 @@ const {
   purgeExpiredOTPs,
   getPaymentFinancials,
   getAllRides,
+  purgeAllRides,
   healthCheck: dbHealthCheck
 } = require('../services/supabase.service');
 const dispatchService = require('../services/dispatch.service');
@@ -954,6 +955,26 @@ router.get(['/payments/summary', '/api/payments/summary'], async (req, res) => {
   } catch (error) {
     console.error('[Admin] Error fetching payment summary:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch payment summary' });
+  }
+});
+
+/**
+ * POST /api/admin/trips/purge
+ * Clears all trips and resets database for live bookings
+ */
+router.post(['/trips/purge', '/api/admin/trips/purge'], async (req, res) => {
+  try {
+    const result = await purgeAllRides();
+    if (!result.success) {
+      return res.status(500).json({ success: false, error: result.error });
+    }
+    res.json({ 
+      success: true, 
+      message: 'All trips have been successfully purged. System is ready to record actual rides.' 
+    });
+  } catch (error) {
+    console.error('[Admin] Error purging trips:', error);
+    res.status(500).json({ success: false, error: 'Failed to purge trips' });
   }
 });
 

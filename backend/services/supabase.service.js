@@ -930,6 +930,26 @@ async function getAllRides(limit = 100) {
 }
 
 /**
+ * Purge all rides/trips and associated reviews/payments for fresh operational reset
+ */
+async function purgeAllRides() {
+  const sb = requireSupabase();
+  if (!sb) return { success: false, error: 'Database not initialized' };
+
+  try {
+    await sb.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await sb.from('payments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error } = await sb.from('rides').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) throw error;
+
+    return { success: true };
+  } catch (err) {
+    console.error('[Supabase] purgeAllRides error:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Get available riders near a location
  */
 async function getAvailableRiders(lat = null, lng = null, radiusKm = 5) {
@@ -1784,6 +1804,7 @@ module.exports = {
   createRide,
   getRideById,
   getAllRides,
+  purgeAllRides,
   updateRideStatus,
   getPassengerRides,
   deletePassengerRides,

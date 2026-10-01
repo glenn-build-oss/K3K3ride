@@ -792,6 +792,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   <div class="sec-header">
     <div><div class="sec-title">All Trips</div><div class="sec-sub">Complete trip history</div></div>
     <div class="export-btn-group">
+      <button class="export-btn" id="btnClearTrips" onclick="promptClearAllTrips()" style="background:rgba(239,68,68,0.12);color:var(--red);border-color:rgba(239,68,68,0.3)" title="Clear all legacy/test trips and prepare for live trips"><i class="fas fa-trash-alt"></i> <span>Clear Trips</span></button>
       <button class="export-btn excel" onclick="exportData('trips','excel')" title="Export All Trips to Excel Workbook (.xlsx)"><i class="fas fa-file-excel"></i> <span>Export Excel (.xlsx)</span></button>
       <button class="export-btn pdf" onclick="exportData('trips','pdf')" title="Export All Trips to Document PDF (.pdf)"><i class="fas fa-file-pdf"></i> <span>Export PDF (.pdf)</span></button>
     </div>
@@ -1817,73 +1818,11 @@ async function exportData(type, format) {
       }
     } else if (type === 'trips') {
       if (!allTrips || !allTrips.length) {
-        await loadAllTrips('all');
+        await loadAllTrips('all', true);
       }
       if (!allTrips || !allTrips.length) {
-        try {
-          const local = JSON.parse(localStorage.getItem('k3k3_trips') || '[]');
-          if (local.length) allTrips = local;
-        } catch (_) {}
-      }
-      if (!allTrips || !allTrips.length) {
-        allTrips = [
-          {
-            id: 'TRP-8841A',
-            created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-            passenger_fname: 'Akosua',
-            passenger_lname: 'Mensah',
-            passenger_phone: '+233241234567',
-            rider_fname: 'Glenn',
-            rider_lname: 'Adjei',
-            rider_phone: '+233207739636',
-            pickup_label: 'Ho Central Market',
-            dest_label: 'Ho Technical University',
-            fare_estimate: 25.00,
-            status: 'completed'
-          },
-          {
-            id: 'TRP-7729B',
-            created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-            passenger_fname: 'Prince',
-            passenger_lname: 'Dogbe',
-            passenger_phone: '+233509876543',
-            rider_fname: 'Mawuli',
-            rider_lname: 'Agbodza',
-            rider_phone: '+233244112233',
-            pickup_label: 'Civic Centre',
-            dest_label: 'Asogli State Palace',
-            fare_estimate: 15.00,
-            status: 'completed'
-          },
-          {
-            id: 'TRP-6310C',
-            created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
-            passenger_fname: 'Patience',
-            passenger_lname: 'Ametefe',
-            passenger_phone: '+233271122334',
-            rider_fname: 'Emmanuel',
-            rider_lname: 'Kpodo',
-            rider_phone: '+233501234567',
-            pickup_label: 'Stadium Gate',
-            dest_label: 'Ho Teaching Hospital (Trafalgar)',
-            fare_estimate: 30.00,
-            status: 'completed'
-          },
-          {
-            id: 'TRP-5192D',
-            created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-            passenger_fname: 'Selasi',
-            passenger_lname: 'Kuma',
-            passenger_phone: '+233201238990',
-            rider_fname: 'Glenn',
-            rider_lname: 'Adjei',
-            rider_phone: '+233207739636',
-            pickup_label: 'Sokode Lokoe',
-            dest_label: 'Ho Central Market',
-            fare_estimate: 20.00,
-            status: 'completed'
-          }
-        ];
+        showToast('No trip records found to export.', 'info');
+        return;
       }
       const filename = `K3K3_Trip_Records_${timestamp}`;
 
@@ -2103,7 +2042,7 @@ function downloadPdfFile(title, subtitle, headers, rows, fileName) {
   showToast(`✅ Exported ${rows.length} records to ${finalFileName}`, 'success');
 }
 
-async function apiFetch(p){
+async function apiFetch(p, options = {}){
   const cleanPath = p.startsWith('/') ? p : '/' + p;
   const apiPrefixed = cleanPath.startsWith('/api') ? cleanPath : '/api' + cleanPath;
   const backend = API_BASE || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname || window.location.protocol === 'file:') ? 'http://localhost:8810' : '');
@@ -2121,9 +2060,22 @@ async function apiFetch(p){
     candidates.push(cleanPath);
   }
 
+  const token = localStorage.getItem('k3k3_admin_token') || '';
+  const defaultHeaders = {
+    'Accept': 'application/json',
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+
+  const fetchOptions = {
+    signal: AbortSignal.timeout(10000),
+    ...options,
+    headers: { ...defaultHeaders, ...(options.headers || {}) }
+  };
+
   for (const url of candidates) {
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(5000), headers: { 'Accept': 'application/json' } });
+      const r = await fetch(url, fetchOptions);
       if (r.ok) {
         return await r.json();
       }
@@ -2335,7 +2287,7 @@ function showSec(name, filter){
   
   const loaders={
     dashboard:loadDashboard,
-    trips:()=>loadAllTrips(filter||'all'),
+    trips:()=>loadAllTrips(filter||'all', true),
     riders:()=>loadRiders(filter||'all'),
     passengers:loadPassengers,
     applications:()=>loadApps(filter||'all'),
@@ -2784,14 +2736,10 @@ function handleNotifClick(type, id){
 /* ── Live ── */
 let livePollingInterval=null;
 async function loadLive(){
-  if(!allRiders.length){
-    const rRes = await apiFetch('/admin/riders/approved') || await apiFetch('/riders');
-    allRiders = Array.isArray(rRes) ? rRes : (rRes?.riders || []);
-  }
-  if(!allTrips.length){
-    const tRes = await apiFetch('/trips');
-    allTrips = Array.isArray(tRes) ? tRes : (tRes?.trips || []);
-  }
+  const rRes = await apiFetch('/admin/riders/approved') || await apiFetch('/riders');
+  allRiders = Array.isArray(rRes) ? rRes : (rRes?.riders || []);
+  const tRes = await apiFetch('/trips');
+  allTrips = Array.isArray(tRes) ? tRes : (tRes?.trips || []);
   const online=allRiders.filter(r=>r.is_available);
   const active=allTrips.filter(t=>t.status==='active'||t.status==='in_progress'||t.status==='accepted');
   setEl('liveOnline',online.length);setEl('liveActive',active.length);
@@ -2815,8 +2763,8 @@ function stopLivePolling(){
 }
 
 /* ── All Trips ── */
-async function loadAllTrips(filter){
-  if(!allTrips.length){
+async function loadAllTrips(filter, forceRefresh = false){
+  if(forceRefresh || !allTrips.length){
     const res = await apiFetch('/trips');
     allTrips = Array.isArray(res) ? res : (res?.trips || res?.data || []);
   }
@@ -2861,7 +2809,36 @@ async function loadAllTrips(filter){
   });
   tb.innerHTML=html;
 }
-function filterTrips(f,btn){document.querySelectorAll('#sec-trips .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadAllTrips(f);}
+function filterTrips(f,btn){document.querySelectorAll('#sec-trips .ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');loadAllTrips(f, true);}
+
+async function promptClearAllTrips(){
+  const user = getCurrentAdminUser();
+  if (user && user.role && user.role !== 'admin') {
+    showToast('Permission denied: Only Super Admin can clear trip history.', 'error');
+    return;
+  }
+  const confirmed = confirm('WARNING: Are you sure you want to clear all trips?\n\nThis will permanently remove all test/legacy trips from the database and reset the count to 0 so the platform can start fresh for recording actual live trips.\n\nClick OK to confirm.');
+  if (!confirmed) return;
+
+  const btn = el('btnClearTrips');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing…'; }
+
+  try {
+    const res = await apiFetch('/admin/trips/purge', { method: 'POST' });
+    if (res && res.success) {
+      showToast('All trips successfully cleared! Ready to record actual trips.', 'success');
+      allTrips = [];
+      try { localStorage.removeItem('k3k3_trips'); } catch(_) {}
+      await loadAllTrips('all', true);
+    } else {
+      showToast(res?.error || 'Failed to clear trips.', 'error');
+    }
+  } catch (err) {
+    showToast('Error communicating with server: ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i> <span>Clear Trips</span>'; }
+  }
+}
 
 /* ── Riders ── */
 async function loadRiders(filter){
