@@ -1,5 +1,27 @@
 [
   {
+    "id": "log_1790883070028_v01iu",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T19:31:10.028Z"
+  },
+  {
+    "id": "log_1790882696666_c88km",
+    "email": "admin@k3k3.com",
+    "name": "Super Admin",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "details": "2FA OTP verified login",
+    "timestamp": "2026-10-01T19:24:56.666Z"
+  },
+  {
     "id": "log_1790863815415_ba2hj",
     "email": "audit@k3k3.com",
     "name": "Audit Officer",
