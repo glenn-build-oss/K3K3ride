@@ -7920,7 +7920,10 @@
       if (validToken && validToken.startsWith('pk.') && validToken.length > 25) {
         try {
           const mapboxUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${sLng.toFixed(6)},${sLat.toFixed(6)};${eLng.toFixed(6)},${eLat.toFixed(6)}?geometries=geojson&overview=full&access_token=${validToken}`;
-          const res = await fetch(mapboxUrl);
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 6000);
+          const res = await fetch(mapboxUrl, { signal: ctrl.signal });
+          clearTimeout(tId);
           if (res.ok) {
             const data = await res.json();
             if (data.routes && data.routes.length > 0 && Array.isArray(data.routes[0].geometry?.coordinates) && data.routes[0].geometry.coordinates.length > 1) {
@@ -7940,14 +7943,19 @@
             }
           }
         } catch (err) {
-          console.warn('[Mapbox Directions warning, falling back to OSRM]', err.message);
+          if (err && err.name !== 'AbortError' && !err.message?.includes('aborted')) {
+            console.warn('[Mapbox Directions warning, falling back to OSRM]', err.message);
+          }
         }
       }
 
       // 2. Fallback to Open Source Routing Machine (OSRM)
       try {
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${sLng.toFixed(6)},${sLat.toFixed(6)};${eLng.toFixed(6)},${eLat.toFixed(6)}?overview=full&geometries=geojson`;
-        const res = await fetch(osrmUrl);
+        const ctrl = new AbortController();
+        const tId = setTimeout(() => ctrl.abort(), 6500);
+        const res = await fetch(osrmUrl, { signal: ctrl.signal });
+        clearTimeout(tId);
         if (res.ok) {
           const data = await res.json();
           if (data.code === 'Ok' && data.routes && data.routes.length > 0 && Array.isArray(data.routes[0].geometry?.coordinates) && data.routes[0].geometry.coordinates.length > 1) {
@@ -7967,7 +7975,9 @@
           }
         }
       } catch (err) {
-        console.warn('[OSRM warning, using direct fallback]', err.message);
+        if (err && err.name !== 'AbortError' && !err.message?.includes('aborted')) {
+          console.warn('[OSRM warning, using direct fallback]', err.message);
+        }
       }
 
       // 3. Fallback direct line
@@ -8726,16 +8736,32 @@
       const dLng = parseFloat(destLng);
       if (isNaN(oLat) || isNaN(oLng) || isNaN(dLat) || isNaN(dLng)) return null;
 
-      const res = await fetchRoadRoutingPolyline(oLng, oLat, dLng, dLat, _modalMapboxToken);
-      return {
-        latLngs: (res.latLngs && res.latLngs.length > 0) ? res.latLngs : [[oLat, oLng], [dLat, dLng]],
-        coordinates: (res.coordinates && res.coordinates.length > 0) ? res.coordinates : [[oLng, oLat], [dLng, dLat]],
-        distanceKm: res.distanceKm || 1.5,
-        durationMin: res.durationMin || 5,
-        summary: res.summary || `${res.durationMin || 5} mins (${res.distanceKm || 1.5} km)`,
-        isRealRoad: res.source === 'mapbox' || res.source === 'osrm',
-        source: res.source
-      };
+      try {
+        const res = await fetchRoadRoutingPolyline(oLng, oLat, dLng, dLat, _modalMapboxToken);
+        if (!res) throw new Error('No routing result returned');
+        return {
+          latLngs: (res.latLngs && res.latLngs.length > 0) ? res.latLngs : [[oLat, oLng], [dLat, dLng]],
+          coordinates: (res.coordinates && res.coordinates.length > 0) ? res.coordinates : [[oLng, oLat], [dLng, dLat]],
+          distanceKm: res.distanceKm || 1.5,
+          durationMin: res.durationMin || 5,
+          summary: res.summary || `${res.durationMin || 5} mins (${res.distanceKm || 1.5} km)`,
+          isRealRoad: res.source === 'mapbox' || res.source === 'osrm',
+          source: res.source
+        };
+      } catch (err) {
+        if (err && err.name !== 'AbortError' && !err.message?.includes('aborted')) {
+          console.warn('[Passenger OSRM Road Routing Notice]', err.message || err);
+        }
+        return {
+          latLngs: [[oLat, oLng], [dLat, dLng]],
+          coordinates: [[oLng, oLat], [dLng, dLat]],
+          distanceKm: 1.5,
+          durationMin: 5,
+          summary: '5 mins (1.5 km)',
+          isRealRoad: false,
+          source: 'direct'
+        };
+      }
     }
 
     async function previewRouteOnPassengerMap(pickup, dest) {
@@ -9543,8 +9569,8 @@
 
     // Legacy requestRide for any existing call sites
     async function requestRide() {
-      const pickup = (document.getElementById('pickupInput')?.value || '').trim();
-      const dest   = (document.getElementById('destInput')?.value || '').trim();
+      const pickup = (_pickupVal || document.getElementById('pickupSelect')?.value || document.getElementById('pickupInput')?.value || '').trim();
+      const dest   = (_destVal || document.getElementById('destSelect')?.value || document.getElementById('destInput')?.value || '').trim();
       if (!pickup) { showToast('Please select a pickup location', 'error'); return; }
       if (!dest)   { showToast('Please select a destination', 'error'); return; }
       _pickupVal = pickup; _destVal = dest;
@@ -9560,33 +9586,43 @@
 
     function showRiderSearch(pickup, dest) {
       // Reset states
-      document.getElementById('searchingState').style.display = 'block';
-      document.getElementById('noRidersState').style.display = 'none';
-      document.getElementById('assignedState').style.display = 'none';
+      const sState = document.getElementById('searchingState');
+      if (sState) sState.style.display = 'block';
+      const noRState = document.getElementById('noRidersState');
+      if (noRState) noRState.style.display = 'none';
+      const aState = document.getElementById('assignedState');
+      if (aState) aState.style.display = 'none';
 
       const sub = document.getElementById('searchStatusSub');
-      if (sub) sub.textContent = `Searching near "${pickup}"…`;
+      if (sub) sub.textContent = `Searching near "${pickup || 'your location'}"…`;
 
-      document.getElementById('riderSearchOverlay').classList.add('show');
+      const overlay = document.getElementById('riderSearchOverlay');
+      if (overlay) {
+        overlay.classList.add('show');
+        overlay.style.display = 'flex';
+      }
 
       // Update search status message progressively without closing prematurely
       clearTimeout(riderSearchTimer);
       riderSearchTimer = setTimeout(() => {
-        if (sub && document.getElementById('searchingState').style.display !== 'none') {
+        if (sub && document.getElementById('searchingState')?.style.display !== 'none') {
           sub.textContent = 'Contacting available K3K3 riders in your area…';
         }
       }, 3000);
     }
 
     function retryRiderSearch() {
-      const pickup = document.getElementById('pickupInput').value.trim();
-      const dest = document.getElementById('destInput').value.trim();
-      document.getElementById('searchingState').style.display = 'block';
-      document.getElementById('noRidersState').style.display = 'none';
-      document.getElementById('assignedState').style.display = 'none';
+      const pickup = _pickupVal || document.getElementById('pickupSelect')?.value || document.getElementById('pickupInput')?.value || '';
+      const dest = _destVal || document.getElementById('destSelect')?.value || document.getElementById('destInput')?.value || '';
+      const sState = document.getElementById('searchingState');
+      if (sState) sState.style.display = 'block';
+      const noRState = document.getElementById('noRidersState');
+      if (noRState) noRState.style.display = 'none';
+      const aState = document.getElementById('assignedState');
+      if (aState) aState.style.display = 'none';
 
       const sub = document.getElementById('searchStatusSub');
-      if (sub) sub.textContent = `Retrying search near "${pickup}"…`;
+      if (sub) sub.textContent = pickup ? `Retrying search near "${pickup}"…` : 'Retrying rider search…';
 
       clearTimeout(riderSearchTimer);
       // Re-trigger confirmRide
@@ -9598,12 +9634,30 @@
       if (typeof searchTripPollTimer !== 'undefined' && searchTripPollTimer) {
         clearInterval(searchTripPollTimer);
       }
-      document.getElementById('riderSearchOverlay').classList.remove('show');
-      document.getElementById('pickupInput').value = '';
-      document.getElementById('destInput').value = '';
+      const overlay = document.getElementById('riderSearchOverlay');
+      if (overlay) {
+        overlay.classList.remove('show');
+        overlay.style.display = 'none';
+      }
+      const pSel = document.getElementById('pickupSelect');
+      if (pSel) pSel.value = '';
+      const dSel = document.getElementById('destSelect');
+      if (dSel) dSel.value = '';
+      const pInp = document.getElementById('pickupInput');
+      if (pInp) pInp.value = '';
+      const dInp = document.getElementById('destInput');
+      if (dInp) dInp.value = '';
+      const sBar = document.getElementById('searchBar');
+      if (sBar) sBar.value = '';
+
+      _pickupVal = '';
+      _destVal = '';
+
       const lat = sessionStorage.getItem('k3k3_lat');
       const lng = sessionStorage.getItem('k3k3_lng');
-      if (lat && lng) autoFillPickup(parseFloat(lat), parseFloat(lng));
+      if (lat && lng && typeof autoFillPickup === 'function') {
+        autoFillPickup(parseFloat(lat), parseFloat(lng));
+      }
     }
 
     /* ══════════════════════════════════════════

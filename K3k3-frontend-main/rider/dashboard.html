@@ -3575,7 +3575,9 @@ async function fetchRoadDrivingRoute(originLat, originLng, destLat, destLng) {
         }
       }
     } catch (err) {
-      console.warn('[Mapbox Directions Warning]', err.message);
+      if (err && err.name !== 'AbortError' && !err.message?.includes('aborted')) {
+        console.warn('[Mapbox Directions Warning]', err.message);
+      }
     }
   }
 
@@ -3607,7 +3609,9 @@ async function fetchRoadDrivingRoute(originLat, originLng, destLat, destLng) {
       }
     }
   } catch (err) {
-    console.warn('[OSRM Road Routing Warning]', err.message);
+    if (err && err.name !== 'AbortError' && !err.message?.includes('aborted')) {
+      console.warn('[OSRM Road Routing Warning]', err.message);
+    }
   }
 
   // 3. Fallback: Smooth curved road spline (never a rigid straight line through buildings)
