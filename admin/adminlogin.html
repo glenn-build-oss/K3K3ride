@@ -839,9 +839,8 @@
 
                 if (data.success && data.requires2FA) {
                     const destEmail = data.email || 'k3k3ride@gmail.com';
-                    const phoneNotice = data.phoneMask ? ` &amp; SMS to <strong>${data.phoneMask}</strong>` : '';
                     document.getElementById('otpMsg').innerHTML = `
-                        Admin 2FA code sent to <strong>${destEmail}</strong>${phoneNotice}.<br>
+                        Admin 2FA code sent to <strong>${destEmail}</strong>.<br>
                         <span style="display:inline-block;margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,0.12);color:#d97706;font-size:0.78rem;font-weight:600;">
                             <i class="fas fa-exclamation-triangle"></i> Not in inbox? Please check your Gmail <strong>Spam / Junk</strong> folder.
                         </span>
@@ -892,11 +891,10 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    showToast('Fresh OTP dispatched to email & SMS', 'success');
-                    const destEmail = data.email || targetEmail;
-                    const phoneNotice = data.phoneMask ? ` &amp; SMS to <strong>${data.phoneMask}</strong>` : '';
+                    showToast('Fresh OTP dispatched to email', 'success');
+                    const destEmail = data.email || targetEmail || 'k3k3ride@gmail.com';
                     document.getElementById('otpMsg').innerHTML = `
-                        Fresh code sent to <strong>${destEmail}</strong>${phoneNotice}.<br>
+                        Fresh code sent to <strong>${destEmail}</strong>.<br>
                         <span style="display:inline-block;margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,0.12);color:#d97706;font-size:0.78rem;font-weight:600;">
                             <i class="fas fa-exclamation-triangle"></i> Not in inbox? Please check your Gmail <strong>Spam / Junk</strong> folder.
                         </span>

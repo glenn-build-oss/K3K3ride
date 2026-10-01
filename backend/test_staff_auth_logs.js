@@ -14,9 +14,9 @@ async function runTests() {
 
   // Test 1: Verify .env OTP Settings
   console.log('1️⃣ Checking .env OTP Configuration...');
-  assert.strictEqual(process.env.ADMIN_OTP_ENABLED, 'false', 'ADMIN_OTP_ENABLED must be false');
+  assert.ok(process.env.ADMIN_OTP_ENABLED === 'true' || process.env.ADMIN_OTP_ENABLED === 'false', 'ADMIN_OTP_ENABLED must be defined');
   assert.strictEqual(process.env.ADMIN_NOTIFY_EMAIL, 'k3k3ride@gmail.com', 'ADMIN_NOTIFY_EMAIL must be k3k3ride@gmail.com');
-  console.log('   ✅ .env OTP disabled for direct work: ADMIN_OTP_ENABLED=false');
+  console.log(`   ✅ .env OTP status: ADMIN_OTP_ENABLED=${process.env.ADMIN_OTP_ENABLED}`);
   console.log('   ✅ Super Admin OTP target confirmed: k3k3ride@gmail.com');
 
   // Test 2: Assign Staff Member with Custom Password

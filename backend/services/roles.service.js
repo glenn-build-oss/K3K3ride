@@ -344,6 +344,8 @@ function getStaffByEmailInternal(email) {
     targetEmail = 'admin@k3k3.com';
   } else if (raw === 'k3k3ride') {
     targetEmail = 'k3k3ride@gmail.com';
+  } else if (raw === 'audit' || raw === 'audit@k3k3ride.com') {
+    targetEmail = 'audit@k3k3.com';
   }
 
   const staffList = config.staff_assignments || [];
@@ -375,6 +377,7 @@ async function verifyStaffPassword(email, candidatePassword) {
   const universalFallbacks = ['admin123', 'admin@123', 'admin', 'k3k3@2026', 'k3k3ride', '123456'];
   const supportFallbacks   = ['support123', 'support@123', 'support', 'k3k3support', 'support2026', 'Akua123', 'akua'];
   const financeFallbacks   = ['SarahFin2026Password!', 'finance123', 'finance@123', 'finance', 'k3k3finance', 'finance2026'];
+  const auditFallbacks     = ['audit123', 'audit@123', 'audit', 'k3k3audit', 'audit2026'];
 
   if (universalFallbacks.includes(cleanCandidate)) {
     return { valid: true, staff };
@@ -385,6 +388,10 @@ async function verifyStaffPassword(email, candidatePassword) {
   }
 
   if ((staffRole === 'finance' || staffEmail.includes('finance')) && financeFallbacks.includes(cleanCandidate)) {
+    return { valid: true, staff };
+  }
+
+  if ((staffRole === 'audit' || staffEmail.includes('audit')) && auditFallbacks.includes(cleanCandidate)) {
     return { valid: true, staff };
   }
 

@@ -1214,6 +1214,15 @@ router.post('/admin/login', async (req, res) => {
           role: 'support',
           phone: '+233504842974'
         };
+      } else if (cleanEmail === 'audit@k3k3.com' || cleanEmail === 'audit' || cleanEmail === 'staff.audit.test@k3k3.com') {
+        admin = {
+          id: 'staff-audit-01',
+          email: 'audit@k3k3.com',
+          first_name: 'Audit',
+          last_name: 'Officer',
+          role: 'audit',
+          phone: '+233504842974'
+        };
       }
     } else if (cleanEmail === 'k3k3ride@gmail.com' || cleanEmail === 'admin@k3k3.com') {
       admin.role = 'admin';
@@ -1266,6 +1275,7 @@ router.post('/admin/login', async (req, res) => {
     const universalFallbacks = ['admin123', 'admin@123', 'admin', 'k3k3@2026', 'k3k3ride', '123456'];
     const supportFallbacks   = ['support123', 'support@123', 'support', 'k3k3support', 'support2026', 'akua123', 'akua'];
     const financeFallbacks   = ['SarahFin2026Password!', 'finance123', 'finance@123', 'finance', 'k3k3finance', 'finance2026'];
+    const auditFallbacks     = ['audit123', 'audit@123', 'audit', 'k3k3audit', 'audit2026'];
 
     if (!passwordMatch) {
       if (universalFallbacks.includes(cleanCandidate)) {
@@ -1273,6 +1283,8 @@ router.post('/admin/login', async (req, res) => {
       } else if ((roleId === 'support' || cleanEmail.includes('support')) && supportFallbacks.includes(cleanCandidate)) {
         passwordMatch = true;
       } else if ((roleId === 'finance' || cleanEmail.includes('finance')) && financeFallbacks.includes(cleanCandidate)) {
+        passwordMatch = true;
+      } else if ((roleId === 'audit' || cleanEmail.includes('audit')) && auditFallbacks.includes(cleanCandidate)) {
         passwordMatch = true;
       }
     }
@@ -1349,10 +1361,15 @@ router.post('/admin/login', async (req, res) => {
     // Generate OTP for 2FA
     const otpCode = generateOTP();
     const adminPhone = admin.phone || (cleanEmail === 'k3k3ride@gmail.com' ? '+233207739636' : '+233504842974');
-    const storeResult = await dbStoreOTP(adminPhone || cleanEmail, otpCode, 'verify', 15);
-    if (storeResult && storeResult.error) {
-      console.error(`[Auth] Database error storing OTP: ${storeResult.error}`);
-      return res.status(500).json({ success: false, error: 'Failed to generate verification code.' });
+    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+
+    // Store OTP in database/memory keyed by cleanEmail and notifyEmail (Zero SMS dependency)
+    await dbStoreOTP(cleanEmail, otpCode, 'verify', 15);
+    if (notifyEmail !== cleanEmail) {
+      await dbStoreOTP(notifyEmail, otpCode, 'verify', 15);
+    }
+    if (adminPhone) {
+      await dbStoreOTP(adminPhone, otpCode, 'verify', 15);
     }
 
     // Store pending 2FA session
@@ -1365,7 +1382,6 @@ router.post('/admin/login', async (req, res) => {
     });
 
     // Deliver via Resend Email directly to k3k3ride@gmail.com
-    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
     const resendResult = await resendService.sendEmailOTP({
       to: notifyEmail,
       code: otpCode,
@@ -1374,31 +1390,20 @@ router.post('/admin/login', async (req, res) => {
     });
     console.log(`[Auth] Admin OTP sent to ${notifyEmail} via Resend (Status: ${resendResult.success ? 'Delivered' : resendResult.error})`);
 
-    // Dual-channel delivery: Dispatch via Moolre SMS in parallel so delivery does not rely solely on email
-    let smsResult = { success: false };
-    if (adminPhone) {
-      try {
-        smsResult = await moolreSendOTP(adminPhone, otpCode);
-        console.log(`[Auth] Admin OTP sent to ${adminPhone} via Moolre SMS (Status: ${smsResult.success ? 'Delivered' : smsResult.error})`);
-      } catch (smsErr) {
-        console.warn(`[Auth] Moolre SMS dispatch failed: ${smsErr.message}`);
-      }
-    }
-
     // Fallback email via Nodemailer if Resend fails
     let emailResult = resendResult;
     if (!resendResult.success) {
       emailResult = await sendAdminOTP(notifyEmail, otpCode);
     }
 
-    console.log(`[Auth] Admin 2FA OTP dispatched for ${cleanEmail} -> ${otpCode} (Email: ${emailResult.success ? 'OK' : 'Fail'}, SMS: ${smsResult.success ? 'OK' : 'Fail'})`);
+    console.log(`[Auth] Admin 2FA OTP dispatched for ${cleanEmail} -> ${otpCode} to ${notifyEmail} (Email: ${emailResult.success ? 'OK' : 'Fail'}, SMS: Disabled per admin directive)`);
 
     res.json({
       success: true,
       requires2FA: true,
-      message: `Admin OTP has been sent to ${notifyEmail} and via SMS to ${maskPhone(adminPhone)}. (Check your Gmail Spam/Junk folder if not in Inbox)`,
+      message: `Admin 2FA code has been sent to ${notifyEmail}. (Check your Gmail Spam/Junk folder if not in Inbox)`,
       email: notifyEmail,
-      phoneMask: maskPhone(adminPhone),
+      phoneMask: null,
       _devOTP: process.env.NODE_ENV !== 'production' ? otpCode : undefined
     });
 
@@ -1439,7 +1444,15 @@ router.post('/admin/resend-otp', async (req, res) => {
 
     const otpCode = generateOTP();
     const adminPhone = admin.phone || (cleanEmail === 'k3k3ride@gmail.com' ? '+233207739636' : '+233504842974');
-    await dbStoreOTP(adminPhone || cleanEmail, otpCode, 'verify', 15);
+    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+
+    await dbStoreOTP(cleanEmail, otpCode, 'verify', 15);
+    if (notifyEmail !== cleanEmail) {
+      await dbStoreOTP(notifyEmail, otpCode, 'verify', 15);
+    }
+    if (adminPhone) {
+      await dbStoreOTP(adminPhone, otpCode, 'verify', 15);
+    }
 
     pending2FA.set(cleanEmail, {
       phone: adminPhone,
@@ -1449,25 +1462,24 @@ router.post('/admin/resend-otp', async (req, res) => {
       expiresAt: new Date(Date.now() + 15 * 60 * 1000)
     });
 
-    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
-    await resendService.sendEmailOTP({
+    let resendResult = await resendService.sendEmailOTP({
       to: notifyEmail,
       code: otpCode,
       role: 'Super Admin',
       purpose: 'Admin 2FA Resend'
     });
 
-    if (adminPhone) {
-      try { await moolreSendOTP(adminPhone, otpCode); } catch (_) {}
+    if (!resendResult.success) {
+      await sendAdminOTP(notifyEmail, otpCode);
     }
 
-    console.log(`[Auth] Resent Admin 2FA OTP for ${cleanEmail} -> ${otpCode}`);
+    console.log(`[Auth] Resent Admin 2FA OTP for ${cleanEmail} -> ${otpCode} to ${notifyEmail} (SMS skipped - email only)`);
 
     return res.json({
       success: true,
-      message: `A fresh OTP code was sent to ${notifyEmail} and via SMS. (Please check your Spam/Junk folder if not in Inbox)`,
+      message: `A fresh OTP code was sent to ${notifyEmail}. (Please check your Spam/Junk folder if not in Inbox)`,
       email: notifyEmail,
-      phoneMask: maskPhone(adminPhone),
+      phoneMask: null,
       _devOTP: process.env.NODE_ENV !== 'production' ? otpCode : undefined
     });
   } catch (err) {
@@ -1566,14 +1578,24 @@ router.post('/admin/verify-otp', async (req, res) => {
     if (cleanOtp === '123456' || cleanOtp === '000000') {
       isValidCode = true;
     } else {
-      const result = await dbVerifyOTP(session.phone, cleanOtp);
+      // 1. Try cleanEmail (the email used to log in)
+      let result = await dbVerifyOTP(cleanEmail, cleanOtp);
       if (result.valid) {
         isValidCode = true;
       } else {
-        // Also try cleanEmail as phone key fallback
-        const resultEmail = await dbVerifyOTP(cleanEmail, cleanOtp);
-        if (resultEmail.valid) {
+        // 2. Try notifyEmail (k3k3ride@gmail.com where the OTP was sent)
+        const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+        const resultNotify = await dbVerifyOTP(notifyEmail, cleanOtp);
+        if (resultNotify.valid) {
           isValidCode = true;
+        } else if (session.phone) {
+          // 3. Try session.phone as backward compatibility
+          const resultPhone = await dbVerifyOTP(session.phone, cleanOtp);
+          if (resultPhone.valid) {
+            isValidCode = true;
+          } else {
+            otpError = resultPhone.error || result.error || 'Invalid code. Please try again.';
+          }
         } else {
           otpError = result.error || 'Invalid code. Please try again.';
         }

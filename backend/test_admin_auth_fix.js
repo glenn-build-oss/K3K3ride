@@ -80,6 +80,20 @@ async function runVerification() {
     assert.strictEqual(data4.user.role, 'finance');
     console.log(`   ✅ PASS: Finance logged in directly without OTP`);
 
+    // ── TEST 4B: Audit Login ──
+    console.log('\n4️⃣B Testing Audit Login (audit@k3k3.com + audit123)...');
+    const res4b = await fetch(`${baseUrl}/api/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'audit@k3k3.com', password: 'audit123' })
+    });
+    const data4b = await res4b.json();
+    assert.strictEqual(res4b.status, 200);
+    assert.strictEqual(data4b.success, true);
+    assert.strictEqual(data4b.requires2FA, false, 'Audit must NOT require OTP');
+    assert.strictEqual(data4b.user.role, 'audit');
+    console.log(`   ✅ PASS: Audit logged in directly without OTP as "${data4b.user.name}"`);
+
     // ── TEST 5: Super Admin 2FA Dispatch (admin@k3k3.com) ──
     console.log('\n5️⃣ Testing Super Admin 2FA Dispatch (admin@k3k3.com + admin123)...');
     const res5 = await fetch(`${baseUrl}/api/auth/admin/login`, {
@@ -92,9 +106,9 @@ async function runVerification() {
     assert.strictEqual(data5.success, true);
     assert.strictEqual(data5.requires2FA, true, 'Super Admin must require 2FA OTP');
     assert.strictEqual(data5.email, 'k3k3ride@gmail.com');
+    assert.strictEqual(data5.phoneMask, null, 'Zero SMS phone mask must be returned');
     assert.ok(data5.message.includes('k3k3ride@gmail.com'));
-    assert.ok(data5.message.includes('SMS'));
-    console.log(`   ✅ PASS: Admin 2FA OTP dispatched to ${data5.email} and SMS to ${data5.phoneMask}`);
+    console.log(`   ✅ PASS: Admin 2FA OTP dispatched strictly to ${data5.email} with ZERO SMS`);
 
     // ── TEST 6: Super Admin Login via k3k3ride@gmail.com ──
     console.log('\n6️⃣ Testing Super Admin Login via owner email (k3k3ride@gmail.com + k3k3@2026)...');
@@ -107,7 +121,8 @@ async function runVerification() {
     assert.strictEqual(res6.status, 200);
     assert.strictEqual(data6.success, true);
     assert.strictEqual(data6.requires2FA, true);
-    console.log(`   ✅ PASS: k3k3ride@gmail.com recognized as Super Admin and initiated 2FA`);
+    assert.strictEqual(data6.phoneMask, null);
+    console.log(`   ✅ PASS: k3k3ride@gmail.com recognized as Super Admin and initiated email-only 2FA`);
 
     // ── TEST 7: Resend OTP API ──
     console.log('\n7️⃣ Testing POST /api/auth/admin/resend-otp...');
@@ -120,7 +135,8 @@ async function runVerification() {
     assert.strictEqual(res7.status, 200);
     assert.strictEqual(data7.success, true);
     assert.strictEqual(data7.email, 'k3k3ride@gmail.com');
-    console.log(`   ✅ PASS: Fresh OTP successfully resent to email and SMS`);
+    assert.strictEqual(data7.phoneMask, null);
+    console.log(`   ✅ PASS: Fresh OTP successfully resent strictly to email with ZERO SMS`);
 
     // ── TEST 8: Verify 2FA OTP with Master QA/Dev Code ──
     console.log('\n8️⃣ Testing POST /api/auth/admin/verify-otp with 123456...');

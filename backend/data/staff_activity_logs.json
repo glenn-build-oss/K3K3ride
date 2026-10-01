@@ -1,5 +1,115 @@
 [
   {
+    "id": "log_1790814475495_oe8my",
+    "email": "admin@k3k3.com",
+    "name": "K3K3 Admin",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "node",
+    "details": "2FA OTP verified login",
+    "timestamp": "2026-10-01T00:27:55.496Z"
+  },
+  {
+    "id": "log_1790814468329_q8ss1",
+    "email": "audit@k3k3.com",
+    "name": "Audit Officer",
+    "role": "audit",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T00:27:48.329Z"
+  },
+  {
+    "id": "log_1790814468053_03333",
+    "email": "finance@k3k3.com",
+    "name": "Sarah Connor",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T00:27:48.053Z"
+  },
+  {
+    "id": "log_1790814467628_nzqbj",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T00:27:47.628Z"
+  },
+  {
+    "id": "log_1790814466962_c8qhj",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T00:27:46.962Z"
+  },
+  {
+    "id": "log_1790814466409_xtrq5",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGIN",
+    "ip": "::ffff:127.0.0.1",
+    "user_agent": "node",
+    "details": "Staff login (No OTP required — email audit alert dispatched)",
+    "timestamp": "2026-10-01T00:27:46.409Z"
+  },
+  {
+    "id": "log_1790814357843_zgim5",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "LOGOUT",
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 Test Suite",
+    "details": "Automated test staff logout",
+    "timestamp": "2026-10-01T00:25:57.843Z"
+  },
+  {
+    "id": "log_1790814357831_tqk8g",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "LOGIN",
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 Test Suite",
+    "details": "Automated test staff login",
+    "timestamp": "2026-10-01T00:25:57.831Z"
+  },
+  {
+    "id": "log_1790814357381_1ndpj",
+    "email": "staff.audit.test@k3k3.com",
+    "name": "Audit Officer",
+    "role": "finance",
+    "action": "PASSWORD_UPDATE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "Role updated to Finance Team (password changed)",
+    "timestamp": "2026-10-01T00:25:57.381Z"
+  },
+  {
+    "id": "log_1790813568495_egqck",
+    "email": "audit@k3k3.com",
+    "name": "Auditor",
+    "role": "finance",
+    "action": "ROLE_CHANGE",
+    "ip": "127.0.0.1",
+    "user_agent": "Browser",
+    "details": "New staff member added with role Finance Team",
+    "timestamp": "2026-10-01T00:12:48.495Z"
+  },
+  {
     "id": "log_1790444227234_wrekq",
     "email": "admin@k3k3.com",
     "name": "K3K3 Admin",
