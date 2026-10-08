@@ -71,3 +71,5 @@ pnpm-lock.yaml
 
 .vercel
 .env*.local
+
+scratch/

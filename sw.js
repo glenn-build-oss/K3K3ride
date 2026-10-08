@@ -1,4 +1,4 @@
-const CACHE_NAME = 'k3k3-v7';
+const CACHE_NAME = 'k3k3-v10';
 const ASSETS = [
   '/',
   '/index.html',
@@ -13,14 +13,12 @@ const ASSETS = [
   '/passenger/login.css'
 ];
 
-// Install event - cache all assets safely
+// Install event - cache core local assets safely & take over immediately
 self.addEventListener('install', e => {
-  console.log('[SW] Installing service worker...');
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME)
       .then(async cache => {
-        console.log('[SW] Caching assets...');
         await Promise.allSettled(
           ASSETS.map(url =>
             cache.add(url).catch(err => {
@@ -28,74 +26,118 @@ self.addEventListener('install', e => {
             })
           )
         );
-        console.log('[SW] Asset caching complete');
       })
-      .then(() => {
-        console.log('[SW] Installation complete');
-        return self.skipWaiting();
-      })
+      .then(() => self.skipWaiting())
       .catch(err => {
-        console.error('[SW] Installation failed:', err);
+        console.error('[SW] Installation error:', err);
       })
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - purge all outdated caches and claim clients immediately
 self.addEventListener('activate', e => {
-  console.log('[SW] Activating service worker...');
   e.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
         keys.filter(key => key !== CACHE_NAME)
-          .map(key => {
-            console.log('[SW] Deleting old cache:', key);
-            return caches.delete(key);
-          })
+          .map(key => caches.delete(key))
       ))
-      .then(() => {
-        console.log('[SW] Activation complete');
-        return self.clients.claim();
-      })
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - handle local assets, NEVER intercept external CDNs or APIs
 self.addEventListener('fetch', e => {
-  // Skip API requests and backend calls - let them go directly to the network
-  if (e.request.url.includes('/api/') || e.request.url.includes(':8810')) {
+  // 1. Only intercept GET requests
+  if (e.request.method !== 'GET') {
     return;
   }
 
+  // 2. Ignore non-HTTP/HTTPS schemes (e.g. chrome-extension:, data:, blob:)
+  if (!e.request.url.startsWith('http://') && !e.request.url.startsWith('https://')) {
+    return;
+  }
+
+  const url = new URL(e.request.url);
+
+  // 3. DO NOT intercept external/cross-origin CDNs (fonts, leaflet, unpkg, mapbox, cdnjs, etc.)
+  // Let the browser handle external CDN resources directly with native caching and SRI integrity.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // 4. Skip backend APIs, WebSockets, Supabase, Moolre, and backend ports
+  if (
+    url.pathname.includes('/api/') ||
+    url.pathname.includes('/socket.io/') ||
+    url.pathname.includes('/trips') ||
+    url.pathname.includes('/applications') ||
+    url.pathname.includes('/riders') ||
+    url.pathname.includes('/passengers') ||
+    url.pathname.includes('/users') ||
+    url.pathname.includes('/auth') ||
+    url.port === '8810' ||
+    url.port === '8811' ||
+    url.hostname.includes('supabase.co') ||
+    url.hostname.includes('moolre.com')
+  ) {
+    return;
+  }
+
+  // 5. Safe cache/network strategy for same-origin static assets:
+  // ALWAYS returns a valid Response object; NEVER resolves to undefined or unhandled rejection.
   e.respondWith(
-    caches.match(e.request)
-      .then(response => {
-        // Return cached version if found
-        if (response) {
-          return response;
+    (async () => {
+      // Check cache first
+      try {
+        const cached = await caches.match(e.request);
+        if (cached) {
+          // Background revalidation for local assets
+          fetch(e.request)
+            .then(netRes => {
+              if (netRes && netRes.status === 200) {
+                caches.open(CACHE_NAME).then(c => c.put(e.request, netRes).catch(() => {}));
+              }
+            })
+            .catch(() => {});
+          return cached;
         }
-        
-        // Fetch from network
-        return fetch(e.request)
-          .then(response => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            
-            // Cache the response for future use
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(e.request, responseToCache);
-              });
-            
-            return response;
-          })
-          .catch(() => {
-            // Network failed, try to serve from cache
-            return caches.match(e.request);
-          });
-      })
+      } catch (_) {}
+
+      // If not in cache, fetch from network
+      try {
+        const networkResponse = await fetch(e.request);
+        if (networkResponse && networkResponse.status === 200) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone).catch(() => {}));
+        }
+        return networkResponse;
+      } catch (networkError) {
+        // Fallback: check cache again
+        try {
+          const fallbackCached = await caches.match(e.request);
+          if (fallbackCached) {
+            return fallbackCached;
+          }
+        } catch (_) {}
+
+        // For HTML navigation requests, fallback to cached index.html
+        if (e.request.mode === 'navigate') {
+          try {
+            const indexFallback = await caches.match('/index.html');
+            if (indexFallback) return indexFallback;
+          } catch (_) {}
+        }
+
+        // Return a valid Response object so browser never throws
+        // "TypeError: Failed to convert value to 'Response'"
+        return new Response('Network unavailable (offline)', {
+          status: 504,
+          statusText: 'Gateway Timeout',
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      }
+    })()
   );
 });
 

@@ -8,7 +8,7 @@ try {
   require('dotenv').config({ path: path.join(__dirname, '.env.local') });
 } catch (_) {}
 
-const PORT = process.env.PORT || 8081;
+const PORT = process.env.FRONTEND_PORT || 8081;
 const BACKEND_PORT = process.env.BACKEND_PORT || 8810;
 const ROOT = __dirname;
 
@@ -103,6 +103,21 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, {
         'Content-Type': 'application/manifest+json',
         'Cache-Control': 'no-cache'
+      });
+      res.end(data);
+    });
+    return;
+  }
+
+  // Serve sw.js with no-store and Service-Worker-Allowed header to guarantee immediate updates
+  if (url === '/sw.js') {
+    const swPath = path.join(ROOT, 'sw.js');
+    fs.readFile(swPath, (err, data) => {
+      if (err) { res.writeHead(404); res.end('Not found'); return; }
+      res.writeHead(200, {
+        'Content-Type': 'application/javascript',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Service-Worker-Allowed': '/'
       });
       res.end(data);
     });

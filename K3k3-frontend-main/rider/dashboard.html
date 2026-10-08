@@ -1821,6 +1821,185 @@
       .earnings-hero-val { font-size: 1.7rem; }
       .pay-method-amount { font-size: 1.35rem; }
     }
+
+    /* ═══════════════════════════════════════════════════════════════
+       UBER DRIVER / BOLT DRIVER SLIDING BOTTOM SHEETS (POPS UP FROM BELOW)
+    ═══════════════════════════════════════════════════════════════ */
+    .rider-bottom-sheet-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10000;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      padding: 0 12px calc(12px + env(safe-area-inset-bottom, 12px));
+    }
+
+    .rider-bottom-sheet {
+      pointer-events: none;
+      width: 100%;
+      max-width: 560px;
+      background: #0f121a;
+      color: #ffffff;
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      border-top: 2px solid #FFD60A;
+      padding: 14px 20px 20px;
+      transform: translateY(125%);
+      transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+      opacity: 0;
+      will-change: transform;
+      display: block;
+      visibility: hidden;
+      position: absolute;
+      bottom: calc(12px + env(safe-area-inset-bottom, 12px));
+    }
+
+    .rider-bottom-sheet.show {
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .rider-sheet-handle {
+      width: 44px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      margin: 0 auto 12px;
+    }
+
+    .rider-offer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .rider-offer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 214, 10, 0.15);
+      color: #FFD60A;
+      border: 1px solid rgba(255, 214, 10, 0.35);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+    }
+
+    .rider-offer-countdown-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: #FFD60A;
+    }
+
+    .rider-offer-route-box {
+      background: #181c28;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .rider-route-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+    }
+    .rider-route-point:first-child {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .rider-route-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .rider-route-icon.pickup {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .rider-route-icon.dest {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .rider-offer-fare-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(255, 214, 10, 0.08);
+      border: 1px solid rgba(255, 214, 10, 0.25);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .rider-offer-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .rider-offer-accept-btn {
+      flex: 2;
+      height: 52px;
+      background: #10B981;
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.45);
+      transition: transform 0.15s, background 0.15s;
+    }
+    .rider-offer-accept-btn:active {
+      transform: scale(0.98);
+      background: #059669;
+    }
+
+    .rider-offer-decline-btn {
+      flex: 1;
+      height: 52px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #94A3B8;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .rider-offer-decline-btn:hover {
+      background: rgba(239, 68, 68, 0.18);
+      color: #EF4444;
+    }
   </style>
 </head>
 <body>
@@ -2635,6 +2814,138 @@
 
 <!-- Toast -->
 <div id="toastCont"></div>
+
+<!-- ════════ UBER / BOLT DRIVER SLIDING BOTTOM SHEETS ════════ -->
+<div class="rider-bottom-sheet-container" id="riderBottomSheetContainer">
+
+  <!-- 1. INCOMING TRIP OFFER (POPS UP FROM BELOW) -->
+  <div class="rider-bottom-sheet" id="riderOfferBottomSheet">
+    <div class="rider-sheet-handle"></div>
+
+    <div class="rider-offer-header">
+      <div class="rider-offer-badge">
+        <i class="fas fa-bolt"></i> NEW RIDE REQUEST
+      </div>
+      <div class="rider-offer-countdown-wrap">
+        <i class="fas fa-stopwatch"></i> <span id="riderOfferTtlText">20s</span>
+      </div>
+    </div>
+
+    <!-- Route preview box -->
+    <div class="rider-offer-route-box">
+      <div class="rider-route-point">
+        <div class="rider-route-icon pickup"><i class="fas fa-location-dot"></i></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.7rem;text-transform:uppercase;color:#10B981;font-weight:800">Passenger Pickup</div>
+          <div style="font-size:0.95rem;font-weight:800;color:#F8FAFC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="riderOfferPickupText">UHAS Main Gate</div>
+          <div style="font-size:0.76rem;color:#94A3B8;margin-top:2px" id="riderOfferDistToPickup">1.3 km away • ~4 mins</div>
+        </div>
+      </div>
+
+      <div class="rider-route-point">
+        <div class="rider-route-icon dest"><i class="fas fa-flag-checkered"></i></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.7rem;text-transform:uppercase;color:#EF4444;font-weight:800">Drop-off Destination</div>
+          <div style="font-size:0.95rem;font-weight:800;color:#F8FAFC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="riderOfferDropText">Ho Market</div>
+          <div style="font-size:0.76rem;color:#94A3B8;margin-top:2px" id="riderOfferRideTypeBadge">Shared Ride (1 Seat)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fare preview row -->
+    <div class="rider-offer-fare-row">
+      <div style="font-size:0.85rem;color:#E2E8F0;font-weight:600">Estimated Trip Fare</div>
+      <div style="font-size:1.35rem;font-weight:900;color:#FFD60A" id="riderOfferFareVal">GH₵ 15.00</div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="rider-offer-actions">
+      <button type="button" class="rider-offer-decline-btn" onclick="declineCurrentOffer()">
+        Decline
+      </button>
+      <button type="button" class="rider-offer-accept-btn" id="riderOfferAcceptBtn" onclick="acceptCurrentOffer()">
+        <i class="fas fa-check"></i> ACCEPT RIDE
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. ACTIVE NAVIGATION SHEET (POPS UP ON ACCEPT) -->
+  <div class="rider-bottom-sheet" id="riderNavBottomSheet">
+    <div class="rider-sheet-handle"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span class="rider-offer-badge" id="riderNavStageBadge" style="background:rgba(16,185,129,0.15);color:#10B981;border-color:rgba(16,185,129,0.3)">
+        <i class="fas fa-location-arrow"></i> Heading to Pickup
+      </span>
+      <div style="font-weight:900;font-size:1.05rem;color:#FFD60A" id="riderNavEtaText">~4 mins</div>
+    </div>
+
+    <!-- Target location banner -->
+    <div style="background:#181c28;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-size:0.72rem;color:#94A3B8;text-transform:uppercase;font-weight:700" id="riderNavTargetLbl">Pickup Location</div>
+      <div style="font-size:1.05rem;font-weight:800;color:#FFFFFF;margin-top:2px" id="riderNavTargetPlace">UHAS Main Gate</div>
+      <div style="font-size:0.78rem;color:#34D399;margin-top:4px" id="riderNavTargetMeta">1.3 km away</div>
+    </div>
+
+    <!-- Passenger info & quick actions -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#FFD60A;color:#000;font-weight:900;font-size:1.1rem;display:flex;align-items:center;justify-content:center" id="riderNavPaxAvatar">P</div>
+        <div>
+          <div style="font-weight:800;font-size:0.92rem;color:#FFFFFF" id="riderNavPaxName">Passenger</div>
+          <div style="font-size:0.75rem;color:#FFD60A;font-weight:700"><i class="fas fa-star"></i> 4.9 · Verified</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a id="riderNavCallBtn" href="tel:" style="width:38px;height:38px;border-radius:50%;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:0.9rem" title="Call Passenger">
+          <i class="fas fa-phone"></i>
+        </a>
+        <a id="riderNavGpsBtn" href="#" target="_blank" style="padding:0 12px;height:38px;border-radius:10px;background:#FFD60A;color:#000;display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:800;font-size:0.78rem;gap:6px">
+          <i class="fab fa-google"></i> Turn-by-Turn GPS
+        </a>
+      </div>
+    </div>
+
+    <!-- Primary Progression CTA -->
+    <button type="button" class="rider-offer-accept-btn" id="riderNavPrimaryActionBtn" style="width:100%" onclick="advanceRiderTripStage()">
+      <i class="fas fa-location-crosshairs"></i> I HAVE ARRIVED
+    </button>
+  </div>
+
+  <!-- 3. TRIP COMPLETED EARNINGS SHEET -->
+  <div class="rider-bottom-sheet" id="riderTripCompletedSheet">
+    <div class="rider-sheet-handle"></div>
+
+    <div style="text-align:center;padding:6px 0 10px">
+      <div style="width:56px;height:56px;border-radius:50%;background:rgba(16,185,129,0.15);color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.6rem;border:2px solid rgba(16,185,129,0.3)">
+        <i class="fas fa-check"></i>
+      </div>
+      <div style="font-size:1.25rem;font-weight:900;color:#FFFFFF;margin-bottom:2px">Trip Completed!</div>
+      <div style="font-size:0.8rem;color:#94A3B8;margin-bottom:14px">Payment finalized and credited to your account</div>
+
+      <!-- Financial breakdown -->
+      <div style="background:#181c28;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;text-align:left;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.85rem">
+          <span style="color:#94A3B8">Total Passenger Fare:</span>
+          <strong style="color:#F8FAFC" id="riderSummaryTotalFare">GH₵ 15.00</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.82rem">
+          <span style="color:#94A3B8">Platform Commission (10%):</span>
+          <span style="color:#EF4444" id="riderSummaryCommission">- GH₵ 1.50</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;font-size:1rem">
+          <strong style="color:#10B981">Your Payout (90% MoMo):</strong>
+          <strong style="color:#10B981;font-size:1.2rem" id="riderSummaryPayout">GH₵ 13.50</strong>
+        </div>
+      </div>
+
+      <button type="button" class="rider-offer-accept-btn" style="width:100%" onclick="dismissRiderSummarySheet()">
+        <i class="fas fa-satellite-dish"></i> BACK TO FLEET RADAR
+      </button>
+    </div>
+  </div>
+
+</div>
 
 <!-- ════════════════════════════════════════
      JAVASCRIPT
@@ -4115,6 +4426,11 @@ function handleWsMessage(msg) {
   renderRequests();
   showToast(`New ride request from ${req.passengerName}! (₵${req.fare.toFixed(2)})`, 'warn');
 
+  // Slide up Uber/Bolt incoming offer bottom sheet if idle
+  if (!activeTrip && isOnline) {
+    displayRiderOfferSheet(req);
+  }
+
   // Play audio chime
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -4240,6 +4556,11 @@ async function pollPendingTrips() {
         changed = true;
         showToast('New ride request from '+req.passengerName+'!', 'warn');
         reqTimers[req.id] = setTimeout(() => dismissReq(req.id), 45000);
+
+        // Slide up offer sheet if idle
+        if (!activeTrip && !currentOfferTrip && isOnline) {
+          displayRiderOfferSheet(req);
+        }
       }
     });
 
@@ -4397,8 +4718,260 @@ function buildReqCard(r) {
 }
 
 /* ════════════════════════════════════════
-   ACCEPT / DECLINE
+   ACCEPT / DECLINE & BOTTOM SHEET CONTROLLERS
 ════════════════════════════════════════ */
+let currentOfferTrip = null;
+let offerCountdownInterval = null;
+let currentTripStage = 'heading_to_pickup'; // 'heading_to_pickup' | 'arrived_at_pickup' | 'heading_to_dest' | 'completed'
+
+function hideAllRiderBottomSheets() {
+  ['riderOfferBottomSheet', 'riderNavBottomSheet', 'riderTripCompletedSheet'].forEach(id => {
+    const s = el(id);
+    if (s) s.classList.remove('show');
+  });
+}
+
+function displayRiderOfferSheet(req) {
+  if (!req || activeTrip) return;
+  currentOfferTrip = req;
+
+  // Populate data in #riderOfferBottomSheet
+  setEl('riderOfferPickupText', req.pickup || 'Pickup Location');
+  setEl('riderOfferDropText', req.drop || 'Drop-off Destination');
+  setEl('riderOfferFareVal', `GH₵ ${parseFloat(req.fare || 15).toFixed(2)}`);
+  setEl('riderOfferRideTypeBadge', req.ride_type === 'alone' ? 'Private Ride (Sole Passenger)' : 'Shared Ride (1 Seat)');
+
+  // Calculate distance & ETA from rider's current position to passenger pickup
+  const curLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const curLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+  const pLat = parseFloat(req.pickup_lat || '6.6078');
+  const pLng = parseFloat(req.pickup_lng || '0.4651');
+  const distKm = estimateDist({ lat: curLat, lng: curLng }, { lat: pLat, lng: pLng });
+  const etaMins = Math.max(1, Math.ceil(distKm / 15 * 60));
+  setEl('riderOfferDistToPickup', `${distKm.toFixed(1)} km away • ~${etaMins} mins`);
+
+  // Start TTL visual countdown (default 20 seconds)
+  clearInterval(offerCountdownInterval);
+  let ttl = req.ttl || 20;
+  setEl('riderOfferTtlText', `${ttl}s`);
+
+  offerCountdownInterval = setInterval(() => {
+    ttl--;
+    if (ttl > 0) {
+      setEl('riderOfferTtlText', `${ttl}s`);
+    } else {
+      clearInterval(offerCountdownInterval);
+      setEl('riderOfferTtlText', 'Expired');
+      declineCurrentOffer();
+    }
+  }, 1000);
+
+  // Preview route on rider map
+  if (typeof previewReqRoute === 'function') {
+    previewReqRoute(req.id);
+  }
+
+  // Slide up offer sheet
+  hideAllRiderBottomSheets();
+  const offerSheet = el('riderOfferBottomSheet');
+  if (offerSheet) {
+    offerSheet.classList.add('show');
+  }
+}
+
+async function acceptCurrentOffer() {
+  if (!currentOfferTrip) return;
+  clearInterval(offerCountdownInterval);
+  const trip = currentOfferTrip;
+  currentOfferTrip = null;
+
+  hideAllRiderBottomSheets();
+  if (typeof clearReqRoutePreview === 'function') {
+    clearReqRoutePreview();
+  }
+
+  await acceptReq(trip.id);
+}
+
+function declineCurrentOffer() {
+  clearInterval(offerCountdownInterval);
+  if (currentOfferTrip) {
+    declineReq(currentOfferTrip.id);
+    currentOfferTrip = null;
+  }
+  hideAllRiderBottomSheets();
+  if (typeof clearReqRoutePreview === 'function') {
+    clearReqRoutePreview();
+  }
+}
+
+function setupRiderNavSheet(trip) {
+  if (!trip) return;
+  const pLat = parseFloat(trip.pickup_lat || '6.6078');
+  const pLng = parseFloat(trip.pickup_lng || '0.4651');
+  const dLat = parseFloat(trip.dest_lat || trip.dropoff_lat || '6.6005');
+  const dLng = parseFloat(trip.dest_lng || trip.dropoff_lng || '0.4715');
+  const curLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const curLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+
+  // Passenger profile
+  const name = trip.passengerName || 'Passenger';
+  setEl('riderNavPaxName', name);
+  const ini = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  setEl('riderNavPaxAvatar', ini);
+
+  const callBtn = el('riderNavCallBtn');
+  if (callBtn) {
+    callBtn.href = trip.passengerPhone ? `tel:${trip.passengerPhone}` : 'javascript:void(0)';
+    callBtn.onclick = trip.passengerPhone ? null : () => showToast(`Connecting call to ${name}…`, 'info');
+  }
+
+  const gpsBtn = el('riderNavGpsBtn');
+  const stageBadge = el('riderNavStageBadge');
+  const actionBtn = el('riderNavPrimaryActionBtn');
+
+  if (currentTripStage === 'heading_to_pickup') {
+    if (stageBadge) {
+      stageBadge.style.background = 'rgba(16,185,129,0.15)';
+      stageBadge.style.color = '#10B981';
+      stageBadge.style.borderColor = 'rgba(16,185,129,0.3)';
+      stageBadge.innerHTML = '<i class="fas fa-location-arrow"></i> Heading to Pickup';
+    }
+    const distToP = estimateDist({ lat: curLat, lng: curLng }, { lat: pLat, lng: pLng });
+    const etaP = Math.max(1, Math.ceil(distToP / 15 * 60));
+    setEl('riderNavEtaText', `~${etaP} mins`);
+    setEl('riderNavTargetLbl', 'Pickup Location');
+    setEl('riderNavTargetPlace', trip.pickup || 'Pickup Location');
+    setEl('riderNavTargetMeta', `${distToP.toFixed(1)} km away • Fast route`);
+
+    if (gpsBtn) {
+      gpsBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${curLat},${curLng}&destination=${pLat},${pLng}&travelmode=driving`;
+    }
+
+    if (actionBtn) {
+      actionBtn.style.background = '#10B981';
+      actionBtn.style.color = '#FFFFFF';
+      actionBtn.innerHTML = '<i class="fas fa-location-crosshairs"></i> I HAVE ARRIVED';
+    }
+  } else if (currentTripStage === 'arrived_at_pickup') {
+    if (stageBadge) {
+      stageBadge.style.background = 'rgba(255,214,10,0.15)';
+      stageBadge.style.color = '#FFD60A';
+      stageBadge.style.borderColor = 'rgba(255,214,10,0.3)';
+      stageBadge.innerHTML = '<i class="fas fa-bell"></i> Arrived at Pickup Spot';
+    }
+    setEl('riderNavEtaText', 'Waiting');
+    setEl('riderNavTargetLbl', 'Passenger Pickup Spot');
+    setEl('riderNavTargetPlace', trip.pickup || 'Pickup Location');
+    setEl('riderNavTargetMeta', 'At location • Passenger notified');
+
+    if (actionBtn) {
+      actionBtn.style.background = '#FFD60A';
+      actionBtn.style.color = '#000000';
+      actionBtn.innerHTML = '<i class="fas fa-user-check"></i> START RIDE (PASSENGER ON BOARD)';
+    }
+  } else if (currentTripStage === 'heading_to_dest') {
+    if (stageBadge) {
+      stageBadge.style.background = 'rgba(59,130,246,0.15)';
+      stageBadge.style.color = '#3B82F6';
+      stageBadge.style.borderColor = 'rgba(59,130,246,0.3)';
+      stageBadge.innerHTML = '<i class="fas fa-route"></i> Heading to Destination';
+    }
+    const distToD = estimateDist({ lat: curLat, lng: curLng }, { lat: dLat, lng: dLng });
+    const etaD = Math.max(1, Math.ceil(distToD / 18 * 60));
+    setEl('riderNavEtaText', `~${etaD} mins`);
+    setEl('riderNavTargetLbl', 'Drop-off Destination');
+    setEl('riderNavTargetPlace', trip.drop || 'Drop-off Destination');
+    setEl('riderNavTargetMeta', `${distToD.toFixed(1)} km to destination`);
+
+    if (gpsBtn) {
+      gpsBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${curLat},${curLng}&destination=${dLat},${dLng}&travelmode=driving`;
+    }
+
+    if (actionBtn) {
+      actionBtn.style.background = '#10B981';
+      actionBtn.style.color = '#FFFFFF';
+      actionBtn.innerHTML = '<i class="fas fa-flag-checkered"></i> COMPLETE RIDE & COLLECT FARE';
+    }
+  }
+}
+
+async function advanceRiderTripStage() {
+  if (!activeTrip) return;
+  const trip = activeTrip;
+  const tripId = trip.id;
+  const riderId = session?.dbRiderId || session?.id || session?.riderId;
+
+  if (currentTripStage === 'heading_to_pickup') {
+    // 1. Arrived at pickup
+    currentTripStage = 'arrived_at_pickup';
+    setupRiderNavSheet(trip);
+
+    // Notify backend & passenger
+    if (wsConn && wsConn.emit) {
+      wsConn.emit('trip:arrived', { tripId, riderId });
+      wsConn.emit('trip:status_change', { tripId, status: 'arriving' });
+    }
+    try {
+      fetch(`${API}/trips/${tripId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'arriving', rider_id: riderId })
+      }).catch(() => {});
+    } catch (_) {}
+
+    showToast('Arrival confirmed! Passenger notified.', 'warn');
+
+  } else if (currentTripStage === 'arrived_at_pickup') {
+    // 2. Start ride (Passenger on board)
+    currentTripStage = 'heading_to_dest';
+    await doPickupPassenger();
+    setupRiderNavSheet(trip);
+    showToast(`Ride started! Heading to ${trip.drop}`, 'success');
+
+  } else if (currentTripStage === 'heading_to_dest') {
+    // 3. Complete ride
+    currentTripStage = 'completed';
+    const fare = parseFloat(trip.fare || 15);
+    const commission = fare * 0.10;
+    const payout = fare * 0.90;
+
+    // Financial breakdown in completed sheet
+    setEl('riderSummaryTotalFare', `GH₵ ${fare.toFixed(2)}`);
+    setEl('riderSummaryCommission', `- GH₵ ${commission.toFixed(2)}`);
+    setEl('riderSummaryPayout', `GH₵ ${payout.toFixed(2)}`);
+
+    // Hide nav sheet and show completed sheet
+    hideAllRiderBottomSheets();
+    const completedSheet = el('riderTripCompletedSheet');
+    if (completedSheet) {
+      completedSheet.classList.add('show');
+    }
+
+    // Call backend completion and financial settlement
+    await doCompleteTrip();
+  }
+}
+
+function dismissRiderSummarySheet() {
+  hideAllRiderBottomSheets();
+  currentTripStage = 'heading_to_pickup';
+  activeTrip = null;
+
+  // Reset map route and center to rider location
+  if (tripRouteLayer && riderMap) {
+    riderMap.removeLayer(tripRouteLayer);
+    tripRouteLayer = null;
+  }
+  const curLat = parseFloat(sessionStorage.getItem('k3k3_rider_lat') || '6.6012');
+  const curLng = parseFloat(sessionStorage.getItem('k3k3_rider_lng') || '0.4688');
+  if (riderMap) {
+    riderMap.setView([curLat, curLng], 15);
+  }
+
+  showToast('Ready for next ride request!', 'info');
+}
+
 async function acceptReq(id) {
   const r = pendingReqs.find(x => x.id == id);
   if (!r) return;
@@ -4441,6 +5014,13 @@ async function acceptReq(id) {
   updateActiveTripMapRoute(activeTrip); // Draw road curves immediately
   showToast('Ride accepted! Head to: '+r.pickup, 'success');
   showSec('home');
+
+  // Sync with Bolt / Uber bottom navigation sheet
+  currentTripStage = 'heading_to_pickup';
+  setupRiderNavSheet(activeTrip);
+  hideAllRiderBottomSheets();
+  const navSheet = el('riderNavBottomSheet');
+  if (navSheet) navSheet.classList.add('show');
 }
 
 function declineReq(id) {
@@ -4448,6 +5028,13 @@ function declineReq(id) {
   pendingReqs = pendingReqs.filter(x => x.id != id);
   document.querySelectorAll('#rc-'+id).forEach(c => c.remove());
   renderRequests();
+
+  if (currentOfferTrip && currentOfferTrip.id == id) {
+    currentOfferTrip = null;
+    clearInterval(offerCountdownInterval);
+    hideAllRiderBottomSheets();
+    if (typeof clearReqRoutePreview === 'function') clearReqRoutePreview();
+  }
 
   const riderId = session?.dbRiderId || session?.id || session?.riderId;
   if (wsConn && wsConn.emit) {
@@ -4461,6 +5048,12 @@ function declineReq(id) {
 function dismissReq(id) {
   pendingReqs = pendingReqs.filter(x => x.id != id);
   renderRequests();
+  if (currentOfferTrip && currentOfferTrip.id == id) {
+    currentOfferTrip = null;
+    clearInterval(offerCountdownInterval);
+    hideAllRiderBottomSheets();
+    if (typeof clearReqRoutePreview === 'function') clearReqRoutePreview();
+  }
 }
 
 /* ════════════════════════════════════════
@@ -4899,6 +5492,15 @@ function openRiderWhatsAppSupport(event, customMsg) {
   } else {
     window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
   }
+}
+
+// Auto-update Service Worker to ensure fresh cache and prevent stale fetch rejections
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    for (const reg of regs) {
+      reg.update().catch(() => {});
+    }
+  }).catch(() => {});
 }
 </script>
 </body>

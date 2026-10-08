@@ -201,19 +201,20 @@
    DESKTOP LAYOUT — SIDEBAR + TOPBAR + CONTENT
 ===================================================== */
 
-    /* ─── Top Header (full-width topbar) ─── */
+    /* ─── Top Header (full-width topbar without sidebar offset) ─── */
     .top-header {
       position: fixed;
       top: 0;
-      left: var(--sidebar-w);
-      right: 0;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
       height: var(--topbar-h);
       background: var(--white);
       border-bottom: 2px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 28px;
+      padding: 0 24px;
       z-index: 500;
       box-shadow: 0 1px 0 var(--border), var(--sh-sm);
       gap: 16px;
@@ -386,37 +387,23 @@
       color: var(--text)
     }
 
-    /* Hide hamburger on desktop */
-    .hamburger {
-      display: none
+    /* ─── Universal Removal of Left Sidebar / Drawer across ALL screen sizes ─── */
+    .drawer,
+    .drawer-overlay,
+    .hamburger,
+    .sidebar-collapse-btn,
+    .sidebar-collapse-label {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      position: absolute !important;
+      left: -9999px !important;
     }
 
-    /* ─── Left Sidebar ─── */
-    .drawer-overlay {
-      display: none
-    }
-
-    .drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: var(--sidebar-w);
-      height: 100vh;
-      background: var(--black);
-      z-index: 600;
-      display: flex;
-      flex-direction: column;
-      transform: none;
-      border-right: 1px solid rgba(255, 255, 255, .06);
-      overflow-y: auto;
-      overflow-x: hidden;
-      overscroll-behavior: contain;
-      transition: width .28s var(--ease);
-    }
-
-    /* ── Collapsed sidebar — icon-only, VSCode-style with tooltips ── */
     body.sidebar-collapsed .drawer {
-      width: 64px;
+      display: none !important;
     }
 
     body.sidebar-collapsed .drawer-brand-text,
@@ -473,11 +460,11 @@
     }
 
     body.sidebar-collapsed .top-header {
-      left: 64px;
+      left: 0 !important;
     }
 
     body.sidebar-collapsed .main-content {
-      margin-left: 64px;
+      margin-left: 0 !important;
     }
 
     /* Tooltip on hover in collapsed mode */
@@ -1452,33 +1439,36 @@
       background: rgba(239, 68, 68, .18)
     }
 
-    /* ─── Main Wrapper ─── */
+    /* ─── Main Content Wrapper (No Sidebar, centered clean app container) ─── */
     .main-content {
       margin-top: var(--topbar-h);
-      margin-left: var(--sidebar-w);
-      padding: 32px 36px;
+      margin-left: 0 !important;
+      padding: 24px 20px 100px 20px !important;
       min-height: calc(100vh - var(--topbar-h));
+      max-width: 960px;
+      margin-inline: auto;
+      width: 100%;
     }
 
     /* ─── Section show/hide ─── */
     .dash-section {
-      display: none
+      display: none;
     }
 
     .dash-section.active {
       display: block;
-      animation: fadeUp .25s var(--ease)
+      animation: fadeUp .25s var(--ease);
     }
 
     @keyframes fadeUp {
       from {
         opacity: 0;
-        transform: translateY(8px)
+        transform: translateY(8px);
       }
 
       to {
         opacity: 1;
-        transform: translateY(0)
+        transform: translateY(0);
       }
     }
 
@@ -1487,9 +1477,63 @@
       max-width: 800px;
     }
 
-    /* ─── Bottom Nav — hidden on desktop ─── */
+    /* ─── Universal Bottom Nav — exactly 3 buttons on ALL devices ─── */
     .bottom-nav {
-      display: none
+      display: flex !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      height: var(--nav-h, 64px) !important;
+      background: rgba(255, 255, 255, 0.98) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border-top: 1.5px solid var(--border) !important;
+      align-items: stretch !important;
+      justify-content: space-around !important;
+      z-index: 1000 !important;
+      padding-bottom: env(safe-area-inset-bottom, 0) !important;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, .08) !important;
+    }
+
+    .nav-tab {
+      flex: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 6px 4px !important;
+      background: none !important;
+      border: none !important;
+      color: var(--muted) !important;
+      cursor: pointer !important;
+      transition: all .18s var(--ease) !important;
+      font-size: .75rem !important;
+      font-weight: 600 !important;
+      gap: 3px !important;
+      text-decoration: none !important;
+    }
+
+    .nav-tab.active {
+      color: #0A0D12 !important;
+      font-weight: 800 !important;
+    }
+
+    .nav-tab-icon {
+      font-size: 1.2rem !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 36px !important;
+      height: 26px !important;
+      border-radius: 12px !important;
+      transition: all .2s !important;
+    }
+
+    .nav-tab.active .nav-tab-icon {
+      background: rgba(255, 214, 10, 0.28) !important;
+      color: #0A0D12 !important;
     }
 
 
@@ -2858,48 +2902,70 @@
     }
 
     /* =====================================================
-   BOOK RIDE MODAL — DESKTOP CENTERED
+   BOOK RIDE & TRIP FLOW — BOLT / UBER BOTTOM SHEET
 ===================================================== */
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
       z-index: 700;
-      background: rgba(0, 0, 0, .5);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      align-items: center;
+      background: rgba(0, 0, 0, .45);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      align-items: flex-end;
       justify-content: center;
+      padding-bottom: calc(var(--nav-h) + 14px);
+      padding-top: calc(var(--topbar-h, 60px) + 12px);
+      transition: background 0.3s ease;
     }
 
     .modal-backdrop.show {
-      display: flex
+      display: flex;
     }
 
     .modal-sheet {
-      background: var(--white);
-      border-radius: var(--r-xl);
-      padding: 36px 36px 32px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: var(--sh-lg);
-      animation: modalIn .25s var(--ease);
+      background: var(--surface);
+      border-radius: 26px;
+      padding: 18px 20px calc(18px + env(safe-area-inset-bottom, 12px));
+      width: 100%;
+      max-width: min(418px, calc(100vw - 20px));
+      margin: 0 auto;
+      box-shadow: 0 -12px 42px rgba(0, 0, 0, .45), 0 4px 18px rgba(0, 0, 0, 0.25);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      max-height: calc(85vh - var(--nav-h));
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(0);
     }
 
-    @keyframes modalIn {
-      from {
-        opacity: 0;
-        transform: scale(.96)
-      }
+    .modal-backdrop.show .modal-sheet {
+      animation: sheetSlideUp .32s cubic-bezier(0.32, 0.72, 0, 1) both;
+    }
 
+    @keyframes sheetSlideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0.85;
+      }
       to {
+        transform: translateY(0);
         opacity: 1;
-        transform: scale(1)
       }
     }
 
     .modal-handle {
-      display: none
+      display: block;
+      width: 44px;
+      height: 5px;
+      background: rgba(140, 140, 150, 0.45);
+      border-radius: 4px;
+      margin: 0 auto 16px;
+      cursor: grab;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .modal-handle:hover, .modal-handle:active {
+      background: var(--yellow);
+      transform: scaleX(1.15);
     }
 
     .modal-title {
@@ -2953,13 +3019,18 @@
     }
     .modal-mapbox-wrap {
       width: 100%;
-      height: 195px;
-      border-radius: var(--r-lg);
+      height: 135px;
+      border-radius: var(--r-lg, 16px);
       overflow: hidden;
       border: 1.5px solid var(--border);
-      margin-bottom: 16px;
+      margin-bottom: 10px;
       position: relative;
-      background: #111318;
+      background: #f1f5f9;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-mapbox-wrap.expanded {
+      height: 265px !important;
     }
     #modalMapboxMap {
       width: 100%;
@@ -2969,19 +3040,49 @@
       position: absolute;
       bottom: 8px;
       left: 8px;
-      z-index: 2;
-      background: rgba(12, 13, 16, 0.88);
+      z-index: 500;
+      background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(4px);
-      padding: 3px 9px;
-      border-radius: 6px;
+      -webkit-backdrop-filter: blur(4px);
+      padding: 4px 10px;
+      border-radius: 8px;
       font-size: 0.68rem;
       font-weight: 800;
-      color: var(--yellow);
-      border: 1px solid var(--yellow-bdr);
+      color: #FFD60A;
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .modal-map-resize-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 500;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #0f172a;
       display: flex;
       align-items: center;
       gap: 5px;
-      pointer-events: none;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      touch-action: manipulation;
+    }
+    .modal-map-resize-btn:hover {
+      background: #ffffff;
+      transform: scale(1.04);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+      border-color: #00D775;
     }
     .zone-indicator-pill {
       display: inline-flex;
@@ -3142,7 +3243,7 @@
       font-weight: 700;
       cursor: pointer;
       padding: 0;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       transition: color .15s;
     }
     .campus-back-btn:hover { color: var(--text) }
@@ -3155,8 +3256,8 @@
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 10px 14px;
-      margin-bottom: 18px;
+      padding: 7px 12px;
+      margin-bottom: 10px;
     }
     .campus-route-from, .campus-route-to {
       font-size: .82rem;
@@ -3323,44 +3424,42 @@
       position: fixed;
       inset: 0;
       z-index: 800;
-      background: rgba(0, 0, 0, .85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, .35);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 24px;
+      justify-content: flex-end;
+      padding: 0;
     }
 
     .rider-search-overlay.show {
       display: flex;
-      animation: fadeInOv .3s ease;
-    }
-
-    @keyframes fadeInOv {
-      from {
-        opacity: 0
-      }
-
-      to {
-        opacity: 1
-      }
+      animation: fadeInOv .25s ease;
     }
 
     .rider-search-box {
       background: var(--white);
-      border-radius: var(--r-xl);
-      padding: 48px 40px 40px;
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      padding: 14px 28px calc(24px + env(safe-area-inset-bottom, 16px));
       width: 100%;
-      max-width: 460px;
+      max-width: 580px;
+      margin: 0 auto;
       text-align: center;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, .4);
-      animation: modalIn .35s var(--ease);
+      box-shadow: 0 -14px 48px rgba(0, 0, 0, .35);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.12);
+      animation: sheetSlideUp .38s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 88vh;
+      overflow-y: auto;
+      position: relative;
     }
 
     @media(max-width:480px) {
       .rider-search-box {
-        padding: 36px 24px 32px;
+        padding: 12px 20px calc(20px + env(safe-area-inset-bottom, 16px));
       }
     }
 
@@ -4119,25 +4218,17 @@
 
       /* ── Modal → bottom sheet on mobile ── */
       .modal-backdrop {
-        align-items: flex-end
+        align-items: flex-end;
+        padding-bottom: calc(var(--nav-h) + 12px);
       }
 
       .modal-sheet {
-        border-radius: 24px 24px 0 0;
-        padding: 20px 20px 40px;
+        border-radius: 24px;
+        padding: 16px 16px 20px;
         width: 100%;
-        max-width: 100%;
-        animation: slideUp .3s var(--ease);
-      }
-
-      @keyframes slideUp {
-        from {
-          transform: translateY(100%)
-        }
-
-        to {
-          transform: translateY(0)
-        }
+        max-width: min(418px, calc(100vw - 16px));
+        margin: 0 auto;
+        max-height: calc(85vh - var(--nav-h));
       }
 
       .modal-handle {
@@ -4711,6 +4802,535 @@
       color: #FFD60A;
       border: 1px solid rgba(255, 214, 10, 0.3);
     }
+
+    /* ═════════════════════════════════════════════════════════════════
+       4. PASSENGER BOTTOM NAV (NO SIDEBAR — HOME, MY RIDES, PROFILE)
+    ══════════════════════════════════════════════════════════════════ */
+    .drawer,
+    .drawer-overlay,
+    #drawer,
+    #drawerOverlay,
+    .sidebar-collapse-btn,
+    .hamburger {
+      display: none !important;
+    }
+
+    .top-header {
+      left: 0 !important;
+      width: 100% !important;
+      padding: 0 20px !important;
+    }
+
+    .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 860px !important;
+      margin: 0 auto !important;
+      padding-top: calc(var(--topbar-h) + 16px) !important;
+      padding-bottom: calc(var(--nav-h) + 36px) !important;
+    }
+
+    .bottom-nav {
+      display: flex !important;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-h);
+      background: #0f121a;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      align-items: stretch;
+      z-index: 850 !important;
+      pointer-events: auto !important;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      max-width: 580px;
+      margin: 0 auto;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      color: #94A3B8;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      transition: color .18s, transform .18s;
+      min-height: 48px;
+    }
+
+    .nav-tab.active {
+      color: #FFD60A;
+    }
+    .nav-tab.active .nav-tab-icon {
+      transform: translateY(-2px);
+      color: #FFD60A;
+    }
+    .nav-tab-icon {
+      font-size: 1.25rem;
+    }
+
+    /* ═════════════════════════════════════════════════════════════════
+       5. PAST TRIPS STRIP WITH CLOCK ICON (RETURNING RIDERS)
+    ══════════════════════════════════════════════════════════════════ */
+    .recent-trips-box {
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+    .recent-trips-hdr {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #FFD60A;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+    .recent-trip-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+    }
+    .recent-trip-item:hover {
+      background: rgba(255, 214, 10, 0.08);
+      border-color: rgba(255, 214, 10, 0.35);
+      transform: translateY(-1px);
+    }
+    .recent-trip-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 214, 10, 0.15);
+      color: #FFD60A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .recent-trip-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .recent-trip-dest {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .recent-trip-from {
+      font-size: 0.76rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .recent-trip-arrow {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* ═════════════════════════════════════════════════════════════════
+       6. RIDE CHOICE CARDS WITH KEKE IMAGES (UBER STYLE)
+    ══════════════════════════════════════════════════════════════════ */
+    .ride-choice-card-v2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface-2);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 0;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+      position: relative;
+    }
+    .ride-choice-card-v2:hover {
+      border-color: rgba(255, 214, 10, 0.5);
+      background: var(--surface);
+    }
+    .ride-choice-card-v2.selected {
+      border-color: #FFD60A;
+      background: rgba(255, 214, 10, 0.08);
+      box-shadow: 0 4px 20px rgba(255, 214, 10, 0.18);
+    }
+    .ride-info-left {
+      flex: 1;
+      min-width: 0;
+    }
+    .ride-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .ride-title-text {
+      font-size: 1.02rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .ride-badge-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .ride-badge-tag.shared {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .ride-badge-tag.alone {
+      background: rgba(255, 214, 10, 0.15);
+      color: #FFD60A;
+      border: 1px solid rgba(255, 214, 10, 0.35);
+    }
+    .ride-meta-row {
+      font-size: 0.75rem;
+      color: var(--text-2);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .ride-fare-tag {
+      font-size: 1.12rem;
+      font-weight: 900;
+      color: #FFD60A;
+    }
+    .keke-graphic-box {
+      width: 88px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .keke-graphic-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 10px;
+      /* Stable: zero float/jitter animation */
+      animation: none !important;
+      transform: none !important;
+      transition: transform 0.2s ease;
+    }
+    .ride-choice-card-v2:hover .keke-graphic-img {
+      transform: scale(1.02) !important;
+    }
+
+    /* Scrollable ride options container (Bolt Style) */
+    .ride-options-scroll-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: clamp(200px, 28vh, 280px);
+      overflow-y: auto;
+      padding: 2px 4px 4px 2px;
+      margin-top: 6px;
+      margin-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 214, 10, 0.35) transparent;
+    }
+    .ride-options-scroll-box::-webkit-scrollbar {
+      width: 5px;
+    }
+    .ride-options-scroll-box::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+    }
+    .ride-options-scroll-box::-webkit-scrollbar-thumb {
+      background: rgba(255, 214, 10, 0.35);
+      border-radius: 4px;
+    }
+
+    /* Payment dropdown with arrow */
+    .payment-select-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      margin: 14px 0 10px;
+      transition: border-color 0.18s;
+    }
+    .payment-select-bar:hover {
+      border-color: #FFD60A;
+    }
+    .payment-current-val {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+    .payment-dropdown-box {
+      display: none;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .payment-dropdown-box.open {
+      display: block;
+    }
+    .payment-opt-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .payment-opt-item:last-child {
+      border-bottom: none;
+    }
+    .payment-opt-item:hover, .payment-opt-item.active {
+      background: rgba(255, 214, 10, 0.08);
+    }
+
+    /* ═════════════════════════════════════════════════════════════════
+       7. STEP 3: PICKUP PIN ADJUSTMENT SCREEN (HALF-SCREEN MAP)
+    ══════════════════════════════════════════════════════════════════ */
+    #bookStep3 {
+      display: none;
+    }
+    .pin-adjust-container {
+      position: relative;
+      width: 100%;
+    }
+    .pin-adjust-map-frame {
+      width: 100%;
+      height: 46vh;
+      min-height: 250px;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      background: #11141d;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    #pinAdjustLiveMap {
+      width: 100%;
+      height: 100%;
+    }
+    .pin-crosshair-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -100%);
+      z-index: 400;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pin-eta-tag {
+      background: #000000;
+      color: #FFD60A;
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 214, 10, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      animation: bobTag 2s ease-in-out infinite;
+    }
+    @keyframes bobTag {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    .pin-svg-icon {
+      font-size: 2.2rem;
+      color: #FFD60A;
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
+    }
+    .pin-shadow-dot {
+      width: 10px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      margin-top: -2px;
+    }
+    .pin-zoom-btns {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 410;
+    }
+    .pin-zoom-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: #FFFFFF;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      transition: all 0.18s;
+    }
+    .pin-zoom-btn:hover {
+      background: #FFD60A;
+      color: #000000;
+      border-color: #FFD60A;
+    }
+
+    .pin-adjust-card-bottom {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+    }
+    .pin-confirm-header {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .pin-confirm-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .pin-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .pin-search-bar:focus-within {
+      border-color: #FFD60A;
+    }
+    .pin-search-bar input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      font-family: inherit;
+    }
+    .pin-meta-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      background: rgba(255, 214, 10, 0.08);
+      border-radius: 10px;
+      font-size: 0.88rem;
+    }
+
+    /* ═════════════════════════════════════════════════════════════════
+       8. CLOSE X BUTTON ON SEARCH RADAR & ACTIVE RIDE CANCEL
+    ══════════════════════════════════════════════════════════════════ */
+    .search-cancel-x-btn {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.18s;
+      z-index: 10;
+    }
+    .search-cancel-x-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #EF4444;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .btn-cancel-active-ride {
+      width: 100%;
+      height: 48px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      border-radius: 12px;
+      color: #EF4444;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      transition: all 0.2s;
+    }
+    .btn-cancel-active-ride:hover {
+      background: #EF4444;
+      color: #FFFFFF;
+    }
   </style>
 
 </head>
@@ -5181,6 +5801,61 @@
             </button>
           </div>
         </div>
+
+        <!-- Quick Account Hub Options (No Sidebar Needed) -->
+        <div class="card" style="grid-column: 1 / -1; margin-top: 16px;">
+          <div class="rider-cta" style="margin-bottom:16px">
+            <div class="rider-cta-icon"><i class="fas fa-motorcycle"></i></div>
+            <div class="rider-cta-text">
+              <h3>Earn with K3K3</h3>
+              <p>Apply to become an approved K3K3 rider in Ho</p>
+            </div>
+            <button class="rider-cta-btn" onclick="navTo('apply-rider',null,null)">Apply Now</button>
+          </div>
+
+          <div class="account-menu">
+            <div class="account-menu-item" onclick="navTo('rides',null,'navRides')">
+              <div class="acct-icon black"><i class="fas fa-route"></i></div>
+              <div class="acct-text">
+                <div class="acct-label">My Rides</div>
+                <div class="acct-desc">View your trip receipts and history</div>
+              </div>
+              <i class="fas fa-chevron-right acct-chevron"></i>
+            </div>
+            <div class="account-menu-item" onclick="openPassengerWhatsAppSupport(event)">
+              <div class="acct-icon green"><i class="fas fa-headset"></i></div>
+              <div class="acct-text">
+                <div class="acct-label">Support &amp; Help</div>
+                <div class="acct-desc">Live WhatsApp support (+233 50 484 2974)</div>
+              </div>
+              <i class="fas fa-chevron-right acct-chevron"></i>
+            </div>
+            <div class="account-menu-item" onclick="navTo('notifications',null,null)">
+              <div class="acct-icon blue"><i class="fas fa-bell"></i></div>
+              <div class="acct-text">
+                <div class="acct-label">Notifications</div>
+                <div class="acct-desc">Ride updates, promo codes, and alerts</div>
+              </div>
+              <i class="fas fa-chevron-right acct-chevron"></i>
+            </div>
+            <div class="account-menu-item" onclick="navTo('settings',null,null)">
+              <div class="acct-icon yellow"><i class="fas fa-gear"></i></div>
+              <div class="acct-text">
+                <div class="acct-label">Settings &amp; Preferences</div>
+                <div class="acct-desc">Language, ride notifications &amp; privacy</div>
+              </div>
+              <i class="fas fa-chevron-right acct-chevron"></i>
+            </div>
+            <div class="account-menu-item" onclick="doLogout()" style="border-bottom:none">
+              <div class="acct-icon red"><i class="fas fa-sign-out-alt"></i></div>
+              <div class="acct-text">
+                <div class="acct-label" style="color:var(--red)">Logout</div>
+                <div class="acct-desc">Sign out of your K3K3 passenger account</div>
+              </div>
+              <i class="fas fa-chevron-right acct-chevron"></i>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -5294,11 +5969,15 @@
     </section>
 
 
-    <!-- Settings section removed -->
-    <section class="dash-section" id="sec-settings" style="display:none!important">
+    <!-- ══════ SETTINGS ══════ -->
+    <section class="dash-section" id="sec-settings">
       <div class="page-header">
+        <button class="page-header-back" onclick="navTo('profile',null,'navProfile')" aria-label="Back">
+          <i class="fas fa-arrow-left"></i>
+        </button>
         <div class="page-header-info">
           <h2>Settings</h2>
+          <p>App preferences and language</p>
         </div>
       </div>
       <div class="settings-layout">
@@ -5760,17 +6439,17 @@
     </button>
     <button class="nav-tab" id="navRides" onclick="navTo('rides',null,'navRides')" aria-label="My Rides">
       <div class="nav-tab-icon"><i class="fas fa-route"></i></div>
-      Rides
+      My Rides
     </button>
-    <button class="nav-tab" id="navAccount" onclick="navTo('account',null,'navAccount')" aria-label="Account">
-      <div class="nav-tab-icon"><i class="fas fa-circle-user"></i></div>
-      Account
+    <button class="nav-tab" id="navProfile" onclick="navTo('profile',null,'navProfile')" aria-label="Profile">
+      <div class="nav-tab-icon"><i class="fas fa-user-circle"></i></div>
+      Profile
     </button>
   </nav>
 
   <!-- ─── Book Ride Modal ─── -->
   <div class="modal-backdrop" id="bookModal" onclick="handleModalBackdrop(event)">
-    <div class="modal-sheet" style="max-height:92vh;overflow-y:auto">
+    <div class="modal-sheet">
       <div class="modal-handle"></div>
 
       <!-- STEP 1: Pick locations -->
@@ -5783,6 +6462,14 @@
           <button type="button" class="modal-zone-chip active" id="mChipAll" onclick="setDestinationFilter('all', this)">All Stops</button>
           <button type="button" class="modal-zone-chip" id="mChipIn" onclick="setDestinationFilter('in', this)"><i class="fas fa-graduation-cap"></i> In-Campus (₵3.00)</button>
           <button type="button" class="modal-zone-chip" id="mChipOut" onclick="setDestinationFilter('out', this)"><i class="fas fa-city"></i> Out-Campus / Town</button>
+        </div>
+
+        <!-- Recent Trips with Clock Icon (Returning Passengers Only) -->
+        <div class="recent-trips-box" id="recentTripsBox" style="display:none">
+          <div class="recent-trips-hdr">
+            <i class="fas fa-clock"></i> Recent Trips
+          </div>
+          <div id="recentTripsList"></div>
         </div>
 
         <!-- Pickup -->
@@ -5889,14 +6576,6 @@
           </div>
         </div>
 
-        <!-- Interactive Mapbox Live Route Container -->
-        <div class="modal-mapbox-wrap" id="modalMapboxContainer">
-          <div id="modalMapboxMap"></div>
-          <div class="modal-mapbox-badge">
-            <i class="fas fa-map-marked-alt"></i> <span>Mapbox Interactive Route</span>
-          </div>
-        </div>
-
         <!-- Route preview (shown when both selected) -->
         <div id="routePreviewBar" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--yellow-lt);border:1px solid var(--yellow-bdr);border-radius:var(--r);align-items:center;justify-content:space-between;gap:12px">
           <div>
@@ -5921,7 +6600,19 @@
 
       <!-- STEP 2: Choose ride type -->
       <div id="bookStep2" style="display:none">
-        <button class="campus-back-btn" onclick="backToStep1()"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="campus-back-btn" onclick="backToStep1()"><i class="fas fa-arrow-left"></i> Back to locations</button>
+
+        <!-- Interactive Map Route (Positioned slightly above Choose Your Ride) -->
+        <div class="modal-mapbox-wrap" id="modalMapboxContainer">
+          <div id="modalMapboxMap"></div>
+          <div class="modal-mapbox-badge">
+            <i class="fas fa-route"></i> <span id="modalRouteSummaryBadge">Turn-by-Turn Route</span>
+          </div>
+          <button type="button" class="modal-map-resize-btn" id="modalMapResizeBtn" onclick="toggleModalMapSize(event)" title="Resize map view">
+            <i class="fas fa-expand-alt" id="modalMapResizeIcon"></i> <span id="modalMapResizeLabel">Expand</span>
+          </button>
+        </div>
+
         <div class="modal-title" style="margin-bottom:4px">Choose Your Ride</div>
 
         <!-- Route summary strip -->
@@ -5931,80 +6622,129 @@
           <div class="campus-route-to" id="strip-to">—</div>
         </div>
 
-        <!-- Ride option cards -->
-        <div class="ride-choice-grid" id="rideChoiceGrid">
-
-          <!-- SHARED -->
-          <div class="ride-choice-card" id="card-shared" onclick="selectRideType('shared')">
-            <div class="ride-choice-header">
-              <div class="ride-choice-icon-wrap shared">
-                <i class="fas fa-users"></i>
+        <!-- Scrollable ride option cards with stable keke images (Bolt Style) -->
+        <div class="ride-options-scroll-box">
+          <!-- K3K3 SHARED -->
+          <div class="ride-choice-card-v2 selected" id="card-shared-v2" onclick="selectRideType('shared')">
+            <div class="ride-info-left">
+              <div class="ride-title-row">
+                <span class="ride-title-text">K3K3 Shared</span>
+                <span class="ride-badge-tag shared">Best Value</span>
               </div>
-              <div class="ride-badge-shared"><i class="fas fa-leaf" style="font-size:.6rem"></i> Best Value</div>
+              <div class="ride-meta-row">
+                <span><i class="fas fa-user-group"></i> 1–3 passengers</span>
+                <span>•</span>
+                <span id="sharedEtaTag"><i class="fas fa-clock"></i> ~3-5 mins</span>
+              </div>
+              <div class="ride-fare-tag">
+                GH₵ <span id="fareSharedVal">3.00</span>
+              </div>
             </div>
-            <div class="ride-choice-name">Shared Ride</div>
-            <div class="ride-choice-sub">Share with others &amp; save</div>
-            <div class="ride-choice-meta"><i class="fas fa-user-friends"></i> Up to 3 passengers · <i class="fas fa-clock"></i> May wait briefly</div>
-            <div class="ride-choice-price">
-              <span class="ride-price-currency">₵</span>
-              <span class="ride-price-amount" id="fareShared">—</span>
+            <div class="keke-graphic-box">
+              <img src="../assets/Shared%20Ride.jpg" alt="K3K3 Shared Ride" class="keke-graphic-img" onerror="this.src='../assets/k3k3 - wobbly.png'">
             </div>
-            <div class="ride-price-note" id="fareSharedNote">per person, fixed fare</div>
           </div>
 
-          <!-- RIDE ALONE -->
-          <div class="ride-choice-card" id="card-alone" onclick="selectRideType('alone')">
-            <div class="ride-choice-header">
-              <div class="ride-choice-icon-wrap alone">
-                <i class="fas fa-user"></i>
+          <!-- K3K3 ALONE -->
+          <div class="ride-choice-card-v2" id="card-alone-v2" onclick="selectRideType('alone')">
+            <div class="ride-info-left">
+              <div class="ride-title-row">
+                <span class="ride-title-text">K3K3 Alone</span>
+                <span class="ride-badge-tag alone">Private</span>
+              </div>
+              <div class="ride-meta-row">
+                <span><i class="fas fa-user"></i> Sole passenger</span>
+                <span>•</span>
+                <span id="aloneEtaTag"><i class="fas fa-bolt"></i> ~2-4 mins</span>
+              </div>
+              <div class="ride-fare-tag">
+                GH₵ <span id="fareAloneVal">6.00</span>
               </div>
             </div>
-            <div class="ride-choice-name">Ride Alone</div>
-            <div class="ride-choice-sub">Private ride, no waiting</div>
-            <div class="ride-choice-meta"><i class="fas fa-lock"></i> Just you · <i class="fas fa-bolt"></i> Instant pickup</div>
-            <div class="ride-choice-price">
-              <span class="ride-price-currency">₵</span>
-              <span class="ride-price-amount" id="fareAlone">—</span>
-            </div>
-            <div class="ride-price-note">full vehicle to yourself</div>
-          </div>
-        </div>
-
-        <!-- Payment method selection -->
-        <div class="campus-payment-section">
-          <div class="campus-payment-label">Payment Method</div>
-          <div class="campus-payment-options">
-            <div class="campus-payment-option" id="payment-cash" onclick="selectPaymentMethod('cash')">
-              <div class="campus-payment-icon">
-                <i class="fas fa-money-bill-wave" style="color:var(--green)"></i>
-              </div>
-              <div class="campus-payment-info">
-                <div class="campus-payment-name">Cash</div>
-                <div class="campus-payment-desc">Pay driver after ride</div>
-              </div>
-              <div class="campus-payment-check">
-                <i class="fas fa-check-circle"></i>
-              </div>
-            </div>
-            <div class="campus-payment-option" id="payment-momo" onclick="selectPaymentMethod('momo')">
-              <div class="campus-payment-icon">
-                <i class="fas fa-mobile-alt" style="color:var(--yellow)"></i>
-              </div>
-              <div class="campus-payment-info">
-                <div class="campus-payment-name">MoMo</div>
-                <div class="campus-payment-desc">Pay via mobile money</div>
-              </div>
-              <div class="campus-payment-check">
-                <i class="fas fa-check-circle"></i>
-              </div>
+            <div class="keke-graphic-box">
+              <img src="../assets/Alone%20Ride.jpg" alt="K3K3 Alone Ride" class="keke-graphic-img" onerror="this.src='../assets/k3k3.png'">
             </div>
           </div>
         </div>
 
-        <button class="book-btn" style="width:100%;margin-top:12px" id="confirmRideBtn" onclick="confirmRide()" disabled>
-          <i class="fas fa-motorcycle"></i> <span id="confirmRideBtnLabel">Select a ride</span>
+        <!-- Payment selector with dropdown chevron arrow (defaulting to Cash) -->
+        <div class="payment-select-bar" onclick="togglePaymentDropdown()" id="paymentSelectBar">
+          <div class="payment-current-val">
+            <i class="fas fa-money-bill-wave" id="currentPaymentIcon" style="color:#10B981"></i>
+            <span id="currentPaymentLabel">Cash</span>
+          </div>
+          <i class="fas fa-chevron-down" id="paymentChevron" style="color:var(--muted);font-size:0.85rem;transition:transform 0.2s"></i>
+        </div>
+        <div class="payment-dropdown-box" id="paymentDropdownList">
+          <div class="payment-opt-item active" id="popt-cash" onclick="choosePaymentMethod('cash')">
+            <div style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:0.88rem;color:var(--text)">
+              <i class="fas fa-money-bill-wave" style="color:#10B981"></i> Cash
+            </div>
+            <i class="fas fa-check" style="color:#10B981" id="pcheck-cash"></i>
+          </div>
+          <div class="payment-opt-item" id="popt-momo" onclick="choosePaymentMethod('momo')">
+            <div style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:0.88rem;color:var(--text)">
+              <i class="fas fa-mobile-alt" style="color:#FFD60A"></i> MoMo (Mobile Money)
+            </div>
+            <i class="fas fa-check" style="color:#FFD60A;display:none" id="pcheck-momo"></i>
+          </div>
+        </div>
+
+        <!-- Select K3K3 action button -->
+        <button class="book-btn" style="width:100%;margin-top:12px" id="selectKekeBtn" onclick="goToStep3PinAdjust()">
+          <i class="fas fa-motorcycle"></i> <span id="selectKekeBtnLabel">Select K3K3</span>
         </button>
         <button class="btn-cancel" style="width:100%;margin-top:8px;text-align:center" onclick="closeBookModal()">Cancel</button>
+      </div>
+
+      <!-- STEP 3: Pickup Pin Adjustment Screen (Half-Screen Map) -->
+      <div id="bookStep3" style="display:none">
+        <button class="campus-back-btn" onclick="backToStep2()"><i class="fas fa-arrow-left"></i> Back</button>
+        <div class="pin-adjust-container">
+          <!-- Sizable map taking ~46vh -->
+          <div class="pin-adjust-map-frame" id="pinAdjustMapFrame">
+            <div id="pinAdjustLiveMap"></div>
+
+            <!-- Centered Pin Marker with Floating ETA Tooltip -->
+            <div class="pin-crosshair-center">
+              <div class="pin-eta-tag">
+                <i class="fas fa-motorcycle"></i> <span id="pinEtaDisplay">~3 mins away</span>
+              </div>
+              <i class="fas fa-location-dot pin-svg-icon"></i>
+              <div class="pin-shadow-dot"></div>
+            </div>
+
+            <!-- Floating Zoom Controls -->
+            <div class="pin-zoom-btns">
+              <button type="button" class="pin-zoom-btn" onclick="zoomPinMap(1)" aria-label="Zoom In"><i class="fas fa-plus"></i></button>
+              <button type="button" class="pin-zoom-btn" onclick="zoomPinMap(-1)" aria-label="Zoom Out"><i class="fas fa-minus"></i></button>
+            </div>
+          </div>
+
+          <!-- Search Bar with Magnifying Glass -->
+          <div class="pin-search-bar" style="margin-top:12px">
+            <i class="fas fa-magnifying-glass" style="color:#FFD60A;font-size:1rem"></i>
+            <input type="text" id="pinSearchInput" placeholder="Edit pickup address or landmark..." onchange="onPinAddressChange(this.value)">
+          </div>
+
+          <!-- Bottom Confirmation Card -->
+          <div class="pin-adjust-card-bottom">
+            <div class="pin-confirm-header">Confirm pickup</div>
+            <div class="pin-confirm-sub">Drag the pin or edit your address to set your pickup</div>
+
+            <div class="pin-meta-summary">
+              <div style="font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px">
+                <i class="fas fa-motorcycle" style="color:#FFD60A"></i>
+                <span id="pinSummaryRideType">K3K3 Shared</span>
+              </div>
+              <div style="font-weight:900;color:#FFD60A;font-size:1.1rem" id="pinSummaryFare">GH₵ 3.00</div>
+            </div>
+
+            <button class="book-btn" style="width:100%" id="finalConfirmRideBtn" onclick="confirmRide()">
+              <i class="fas fa-check"></i> Confirm Pickup
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -6013,9 +6753,14 @@
   <!-- Toast -->
   <div id="toast-container"></div>
 
-  <!-- Rider Search Overlay -->
+  <!-- Rider Search Overlay (Bolt/Uber Sliding Bottom Sheet) -->
   <div class="rider-search-overlay" id="riderSearchOverlay">
     <div class="rider-search-box" id="riderSearchBox">
+      <!-- Close X Button to Cancel Search -->
+      <button type="button" class="search-cancel-x-btn" onclick="cancelRideSearch()" aria-label="Cancel Search">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-handle"></div>
 
       <!-- SEARCHING STATE -->
       <div id="searchingState">
@@ -6080,12 +6825,22 @@
             </div>
           </div>
 
+          <!-- Route Strip & Category -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:0.82rem;margin-bottom:8px">
+            <div style="color:var(--text-2);display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis">
+              <i class="fas fa-route" style="color:var(--yellow-dk);flex-shrink:0"></i>
+              <span id="assignedRouteStrip" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Ho Central → Trafalgar</span>
+            </div>
+            <div style="font-weight:800;color:var(--yellow-dk);flex-shrink:0;margin-left:8px" id="assignedCategoryBadge">K3K3 Shared</div>
+          </div>
+
+          <!-- Vehicle Model, Payment & Fare -->
           <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);font-size:0.82rem;margin-bottom:12px">
             <div style="color:var(--text-2);display:flex;align-items:center;gap:6px">
-              <i class="fas fa-motorcycle" style="color:var(--yellow-dk)"></i>
-              <span id="assignedRiderVehicle">TVS King Deluxe Tricycle</span>
+              <i class="fas fa-wallet" style="color:var(--green)"></i>
+              <span>Pay: <strong id="assignedPaymentMethod" style="color:var(--text)">Cash</strong></span>
             </div>
-            <div style="font-weight:800;color:var(--green)">Fare: <span id="assignedRiderFare">GH₵ 12.00</span></div>
+            <div style="font-weight:900;color:var(--green);font-size:1.02rem">Fare: <span id="assignedRiderFare">GH₵ 12.00</span></div>
           </div>
 
           <!-- Direct Call & SMS Buttons -->
@@ -6100,12 +6855,12 @@
         </div>
 
         <!-- ETA Banner -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,214,10,0.12);border:1px solid rgba(255,214,10,0.3);border-radius:10px;font-size:0.88rem;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,214,10,0.12);border:1px solid rgba(255,214,10,0.3);border-radius:10px;font-size:0.88rem;margin-bottom:12px">
           <span style="color:var(--text);font-weight:600"><i class="fas fa-clock" style="color:var(--yellow-dk)"></i> Estimated Driver Arrival</span>
           <span style="font-weight:900;color:var(--text);font-size:1.05rem" id="assignedRiderETA">~3 min</span>
         </div>
 
-        <div style="display:flex;gap:10px">
+        <div style="display:flex;gap:10px;margin-bottom:10px">
           <button class="rsearch-retry-btn" onclick="viewLiveTripTracking()" style="background:var(--yellow);color:var(--black);font-weight:800;border-radius:10px;flex:1;height:46px">
             <i class="fas fa-map-location-dot"></i> Track Live On Map
           </button>
@@ -6113,6 +6868,11 @@
             <i class="fas fa-id-card"></i> Profile
           </button>
         </div>
+
+        <!-- Working Cancel Ride Button -->
+        <button type="button" class="btn-cancel-active-ride" onclick="cancelActiveRide()">
+          <i class="fas fa-ban"></i> Cancel Ride
+        </button>
       </div>
 
   <!-- Assigned Rider Profile Modal -->
@@ -6236,6 +6996,56 @@
     </div>
   </div>
 
+  <!-- ══════ BOLT/UBER TRIP COMPLETED & RATING BOTTOM SHEET ══════ -->
+  <div class="modal-backdrop" id="tripCompletedModal" style="z-index:9999" onclick="if(event.target===this)closeTripCompletedModal()">
+    <div class="modal-sheet" style="text-align:center">
+      <div class="modal-handle"></div>
+      <div style="width:60px;height:60px;border-radius:50%;background:rgba(16,185,129,0.15);color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.75rem;border:2px solid rgba(16,185,129,0.3)">
+        <i class="fas fa-check"></i>
+      </div>
+      <div class="modal-title" style="justify-content:center;margin-bottom:4px">Trip Completed!</div>
+      <div style="font-size:0.85rem;color:var(--text-2);margin-bottom:16px" id="tripCompletedSub">Hope you had a smooth ride with K3K3</div>
+
+      <!-- Receipt summary box -->
+      <div style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;text-align:left">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:0.82rem;color:var(--text-2)">Total Fare</span>
+          <span style="font-size:1.35rem;font-weight:900;color:var(--green)" id="completedFareVal">GH₵ 15.00</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:0.8rem;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">
+          <div><i class="fas fa-route" style="color:var(--yellow-dk)"></i> <span id="completedDistVal">4.2 km</span></div>
+          <div><i class="fas fa-clock" style="color:var(--yellow-dk)"></i> <span id="completedDurationVal">12 mins</span></div>
+          <div><i class="fas fa-shield-halved" style="color:#10B981"></i> Verified Safe</div>
+        </div>
+      </div>
+
+      <!-- Interactive 5-Star Rating -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:0.9rem;font-weight:800;color:var(--text);margin-bottom:8px">Rate Your Rider</div>
+        <div id="starRatingRow" style="display:flex;justify-content:center;gap:10px;font-size:2rem;color:#D1D5DB;cursor:pointer">
+          <span onclick="setPassengerRating(1)" onmouseover="highlightStars(1)"><i class="fas fa-star" id="star-1"></i></span>
+          <span onclick="setPassengerRating(2)" onmouseover="highlightStars(2)"><i class="fas fa-star" id="star-2"></i></span>
+          <span onclick="setPassengerRating(3)" onmouseover="highlightStars(3)"><i class="fas fa-star" id="star-3"></i></span>
+          <span onclick="setPassengerRating(4)" onmouseover="highlightStars(4)"><i class="fas fa-star" id="star-4"></i></span>
+          <span onclick="setPassengerRating(5)" onmouseover="highlightStars(5)"><i class="fas fa-star" id="star-5"></i></span>
+        </div>
+        <div id="starRatingLabel" style="font-size:0.8rem;font-weight:700;color:var(--yellow-dk);margin-top:6px">Tap to rate (5.0 Excellent)</div>
+      </div>
+
+      <!-- Feedback chips -->
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px" id="feedbackChips">
+        <button type="button" class="modal-zone-chip active" onclick="this.classList.toggle('active')">Polite Driver</button>
+        <button type="button" class="modal-zone-chip active" onclick="this.classList.toggle('active')">Clean Keke</button>
+        <button type="button" class="modal-zone-chip active" onclick="this.classList.toggle('active')">Smooth Route</button>
+        <button type="button" class="modal-zone-chip active" onclick="this.classList.toggle('active')">On Time</button>
+      </div>
+
+      <button type="button" class="book-btn" style="width:100%" onclick="submitTripRating()">
+        <i class="fas fa-check"></i> Submit Rating &amp; Finish
+      </button>
+    </div>
+  </div>
+
   <!-- Geofencing Out of Service Area Notice Modal -->
   <div class="rider-profile-modal-backdrop" id="serviceAreaNoticeModal" style="display:none">
     <div class="rider-profile-modal-box" style="max-width:440px">
@@ -6265,7 +7075,7 @@
 
 
   <!-- ══════ LOCATION PERMISSION PROMPT MODAL ══════ -->
-  <div class="location-prompt-modal-backdrop" id="enableLocationModal" style="display:flex">
+  <div class="location-prompt-modal-backdrop" id="enableLocationModal" style="display:none">
     <div class="location-prompt-card">
       <div class="location-pulse-ring">
         <i class="fas fa-location-crosshairs"></i>
@@ -7301,6 +8111,14 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function goBack() {
+      if (prevSection && prevSection !== currentSection) {
+        navTo(prevSection, null, prevSection === 'rides' ? 'navRides' : (prevSection === 'profile' ? 'navProfile' : 'navHome'));
+      } else {
+        navTo('profile', null, 'navProfile');
+      }
+    }
+
     /* ══════════════════════════════════════════
        Sidebar Collapse
     ══════════════════════════════════════════ */
@@ -7369,48 +8187,35 @@
     }
 
     /* ══════════════════════════════════════════
-       Location Permission
+       Past Trips Storage (Returning vs First Ride)
     ══════════════════════════════════════════ */
-    function initLocationPrompt() {
-      const granted = sessionStorage.getItem('k3k3_location_granted');
-      const denied = sessionStorage.getItem('k3k3_location_denied');
-      if (!granted && !denied) {
-        setTimeout(() => {
-          const el = document.getElementById('locationPrompt');
-          if (el) el.classList.remove('hidden');
-        }, 2500);
+    function recordPastTrip(pickup, dest) {
+      if (!pickup || !dest) return;
+      try {
+        let past = JSON.parse(localStorage.getItem('k3k3_past_trips') || '[]');
+        past = past.filter(t => !(t.pickup === pickup && t.dest === dest));
+        past.unshift({ pickup, dest, time: Date.now() });
+        if (past.length > 5) past = past.slice(0, 5);
+        localStorage.setItem('k3k3_past_trips', JSON.stringify(past));
+      } catch (_) {}
+    }
+
+    function getRecentTrips() {
+      try {
+        return JSON.parse(localStorage.getItem('k3k3_past_trips') || '[]');
+      } catch (_) {
+        return [];
       }
     }
-    function allowLocation() {
-      document.getElementById('locationPrompt').classList.add('hidden');
-      requestLocationPermission();
-    }
-    function denyLocation() {
-      document.getElementById('locationPrompt').classList.add('hidden');
-      sessionStorage.setItem('k3k3_location_denied', 'true');
-      showToast('Location access denied. Enable it in Settings anytime.', 'info');
-    }
-    function requestLocationPermission() {
-      if (!navigator.geolocation) { showToast('Geolocation not supported', 'error'); return; }
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          sessionStorage.setItem('k3k3_location_granted', 'true');
-          sessionStorage.setItem('k3k3_lat', pos.coords.latitude);
-          sessionStorage.setItem('k3k3_lng', pos.coords.longitude);
-          showToast('Location access enabled ✓', 'success');
-          
-          if (!isInsideHoVoltaServiceZone(pos.coords.latitude, pos.coords.longitude)) {
-            showServiceAreaNotice(pos.coords.latitude, pos.coords.longitude);
-          } else {
-            autoFillPickup(pos.coords.latitude, pos.coords.longitude);
-          }
-        },
-        () => {
-          showToast('Location access denied by browser.', 'error');
-          setToggle('toggleLocation', false);
-          sessionStorage.setItem('k3k3_privacyLocation', 'false');
-        }
-      );
+
+    function quickSelectPastTrip(pickup, dest) {
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = pickup;
+      if (dSel) dSel.value = dest;
+      _pickupVal = pickup;
+      _destVal = dest;
+      if (typeof onLocationChange === 'function') onLocationChange();
     }
 
     /* ─── Reverse geocode & auto-fill pickup ─── */
@@ -7437,42 +8242,68 @@
     ══════════════════════════════════════════ */
     function openBookModal(dest) {
       const modal = document.getElementById('bookModal');
-      modal.classList.add('show');
+      if (modal) modal.classList.add('show');
 
       // Always start at step 1 and reset state
       const step1 = document.getElementById('bookStep1');
       const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
       if (step1) step1.style.display = 'block';
       if (step2) step2.style.display = 'none';
+      if (step3) step3.style.display = 'none';
+
+      // Past trips with clock icon: ONLY shown if returning passenger has history
+      const recentTrips = getRecentTrips();
+      const recentBox = document.getElementById('recentTripsBox');
+      const recentList = document.getElementById('recentTripsList');
+      if (recentTrips && recentTrips.length > 0 && recentBox && recentList) {
+        recentList.innerHTML = recentTrips.slice(0, 3).map(t => {
+          const safeP = (t.pickup || '').replace(/'/g, "\\'");
+          const safeD = (t.dest || '').replace(/'/g, "\\'");
+          return `
+            <div class="recent-trip-item" onclick="quickSelectPastTrip('${safeP}', '${safeD}')">
+              <div class="recent-trip-icon"><i class="fas fa-clock"></i></div>
+              <div class="recent-trip-text">
+                <div class="recent-trip-dest">${t.dest || 'Campus'}</div>
+                <div class="recent-trip-from"><i class="fas fa-location-dot" style="font-size:0.65rem;color:#10B981"></i> From ${t.pickup || 'Ho'}</div>
+              </div>
+              <div class="recent-trip-arrow"><i class="fas fa-chevron-right"></i></div>
+            </div>
+          `;
+        }).join('');
+        recentBox.style.display = 'block';
+      } else if (recentBox) {
+        // First-time rider: completely hidden! Only "Where are you going?" and clean inputs appear
+        recentBox.style.display = 'none';
+      }
 
       // Reset ride type selection
       _rideType = null;
       _campusFare = null;
       _pickupVal = '';
       _destVal = '';
-      ['card-shared','card-alone'].forEach(id => {
+      ['card-shared-v2','card-alone-v2','card-shared','card-alone'].forEach(id => {
         const c = document.getElementById(id);
         if (c) c.classList.remove('selected');
       });
 
-      // Reset payment method selection
-      paymentMethod = null;
-      ['payment-cash','payment-momo'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('selected');
-      });
+      // Reset payment method selection defaulting to Cash
+      paymentMethod = 'cash';
+      const pLbl = document.getElementById('currentPaymentLabel');
+      const pIco = document.getElementById('currentPaymentIcon');
+      if (pLbl) pLbl.textContent = 'Cash';
+      if (pIco) { pIco.className = 'fas fa-money-bill-wave'; pIco.style.color = '#10B981'; }
 
-      const confirmBtn = document.getElementById('confirmRideBtn');
-      const confirmLbl = document.getElementById('confirmRideBtnLabel');
+      const selectBtn = document.getElementById('selectKekeBtn') || document.getElementById('confirmRideBtn');
+      const selectLbl = document.getElementById('selectKekeBtnLabel') || document.getElementById('confirmRideBtnLabel');
       const nextBtn    = document.getElementById('step1NextBtn');
-      if (confirmBtn) confirmBtn.disabled = true;
-      if (confirmLbl) confirmLbl.textContent = 'Select a ride';
+      if (selectBtn) selectBtn.disabled = true;
+      if (selectLbl) selectLbl.textContent = 'Select K3K3';
       if (nextBtn)    { nextBtn.disabled = true; nextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Choose Ride'; }
 
       // If a destination was passed (from a quick chip), pre-fill the dest dropdown
       const destSel = document.getElementById('destSelect');
       if (dest && destSel) {
-        // Try to match the exact campus location name
         const opts = Array.from(destSel.options);
         const match = opts.find(o => o.value === dest || o.text === dest);
         destSel.value = match ? match.value : '';
@@ -7483,18 +8314,18 @@
         if (routePreview) routePreview.style.display = 'none';
       }
 
-      // Focus the pickup select and initialize modal Mapbox container
       setTimeout(() => document.getElementById('pickupSelect')?.focus(), 150);
-      setTimeout(initModalMapbox, 180);
     }
+
     function closeBookModal() {
       const modal = document.getElementById('bookModal');
       if (modal) modal.classList.remove('show');
-      // Reset to step 1
       const step1 = document.getElementById('bookStep1');
       const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
       if (step1) step1.style.display = 'block';
       if (step2) step2.style.display = 'none';
+      if (step3) step3.style.display = 'none';
     }
     function handleModalBackdrop(e) { if (e.target === document.getElementById('bookModal')) closeBookModal(); }
 
@@ -7780,6 +8611,7 @@
     let _modalLeafletPickupMarker = null;
     let _modalLeafletDestMarker = null;
     let _modalLeafletRouteLine = null;
+    let _modalLeafletCasing = null;
 
     function handleMapClickSelection(lat, lng) {
       const closest = findClosestHoLandmark(lat, lng);
@@ -7805,82 +8637,69 @@
       const container = document.getElementById('modalMapboxMap');
       if (!container) return;
 
-      const storedToken = localStorage.getItem('k3k3_mapbox_token') || sessionStorage.getItem('k3k3_mapbox_token');
-      if (storedToken) _modalMapboxToken = storedToken.trim();
-
-      const hasValidToken = _modalMapboxToken && _modalMapboxToken.startsWith('pk.') && _modalMapboxToken.length > 25;
-
-      if (hasValidToken && typeof mapboxgl !== 'undefined') {
-        if (_modalLeafletMap) {
-          try { _modalLeafletMap.remove(); } catch(_) {}
-          _modalLeafletMap = null;
-        }
-        if (_modalMapbox) {
-          _modalMapbox.resize();
-          return;
-        }
-
-        try {
-          mapboxgl.accessToken = _modalMapboxToken;
-          _modalMapbox = new mapboxgl.Map({
-            container: 'modalMapboxMap',
-            style: 'mapbox://styles/mapbox/dark-v11',
-            center: [0.4688, 6.6012],
-            zoom: 12.6,
-            attributionControl: false
-          });
-
-          _modalMapbox.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
-
-          _modalMapbox.on('load', () => {
-            _modalMapbox.resize();
-            const p = (document.getElementById('pickupSelect')?.value || '').trim();
-            const d = (document.getElementById('destSelect')?.value || '').trim();
-            if (p && d) updateModalMapboxRoute(p, d);
-          });
-
-          _modalMapbox.on('click', (e) => {
-            handleMapClickSelection(e.lngLat.lat, e.lngLat.lng);
-          });
-          return;
-        } catch (err) {
-          console.warn('[Mapbox initialization exception, falling back to Leaflet]', err);
-        }
-      }
-
-      // Zero-Token Engine: High-Performance Leaflet Vector & OpenStreetMap
-      if (typeof L === 'undefined') return;
       if (_modalLeafletMap) {
-        setTimeout(() => _modalLeafletMap.invalidateSize(), 200);
+        setTimeout(() => {
+          if (_modalLeafletMap) {
+            _modalLeafletMap.invalidateSize();
+            if (_modalLeafletRouteLine) {
+              _modalLeafletMap.fitBounds(_modalLeafletRouteLine.getBounds(), { padding: [22, 22] });
+            }
+          }
+        }, 120);
         return;
       }
 
-      container.innerHTML = ''; // clear any empty mapbox canvas
+      container.innerHTML = '';
 
-      _modalLeafletMap = L.map('modalMapboxMap', {
-        zoomControl: false,
-        attributionControl: false,
-        scrollWheelZoom: false
-      }).setView([6.6012, 0.4688], 14);
+      if (typeof L !== 'undefined') {
+        _modalLeafletMap = L.map('modalMapboxMap', {
+          zoomControl: false,
+          attributionControl: false,
+          scrollWheelZoom: true,
+          dragging: true,
+          touchZoom: true
+        }).setView([6.6110, 0.4710], 14);
 
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-      }).addTo(_modalLeafletMap);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(_modalLeafletMap);
 
-      L.control.zoom({ position: 'topright' }).addTo(_modalLeafletMap);
+        _modalLeafletMap.on('click', (e) => {
+          handleMapClickSelection(e.latlng.lat, e.latlng.lng);
+        });
 
-      _modalLeafletMap.on('click', (e) => {
-        handleMapClickSelection(e.latlng.lat, e.latlng.lng);
-      });
+        window._modalLeafletMap = _modalLeafletMap;
+
+        setTimeout(() => {
+          if (_modalLeafletMap) {
+            _modalLeafletMap.invalidateSize();
+            const p = (document.getElementById('pickupSelect')?.value || '').trim();
+            const d = (document.getElementById('destSelect')?.value || '').trim();
+            if (p && d) updateModalMapboxRoute(p, d);
+          }
+        }, 200);
+      }
+    }
+
+    function toggleModalMapSize(e) {
+      if (e) e.stopPropagation();
+      const wrap = document.getElementById('modalMapboxContainer');
+      const icon = document.getElementById('modalMapResizeIcon');
+      const label = document.getElementById('modalMapResizeLabel');
+      if (!wrap) return;
+
+      const isExpanded = wrap.classList.toggle('expanded');
+      if (icon) icon.className = isExpanded ? 'fas fa-compress-alt' : 'fas fa-expand-alt';
+      if (label) label.textContent = isExpanded ? 'Compact' : 'Expand';
 
       setTimeout(() => {
         if (_modalLeafletMap) {
           _modalLeafletMap.invalidateSize();
-          const p = (document.getElementById('pickupSelect')?.value || '').trim();
-          const d = (document.getElementById('destSelect')?.value || '').trim();
-          if (p && d) updateModalMapboxRoute(p, d);
+          if (_modalLeafletRouteLine) {
+            _modalLeafletMap.fitBounds(_modalLeafletRouteLine.getBounds(), { padding: [24, 24] });
+          }
         }
-      }, 250);
+      }, 320);
     }
 
     function findClosestHoLandmark(lat, lng) {
@@ -8069,36 +8888,45 @@
           }
         };
 
-        if (_modalMapbox.getSource('modalRouteSrc')) {
-          _modalMapbox.getSource('modalRouteSrc').setData(routeGeoJSON);
-        } else if (_modalMapbox.isStyleLoaded()) {
-          _modalMapbox.addSource('modalRouteSrc', { type: 'geojson', data: routeGeoJSON });
+        const drawRoute = () => {
+          if (!_modalMapbox) return;
+          if (_modalMapbox.getSource('modalRouteSrc')) {
+            _modalMapbox.getSource('modalRouteSrc').setData(routeGeoJSON);
+          } else if (_modalMapbox.isStyleLoaded()) {
+            _modalMapbox.addSource('modalRouteSrc', { type: 'geojson', data: routeGeoJSON });
 
-          // Layer 1: Bolt-style dark outer road casing for high contrast
-          _modalMapbox.addLayer({
-            id: 'modalRouteCasing',
-            type: 'line',
-            source: 'modalRouteSrc',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-              'line-color': '#0B0F19',
-              'line-width': 8,
-              'line-opacity': 0.75
-            }
-          });
+            // Layer 1: Bolt-style dark outer road casing for high contrast
+            _modalMapbox.addLayer({
+              id: 'modalRouteCasing',
+              type: 'line',
+              source: 'modalRouteSrc',
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: {
+                'line-color': '#0B0F19',
+                'line-width': 8,
+                'line-opacity': 0.75
+              }
+            });
 
-          // Layer 2: Bolt-style vibrant neon-gold road line
-          _modalMapbox.addLayer({
-            id: 'modalRouteLine',
-            type: 'line',
-            source: 'modalRouteSrc',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: {
-              'line-color': '#FFD60A',
-              'line-width': 4.5,
-              'line-opacity': 1.0
-            }
-          });
+            // Layer 2: Bolt-style vibrant neon-gold road line
+            _modalMapbox.addLayer({
+              id: 'modalRouteLine',
+              type: 'line',
+              source: 'modalRouteSrc',
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: {
+                'line-color': '#FFD60A',
+                'line-width': 4.5,
+                'line-opacity': 1.0
+              }
+            });
+          }
+        };
+
+        if (_modalMapbox.isStyleLoaded()) {
+          drawRoute();
+        } else {
+          _modalMapbox.once('style.load', drawRoute);
         }
 
         // Auto-fit camera to enclose all road curves and corners perfectly
@@ -8111,20 +8939,38 @@
         });
       }
 
-      // ── Render on Leaflet Fallback (if active) ──
+      // ── Render on Leaflet (Normal Street Map as Bolt has it) ──
       if (_modalLeafletMap) {
         if (_modalLeafletRouteLine) { _modalLeafletMap.removeLayer(_modalLeafletRouteLine); _modalLeafletRouteLine = null; }
+        if (_modalLeafletCasing) { _modalLeafletMap.removeLayer(_modalLeafletCasing); _modalLeafletCasing = null; }
+
         const leafletLatLngs = roadCoordinates.map(c => [c[1], c[0]]);
+
+        // High-contrast Bolt style route polyline with dark casing
+        _modalLeafletCasing = L.polyline(leafletLatLngs, {
+          color: '#0f172a',
+          weight: 8,
+          opacity: 0.65,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }).addTo(_modalLeafletMap);
+
         _modalLeafletRouteLine = L.polyline(leafletLatLngs, {
-          color: '#FFD60A',
+          color: '#00D775',
           weight: 5,
-          opacity: 0.95,
+          opacity: 1.0,
           lineCap: 'round',
           lineJoin: 'round'
         }).addTo(_modalLeafletMap);
 
         const bounds = L.latLngBounds(leafletLatLngs);
-        _modalLeafletMap.fitBounds(bounds, { padding: [35, 35] });
+        _modalLeafletMap.fitBounds(bounds, { padding: [22, 22], maxZoom: 16 });
+      }
+
+      // Update route summary badge text
+      const badgeText = document.getElementById('modalRouteSummaryBadge');
+      if (badgeText) {
+        badgeText.textContent = (routeData && routeData.summary) ? routeData.summary : 'Turn-by-Turn Route';
       }
     }
 
@@ -8245,69 +9091,230 @@
       }
     }
 
+    let pinAdjustMap = null;
+    let _pinAdjustLat = 6.6012;
+    let _pinAdjustLng = 0.4688;
+
     function goToRideChoice() {
       if (!_campusFare || !_pickupVal || !_destVal) return;
 
       const sharedFare = _campusFare.toFixed(2);
-      const aloneFare  = (_routeDetails?.alone_fare ? _routeDetails.alone_fare.toFixed(2) : (_campusFare * _aloneMultiplier).toFixed(2));
+      const aloneFare  = (_routeDetails?.alone_fare ? _routeDetails.alone_fare.toFixed(2) : (_campusFare * (_aloneMultiplier || 1.8)).toFixed(2));
 
-      document.getElementById('strip-from').textContent = _pickupVal;
-      document.getElementById('strip-to').textContent   = _destVal;
-      document.getElementById('fareShared').textContent = sharedFare;
-      document.getElementById('fareAlone').textContent  = aloneFare;
+      const sfEl = document.getElementById('strip-from');
+      const stEl = document.getElementById('strip-to');
+      if (sfEl) sfEl.textContent = _pickupVal;
+      if (stEl) stEl.textContent = _destVal;
 
-      _rideType = null;
-      document.getElementById('card-shared').classList.remove('selected');
-      document.getElementById('card-alone').classList.remove('selected');
-      const confirmBtn = document.getElementById('confirmRideBtn');
-      if (confirmBtn) { confirmBtn.disabled = true; }
-      document.getElementById('confirmRideBtnLabel').textContent = 'Select a ride';
+      const fShared = document.getElementById('fareSharedVal') || document.getElementById('fareShared');
+      const fAlone  = document.getElementById('fareAloneVal') || document.getElementById('fareAlone');
+      if (fShared) fShared.textContent = sharedFare;
+      if (fAlone)  fAlone.textContent  = aloneFare;
 
-      document.getElementById('bookStep1').style.display = 'none';
-      document.getElementById('bookStep2').style.display = 'block';
+      // Default to shared ride option
+      _rideType = 'shared';
+      const cShared = document.getElementById('card-shared-v2') || document.getElementById('card-shared');
+      const cAlone  = document.getElementById('card-alone-v2') || document.getElementById('card-alone');
+      if (cShared) cShared.classList.add('selected');
+      if (cAlone)  cAlone.classList.remove('selected');
+
+      // Default payment method to Cash
+      paymentMethod = 'cash';
+      const pLbl = document.getElementById('currentPaymentLabel');
+      const pIco = document.getElementById('currentPaymentIcon');
+      if (pLbl) pLbl.textContent = 'Cash';
+      if (pIco) { pIco.className = 'fas fa-money-bill-wave'; pIco.style.color = '#10B981'; }
+      const pChkCash = document.getElementById('pcheck-cash');
+      const pChkMomo = document.getElementById('pcheck-momo');
+      if (pChkCash) pChkCash.style.display = 'inline-block';
+      if (pChkMomo) pChkMomo.style.display = 'none';
+
+      const selectBtn = document.getElementById('selectKekeBtn') || document.getElementById('confirmRideBtn');
+      const selectLbl = document.getElementById('selectKekeBtnLabel') || document.getElementById('confirmRideBtnLabel');
+      if (selectBtn) selectBtn.disabled = false;
+      if (selectLbl) selectLbl.textContent = 'Select K3K3';
+
+      const step1 = document.getElementById('bookStep1');
+      const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
+      if (step1) step1.style.display = 'none';
+      if (step2) step2.style.display = 'block';
+      if (step3) step3.style.display = 'none';
+
+      // Initialize or resize route map in Step 2 directly above Choose Your Ride
+      if (!_modalMapbox && !_modalLeafletMap) {
+        initModalMapbox();
+      }
+      setTimeout(() => {
+        if (_modalMapbox) {
+          try { _modalMapbox.resize(); } catch(e) {}
+        }
+        if (_modalLeafletMap) {
+          try { _modalLeafletMap.invalidateSize(); } catch(e) {}
+        }
+        if (typeof updateModalMapboxRoute === 'function') {
+          updateModalMapboxRoute(_pickupVal, _destVal);
+        }
+      }, 120);
     }
 
     function backToStep1() {
-      document.getElementById('bookStep2').style.display = 'none';
-      document.getElementById('bookStep1').style.display = 'block';
-
-      // Reset ride type + payment method when going back so step 2 is fresh
-      _rideType = null;
-      paymentMethod = null;
-      ['card-shared','card-alone'].forEach(id => {
-        const c = document.getElementById(id);
-        if (c) c.classList.remove('selected');
-      });
-      ['payment-cash','payment-momo'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('selected');
-      });
-      const confirmBtn = document.getElementById('confirmRideBtn');
-      const confirmLbl = document.getElementById('confirmRideBtnLabel');
-      if (confirmBtn) confirmBtn.disabled = true;
-      if (confirmLbl) confirmLbl.textContent = 'Select ride & payment';
+      const step1 = document.getElementById('bookStep1');
+      const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
+      if (step2) step2.style.display = 'none';
+      if (step3) step3.style.display = 'none';
+      if (step1) step1.style.display = 'block';
     }
 
     function selectRideType(type) {
       _rideType = type;
-      document.getElementById('card-shared').classList.toggle('selected', type === 'shared');
-      document.getElementById('card-alone').classList.toggle('selected',  type === 'alone');
-      updateConfirmButton();
+      const cShared = document.getElementById('card-shared-v2') || document.getElementById('card-shared');
+      const cAlone  = document.getElementById('card-alone-v2') || document.getElementById('card-alone');
+      if (cShared) cShared.classList.toggle('selected', type === 'shared');
+      if (cAlone)  cAlone.classList.toggle('selected',  type === 'alone');
+
+      const selectLbl = document.getElementById('selectKekeBtnLabel') || document.getElementById('confirmRideBtnLabel');
+      if (selectLbl) selectLbl.textContent = type === 'alone' ? 'Select K3K3 Alone' : 'Select K3K3 Shared';
+    }
+
+    function togglePaymentDropdown() {
+      const box = document.getElementById('paymentDropdownList');
+      const chev = document.getElementById('paymentChevron');
+      if (!box) return;
+      const isOpen = box.classList.toggle('open');
+      if (chev) chev.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function choosePaymentMethod(method) {
+      paymentMethod = method;
+      const pLbl = document.getElementById('currentPaymentLabel');
+      const pIco = document.getElementById('currentPaymentIcon');
+      const pCash = document.getElementById('popt-cash');
+      const pMomo = document.getElementById('popt-momo');
+      const pChkCash = document.getElementById('pcheck-cash');
+      const pChkMomo = document.getElementById('pcheck-momo');
+
+      if (pCash) pCash.classList.toggle('active', method === 'cash');
+      if (pMomo) pMomo.classList.toggle('active', method === 'momo');
+
+      if (method === 'cash') {
+        if (pLbl) pLbl.textContent = 'Cash';
+        if (pIco) { pIco.className = 'fas fa-money-bill-wave'; pIco.style.color = '#10B981'; }
+        if (pChkCash) pChkCash.style.display = 'inline-block';
+        if (pChkMomo) pChkMomo.style.display = 'none';
+      } else {
+        if (pLbl) pLbl.textContent = 'MoMo (Mobile Money)';
+        if (pIco) { pIco.className = 'fas fa-mobile-alt'; pIco.style.color = '#FFD60A'; }
+        if (pChkCash) pChkCash.style.display = 'none';
+        if (pChkMomo) pChkMomo.style.display = 'inline-block';
+        openMoolrePaymentModal();
+      }
+      togglePaymentDropdown();
+    }
+
+    /* ══════════════════════════════════════════
+       STEP 3: Pickup Pin Adjustment Handlers
+    ══════════════════════════════════════════ */
+    function goToStep3PinAdjust() {
+      const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
+      if (step2) step2.style.display = 'none';
+      if (step3) step3.style.display = 'block';
+
+      // Determine initial coordinates from pickup location or GPS
+      const pCoord = getHoCoordinate(_pickupVal) || [
+        parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012'),
+        parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688')
+      ];
+      _pinAdjustLat = pCoord[0];
+      _pinAdjustLng = pCoord[1];
+
+      // Update card details
+      const summaryType = document.getElementById('pinSummaryRideType');
+      const summaryFare = document.getElementById('pinSummaryFare');
+      const etaDisplay  = document.getElementById('pinEtaDisplay');
+      const searchInput = document.getElementById('pinSearchInput');
+
+      const fareVal = _rideType === 'alone' 
+        ? (_routeDetails?.alone_fare ? _routeDetails.alone_fare.toFixed(2) : (_campusFare * (_aloneMultiplier || 1.8)).toFixed(2))
+        : (_campusFare ? _campusFare.toFixed(2) : '3.00');
+
+      if (summaryType) summaryType.textContent = _rideType === 'alone' ? 'K3K3 Alone' : 'K3K3 Shared';
+      if (summaryFare) summaryFare.textContent = `GH₵ ${fareVal}`;
+      if (etaDisplay)  etaDisplay.textContent  = _rideType === 'alone' ? '~2-4 mins away' : '~3-5 mins away';
+      if (searchInput) searchInput.value = _pickupVal || 'Ho Central';
+
+      initPinAdjustMap(_pinAdjustLat, _pinAdjustLng);
+    }
+
+    function backToStep2() {
+      const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
+      if (step3) step3.style.display = 'none';
+      if (step2) step2.style.display = 'block';
+    }
+
+    function initPinAdjustMap(lat, lng) {
+      const mapEl = document.getElementById('pinAdjustLiveMap');
+      if (!mapEl || typeof L === 'undefined') return;
+
+      if (pinAdjustMap) {
+        pinAdjustMap.setView([lat, lng], 16);
+        setTimeout(() => pinAdjustMap.invalidateSize(), 200);
+        return;
+      }
+
+      pinAdjustMap = L.map('pinAdjustLiveMap', {
+        zoomControl: false,
+        attributionControl: false,
+        tap: false,
+        scrollWheelZoom: true
+      }).setView([lat, lng], 16);
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(pinAdjustMap);
+
+      // On pan/drag completion, update pickup coordinates and search input
+      pinAdjustMap.on('moveend', () => {
+        const center = pinAdjustMap.getCenter();
+        _pinAdjustLat = center.lat;
+        _pinAdjustLng = center.lng;
+        const nearest = findClosestHoLandmark(center.lat, center.lng);
+        const searchInput = document.getElementById('pinSearchInput');
+        if (searchInput && nearest) {
+          searchInput.value = nearest;
+          _pickupVal = nearest;
+        }
+      });
+
+      setTimeout(() => pinAdjustMap.invalidateSize(), 250);
+    }
+
+    function zoomPinMap(delta) {
+      if (pinAdjustMap) {
+        if (delta > 0) pinAdjustMap.zoomIn();
+        else pinAdjustMap.zoomOut();
+      }
+    }
+
+    function onPinAddressChange(val) {
+      if (!val) return;
+      const trimmed = val.trim();
+      _pickupVal = trimmed;
+      const coord = getHoCoordinate(trimmed);
+      if (coord && pinAdjustMap) {
+        _pinAdjustLat = coord[0];
+        _pinAdjustLng = coord[1];
+        pinAdjustMap.setView(coord, 16);
+      }
     }
 
     let _moolreSelectedChannel = '13'; // Default MTN MoMo
 
     function selectPaymentMethod(method) {
-      paymentMethod = method;
-      const cashEl = document.getElementById('payment-cash');
-      const momoEl = document.getElementById('payment-momo');
-      if (cashEl) cashEl.classList.toggle('selected', method === 'cash');
-      if (momoEl) momoEl.classList.toggle('selected', method === 'momo');
-      updateConfirmButton();
-
-      if (method === 'momo') {
-        openMoolrePaymentModal();
-      }
+      choosePaymentMethod(method);
     }
 
     function openMoolrePaymentModal() {
@@ -8398,7 +9405,8 @@
       if (!modal) return;
       if (!force) {
         const dismissed = sessionStorage.getItem('k3k3_loc_prompt_dismissed');
-        if (dismissed === '1') {
+        const granted = sessionStorage.getItem('k3k3_loc_granted');
+        if (dismissed === '1' || granted === '1') {
           modal.style.display = 'none';
           return;
         }
@@ -9221,6 +10229,14 @@
       if (aEta) aEta.textContent = initialEta;
       if (hEta) hEta.textContent = initialEta;
 
+      const aRoute = document.getElementById('assignedRouteStrip');
+      const aCat   = document.getElementById('assignedCategoryBadge');
+      const aPay   = document.getElementById('assignedPaymentMethod');
+      const destName = data.dest_address || data.dest_label || data.dest || _destVal || 'Ho';
+      if (aRoute) aRoute.textContent = `${pickupName} → ${destName}`;
+      if (aCat)   aCat.textContent   = (data.ride_type === 'alone' || _rideType === 'alone') ? 'K3K3 Alone' : 'K3K3 Shared';
+      if (aPay)   aPay.textContent   = (data.payment_method === 'momo' || paymentMethod === 'momo') ? 'MoMo' : 'Cash';
+
       // 2. POPULATE & REVEAL BOLT-STYLE RIDER BOTTOM SHEET (#boltRiderSheet)
       const bName = document.getElementById('boltRiderName');
       const bPhotoBox = document.getElementById('boltRiderPhotoBox');
@@ -9330,12 +10346,12 @@
       const pill = document.getElementById('boltTripStatusPill');
 
       if (update.status === 'completed') {
+        const fare = update.actualFare || update.fare || '15.00';
+        openTripCompletedRatingSheet(fare);
         sessionStorage.removeItem('k3k3_active_trip');
         const card = document.getElementById('homeActiveTripCard');
         if (card) card.style.display = 'none';
         if (boltSheet) boltSheet.style.display = 'none';
-        const mapCard = document.getElementById('passengerLiveMapCard');
-        if (mapCard) mapCard.style.display = 'none';
         closeRiderSearch();
         closeAssignedRiderModal();
         showToast('Trip completed! Thank you for riding with K3K3.', 'success');
@@ -9469,6 +10485,40 @@
       showToast('Ride request cancelled.', 'info');
     }
 
+    /* ─── Bolt/Uber Trip Completed Rating Functions ─── */
+    let _passengerRatingVal = 5;
+    function openTripCompletedRatingSheet(fare) {
+      const fareEl = document.getElementById('completedFareVal');
+      if (fareEl) fareEl.textContent = `GH₵ ${parseFloat(fare || 15).toFixed(2)}`;
+      const modal = document.getElementById('tripCompletedModal');
+      if (modal) modal.classList.add('show');
+      highlightStars(5);
+    }
+    function closeTripCompletedModal() {
+      const modal = document.getElementById('tripCompletedModal');
+      if (modal) modal.classList.remove('show');
+    }
+    function highlightStars(val) {
+      for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById(`star-${i}`);
+        if (star) {
+          star.style.color = i <= val ? '#FFD60A' : '#D1D5DB';
+        }
+      }
+      const lbl = document.getElementById('starRatingLabel');
+      const ratings = ['', '1.0 Poor', '2.0 Fair', '3.0 Good', '4.0 Very Good', '5.0 Excellent Service'];
+      if (lbl) lbl.textContent = ratings[val] || '5.0 Excellent Service';
+    }
+    function setPassengerRating(val) {
+      _passengerRatingVal = val;
+      highlightStars(val);
+      showToast(`Rating selected: ${val} star${val > 1 ? 's' : ''}`, 'info');
+    }
+    function submitTripRating() {
+      closeTripCompletedModal();
+      showToast('Thank you for rating your K3K3 rider! Safe travels.', 'success');
+    }
+
     // Call initPassengerSocket & initPassengerMap on page load
     document.addEventListener('DOMContentLoaded', () => {
       initPassengerSocket();
@@ -9489,19 +10539,23 @@
 
       const pickup = _pickupVal;
       const dest   = _destVal;
-      const fare   = _rideType === 'shared' ? _campusFare : _campusFare * ALONE_MULTIPLIER;
+      const fare   = _rideType === 'alone' ? (_campusFare * (_aloneMultiplier || 1.8)) : _campusFare;
 
       // Geofence pre-flight check: Ensure pickup location is inside Ho / Volta Region
-      const pCoord = getHoCoordinate(pickup) || [
+      const pCoord = (_pinAdjustLat && _pinAdjustLng) ? [_pinAdjustLat, _pinAdjustLng] : (getHoCoordinate(pickup) || [
         parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012'),
         parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688')
-      ];
+      ]);
+
       if (!isInsideHoVoltaServiceZone(pCoord[0], pCoord[1])) {
         closeBookModal();
         showServiceAreaNotice(pCoord[0], pCoord[1]);
         showToast("K3K3ride isn't available in this location yet. We currently serve Ho & Volta Region!", "warn");
         return;
       }
+
+      // Record this trip for returning passenger 1-tap rebooking
+      recordPastTrip(pickup, dest);
 
       const pickupInputEl = document.getElementById('pickupInput');
       const destInputEl   = document.getElementById('destInput');
@@ -9544,7 +10598,7 @@
           const resp = await res.json();
           const trip = resp.ride || resp;
           sessionStorage.setItem('k3k3_active_trip', JSON.stringify(trip));
-          showToast('Ride requested! Dispatching nearest keke…', 'success');
+          showToast('Ride requested! Finding nearby K3K3 rider…', 'success');
 
           // Subscribe socket to this trip
           if (passengerSocket && passengerSocket.connected && trip.id) {
@@ -9565,6 +10619,35 @@
       } catch (e) {
         showToast('Network error — please retry.', 'error');
       }
+    }
+
+    // Cancel searching immediately from close X button
+    async function cancelRideSearch() {
+      clearTimeout(riderSearchTimer);
+      if (typeof searchTripPollTimer !== 'undefined' && searchTripPollTimer) {
+        clearInterval(searchTripPollTimer);
+      }
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+        if (saved && saved.id) {
+          await fetch(`${API}/trips/${saved.id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'cancelled' })
+          });
+          if (passengerSocket && passengerSocket.connected) {
+            passengerSocket.emit('trip:cancel', { tripId: saved.id });
+          }
+        }
+      } catch(_) {}
+      sessionStorage.removeItem('k3k3_active_trip');
+      closeRiderSearch();
+      showToast('Ride search cancelled.', 'info');
+    }
+
+    // Cancel assigned / active ride
+    function cancelActiveRide() {
+      cancelActiveTrip();
     }
 
     // Legacy requestRide for any existing call sites
@@ -9593,8 +10676,11 @@
       const aState = document.getElementById('assignedState');
       if (aState) aState.style.display = 'none';
 
+      const title = document.querySelector('#searchingState .search-status-title');
+      if (title) title.textContent = 'Finding a nearby K3K3 rider…';
+
       const sub = document.getElementById('searchStatusSub');
-      if (sub) sub.textContent = `Searching near "${pickup || 'your location'}"…`;
+      if (sub) sub.textContent = `Searching for available riders near "${pickup || 'your location'}"…`;
 
       const overlay = document.getElementById('riderSearchOverlay');
       if (overlay) {
@@ -9602,13 +10688,13 @@
         overlay.style.display = 'flex';
       }
 
-      // Update search status message progressively without closing prematurely
+      // Progress status text to "Waiting for a rider to accept your ride…"
       clearTimeout(riderSearchTimer);
       riderSearchTimer = setTimeout(() => {
         if (sub && document.getElementById('searchingState')?.style.display !== 'none') {
-          sub.textContent = 'Contacting available K3K3 riders in your area…';
+          sub.textContent = 'Waiting for a rider to accept your ride…';
         }
-      }, 3000);
+      }, 2500);
     }
 
     function retryRiderSearch() {
@@ -10337,6 +11423,15 @@
     document.getElementById('deleteHistoryModal')?.addEventListener('click', e => {
       if (e.target === document.getElementById('deleteHistoryModal')) closeDeleteHistoryModal();
     });
+
+    // Auto-update Service Worker to ensure fresh cache and prevent stale fetch rejections
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) {
+          reg.update().catch(() => {});
+        }
+      }).catch(() => {});
+    }
   </script>
 </body>
 
