@@ -853,7 +853,7 @@
                     <div id="phoneStep">
                         <div class="form-eyebrow">Passenger Login</div>
                         <h1 class="form-title">Welcome back</h1>
-                        <p class="form-subtitle">Enter your phone number to receive a one-time verification code.</p>
+                        <p class="form-subtitle">Enter your phone and email to receive your verification code.</p>
 
                         <form id="otpForm" onsubmit="handleSendOTP(event)">
                             <div class="field-group">
@@ -867,13 +867,29 @@
                                         autocomplete="tel"
                                         inputmode="numeric"
                                         maxlength="10"
+                                        required
                                     >
                                 </div>
                             </div>
 
+                            <div class="field-group" style="margin-top:14px">
+                                <label class="field-label" for="emailInput">
+                                    Email Address
+                                    <span style="font-size:0.75rem;font-weight:600;color:var(--yellow);margin-left:6px;"><i class="fas fa-envelope"></i> Code sent to your inbox</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    id="emailInput"
+                                    class="text-input"
+                                    placeholder="yourname@gmail.com"
+                                    autocomplete="email"
+                                    required
+                                >
+                            </div>
+
                             <button type="submit" class="otp-btn" id="sendOtpBtn">
                                 <i class="fas fa-paper-plane"></i>
-                                Send OTP
+                                Send Verification Code
                             </button>
                         </form>
 
@@ -902,12 +918,12 @@
                     <div id="verifyStep" class="otp-verify-step">
                         <button class="back-btn" onclick="goBackToPhone()">
                             <i class="fas fa-arrow-left"></i>
-                            Change number
+                            Change phone / email
                         </button>
 
                         <div class="form-eyebrow">Verification</div>
-                        <h1 class="form-title">Enter OTP</h1>
-                        <p class="form-subtitle" id="otpSentMsg">We sent a 6-digit code to your number. Enter it below.</p>
+                        <h1 class="form-title">Enter Verification Code</h1>
+                        <p class="form-subtitle" id="otpSentMsg">We sent a 6-digit code to your email. Enter it below.</p>
 
                         <div class="otp-inputs" id="otpInputs">
                             <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d1">
@@ -1015,7 +1031,8 @@
 
     <script>
         const API_BASE = '';
-        let currentPhone = ''; 
+        let currentPhone = '';
+        let currentEmail = ''; 
 
         function showToast(msg, type = 'success') {
             const colors = {
@@ -1070,6 +1087,7 @@
         async function handleSendOTP(e) {
             e.preventDefault();
             const phone = document.getElementById('phoneInput').value.trim();
+            const email = (document.getElementById('emailInput')?.value || '').trim();
             const cleanPhone = phone.replace(/\D/g, '');
 
             if (!cleanPhone || cleanPhone.length !== 10) {
@@ -1077,40 +1095,42 @@
                 return;
             }
 
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('Please enter a valid email address to receive your verification code.', 'error');
+                document.getElementById('emailInput')?.focus();
+                return;
+            }
+
             const btn = document.getElementById('sendOtpBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending code to email...';
 
             try {
                 const res = await fetch(`${API_BASE}/api/auth/passenger/send-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ phone, email })
                 });
                 const data = await res.json();
 
                 if (data.success) {
                     currentPhone = phone;
+                    currentEmail = email;
+                    try {
+                        localStorage.setItem('k3k3_passenger_email', email);
+                        localStorage.setItem('k3k3_passenger_phone', phone);
+                    } catch (_) {}
+
                     document.getElementById('phoneStep').style.display = 'none';
                     document.getElementById('verifyStep').classList.add('show');
                     document.getElementById('d1').focus();
 
-                    if (data.emailDelivery) {
-                        const targetEmail = data.targetEmail || 'your email';
-                        document.getElementById('otpSentMsg').innerHTML =
-                            `<i class="fas fa-envelope-circle-check" style="color:var(--yellow);margin-right:6px"></i> We sent a 6-digit code to <strong>${escapeHtml(targetEmail)}</strong> and SMS to +233 ${phone.replace(/^0/, '')}.<br><small style="color:var(--text-muted);margin-top:4px;display:block">Enter the code below to log in.</small>`;
-                        showToast('Verification code sent to your email and SMS!', 'success');
-                    } else if (data._otp) {
-                        document.getElementById('otpSentMsg').innerHTML =
-                            `Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${data._otp}</strong><br><small>Enter this code below to log in.</small>`;
-                        showToast(`Your OTP: ${data._otp}`, 'info');
-                    } else {
-                        document.getElementById('otpSentMsg').textContent =
-                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')} and your email. Enter it below.`;
-                        showToast('Verification code sent!', 'success');
-                    }
+                    const targetEmail = data.targetEmail || email;
+                    document.getElementById('otpSentMsg').innerHTML =
+                        `<i class="fas fa-envelope-circle-check" style="color:var(--yellow);margin-right:6px"></i> We sent a 6-digit code to <strong>${escapeHtml(targetEmail)}</strong> via email.<br><small style="color:var(--text-muted);margin-top:4px;display:block">Check your inbox or spam folder and enter the code below to log in.</small>`;
+                    showToast(`Verification code sent to ${targetEmail}!`, 'success');
                 } else {
-                    showToast(data.error || 'Failed to send OTP.', 'error');
+                    showToast(data.error || 'Failed to send verification code.', 'error');
                 }
             } catch (err) {
                 console.error('Send OTP error:', err);
@@ -1118,10 +1138,19 @@
             }
 
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            const savedEmail = localStorage.getItem('k3k3_passenger_email');
+            const savedPhone = localStorage.getItem('k3k3_passenger_phone');
+            if (savedEmail && document.getElementById('emailInput')) {
+                document.getElementById('emailInput').value = savedEmail;
+            }
+            if (savedPhone && document.getElementById('phoneInput')) {
+                document.getElementById('phoneInput').value = savedPhone;
+            }
+
             ['phoneInput', 'signupPhone'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1177,7 +1206,7 @@
                 const res = await fetch(`${API_BASE}/api/auth/passenger/verify-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: currentPhone, otp, fullName: signupName })
+                    body: JSON.stringify({ phone: currentPhone, otp, fullName: signupName, email: currentEmail })
                 });
                 const data = await res.json();
 
@@ -1266,17 +1295,18 @@
         async function resendOTP(e) {
             e.preventDefault();
             document.querySelectorAll('.otp-digit').forEach(d => d.value = '');
+            showToast('Sending a new code to your email...', 'info');
             try {
                 const res = await fetch(`${API_BASE}/api/auth/passenger/send-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: currentPhone })
+                    body: JSON.stringify({ phone: currentPhone, email: currentEmail })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('New code sent!', 'success');
+                    showToast('New verification code sent to your email!', 'success');
                 } else {
-                    showToast(data.error || 'Failed to resend.', 'error');
+                    showToast(data.error || 'Failed to resend code.', 'error');
                 }
             } catch (err) {
                 showToast('Cannot reach server.', 'error');
@@ -1318,28 +1348,22 @@
 
                 if (data.success) {
                     currentPhone = phone;
+                    currentEmail = email;
                     try {
                         sessionStorage.setItem('k3k3_signup_name', fullName);
                         sessionStorage.setItem('k3k3_signup_email', email);
+                        localStorage.setItem('k3k3_passenger_email', email);
+                        localStorage.setItem('k3k3_passenger_phone', phone);
                     } catch(e) {}
 
-                    showToast('Verification code sent to your email and SMS!', 'success');
+                    showToast('Verification code sent to your email!', 'success');
 
                     // Switch to login section and show OTP step
                     document.getElementById('signupSection').classList.add('step-hidden');
                     document.getElementById('loginSection').classList.remove('step-hidden');
 
-                    if (data.emailDelivery) {
-                        document.getElementById('otpSentMsg').innerHTML =
-                            `<i class="fas fa-envelope-circle-check" style="color:var(--yellow);margin-right:6px"></i> Verification code sent to <strong>${escapeHtml(email)}</strong> and SMS to +233 ${phone.replace(/^0/, '')}.<br><small style="color:var(--text-muted);margin-top:4px;display:block">Enter the 6-digit code below to finish setup.</small>`;
-                    } else if (data._otp || data._devOTP) {
-                        const code = data._otp || data._devOTP;
-                        document.getElementById('otpSentMsg').innerHTML =
-                            `Your code is: <strong style="font-size:1.6rem;letter-spacing:6px;color:#FFD60A;background:#111;padding:4px 12px;border-radius:8px;">${code}</strong><br><small>Enter this code below to log in.</small>`;
-                    } else {
-                        document.getElementById('otpSentMsg').textContent =
-                            `We sent a 6-digit code to +233 ${phone.replace(/^0/, '')} and ${email}. Enter it below.`;
-                    }
+                    document.getElementById('otpSentMsg').innerHTML =
+                        `<i class="fas fa-envelope-circle-check" style="color:var(--yellow);margin-right:6px"></i> Verification code sent to <strong>${escapeHtml(email)}</strong>.<br><small style="color:var(--text-muted);margin-top:4px;display:block">Check your inbox or spam folder and enter the 6-digit code below to finish setup.</small>`;
 
                     document.getElementById('phoneStep').style.display = 'none';
                     document.getElementById('verifyStep').classList.add('show');

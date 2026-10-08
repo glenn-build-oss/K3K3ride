@@ -158,31 +158,45 @@ router.post('/passenger/send-otp', async (req, res) => {
     // Check if user has registered email or other roles
     const allUsers = await findAllUsersByPhone(normalizedPhone);
     const existingUser = allUsers.find(u => u.role === 'passenger') || allUsers[0];
-    const targetEmail = email || existingUser?.email || (process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com');
+    const targetEmail = (email && email.trim()) || existingUser?.email;
 
-    // Deliver via BOTH Resend Email and Moolre SMS asynchronously in background so response is instantaneous!
-    Promise.all([
-      targetEmail
-        ? resendService.sendEmailOTP({
-            to: targetEmail,
-            code: otpCode,
-            role: 'Passenger',
-            purpose: 'Login'
-          }).catch(err => ({ success: false, error: err.message }))
-        : Promise.resolve({ success: false, error: 'No email provided' }),
-      moolreSendOTP(normalizedPhone, otpCode).catch(err => ({ success: false, error: err.message }))
-    ]).then(([emailResult, smsResult]) => {
-      console.log(`[Auth] Async Passenger OTP dispatch for ${normalizedPhone}: Email (${targetEmail}) -> ${emailResult?.success ? 'Delivered' : emailResult?.error}, SMS -> ${smsResult?.success ? 'Delivered' : smsResult?.error}`);
-    }).catch(err => console.warn('[Auth] Async Passenger OTP dispatch warning:', err.message));
+    if (!targetEmail) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email address is required to receive your verification code. Please provide your email.'
+      });
+    }
+
+    // Deliver exclusively via Resend Email (No SMS as requested)
+    let emailResult = await resendService.sendEmailOTP({
+      to: targetEmail,
+      code: otpCode,
+      role: 'Passenger',
+      purpose: 'Login'
+    });
+
+    console.log(`[Auth] Resend Passenger OTP dispatch for ${normalizedPhone} -> ${targetEmail}: ${emailResult?.success ? 'Delivered' : emailResult?.error}`);
+
+    // If Resend failed due to sandbox unverified domain restriction (403), also dispatch copy to admin email so developer/tester code is never lost
+    if (!emailResult?.success && emailResult?.error && (emailResult.error.includes('testing emails') || emailResult.error.includes('domain'))) {
+      const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+      if (targetEmail.toLowerCase() !== adminEmail.toLowerCase()) {
+        console.warn(`[Auth] Sandbox domain restriction for ${targetEmail}. Forwarding OTP to admin: ${adminEmail}`);
+        await resendService.sendEmailOTP({
+          to: adminEmail,
+          code: otpCode,
+          role: 'Passenger',
+          purpose: `Login (for ${targetEmail})`
+        }).catch(e => console.warn('[Auth] Admin forward error:', e.message));
+      }
+    }
 
     return res.json({
       success: true,
-      message: 'Verification code sent',
+      message: `Verification code sent to ${targetEmail}`,
       phoneMask: maskPhone(normalizedPhone),
-      targetEmail: targetEmail || undefined,
-      emailDelivery: true,
-      smsDelivery: true,
-      _otp: otpCode // Always provide _otp for instant verification & testing
+      targetEmail: targetEmail,
+      emailDelivery: true
     });
 
   } catch (err) {
@@ -452,30 +466,39 @@ router.post('/passenger/register', async (req, res) => {
       console.warn('[Auth] Database warning storing signup OTP (memory active):', storeErr.message);
     }
 
-    // Deliver via BOTH Resend Email and Moolre SMS asynchronously in background so response is instantaneous!
-    const targetEmail = (email && email.trim()) || process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
-    Promise.all([
-      targetEmail
-        ? resendService.sendEmailOTP({
-            to: targetEmail,
-            code: otpCode,
-            role: 'Passenger',
-            purpose: 'Signup'
-          }).catch(err => ({ success: false, error: err.message }))
-        : Promise.resolve({ success: false, error: 'No email provided' }),
-      moolreSendOTP(normalizedPhone, otpCode).catch(err => ({ success: false, error: err.message }))
-    ]).then(([emailResult, smsResult]) => {
-      console.log(`[Auth] Async Passenger Signup OTP dispatch for ${normalizedPhone}: Email (${targetEmail}) -> ${emailResult?.success ? 'Delivered' : emailResult?.error}, SMS -> ${smsResult?.success ? 'Delivered' : smsResult?.error}`);
-    }).catch(err => console.warn('[Auth] Async Passenger Signup OTP dispatch warning:', err.message));
+    // Deliver exclusively via Resend Email (No SMS as requested)
+    const targetEmail = (email && email.trim());
+    if (!targetEmail) {
+      return res.status(400).json({ success: false, error: 'Email address is required to receive verification code.' });
+    }
+
+    let emailResult = await resendService.sendEmailOTP({
+      to: targetEmail,
+      code: otpCode,
+      role: 'Passenger',
+      purpose: 'Signup'
+    });
+
+    console.log(`[Auth] Resend Passenger Signup OTP dispatch for ${normalizedPhone} -> ${targetEmail}: ${emailResult?.success ? 'Delivered' : emailResult?.error}`);
+
+    if (!emailResult?.success && emailResult?.error && (emailResult.error.includes('testing emails') || emailResult.error.includes('domain'))) {
+      const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+      if (targetEmail.toLowerCase() !== adminEmail.toLowerCase()) {
+        await resendService.sendEmailOTP({
+          to: adminEmail,
+          code: otpCode,
+          role: 'Passenger',
+          purpose: `Signup (for ${targetEmail})`
+        }).catch(e => console.warn('[Auth] Admin forward error:', e.message));
+      }
+    }
 
     return res.json({
       success: true,
-      message: 'Verification code sent',
+      message: `Verification code sent to ${targetEmail}`,
       phoneMask: maskPhone(normalizedPhone),
-      targetEmail: targetEmail || undefined,
-      emailDelivery: true,
-      smsDelivery: true,
-      _otp: otpCode
+      targetEmail: targetEmail,
+      emailDelivery: true
     });
 
   } catch (err) {
