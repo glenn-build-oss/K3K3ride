@@ -44,6 +44,14 @@ function generateToken(user) {
   );
 }
 
+// ─── Helper: Mask email for privacy ───
+function maskEmail(email) {
+  if (!email || typeof email !== 'string' || !email.includes('@')) return email || '';
+  const [user, domain] = email.split('@');
+  if (user.length <= 2) return `${user[0]}*@${domain}`;
+  return `${user.slice(0, 2)}${'*'.repeat(Math.max(1, user.length - 4))}${user.slice(-2)}@${domain}`;
+}
+
 // ─── Helper: Find or create user by phone ───
 async function findOrCreateUser(phone, role, extraData = {}) {
   // Check if user exists by phone
@@ -129,7 +137,7 @@ async function findOrCreateUser(phone, role, extraData = {}) {
  */
 router.post('/passenger/send-otp', async (req, res) => {
   try {
-    const { phone, email } = req.body;
+    const { phone } = req.body;
 
     if (!phone) {
       return res.status(400).json({ success: false, error: 'Phone number is required' });
@@ -155,48 +163,79 @@ router.post('/passenger/send-otp', async (req, res) => {
       console.warn('[Auth] Supabase dbStoreOTP warning (in-memory active):', storeErr.message);
     }
 
-    // Check if user has registered email or other roles
-    const allUsers = await findAllUsersByPhone(normalizedPhone);
-    const existingUser = allUsers.find(u => u.role === 'passenger') || allUsers[0];
-    const targetEmail = (email && email.trim()) || existingUser?.email;
+    // Look up user's registered profile to retrieve the email they provided when signing up
+    const existingPassenger = await findUserByPhone(normalizedPhone, 'passenger');
+    let registeredEmail = existingPassenger?.email;
+    if (!registeredEmail) {
+      const allUsers = await findAllUsersByPhone(normalizedPhone);
+      const existingUser = allUsers.find(u => u.role === 'passenger') || allUsers[0];
+      registeredEmail = existingUser?.email;
+    }
+    if (!registeredEmail && req.body.email && typeof req.body.email === 'string') {
+      registeredEmail = req.body.email.trim();
+    }
 
-    if (!targetEmail) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email address is required to receive your verification code. Please provide your email.'
+    // 1. Attempt delivery via Moolre SMS API first
+    let smsSuccess = false;
+    let smsError = null;
+    try {
+      const smsRes = await moolreSendOTP(normalizedPhone, otpCode);
+      if (smsRes && smsRes.success) {
+        smsSuccess = true;
+        console.log(`[Auth] ✅ Moolre SMS OTP sent successfully to ${normalizedPhone}`);
+      } else {
+        smsError = (smsRes && (smsRes.error || smsRes.message)) || 'Moolre SMS delivery failure';
+        console.warn(`[Auth] ⚠️ Moolre SMS failed for ${normalizedPhone}:`, smsError);
+      }
+    } catch (smsErr) {
+      smsError = smsErr.message;
+      console.warn(`[Auth] ⚠️ Moolre SMS exception for ${normalizedPhone}:`, smsErr.message);
+    }
+
+    // 2. If SMS was successful, return SMS confirmation
+    if (smsSuccess) {
+      return res.json({
+        success: true,
+        channel: 'sms',
+        message: 'Verification code sent via SMS',
+        phoneMask: maskPhone(normalizedPhone)
       });
     }
 
-    // Deliver exclusively via Resend Email (No SMS as requested)
-    let emailResult = await resendService.sendEmailOTP({
-      to: targetEmail,
-      code: otpCode,
-      role: 'Passenger',
-      purpose: 'Login'
-    });
+    // 3. FALLBACK: If SMS failed, send OTP to the email provided when signing up
+    if (registeredEmail && registeredEmail.includes('@')) {
+      console.log(`[Auth] 🔄 SMS delivery failed. Executing fallback: sending OTP to registered email ${registeredEmail}...`);
+      const emailRes = await resendService.sendEmailOTP({
+        to: registeredEmail,
+        code: otpCode,
+        role: 'Passenger',
+        purpose: 'Login'
+      });
 
-    console.log(`[Auth] Resend Passenger OTP dispatch for ${normalizedPhone} -> ${targetEmail}: ${emailResult?.success ? 'Delivered' : emailResult?.error}`);
-
-    // If Resend failed due to sandbox unverified domain restriction (403), also dispatch copy to admin email so developer/tester code is never lost
-    if (!emailResult?.success && emailResult?.error && (emailResult.error.includes('testing emails') || emailResult.error.includes('domain'))) {
-      const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
-      if (targetEmail.toLowerCase() !== adminEmail.toLowerCase()) {
-        console.warn(`[Auth] Sandbox domain restriction for ${targetEmail}. Forwarding OTP to admin: ${adminEmail}`);
+      if (!emailRes?.success && emailRes?.error && (emailRes.error.includes('testing emails') || emailRes.error.includes('domain'))) {
+        const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
         await resendService.sendEmailOTP({
           to: adminEmail,
           code: otpCode,
           role: 'Passenger',
-          purpose: `Login (for ${targetEmail})`
-        }).catch(e => console.warn('[Auth] Admin forward error:', e.message));
+          purpose: `Login (Fallback for ${registeredEmail})`
+        }).catch(e => console.warn('[Auth] Admin email forward error:', e.message));
       }
+
+      return res.json({
+        success: true,
+        channel: 'email',
+        fallback: true,
+        message: `SMS unavailable. Verification code sent to your registered email`,
+        targetEmail: maskEmail(registeredEmail),
+        phoneMask: maskPhone(normalizedPhone)
+      });
     }
 
-    return res.json({
-      success: true,
-      message: `Verification code sent to ${targetEmail}`,
-      phoneMask: maskPhone(normalizedPhone),
-      targetEmail: targetEmail,
-      emailDelivery: true
+    // If SMS failed and no email exists on file
+    return res.status(503).json({
+      success: false,
+      error: 'SMS service is temporarily unavailable and no email is associated with this phone. Please try again or create an account.'
     });
 
   } catch (err) {
@@ -466,39 +505,65 @@ router.post('/passenger/register', async (req, res) => {
       console.warn('[Auth] Database warning storing signup OTP (memory active):', storeErr.message);
     }
 
-    // Deliver exclusively via Resend Email (No SMS as requested)
     const targetEmail = (email && email.trim());
-    if (!targetEmail) {
-      return res.status(400).json({ success: false, error: 'Email address is required to receive verification code.' });
+
+    // 1. Attempt delivery via Moolre SMS API first
+    let smsSuccess = false;
+    try {
+      const smsRes = await moolreSendOTP(normalizedPhone, otpCode);
+      if (smsRes && smsRes.success) {
+        smsSuccess = true;
+        console.log(`[Auth] ✅ Moolre SMS successfully sent signup OTP to ${normalizedPhone}`);
+      } else {
+        console.warn(`[Auth] ⚠️ Moolre SMS signup failed for ${normalizedPhone}:`, smsRes?.error);
+      }
+    } catch (smsErr) {
+      console.warn(`[Auth] ⚠️ Moolre SMS signup exception for ${normalizedPhone}:`, smsErr.message);
     }
 
-    let emailResult = await resendService.sendEmailOTP({
-      to: targetEmail,
-      code: otpCode,
-      role: 'Passenger',
-      purpose: 'Signup'
-    });
+    // 2. If SMS was successful, return SMS confirmation
+    if (smsSuccess) {
+      return res.json({
+        success: true,
+        channel: 'sms',
+        message: 'Verification code sent via SMS',
+        phoneMask: maskPhone(normalizedPhone)
+      });
+    }
 
-    console.log(`[Auth] Resend Passenger Signup OTP dispatch for ${normalizedPhone} -> ${targetEmail}: ${emailResult?.success ? 'Delivered' : emailResult?.error}`);
+    // 3. FALLBACK: If SMS failed, deliver to the email provided during signup
+    if (targetEmail && targetEmail.includes('@')) {
+      console.log(`[Auth] 🔄 SMS failed. Executing fallback: sending signup OTP to ${targetEmail}...`);
+      const emailResult = await resendService.sendEmailOTP({
+        to: targetEmail,
+        code: otpCode,
+        role: 'Passenger',
+        purpose: 'Signup'
+      });
 
-    if (!emailResult?.success && emailResult?.error && (emailResult.error.includes('testing emails') || emailResult.error.includes('domain'))) {
-      const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
-      if (targetEmail.toLowerCase() !== adminEmail.toLowerCase()) {
+      if (!emailResult?.success && emailResult?.error && (emailResult.error.includes('testing emails') || emailResult.error.includes('domain'))) {
+        const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
         await resendService.sendEmailOTP({
           to: adminEmail,
           code: otpCode,
           role: 'Passenger',
-          purpose: `Signup (for ${targetEmail})`
+          purpose: `Signup (Fallback for ${targetEmail})`
         }).catch(e => console.warn('[Auth] Admin forward error:', e.message));
       }
+
+      return res.json({
+        success: true,
+        channel: 'email',
+        fallback: true,
+        message: `SMS unavailable. Verification code sent to your email`,
+        targetEmail: targetEmail,
+        phoneMask: maskPhone(normalizedPhone)
+      });
     }
 
-    return res.json({
-      success: true,
-      message: `Verification code sent to ${targetEmail}`,
-      phoneMask: maskPhone(normalizedPhone),
-      targetEmail: targetEmail,
-      emailDelivery: true
+    return res.status(503).json({
+      success: false,
+      error: 'Unable to deliver verification code. Please check your phone number and try again.'
     });
 
   } catch (err) {
