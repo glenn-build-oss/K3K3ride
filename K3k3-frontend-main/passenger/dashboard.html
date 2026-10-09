@@ -4630,38 +4630,41 @@
     }
     .location-prompt-card {
       width: 100%;
-      max-width: 440px;
+      max-width: 400px;
+      max-height: min(88vh, 520px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       background: #11141d;
       border: 1.5px solid rgba(255, 214, 10, 0.28);
-      border-radius: 26px;
-      padding: 24px 22px 20px;
+      border-radius: 22px;
+      padding: 16px 18px 14px;
       text-align: center;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 214, 10, 0.12);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 30px rgba(255, 214, 10, 0.1);
       position: relative;
-      animation: sheetSlideUp .32s cubic-bezier(0.32, 0.72, 0, 1);
+      animation: sheetSlideUp .3s cubic-bezier(0.32, 0.72, 0, 1);
     }
     .location-card-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .loc-brand-badge {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       background: rgba(255, 214, 10, 0.1);
       border: 1px solid rgba(255, 214, 10, 0.25);
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: 20px;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       font-weight: 700;
       color: #FFD60A;
       letter-spacing: 0.02em;
     }
     .loc-close-btn {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4670,7 +4673,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       transition: all .18s;
     }
     .loc-close-btn:hover {
@@ -4678,8 +4681,8 @@
       color: #FFFFFF;
     }
     .location-pulse-ring {
-      width: 68px;
-      height: 68px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: rgba(255, 214, 10, 0.14);
       border: 2px solid #FFD60A;
@@ -4687,17 +4690,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.8rem;
-      margin: 4px auto 14px;
+      font-size: 1.3rem;
+      margin: 2px auto 8px;
       position: relative;
-      box-shadow: 0 4px 20px rgba(255, 214, 10, 0.25);
+      box-shadow: 0 4px 16px rgba(255, 214, 10, 0.22);
     }
     .location-pulse-ring::after {
       content: '';
       position: absolute;
-      inset: -10px;
+      inset: -8px;
       border-radius: 50%;
-      border: 1.5px solid rgba(255, 214, 10, 0.4);
+      border: 1.5px solid rgba(255, 214, 10, 0.35);
       animation: pulseRadar 2s infinite ease-out;
     }
     @keyframes pulseRadar {
@@ -4705,79 +4708,79 @@
       100% { transform: scale(1.4); opacity: 0; }
     }
     .location-prompt-title {
-      font-size: 1.35rem;
+      font-size: 1.2rem;
       font-weight: 900;
       color: #ffffff;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       letter-spacing: -0.02em;
     }
     .location-prompt-desc {
-      font-size: 0.88rem;
-      line-height: 1.5;
+      font-size: 0.8rem;
+      line-height: 1.35;
       color: #94A3B8;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       padding: 0 4px;
     }
     .location-benefit-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 7px;
+      margin-bottom: 14px;
       text-align: left;
     }
     .loc-benefit-item {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 10px 14px;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 11px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 14px;
+      border-radius: 12px;
     }
     .loc-benefit-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
       background: rgba(255, 214, 10, 0.12);
       color: #FFD60A;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       flex-shrink: 0;
-      margin-top: 1px;
     }
     .loc-benefit-text {
-      font-size: 0.8rem;
+      font-size: 0.77rem;
       color: #CBD5E1;
-      line-height: 1.35;
+      line-height: 1.25;
+      display: flex;
+      flex-direction: column;
     }
     .loc-benefit-text strong {
       color: #F8FAFC;
-      display: block;
       font-weight: 700;
-      margin-bottom: 1px;
+      font-size: 0.8rem;
     }
     .location-prompt-actions {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .btn-location-allow {
       width: 100%;
-      height: 48px;
-      border-radius: 14px;
+      height: 44px;
+      border-radius: 13px;
       background: linear-gradient(135deg, #FFD60A 0%, #F59E0B 100%);
       color: #0A0D12;
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35);
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
       transition: transform .18s, filter .18s;
     }
     .btn-location-allow:hover {
@@ -4786,18 +4789,18 @@
     }
     .btn-location-dismiss {
       width: 100%;
-      height: 42px;
-      border-radius: 12px;
+      height: 38px;
+      border-radius: 11px;
       background: transparent;
       color: #94A3B8;
       font-weight: 600;
-      font-size: 0.86rem;
+      font-size: 0.82rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       transition: all .18s;
     }
     .btn-location-dismiss:hover {
@@ -4806,13 +4809,160 @@
       border-color: rgba(255, 255, 255, 0.2);
     }
     .location-prompt-footer {
-      font-size: 0.73rem;
+      font-size: 0.7rem;
       color: #64748B;
-      margin-top: 12px;
+      margin-top: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 5px;
+    }
+
+    /* ═════════════════════════════════════════════════════════════════
+       CANCEL RIDE CONFIRMATION MODAL
+    ══════════════════════════════════════════════════════════════════ */
+    .cancel-confirm-card {
+      width: 100%;
+      max-width: 390px;
+      background: #11141d;
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      border-radius: 22px;
+      padding: 18px 20px 16px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(239, 68, 68, 0.12);
+      position: relative;
+      animation: sheetSlideUp .28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .cancel-card-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cancel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.28);
+      padding: 4px 10px;
+      border-radius: 18px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #F87171;
+    }
+    .cancel-pulse-ring {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.12);
+      border: 2px solid #EF4444;
+      color: #EF4444;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin: 2px auto 10px;
+    }
+    .cancel-prompt-title {
+      font-size: 1.22rem;
+      font-weight: 900;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .cancel-prompt-desc {
+      font-size: 0.82rem;
+      line-height: 1.42;
+      color: #94A3B8;
+      margin-bottom: 16px;
+      padding: 0 4px;
+    }
+    .cancel-prompt-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .btn-keep-ride {
+      width: 100%;
+      height: 44px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #FFD60A 0%, #F59E0B 100%);
+      color: #0A0D12;
+      font-weight: 800;
+      font-size: 0.92rem;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+      transition: all .18s;
+    }
+    .btn-keep-ride:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+    .btn-confirm-cancel {
+      width: 100%;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(239, 68, 68, 0.08);
+      color: #F87171;
+      font-weight: 700;
+      font-size: 0.84rem;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all .18s;
+    }
+    .btn-confirm-cancel:hover {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #FFFFFF;
+    }
+
+    @media(max-height: 680px) {
+      .location-prompt-card {
+        padding: 12px 14px 10px;
+        max-height: 92vh;
+      }
+      .location-pulse-ring {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+        margin: 1px auto 5px;
+      }
+      .location-card-topbar {
+        margin-bottom: 6px;
+      }
+      .location-prompt-title {
+        font-size: 1.05rem;
+        margin-bottom: 2px;
+      }
+      .location-prompt-desc {
+        font-size: 0.74rem;
+        margin-bottom: 8px;
+      }
+      .loc-benefit-item {
+        padding: 4px 8px;
+        gap: 7px;
+      }
+      .loc-benefit-text {
+        font-size: 0.72rem;
+      }
+      .btn-location-allow {
+        height: 38px;
+        font-size: 0.82rem;
+      }
+      .btn-location-dismiss {
+        height: 34px;
+        font-size: 0.76rem;
+      }
     }
 
     /* ═════════════════════════════════════════════════════════════════
@@ -7224,29 +7374,29 @@
 
       <h3 class="location-prompt-title">Enable Live Location</h3>
       <p class="location-prompt-desc">
-        K3K3 uses your precise GPS to discover nearby kekes, calculate real-time arrival ETAs, and guide your rider directly to your pickup spot in Ho.
+        Quickly connect with nearby drivers and get accurate pickups in Ho.
       </p>
 
       <div class="location-benefit-list">
         <div class="loc-benefit-item">
           <div class="loc-benefit-icon"><i class="fas fa-map-pin"></i></div>
           <div class="loc-benefit-text">
-            <strong>Instant Pickup Detection</strong>
-            <span>No manual typing needed — your nearest landmark in Ho is detected automatically.</span>
+            <strong>Instant Pickup</strong>
+            <span>Auto-detects nearest Ho landmark</span>
           </div>
         </div>
         <div class="loc-benefit-item">
           <div class="loc-benefit-icon"><i class="fas fa-bolt"></i></div>
           <div class="loc-benefit-text">
-            <strong>Live Arrival ETAs</strong>
-            <span>Track your keke driver approaching your pickup point on the map in real-time.</span>
+            <strong>Live ETAs</strong>
+            <span>Watch your driver arrive on map</span>
           </div>
         </div>
         <div class="loc-benefit-item">
           <div class="loc-benefit-icon"><i class="fas fa-shield-halved"></i></div>
           <div class="loc-benefit-text">
-            <strong>Private &amp; Encrypted</strong>
-            <span>Your location is only accessed while using the app and never shared with 3rd parties.</span>
+            <strong>Private &amp; Secure</strong>
+            <span>Active only while taking a trip</span>
           </div>
         </div>
       </div>
@@ -7256,12 +7406,45 @@
           <i class="fas fa-location-arrow"></i> Allow Location Access
         </button>
         <button class="btn-location-dismiss" id="btnLocationDismiss" type="button" onclick="dismissLocationPrompt()">
-          <i class="fas fa-search-location"></i> Set Pickup Location Manually
+          <i class="fas fa-map-pin"></i> Set Pickup Location Manually
         </button>
       </div>
 
       <div class="location-prompt-footer">
-        <i class="fas fa-sliders-h"></i> You can adjust permissions anytime in your browser settings
+        <i class="fas fa-sliders-h"></i> Adjust permissions anytime in browser settings
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ PROFESSIONAL CANCEL RIDE CONFIRMATION MODAL ══════ -->
+  <div class="location-prompt-modal-backdrop" id="cancelRideConfirmModal" style="display:none;z-index:100001" onclick="if(event.target===this)closeCancelRideModal()">
+    <div class="cancel-confirm-card">
+      <div class="cancel-card-topbar">
+        <div class="cancel-badge">
+          <i class="fas fa-triangle-exclamation"></i>
+          <span>Ride Cancellation</span>
+        </div>
+        <button type="button" class="loc-close-btn" onclick="closeCancelRideModal()" aria-label="Dismiss">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="cancel-pulse-ring">
+        <i class="fas fa-ban"></i>
+      </div>
+
+      <h3 class="cancel-prompt-title">Cancel this ride?</h3>
+      <p class="cancel-prompt-desc">
+        Your keke driver is already on the way to your pickup spot. If you cancel, you may experience longer wait times when rebooking in Ho.
+      </p>
+
+      <div class="cancel-prompt-actions">
+        <button class="btn-keep-ride" id="btnKeepRide" type="button" onclick="closeCancelRideModal()">
+          <i class="fas fa-motorcycle"></i> No, Keep My Ride
+        </button>
+        <button class="btn-confirm-cancel" id="btnConfirmCancelRide" type="button" onclick="executeCancelTrip()">
+          <i class="fas fa-times-circle"></i> Yes, Cancel Ride
+        </button>
       </div>
     </div>
   </div>
@@ -10563,7 +10746,8 @@
         const s = document.getElementById('homeAtStatus');
         if (s) s.textContent = 'Rider Arrived at Pickup';
         if (pill) pill.innerHTML = '<i class="fas fa-circle-check" style="font-size:8px"></i> Driver has arrived';
-        showToast('Your rider has arrived at your pickup spot!', 'warn');
+        playK3K3Chime('arrived');
+        showToast('Your rider has arrived at your pickup spot in Ho!', 'warn');
       } else if (update.status === 'in_progress' || update.status === 'picked_up') {
         let trip = {};
         try {
@@ -10578,7 +10762,9 @@
           pill.className = 'bolt-pill bolt-pill-progress';
           pill.innerHTML = '<i class="fas fa-route" style="font-size:8px"></i> On the way';
         }
-        showToast('Passenger picked up! En route to your destination.', 'success');
+        playK3K3Chime('trip_start');
+        const destName = trip.drop || trip.dropoff_address || 'your destination';
+        showToast(`Trip started! You're en route to ${destName}. Enjoy your ride!`, 'success');
         updatePassengerMapWithTrip(trip);
       }
     }
@@ -10637,11 +10823,110 @@
       updatePassengerMapWithTrip(tripData);
     }
 
-    async function cancelActiveTrip() {
+    function playK3K3Chime(type = 'trip_start') {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+
+        const now = ctx.currentTime;
+        const masterGain = ctx.createGain();
+        masterGain.connect(ctx.destination);
+
+        if (type === 'trip_start') {
+          // Premium 3-note harmonic chime (C5 -> E5 -> G5)
+          const notes = [523.25, 659.25, 783.99];
+          masterGain.gain.setValueAtTime(0.18, now);
+          masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const noteGain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+            noteGain.gain.setValueAtTime(0.28, now + idx * 0.12);
+            noteGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+            osc.connect(noteGain);
+            noteGain.connect(masterGain);
+            osc.start(now + idx * 0.12);
+            osc.stop(now + idx * 0.12 + 0.38);
+          });
+        } else if (type === 'arrived') {
+          // Friendly 2-note arrival chime (D5 -> A4)
+          const notes = [587.33, 440.00];
+          masterGain.gain.setValueAtTime(0.2, now);
+          masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const noteGain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+            noteGain.gain.setValueAtTime(0.32, now + idx * 0.14);
+            noteGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.14 + 0.38);
+            osc.connect(noteGain);
+            noteGain.connect(masterGain);
+            osc.start(now + idx * 0.14);
+            osc.stop(now + idx * 0.14 + 0.4);
+          });
+        } else if (type === 'cancel') {
+          // Subtle low warning tone
+          const osc = ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(329.63, now);
+          osc.frequency.setValueAtTime(261.63, now + 0.15);
+          masterGain.gain.setValueAtTime(0.15, now);
+          masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.connect(masterGain);
+          osc.start(now);
+          osc.stop(now + 0.48);
+        } else {
+          // Crisp alert ping
+          const osc = ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(659.25, now);
+          osc.frequency.setValueAtTime(880.00, now + 0.1);
+          masterGain.gain.setValueAtTime(0.18, now);
+          masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.connect(masterGain);
+          osc.start(now);
+          osc.stop(now + 0.38);
+        }
+      } catch (err) {
+        console.warn('[Audio Chime] Could not play synthesized tone:', err);
+      }
+    }
+
+    function openCancelRideModal() {
+      const modal = document.getElementById('cancelRideConfirmModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+      }
+    }
+
+    function closeCancelRideModal() {
+      const modal = document.getElementById('cancelRideConfirmModal');
+      if (modal) {
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.18s ease';
+        setTimeout(() => {
+          modal.style.display = 'none';
+          modal.style.opacity = '';
+          modal.style.transition = '';
+        }, 180);
+      }
+    }
+
+    async function executeCancelTrip() {
+      closeCancelRideModal();
       const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
       if (!trip) return;
       const tripId = trip.tripId || trip.id;
-      if (!confirm('Are you sure you want to cancel this ride?')) return;
+      const riderId = trip.rider?.id || trip.rider_id;
 
       try {
         await fetch(`${API}/trips/${tripId}/status`, {
@@ -10651,12 +10936,17 @@
         });
       } catch(_) {}
 
+      if (passengerSocket && passengerSocket.connected) {
+        passengerSocket.emit('trip:cancel', { tripId, reason: 'passenger_cancelled', riderId });
+      }
+
       if (typeof searchTripPollTimer !== 'undefined' && searchTripPollTimer) {
         clearInterval(searchTripPollTimer);
       }
       closeRiderSearch();
       sessionStorage.removeItem('k3k3_active_trip');
-      document.getElementById('homeActiveTripCard').style.display = 'none';
+      const homeCard = document.getElementById('homeActiveTripCard');
+      if (homeCard) homeCard.style.display = 'none';
       const boltSheet = document.getElementById('boltRiderSheet');
       if (boltSheet) boltSheet.style.display = 'none';
       const mapCard = document.getElementById('passengerLiveMapCard');
@@ -10666,7 +10956,14 @@
         passengerMap.removeLayer(passengerRouteLayer);
         passengerRouteLayer = null;
       }
-      showToast('Ride request cancelled.', 'info');
+      playK3K3Chime('cancel');
+      showToast('Ride cancelled. You can request another ride anytime.', 'info');
+    }
+
+    async function cancelActiveTrip() {
+      const trip = JSON.parse(sessionStorage.getItem('k3k3_active_trip') || 'null');
+      if (!trip) return;
+      openCancelRideModal();
     }
 
     /* ─── Bolt/Uber Trip Completed Rating Functions ─── */

@@ -4396,6 +4396,79 @@ function disconnectWS() {
   }
 }
 
+function playK3K3Chime(type = 'new_request') {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+    const masterGain = ctx.createGain();
+    masterGain.connect(ctx.destination);
+
+    if (type === 'trip_start') {
+      // Premium 3-note harmonic chime (C5 -> E5 -> G5)
+      const notes = [523.25, 659.25, 783.99];
+      masterGain.gain.setValueAtTime(0.2, now);
+      masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+        noteGain.gain.setValueAtTime(0.28, now + idx * 0.12);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+        osc.connect(noteGain);
+        noteGain.connect(masterGain);
+        osc.start(now + idx * 0.12);
+        osc.stop(now + idx * 0.12 + 0.38);
+      });
+    } else if (type === 'arrived') {
+      // Friendly 2-note arrival chime (D5 -> A4)
+      const notes = [587.33, 440.00];
+      masterGain.gain.setValueAtTime(0.22, now);
+      masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const noteGain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+        noteGain.gain.setValueAtTime(0.32, now + idx * 0.14);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.14 + 0.38);
+        osc.connect(noteGain);
+        noteGain.connect(masterGain);
+        osc.start(now + idx * 0.14);
+        osc.stop(now + idx * 0.14 + 0.4);
+      });
+    } else {
+      // Crisp 2-tone notification ping for incoming request
+      const osc = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now);
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880.00, now + 0.12);
+
+      masterGain.gain.setValueAtTime(0.2, now);
+      masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+      osc.connect(masterGain);
+      osc2.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 0.2);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.45);
+    }
+  } catch (err) {
+    console.warn('[Rider Audio Chime] Could not play synthesized tone:', err);
+  }
+}
+
 function handleWsMessage(msg) {
   const tripId = msg.trip_id || msg.id;
   if (!tripId) return;
@@ -4426,26 +4499,13 @@ function handleWsMessage(msg) {
   renderRequests();
   showToast(`New ride request from ${req.passengerName}! (₵${req.fare.toFixed(2)})`, 'warn');
 
-  // Slide up Uber/Bolt incoming offer bottom sheet if idle
-  if (!activeTrip && isOnline) {
+  // Play attention chime
+  playK3K3Chime('new_request');
+
+  // Slide up incoming offer sheet only if idle and no offer is currently active (one-by-one flow)
+  if (!activeTrip && isOnline && !currentOfferTrip) {
     displayRiderOfferSheet(req);
   }
-
-  // Play audio chime
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-    osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15);
-    g.gain.setValueAtTime(0.15, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-    osc.connect(g);
-    g.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.35);
-  } catch(_) {}
 
   // Auto-dismiss after TTL seconds
   reqTimers[req.id] = setTimeout(() => dismissReq(req.id), (req.ttl || 20) * 1000);
@@ -4803,6 +4863,20 @@ function declineCurrentOffer() {
   if (typeof clearReqRoutePreview === 'function') {
     clearReqRoutePreview();
   }
+  // Seamlessly check and display next pending request in queue (one-by-one flow)
+  checkAndDisplayNextOffer();
+}
+
+function checkAndDisplayNextOffer() {
+  if (activeTrip || !isOnline || currentOfferTrip) return;
+  const nextReq = pendingReqs.find(r => r && (!reqTimers[r.id] || true));
+  if (nextReq) {
+    setTimeout(() => {
+      if (!activeTrip && isOnline && !currentOfferTrip) {
+        displayRiderOfferSheet(nextReq);
+      }
+    }, 350);
+  }
 }
 
 function setupRiderNavSheet(trip) {
@@ -4858,17 +4932,19 @@ function setupRiderNavSheet(trip) {
       stageBadge.style.background = 'rgba(255,214,10,0.15)';
       stageBadge.style.color = '#FFD60A';
       stageBadge.style.borderColor = 'rgba(255,214,10,0.3)';
-      stageBadge.innerHTML = '<i class="fas fa-bell"></i> Arrived at Pickup Spot';
+      stageBadge.innerHTML = '<i class="fas fa-bell"></i> Waiting at Pickup Spot';
     }
     setEl('riderNavEtaText', 'Waiting');
     setEl('riderNavTargetLbl', 'Passenger Pickup Spot');
     setEl('riderNavTargetPlace', trip.pickup || 'Pickup Location');
-    setEl('riderNavTargetMeta', 'At location • Passenger notified');
+    setEl('riderNavTargetMeta', 'At location • Waiting for passenger');
 
     if (actionBtn) {
-      actionBtn.style.background = '#FFD60A';
-      actionBtn.style.color = '#000000';
-      actionBtn.innerHTML = '<i class="fas fa-user-check"></i> START RIDE (PASSENGER ON BOARD)';
+      actionBtn.style.background = 'linear-gradient(135deg, #FFD60A 0%, #F59E0B 100%)';
+      actionBtn.style.color = '#0A0D12';
+      actionBtn.style.fontWeight = '800';
+      actionBtn.style.boxShadow = '0 6px 18px rgba(245, 158, 11, 0.35)';
+      actionBtn.innerHTML = '<i class="fas fa-play"></i> START TRIP (PASSENGER ON BOARD)';
     }
   } else if (currentTripStage === 'heading_to_dest') {
     if (stageBadge) {
@@ -4906,6 +4982,7 @@ async function advanceRiderTripStage() {
     // 1. Arrived at pickup
     currentTripStage = 'arrived_at_pickup';
     setupRiderNavSheet(trip);
+    playK3K3Chime('arrived');
 
     // Notify backend & passenger
     if (wsConn && wsConn.emit) {
@@ -4920,14 +4997,16 @@ async function advanceRiderTripStage() {
       }).catch(() => {});
     } catch (_) {}
 
-    showToast('Arrival confirmed! Passenger notified.', 'warn');
+    showToast('Arrival confirmed! Waiting for passenger to board.', 'warn');
 
   } else if (currentTripStage === 'arrived_at_pickup') {
     // 2. Start ride (Passenger on board)
     currentTripStage = 'heading_to_dest';
+    playK3K3Chime('trip_start');
     await doPickupPassenger();
     setupRiderNavSheet(trip);
-    showToast(`Ride started! Heading to ${trip.drop}`, 'success');
+    const dropPlace = trip.drop || 'destination';
+    showToast(`Trip started! Heading to ${dropPlace}. Drive safely!`, 'success');
 
   } else if (currentTripStage === 'heading_to_dest') {
     // 3. Complete ride
