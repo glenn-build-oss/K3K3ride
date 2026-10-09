@@ -3424,13 +3424,17 @@
       position: fixed;
       inset: 0;
       z-index: 800;
-      background: rgba(0, 0, 0, .35);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      background: rgba(0, 0, 0, .45);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      padding: 0;
+      padding-bottom: calc(var(--nav-h, 68px) + 16px);
+      padding-top: calc(var(--topbar-h, 60px) + 12px);
+      padding-left: 12px;
+      padding-right: 12px;
+      transition: background 0.3s ease;
     }
 
     .rider-search-overlay.show {
@@ -3439,27 +3443,32 @@
     }
 
     .rider-search-box {
-      background: var(--white);
-      border-top-left-radius: 28px;
-      border-top-right-radius: 28px;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-      padding: 14px 28px calc(24px + env(safe-area-inset-bottom, 16px));
+      background: var(--surface, #1e222d);
+      color: var(--text, #ffffff);
+      border-radius: 26px;
+      padding: 20px 22px calc(18px + env(safe-area-inset-bottom, 10px));
       width: 100%;
-      max-width: 580px;
+      max-width: min(430px, calc(100vw - 20px));
       margin: 0 auto;
       text-align: center;
-      box-shadow: 0 -14px 48px rgba(0, 0, 0, .35);
-      border-top: 1.5px solid rgba(255, 255, 255, 0.12);
-      animation: sheetSlideUp .38s cubic-bezier(0.32, 0.72, 0, 1);
-      max-height: 88vh;
+      box-shadow: 0 -14px 48px rgba(0, 0, 0, .55), 0 4px 22px rgba(0, 0, 0, 0.35);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      animation: sheetSlideUp .35s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: calc(86vh - var(--nav-h, 68px));
       overflow-y: auto;
       position: relative;
     }
 
     @media(max-width:480px) {
+      .rider-search-overlay {
+        padding-bottom: calc(var(--nav-h, 68px) + 14px);
+        padding-left: 10px;
+        padding-right: 10px;
+      }
       .rider-search-box {
-        padding: 12px 20px calc(20px + env(safe-area-inset-bottom, 16px));
+        padding: 16px 18px calc(16px + env(safe-area-inset-bottom, 8px));
+        max-width: calc(100vw - 16px);
+        border-radius: 24px;
       }
     }
 
@@ -3577,64 +3586,85 @@
 
     /* No Riders State */
     .no-riders-icon {
-      width: 80px;
-      height: 80px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
-      background: rgba(255, 214, 10, .12);
+      background: rgba(255, 214, 10, .14);
+      border: 1.5px solid rgba(255, 214, 10, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
+      font-size: 1.75rem;
       color: var(--yellow);
-      margin: 0 auto 20px;
+      margin: 0 auto 12px;
+      box-shadow: 0 4px 18px rgba(255, 214, 10, 0.18);
+    }
+
+    .no-riders-info-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      padding: 10px 14px;
+      background: rgba(255, 214, 10, 0.08);
+      border-radius: 12px;
+      font-size: 0.82rem;
+      color: var(--yellow);
+      font-weight: 600;
+      border: 1px solid rgba(255, 214, 10, 0.22);
+      margin-bottom: 14px;
+      text-align: left;
+      line-height: 1.4;
     }
 
     .rider-search-actions {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin-top: 28px;
+      margin-top: 16px;
     }
 
     .rsearch-retry-btn {
       width: 100%;
-      height: 50px;
-      background: var(--black);
-      color: var(--white);
+      height: 48px;
+      background: var(--yellow, #ffd60a);
+      color: var(--black, #0f172a);
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: inherit;
       font-size: .95rem;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       transition: all .18s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 4px 16px rgba(255, 214, 10, 0.3);
     }
 
     .rsearch-retry-btn:hover {
-      background: #333;
+      background: #e6c200;
       transform: translateY(-1px);
     }
 
     .rsearch-cancel-btn {
       width: 100%;
-      height: 46px;
-      background: var(--surface-2);
-      color: var(--text-2);
-      border: none;
-      border-radius: 10px;
+      height: 44px;
+      background: var(--surface-2, rgba(255, 255, 255, 0.06));
+      color: var(--text-2, #94a3b8);
+      border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+      border-radius: 12px;
       font-family: inherit;
       font-size: .88rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background .18s;
+      transition: all .18s;
     }
 
     .rsearch-cancel-btn:hover {
-      background: var(--border);
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text, #ffffff);
     }
 
     /* ─── Toast ─── */
@@ -4581,7 +4611,13 @@
     ══════════════════════════════════════════════════════════════════ */
     .location-prompt-modal-backdrop {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
       z-index: 100000;
       background: rgba(10, 13, 18, 0.85);
       backdrop-filter: blur(8px);
@@ -4589,33 +4625,72 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 18px;
+      padding: 16px;
       animation: fadeIn .25s ease-out;
     }
     .location-prompt-card {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       background: #11141d;
-      border: 1.5px solid rgba(255, 214, 10, 0.25);
-      border-radius: 24px;
-      padding: 30px 24px;
+      border: 1.5px solid rgba(255, 214, 10, 0.28);
+      border-radius: 26px;
+      padding: 24px 22px 20px;
       text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(255, 214, 10, 0.12);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 214, 10, 0.12);
       position: relative;
+      animation: sheetSlideUp .32s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .location-card-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .loc-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 214, 10, 0.1);
+      border: 1px solid rgba(255, 214, 10, 0.25);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #FFD60A;
+      letter-spacing: 0.02em;
+    }
+    .loc-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94A3B8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all .18s;
+    }
+    .loc-close-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #FFFFFF;
     }
     .location-pulse-ring {
-      width: 76px;
-      height: 76px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
-      background: rgba(255, 214, 10, 0.15);
+      background: rgba(255, 214, 10, 0.14);
       border: 2px solid #FFD60A;
       color: #FFD60A;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      margin-bottom: 20px;
+      font-size: 1.8rem;
+      margin: 4px auto 14px;
       position: relative;
+      box-shadow: 0 4px 20px rgba(255, 214, 10, 0.25);
     }
     .location-pulse-ring::after {
       content: '';
@@ -4631,16 +4706,57 @@
     }
     .location-prompt-title {
       font-size: 1.35rem;
-      font-weight: 800;
+      font-weight: 900;
       color: #ffffff;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       letter-spacing: -0.02em;
     }
     .location-prompt-desc {
-      font-size: 0.9rem;
-      line-height: 1.55;
+      font-size: 0.88rem;
+      line-height: 1.5;
       color: #94A3B8;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+      padding: 0 4px;
+    }
+    .location-benefit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .loc-benefit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+    }
+    .loc-benefit-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255, 214, 10, 0.12);
+      color: #FFD60A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .loc-benefit-text {
+      font-size: 0.8rem;
+      color: #CBD5E1;
+      line-height: 1.35;
+    }
+    .loc-benefit-text strong {
+      color: #F8FAFC;
+      display: block;
+      font-weight: 700;
+      margin-bottom: 1px;
     }
     .location-prompt-actions {
       display: flex;
@@ -4649,12 +4765,12 @@
     }
     .btn-location-allow {
       width: 100%;
-      height: 50px;
+      height: 48px;
       border-radius: 14px;
       background: linear-gradient(135deg, #FFD60A 0%, #F59E0B 100%);
       color: #0A0D12;
       font-weight: 800;
-      font-size: 0.96rem;
+      font-size: 0.95rem;
       border: none;
       cursor: pointer;
       display: flex;
@@ -4673,16 +4789,30 @@
       height: 42px;
       border-radius: 12px;
       background: transparent;
-      color: #64748B;
+      color: #94A3B8;
       font-weight: 600;
       font-size: 0.86rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      transition: color .18s, border-color .18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all .18s;
     }
     .btn-location-dismiss:hover {
       color: #F1F5F9;
+      background: rgba(255, 255, 255, 0.05);
       border-color: rgba(255, 255, 255, 0.2);
+    }
+    .location-prompt-footer {
+      font-size: 0.73rem;
+      color: #64748B;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
     }
 
     /* ═════════════════════════════════════════════════════════════════
@@ -6781,13 +6911,11 @@
         <div class="no-riders-icon"><i class="fas fa-motorcycle"></i></div>
         <div class="search-status-title">No Riders Available</div>
         <div class="search-status-sub">
-          We couldn't find any available riders in your area right now. Our network is still growing — please try again
-          shortly or check back later.
+          We couldn't find any available riders in your area right now. Our fleet is actively expanding — please try again shortly.
         </div>
-        <div
-          style="display:flex;align-items:center;gap:10px;justify-content:center;padding:12px 16px;background:#FFF9E6;border-radius:12px;font-size:.82rem;color:#7a6200;font-weight:600;border:1px solid rgba(255,214,10,.3)">
-          <i class="fas fa-info-circle" style="color:var(--yellow)"></i>
-          K3K3 is expanding fast — riders are being onboarded in your area.
+        <div class="no-riders-info-pill">
+          <i class="fas fa-info-circle"></i>
+          <span>K3K3 is expanding fast — new riders are active across Ho.</span>
         </div>
         <div class="rider-search-actions">
           <button class="rsearch-retry-btn" onclick="retryRiderSearch()">
@@ -6874,6 +7002,8 @@
           <i class="fas fa-ban"></i> Cancel Ride
         </button>
       </div>
+    </div>
+  </div>
 
   <!-- Assigned Rider Profile Modal -->
   <div class="rider-profile-modal-backdrop" id="assignedRiderProfileModal" style="display:none">
@@ -7075,22 +7205,63 @@
 
 
   <!-- ══════ LOCATION PERMISSION PROMPT MODAL ══════ -->
-  <div class="location-prompt-modal-backdrop" id="enableLocationModal" style="display:none">
+  <div class="location-prompt-modal-backdrop" id="enableLocationModal" style="display:none" onclick="if(event.target===this)dismissLocationPrompt()">
     <div class="location-prompt-card">
+      <div class="location-card-topbar">
+        <div class="loc-brand-badge">
+          <i class="fas fa-motorcycle"></i>
+          <span>K3K3 Transit</span>
+          <span style="opacity:0.6;font-size:0.7rem">• Ho Region</span>
+        </div>
+        <button type="button" class="loc-close-btn" onclick="dismissLocationPrompt()" aria-label="Dismiss">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
       <div class="location-pulse-ring">
         <i class="fas fa-location-crosshairs"></i>
       </div>
-      <h3 class="location-prompt-title">Enable Location Access</h3>
+
+      <h3 class="location-prompt-title">Enable Live Location</h3>
       <p class="location-prompt-desc">
-        K3K3 uses your location to find nearby riders and ensure accurate pickups. Your location is only shared when you book a ride.
+        K3K3 uses your precise GPS to discover nearby kekes, calculate real-time arrival ETAs, and guide your rider directly to your pickup spot in Ho.
       </p>
+
+      <div class="location-benefit-list">
+        <div class="loc-benefit-item">
+          <div class="loc-benefit-icon"><i class="fas fa-map-pin"></i></div>
+          <div class="loc-benefit-text">
+            <strong>Instant Pickup Detection</strong>
+            <span>No manual typing needed — your nearest landmark in Ho is detected automatically.</span>
+          </div>
+        </div>
+        <div class="loc-benefit-item">
+          <div class="loc-benefit-icon"><i class="fas fa-bolt"></i></div>
+          <div class="loc-benefit-text">
+            <strong>Live Arrival ETAs</strong>
+            <span>Track your keke driver approaching your pickup point on the map in real-time.</span>
+          </div>
+        </div>
+        <div class="loc-benefit-item">
+          <div class="loc-benefit-icon"><i class="fas fa-shield-halved"></i></div>
+          <div class="loc-benefit-text">
+            <strong>Private &amp; Encrypted</strong>
+            <span>Your location is only accessed while using the app and never shared with 3rd parties.</span>
+          </div>
+        </div>
+      </div>
+
       <div class="location-prompt-actions">
-        <button class="btn-location-allow" type="button" onclick="requestUserLiveLocation()">
+        <button class="btn-location-allow" id="btnLocationAllow" type="button" onclick="requestUserLiveLocation()">
           <i class="fas fa-location-arrow"></i> Allow Location Access
         </button>
-        <button class="btn-location-dismiss" type="button" onclick="dismissLocationPrompt()">
-          Enter Pickup Manually
+        <button class="btn-location-dismiss" id="btnLocationDismiss" type="button" onclick="dismissLocationPrompt()">
+          <i class="fas fa-search-location"></i> Set Pickup Location Manually
         </button>
+      </div>
+
+      <div class="location-prompt-footer">
+        <i class="fas fa-sliders-h"></i> You can adjust permissions anytime in your browser settings
       </div>
     </div>
   </div>
@@ -9417,7 +9588,7 @@
     function requestUserLiveLocation() {
       const btn = document.querySelector('#enableLocationModal .btn-location-allow');
       if (btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Live GPS...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting your location...';
         btn.disabled = true;
       }
 
@@ -9461,7 +9632,7 @@
 
           startLiveGpsWatcher();
           dismissLocationPrompt();
-          showToast(`Live location enabled! Nearest pickup: ${closest}`, 'success');
+          showToast(`Location detected: Pickup set to ${closest}!`, 'success');
         },
         (err) => {
           console.warn('[Geolocation Error]', err.message);
@@ -9469,7 +9640,7 @@
           sessionStorage.setItem('k3k3_lng', '0.4688');
           sessionStorage.setItem('k3k3_loc_granted', '1');
           dismissLocationPrompt();
-          showToast('Defaulted to Ho Central pickup. You can choose any pickup anytime.', 'info');
+          showToast('Location permission unavailable. You can easily choose any pickup location in Ho.', 'info');
         },
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
       );
@@ -9478,7 +9649,20 @@
     function dismissLocationPrompt() {
       sessionStorage.setItem('k3k3_loc_prompt_dismissed', '1');
       const modal = document.getElementById('enableLocationModal');
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.2s ease';
+        setTimeout(() => {
+          modal.style.display = 'none';
+          modal.style.opacity = '';
+          modal.style.transition = '';
+        }, 200);
+      }
+      const btn = document.querySelector('#enableLocationModal .btn-location-allow');
+      if (btn) {
+        btn.innerHTML = '<i class="fas fa-location-arrow"></i> Allow Location Access';
+        btn.disabled = false;
+      }
     }
 
     let _liveWatcherId = null;
