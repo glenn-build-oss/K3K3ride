@@ -3230,6 +3230,245 @@
     }
     .campus-select-arrow { color: var(--text-2); font-size: .78rem; pointer-events: none; flex-shrink: 0 }
 
+    /* ─── Bolt / Uber / Yango Location Inputs (Freeform Typing & Autocomplete) ─── */
+    .route-input-container {
+      display: flex;
+      flex-direction: column;
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 6px 12px;
+      margin-bottom: 14px;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .route-input-container:focus-within {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+    }
+    .route-field-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 4px;
+      position: relative;
+    }
+    .route-field-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease;
+    }
+    .route-field-icon.pickup {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .route-field-icon.dest {
+      background: rgba(255, 214, 10, 0.2);
+      color: #d97706;
+      box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.12);
+    }
+    .route-field-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .route-field-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 2px;
+      line-height: 1;
+    }
+    .route-text-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--text);
+      padding: 0;
+      width: 100%;
+      letter-spacing: -0.01em;
+    }
+    .route-text-input::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    .route-field-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .route-action-btn {
+      background: transparent;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.85rem;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .route-action-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text);
+      transform: scale(1.05);
+    }
+    .route-action-btn.clear-btn {
+      color: #94a3b8;
+    }
+    .route-action-btn.clear-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+    .route-action-btn.gps-btn {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10B981;
+    }
+    .route-action-btn.gps-btn:hover {
+      background: #10B981;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
+    .route-divider-line {
+      position: relative;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      margin-left: 15px;
+    }
+    .route-line-stem {
+      position: absolute;
+      left: 0;
+      top: -12px;
+      bottom: -12px;
+      width: 2px;
+      background: repeating-linear-gradient(to bottom, #cbd5e1 0, #cbd5e1 3px, transparent 3px, transparent 7px);
+    }
+    .route-swap-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 0.72rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 5;
+    }
+    .route-swap-btn:hover {
+      transform: translateY(-50%) rotate(180deg);
+      background: var(--yellow);
+      color: #0f172a;
+      border-color: var(--yellow);
+      box-shadow: 0 2px 10px rgba(255, 214, 10, 0.4);
+    }
+    .place-suggestions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+      max-height: 230px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      margin-top: 2px;
+    }
+    .place-suggestions.show {
+      display: block;
+    }
+    .place-suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--surface-2);
+      transition: background 0.15s ease;
+    }
+    .place-suggestion-item:last-child {
+      border-bottom: none;
+    }
+    .place-suggestion-item:hover {
+      background: rgba(255, 214, 10, 0.1);
+    }
+    .place-sugg-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #FFD60A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .place-sugg-icon.custom {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+    }
+    .place-sugg-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .place-sugg-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .place-sugg-area {
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .custom-place-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      cursor: pointer;
+      background: rgba(16, 185, 129, 0.05);
+      transition: background 0.15s ease;
+    }
+    .custom-place-item:hover {
+      background: rgba(16, 185, 129, 0.12);
+    }
+
     /* ─── Campus Back Button ─── */
     .campus-back-btn {
       display: flex;
@@ -6732,17 +6971,21 @@
     <div class="modal-sheet">
       <div class="modal-handle"></div>
 
-      <!-- STEP 1: Pick locations -->
-      <div id="bookStep1">
-        <div class="modal-title"><i class="fas fa-motorcycle"></i> Where are you going?</div>
-        <div style="font-size:.75rem;color:var(--muted);margin:-4px 0 14px;text-align:center">K3K3 Campus Routes • Ho, Volta Region</div>
-
-        <!-- Zone quick filter chips -->
-        <div class="modal-zone-chips" id="modalZoneChips">
-          <button type="button" class="modal-zone-chip active" id="mChipAll" onclick="setDestinationFilter('all', this)">All Stops</button>
-          <button type="button" class="modal-zone-chip" id="mChipIn" onclick="setDestinationFilter('in', this)"><i class="fas fa-graduation-cap"></i> In-Campus (₵3.00)</button>
-          <button type="button" class="modal-zone-chip" id="mChipOut" onclick="setDestinationFilter('out', this)"><i class="fas fa-city"></i> Out-Campus / Town</button>
+      <!-- Interactive Mapbox Map View (Prominently requested and rendered!) -->
+      <div class="modal-mapbox-wrap" id="modalMapboxContainer">
+        <div id="modalMapboxMap"></div>
+        <div class="modal-mapbox-badge">
+          <i class="fas fa-route"></i> <span id="modalRouteSummaryBadge">Interactive Map • Ho</span>
         </div>
+        <button type="button" class="modal-map-resize-btn" id="modalMapResizeBtn" onclick="toggleModalMapSize(event)" title="Resize map view">
+          <i class="fas fa-expand-alt" id="modalMapResizeIcon"></i> <span id="modalMapResizeLabel">Expand</span>
+        </button>
+      </div>
+
+      <!-- STEP 1: Pick locations (Bolt / Uber / Yango Style) -->
+      <div id="bookStep1">
+        <div class="modal-title" style="margin-bottom:2px"><i class="fas fa-motorcycle"></i> Where are you going?</div>
+        <div style="font-size:.75rem;color:var(--muted);margin:0 0 12px;text-align:center">Type any pickup &amp; drop-off in Ho or tap on the map</div>
 
         <!-- Recent Trips with Clock Icon (Returning Passengers Only) -->
         <div class="recent-trips-box" id="recentTripsBox" style="display:none">
@@ -6752,108 +6995,72 @@
           <div id="recentTripsList"></div>
         </div>
 
-        <!-- Pickup -->
-        <div class="form-field">
-          <label class="form-label">Pickup Location</label>
-          <div class="campus-select-wrap">
-            <div class="campus-select-dot pickup"></div>
-            <select class="campus-select" id="pickupSelect" onchange="onLocationChange()">
-              <option value="">Select pickup location…</option>
-              <optgroup label="Campuses & Hostels (In-Campus)" id="pickupOptIn">
-                <option value="Ho Technical University (HSTU)">Ho Technical University (HSTU)</option>
-                <option value="HSTU Main Gate">HSTU Main Gate</option>
-                <option value="HSTU Student Hostel">HSTU Student Hostel</option>
-                <option value="Sokode Hostel">Sokode Hostel</option>
-                <option value="Cedi Auditorium (UHAS)">Cedi Auditorium (UHAS)</option>
-                <option value="University of Health & Allied Sciences (UHAS)">UHAS Campus</option>
-                <option value="School of Hygiene">School of Hygiene</option>
-                <option value="Dave (Southern Campus)">Dave (Southern Campus)</option>
-              </optgroup>
-              <optgroup label="Central & Commercial (Out-Campus)" id="pickupOptOutComm">
-                <option value="Ho Central">Ho Central</option>
-                <option value="Ho Central Market">Ho Central Market</option>
-                <option value="Ho Bus Terminal">Ho Bus Terminal</option>
-                <option value="Ho Town Centre">Ho Town Centre</option>
-                <option value="Ho Post Office">Ho Post Office</option>
-                <option value="Ho Sports Stadium">Ho Sports Stadium</option>
-                <option value="Ho Jubilee Park">Ho Jubilee Park</option>
-              </optgroup>
-              <optgroup label="Hospitals & Healthcare (Out-Campus)" id="pickupOptOutHosp">
-                <option value="Trafalgar (Ho Teaching Hospital)">Trafalgar (Ho Teaching Hospital)</option>
-                <option value="Volta Regional Hospital">Volta Regional Hospital</option>
-                <option value="Ho Municipal Hospital">Ho Municipal Hospital</option>
-              </optgroup>
-              <optgroup label="Townships & Residential (Out-Campus)" id="pickupOptOutTown">
-                <option value="Dome Area">Dome Area</option>
-                <option value="Bankoe">Bankoe</option>
-                <option value="Ahoe">Ahoe</option>
-                <option value="Kpehe">Kpehe</option>
-                <option value="Mawuli Estates">Mawuli Estates</option>
-                <option value="Mawuli School">Mawuli School</option>
-                <option value="Sokode Estates">Sokode Estates</option>
-                <option value="Sokode Junction">Sokode Junction</option>
-                <option value="Fiave">Fiave</option>
-                <option value="Agorve">Agorve</option>
-                <option value="Volta Barracks">Volta Barracks</option>
-                <option value="Mirage">Mirage</option>
-                <option value="Guiness">Guiness</option>
-                <option value="Lokoe">Lokoe</option>
-              </optgroup>
-            </select>
-            <i class="fas fa-chevron-down campus-select-arrow"></i>
-          </div>
-        </div>
+        <!-- Bolt / Uber / Yango Freeform Location Inputs -->
+        <div class="route-input-container">
+          <!-- Hidden inputs for backward-compatibility with any legacy references -->
+          <input type="hidden" id="pickupSelect" value="">
+          <input type="hidden" id="destSelect" value="">
 
-        <!-- Destination -->
-        <div class="form-field">
-          <label class="form-label">Destination</label>
-          <div class="campus-select-wrap">
-            <div class="campus-select-dot dest"></div>
-            <select class="campus-select" id="destSelect" onchange="onLocationChange()">
-              <option value="">Select destination…</option>
-              <optgroup label="Campuses & Hostels (In-Campus)" id="destOptIn">
-                <option value="Ho Technical University (HSTU)">Ho Technical University (HSTU)</option>
-                <option value="HSTU Main Gate">HSTU Main Gate</option>
-                <option value="HSTU Student Hostel">HSTU Student Hostel</option>
-                <option value="Sokode Hostel">Sokode Hostel</option>
-                <option value="Cedi Auditorium (UHAS)">Cedi Auditorium (UHAS)</option>
-                <option value="University of Health & Allied Sciences (UHAS)">UHAS Campus</option>
-                <option value="School of Hygiene">School of Hygiene</option>
-                <option value="Dave (Southern Campus)">Dave (Southern Campus)</option>
-              </optgroup>
-              <optgroup label="Central & Commercial (Out-Campus)" id="destOptOutComm">
-                <option value="Ho Central">Ho Central</option>
-                <option value="Ho Central Market">Ho Central Market</option>
-                <option value="Ho Bus Terminal">Ho Bus Terminal</option>
-                <option value="Ho Town Centre">Ho Town Centre</option>
-                <option value="Ho Post Office">Ho Post Office</option>
-                <option value="Ho Sports Stadium">Ho Sports Stadium</option>
-                <option value="Ho Jubilee Park">Ho Jubilee Park</option>
-              </optgroup>
-              <optgroup label="Hospitals & Healthcare (Out-Campus)" id="destOptOutHosp">
-                <option value="Trafalgar (Ho Teaching Hospital)">Trafalgar (Ho Teaching Hospital)</option>
-                <option value="Volta Regional Hospital">Volta Regional Hospital</option>
-                <option value="Ho Municipal Hospital">Ho Municipal Hospital</option>
-              </optgroup>
-              <optgroup label="Townships & Residential (Out-Campus)" id="destOptOutTown">
-                <option value="Dome Area">Dome Area</option>
-                <option value="Bankoe">Bankoe</option>
-                <option value="Ahoe">Ahoe</option>
-                <option value="Kpehe">Kpehe</option>
-                <option value="Mawuli Estates">Mawuli Estates</option>
-                <option value="Mawuli School">Mawuli School</option>
-                <option value="Sokode Estates">Sokode Estates</option>
-                <option value="Sokode Junction">Sokode Junction</option>
-                <option value="Fiave">Fiave</option>
-                <option value="Agorve">Agorve</option>
-                <option value="Volta Barracks">Volta Barracks</option>
-                <option value="Mirage">Mirage</option>
-                <option value="Guiness">Guiness</option>
-                <option value="Lokoe">Lokoe</option>
-              </optgroup>
-            </select>
-            <i class="fas fa-chevron-down campus-select-arrow"></i>
+          <!-- Pickup Field -->
+          <div class="route-field-wrap">
+            <div class="route-field-icon pickup">
+              <i class="fas fa-circle-dot"></i>
+            </div>
+            <div class="route-field-body">
+              <label class="route-field-label">Pickup Location</label>
+              <input type="text"
+                     id="pickupInput"
+                     class="route-text-input"
+                     placeholder="Enter pickup spot in Ho (or use GPS)"
+                     autocomplete="off"
+                     spellcheck="false"
+                     oninput="handleLocationInput('pickup')"
+                     onfocus="onLocationInputFocus('pickup')">
+            </div>
+            <div class="route-field-actions">
+              <button type="button" class="route-action-btn clear-btn" id="pickupClearBtn" onclick="clearLocationInput('pickup')" title="Clear pickup" style="display:none">
+                <i class="fas fa-times"></i>
+              </button>
+              <button type="button" class="route-action-btn gps-btn" onclick="useCurrentLocationForPickup()" title="Use Current GPS Location">
+                <i class="fas fa-crosshairs"></i>
+              </button>
+            </div>
           </div>
+          <!-- Autocomplete Dropdown for Pickup -->
+          <div id="pickupSuggestions" class="place-suggestions"></div>
+
+          <!-- Vertical connector stem & swap button -->
+          <div class="route-divider-line">
+            <div class="route-line-stem"></div>
+            <button type="button" class="route-swap-btn" onclick="swapLocations()" title="Swap pickup and destination">
+              <i class="fas fa-arrow-down-up-across-line"></i>
+            </button>
+          </div>
+
+          <!-- Destination Field -->
+          <div class="route-field-wrap">
+            <div class="route-field-icon dest">
+              <i class="fas fa-location-dot"></i>
+            </div>
+            <div class="route-field-body">
+              <label class="route-field-label">Destination</label>
+              <input type="text"
+                     id="destInput"
+                     class="route-text-input"
+                     placeholder="Where to? Type any destination in Ho"
+                     autocomplete="off"
+                     spellcheck="false"
+                     oninput="handleLocationInput('dest')"
+                     onfocus="onLocationInputFocus('dest')">
+            </div>
+            <div class="route-field-actions">
+              <button type="button" class="route-action-btn clear-btn" id="destClearBtn" onclick="clearLocationInput('dest')" title="Clear destination" style="display:none">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <!-- Autocomplete Dropdown for Destination -->
+          <div id="destSuggestions" class="place-suggestions"></div>
         </div>
 
         <!-- Route preview (shown when both selected) -->
@@ -6881,17 +7088,6 @@
       <!-- STEP 2: Choose ride type -->
       <div id="bookStep2" style="display:none">
         <button class="campus-back-btn" onclick="backToStep1()"><i class="fas fa-arrow-left"></i> Back to locations</button>
-
-        <!-- Interactive Map Route (Positioned slightly above Choose Your Ride) -->
-        <div class="modal-mapbox-wrap" id="modalMapboxContainer">
-          <div id="modalMapboxMap"></div>
-          <div class="modal-mapbox-badge">
-            <i class="fas fa-route"></i> <span id="modalRouteSummaryBadge">Turn-by-Turn Route</span>
-          </div>
-          <button type="button" class="modal-map-resize-btn" id="modalMapResizeBtn" onclick="toggleModalMapSize(event)" title="Resize map view">
-            <i class="fas fa-expand-alt" id="modalMapResizeIcon"></i> <span id="modalMapResizeLabel">Expand</span>
-          </button>
-        </div>
 
         <div class="modal-title" style="margin-bottom:4px">Choose Your Ride</div>
 
@@ -8563,12 +8759,20 @@
     }
 
     function quickSelectPastTrip(pickup, dest) {
+      const pInp = document.getElementById('pickupInput');
+      const dInp = document.getElementById('destInput');
+      if (pInp) pInp.value = pickup;
+      if (dInp) dInp.value = dest;
       const pSel = document.getElementById('pickupSelect');
       const dSel = document.getElementById('destSelect');
       if (pSel) pSel.value = pickup;
       if (dSel) dSel.value = dest;
       _pickupVal = pickup;
       _destVal = dest;
+      const pClear = document.getElementById('pickupClearBtn');
+      const dClear = document.getElementById('destClearBtn');
+      if (pClear) pClear.style.display = 'flex';
+      if (dClear) dClear.style.display = 'flex';
       if (typeof onLocationChange === 'function') onLocationChange();
     }
 
@@ -8587,7 +8791,12 @@
         const city = addr.city || addr.town || addr.state_district || '';
         const place = city ? `${label}, ${city}` : label;
         const input = document.getElementById('pickupInput');
-        if (input && !input.value) input.value = place;
+        if (input && !input.value) {
+          input.value = place;
+          _pickupVal = place;
+          const pClear = document.getElementById('pickupClearBtn');
+          if (pClear) pClear.style.display = 'flex';
+        }
       } catch (e) { /* silently fail */ }
     }
 
@@ -8605,6 +8814,9 @@
       if (step1) step1.style.display = 'block';
       if (step2) step2.style.display = 'none';
       if (step3) step3.style.display = 'none';
+
+      // Request and initialize Mapbox interactive map immediately
+      initModalMapbox();
 
       // Past trips with clock icon: ONLY shown if returning passenger has history
       const recentTrips = getRecentTrips();
@@ -8636,6 +8848,8 @@
       _campusFare = null;
       _pickupVal = '';
       _destVal = '';
+      _pickupCoords = null;
+      _destCoords = null;
       ['card-shared-v2','card-alone-v2','card-shared','card-alone'].forEach(id => {
         const c = document.getElementById(id);
         if (c) c.classList.remove('selected');
@@ -8655,20 +8869,50 @@
       if (selectLbl) selectLbl.textContent = 'Select K3K3';
       if (nextBtn)    { nextBtn.disabled = true; nextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Choose Ride'; }
 
-      // If a destination was passed (from a quick chip), pre-fill the dest dropdown
-      const destSel = document.getElementById('destSelect');
-      if (dest && destSel) {
-        const opts = Array.from(destSel.options);
-        const match = opts.find(o => o.value === dest || o.text === dest);
-        destSel.value = match ? match.value : '';
+      const pInp = document.getElementById('pickupInput');
+      const dInp = document.getElementById('destInput');
+      const pClear = document.getElementById('pickupClearBtn');
+      const dClear = document.getElementById('destClearBtn');
+      if (pInp) pInp.value = '';
+      if (dInp) dInp.value = '';
+      if (pClear) pClear.style.display = 'none';
+      if (dClear) dClear.style.display = 'none';
+
+      // Auto-populate pickup with user's current GPS location if known!
+      const currentLat = sessionStorage.getItem('k3k3_lat');
+      const currentLng = sessionStorage.getItem('k3k3_lng');
+      if (currentLat && currentLng) {
+        const nearest = findClosestHoLandmark(parseFloat(currentLat), parseFloat(currentLng));
+        if (pInp) {
+          pInp.value = nearest;
+          _pickupVal = nearest;
+          _pickupCoords = [parseFloat(currentLat), parseFloat(currentLng)];
+          if (pClear) pClear.style.display = 'flex';
+        }
+      }
+
+      if (dest) {
+        if (dInp) {
+          dInp.value = dest;
+          _destVal = dest;
+          if (dClear) dClear.style.display = 'flex';
+        }
         onLocationChange();
       } else {
-        if (destSel) destSel.value = '';
         const routePreview = document.getElementById('routePreviewBar');
         if (routePreview) routePreview.style.display = 'none';
       }
 
-      setTimeout(() => document.getElementById('pickupSelect')?.focus(), 150);
+      setTimeout(() => {
+        if (!_pickupVal && pInp) pInp.focus();
+        else if (dInp) dInp.focus();
+        if (_modalMapbox) {
+          try { _modalMapbox.resize(); } catch(e) {}
+        }
+        if (_modalLeafletMap) {
+          try { _modalLeafletMap.invalidateSize(); } catch(e) {}
+        }
+      }, 150);
     }
 
     function closeBookModal() {
@@ -8730,59 +8974,282 @@
     ];
     window.HO_PLACES = HO_PLACES; // expose for booking functions
 
-    function filterPlaces(inputId, suggestionsId) {
-      const input = document.getElementById(inputId);
-      const box = document.getElementById(suggestionsId);
-      if (!input || !box) return;
-      const q = input.value.trim().toLowerCase();
-      if (q.length < 1) { hideSuggestions(suggestionsId); return; }
-      const results = HO_PLACES.filter(p => {
-        if (p.name.toLowerCase().includes(q)) return true;
-        if (p.area.toLowerCase().includes(q)) return true;
-        return p.tags.some(tag => tag.includes(q));
-      }).slice(0, 8);
-      if (!results.length) {
+    let _searchDebounceTimer = null;
+    let _pickupCoords = null;
+    let _destCoords = null;
+
+    function handleLocationInput(type) {
+      const inpId = type === 'pickup' ? 'pickupInput' : 'destInput';
+      const suggId = type === 'pickup' ? 'pickupSuggestions' : 'destSuggestions';
+      const clearBtn = document.getElementById(type === 'pickup' ? 'pickupClearBtn' : 'destClearBtn');
+      const inp = document.getElementById(inpId);
+      if (!inp) return;
+
+      const val = inp.value;
+      if (clearBtn) clearBtn.style.display = val.length > 0 ? 'flex' : 'none';
+
+      if (type === 'pickup') {
+        _pickupVal = val.trim();
+        _pickupCoords = null;
+      } else {
+        _destVal = val.trim();
+        _destCoords = null;
+      }
+
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = _pickupVal;
+      if (dSel) dSel.value = _destVal;
+
+      clearTimeout(_searchDebounceTimer);
+      _searchDebounceTimer = setTimeout(() => {
+        fetchLocationSuggestions(type, val.trim());
+      }, 180);
+
+      onLocationChange(true /* isTyping */);
+    }
+
+    function onLocationInputFocus(type) {
+      const inpId = type === 'pickup' ? 'pickupInput' : 'destInput';
+      const inp = document.getElementById(inpId);
+      if (inp && inp.value.trim().length > 0) {
+        fetchLocationSuggestions(type, inp.value.trim());
+      }
+    }
+
+    function clearLocationInput(type) {
+      if (type === 'pickup') {
+        const inp = document.getElementById('pickupInput');
+        if (inp) { inp.value = ''; inp.focus(); }
+        _pickupVal = '';
+        _pickupCoords = null;
+        const btn = document.getElementById('pickupClearBtn');
+        if (btn) btn.style.display = 'none';
+        hideSuggestions('pickupSuggestions');
+      } else {
+        const inp = document.getElementById('destInput');
+        if (inp) { inp.value = ''; inp.focus(); }
+        _destVal = '';
+        _destCoords = null;
+        const btn = document.getElementById('destClearBtn');
+        if (btn) btn.style.display = 'none';
+        hideSuggestions('destSuggestions');
+      }
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = _pickupVal;
+      if (dSel) dSel.value = _destVal;
+      onLocationChange();
+    }
+
+    function swapLocations() {
+      const pInp = document.getElementById('pickupInput');
+      const dInp = document.getElementById('destInput');
+      if (!pInp || !dInp) return;
+
+      const tempVal = pInp.value;
+      pInp.value = dInp.value;
+      dInp.value = tempVal;
+
+      const tempValState = _pickupVal;
+      _pickupVal = _destVal;
+      _destVal = tempValState;
+
+      const tempCoords = _pickupCoords;
+      _pickupCoords = _destCoords;
+      _destCoords = tempCoords;
+
+      const pClear = document.getElementById('pickupClearBtn');
+      const dClear = document.getElementById('destClearBtn');
+      if (pClear) pClear.style.display = pInp.value ? 'flex' : 'none';
+      if (dClear) dClear.style.display = dInp.value ? 'flex' : 'none';
+
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = _pickupVal;
+      if (dSel) dSel.value = _destVal;
+
+      onLocationChange();
+    }
+
+    async function useCurrentLocationForPickup() {
+      const pInp = document.getElementById('pickupInput');
+      const clearBtn = document.getElementById('pickupClearBtn');
+      showToast('Detecting your GPS location in Ho…', 'info');
+
+      const applyCoords = async (lat, lng) => {
+        _pickupCoords = [lat, lng];
+        sessionStorage.setItem('k3k3_lat', String(lat));
+        sessionStorage.setItem('k3k3_lng', String(lng));
+        const placeName = (await reverseGeocodeMapbox(lat, lng)) || findClosestHoLandmark(lat, lng);
+        if (pInp) pInp.value = placeName;
+        _pickupVal = placeName;
+        HO_COORDINATES[placeName] = [lat, lng];
+        if (clearBtn) clearBtn.style.display = 'flex';
+        showToast(`Pickup set to ${placeName}`, 'success');
+        if (_modalMapbox) {
+          _modalMapbox.flyTo({ center: [lng, lat], zoom: 15 });
+        } else if (_modalLeafletMap) {
+          _modalLeafletMap.setView([lat, lng], 15);
+        }
+        onLocationChange();
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => applyCoords(pos.coords.latitude, pos.coords.longitude),
+          err => {
+            const cachedLat = sessionStorage.getItem('k3k3_lat');
+            const cachedLng = sessionStorage.getItem('k3k3_lng');
+            if (cachedLat && cachedLng) {
+              applyCoords(parseFloat(cachedLat), parseFloat(cachedLng));
+            } else {
+              applyCoords(6.6012, 0.4688);
+            }
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      } else {
+        applyCoords(6.6012, 0.4688);
+      }
+    }
+
+    async function fetchLocationSuggestions(type, query) {
+      const inpId = type === 'pickup' ? 'pickupInput' : 'destInput';
+      const suggId = type === 'pickup' ? 'pickupSuggestions' : 'destSuggestions';
+      const box = document.getElementById(suggId);
+      if (!box) return;
+
+      if (!query || query.length < 1) {
+        hideSuggestions(suggId);
+        return;
+      }
+
+      if (!_modalMapboxToken) {
+        await getOrFetchMapboxToken();
+      }
+      const token = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+      let suggestions = [];
+
+      // 1. Local landmarks for instant response
+      const qLower = query.toLowerCase();
+      const localMatches = (window.HO_PLACES || []).filter(p => {
+        return p.name.toLowerCase().includes(qLower) ||
+               p.area.toLowerCase().includes(qLower) ||
+               (p.tags && p.tags.some(t => t.includes(qLower)));
+      }).slice(0, 5).map(p => ({
+        name: p.name,
+        area: p.area,
+        icon: p.icon || 'fa-map-pin',
+        lat: p.lat,
+        lng: p.lng,
+        source: 'local'
+      }));
+
+      suggestions.push(...localMatches);
+
+      // 2. Dynamic Mapbox Places Geocoding API
+      if (token && token.startsWith('pk.') && query.length >= 2) {
+        try {
+          const proximity = '0.4688,6.6012'; // Ho Central
+          const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&country=GH&proximity=${proximity}&types=poi,address,neighborhood,locality,place&limit=6`;
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 3500);
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(tId);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.features && Array.isArray(data.features)) {
+              data.features.forEach(f => {
+                const name = f.text || f.place_name.split(',')[0];
+                const area = f.place_name || 'Ho, Volta Region';
+                const [lng, lat] = f.center || [0.4688, 6.6012];
+                if (!suggestions.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+                  suggestions.push({
+                    name,
+                    area,
+                    icon: f.place_type?.includes('poi') ? 'fa-store' : 'fa-location-dot',
+                    lat,
+                    lng,
+                    source: 'mapbox'
+                  });
+                }
+              });
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (!suggestions.length) {
         box.innerHTML = `
-          <div style="padding:14px 16px;text-align:center;color:var(--text-2);font-size:0.84rem">
-            <div style="font-size:1.1rem;margin-bottom:4px;color:#F59E0B"><i class="fas fa-location-dot"></i></div>
-            <div style="font-weight:700;color:var(--text);margin-bottom:4px">Location outside Ho / Volta</div>
-            <div style="font-size:0.78rem;line-height:1.4">K3K3ride currently operates exclusively in Ho &amp; Volta Region.</div>
-            <div style="margin-top:8px">
-              <button type="button" onclick="selectPlace('${inputId}','${suggestionsId}','Ho Central Market')" style="font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:6px;border:none;background:var(--yellow);color:var(--black);cursor:pointer">
-                Select Ho Central Market
-              </button>
+          <div class="custom-place-item" onclick="selectPlace('${inpId}', '${suggId}', '${query.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+            <div class="place-sugg-icon custom"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="place-sugg-text">
+              <div class="place-sugg-name">Use "${query.replace(/"/g, '&quot;')}"</div>
+              <div class="place-sugg-area">Custom location in Ho</div>
             </div>
           </div>
         `;
         box.classList.add('show');
         return;
       }
-      box.innerHTML = results.map(p => `
-    <div class="place-suggestion-item" onclick="selectPlace('${inputId}','${suggestionsId}','${p.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
-      <div class="place-sugg-icon"><i class="fas ${p.icon}"></i></div>
-      <div class="place-sugg-text">
-        <div class="place-sugg-name">${hlMatch(p.name, q)}</div>
-        <div class="place-sugg-area">${p.area}</div>
-      </div>
-    </div>
-  `).join('');
+
+      box.innerHTML = suggestions.slice(0, 7).map(s => `
+        <div class="place-suggestion-item" onclick="selectPlace('${inpId}', '${suggId}', '${s.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', ${s.lat}, ${s.lng})">
+          <div class="place-sugg-icon"><i class="fas ${s.icon}"></i></div>
+          <div class="place-sugg-text">
+            <div class="place-sugg-name">${hlMatch(s.name, query)}</div>
+            <div class="place-sugg-area">${s.area}</div>
+          </div>
+        </div>
+      `).join('');
       box.classList.add('show');
     }
+
     function hlMatch(text, q) {
       if (!q) return text;
       const i = text.toLowerCase().indexOf(q.toLowerCase());
       if (i === -1) return text;
-      return text.slice(0, i) + '<mark style="background:rgba(255,214,10,.42);border-radius:2px;font-weight:800">' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
+      return text.slice(0, i) + '<mark style="background:rgba(255,214,10,.45);border-radius:2px;font-weight:800">' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
     }
-    function selectPlace(inputId, suggestionsId, placeName) {
+
+    function selectPlace(inputId, suggestionsId, placeName, lat, lng) {
       const el = document.getElementById(inputId);
       if (el) el.value = placeName;
       hideSuggestions(suggestionsId);
+
+      const isPickup = inputId.includes('pickup');
+      if (isPickup) {
+        _pickupVal = placeName;
+        if (lat && lng) {
+          _pickupCoords = [lat, lng];
+          HO_COORDINATES[placeName] = [lat, lng];
+        }
+        const clearBtn = document.getElementById('pickupClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+      } else {
+        _destVal = placeName;
+        if (lat && lng) {
+          _destCoords = [lat, lng];
+          HO_COORDINATES[placeName] = [lat, lng];
+        }
+        const clearBtn = document.getElementById('destClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+      }
+
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = _pickupVal;
+      if (dSel) dSel.value = _destVal;
+
+      onLocationChange();
     }
+
     function hideSuggestions(id) {
       const b = document.getElementById(id);
       if (b) { b.classList.remove('show'); b.innerHTML = ''; }
     }
+
     document.addEventListener('click', function (e) {
       ['pickupSuggestions', 'destSuggestions'].forEach(id => {
         const box = document.getElementById(id);
@@ -8884,6 +9351,8 @@
     function getHoCoordinate(name) {
       if (!name) return null;
       const clean = String(name).trim();
+      if (_pickupVal === clean && _pickupCoords) return _pickupCoords;
+      if (_destVal === clean && _destCoords) return _destCoords;
       if (HO_COORDINATES[clean]) return HO_COORDINATES[clean];
       const lower = clean.toLowerCase();
       for (const [k, v] of Object.entries(HO_COORDINATES)) {
@@ -8901,6 +9370,26 @@
     let ALONE_MULTIPLIER = 3.0; // Ride alone = shared fare × 3
     let _aloneMultiplier = 3.0;
     let _modalMapboxToken = window.MAPBOX_PUBLIC_TOKEN || '';
+
+    // Dynamic Mapbox public token resolver from /api/pricing
+    async function getOrFetchMapboxToken() {
+      if (_modalMapboxToken && _modalMapboxToken.startsWith('pk.')) return _modalMapboxToken;
+      if (window.MAPBOX_PUBLIC_TOKEN && typeof window.MAPBOX_PUBLIC_TOKEN === 'string' && window.MAPBOX_PUBLIC_TOKEN.startsWith('pk.')) {
+        _modalMapboxToken = window.MAPBOX_PUBLIC_TOKEN.trim();
+        return _modalMapboxToken;
+      }
+      try {
+        const res = await fetch(`${API}/pricing`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.settings && data.settings.mapbox_public_token) {
+            _modalMapboxToken = String(data.settings.mapbox_public_token).trim();
+            return _modalMapboxToken;
+          }
+        }
+      } catch (_) {}
+      return _modalMapboxToken || '';
+    }
     let _modalMapbox = null;
     let _modalPickupMarker = null;
     let _modalDestMarker = null;
@@ -8943,22 +9432,6 @@
     function setDestinationFilter(zone, btn) {
       document.querySelectorAll('.modal-zone-chip').forEach(c => c.classList.remove('active'));
       if (btn) btn.classList.add('active');
-
-      const inGrp = document.getElementById('destOptIn');
-      const outComm = document.getElementById('destOptOutComm');
-      const outHosp = document.getElementById('destOptOutHosp');
-      const outTown = document.getElementById('destOptOutTown');
-
-      const show = el => { if (el) el.style.display = ''; };
-      const hide = el => { if (el) el.style.display = 'none'; };
-
-      if (zone === 'in') {
-        show(inGrp); hide(outComm); hide(outHosp); hide(outTown);
-      } else if (zone === 'out') {
-        hide(inGrp); show(outComm); show(outHosp); show(outTown);
-      } else {
-        show(inGrp); show(outComm); show(outHosp); show(outTown);
-      }
     }
 
     let _modalLeafletMap = null;
@@ -8967,45 +9440,135 @@
     let _modalLeafletRouteLine = null;
     let _modalLeafletCasing = null;
 
-    function handleMapClickSelection(lat, lng) {
-      const closest = findClosestHoLandmark(lat, lng);
-      const pSel = document.getElementById('pickupSelect');
-      const dSel = document.getElementById('destSelect');
-
-      if (!pSel.value) {
-        pSel.value = closest;
-        showToast(`Pickup set to ${closest}`);
-        if (typeof onLocationChange === 'function') onLocationChange();
-      } else if (!dSel.value) {
-        dSel.value = closest;
-        showToast(`Destination set to ${closest}`);
-        if (typeof onLocationChange === 'function') onLocationChange();
-      } else {
-        dSel.value = closest;
-        showToast(`Updated destination to ${closest}`);
-        if (typeof onLocationChange === 'function') onLocationChange();
+    async function reverseGeocodeMapbox(lat, lng) {
+      if (!_modalMapboxToken) {
+        await getOrFetchMapboxToken();
       }
+      const token = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+      if (token && token.startsWith('pk.')) {
+        try {
+          const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}&country=GH&types=poi,address,neighborhood,locality,place`;
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 3500);
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(tId);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.features && data.features.length > 0) {
+              return data.features[0].text || data.features[0].place_name.split(',')[0];
+            }
+          }
+        } catch (_) {}
+      }
+      return findClosestHoLandmark(lat, lng);
     }
 
-    function initModalMapbox() {
+    async function handleMapClickSelection(lat, lng) {
+      const placeName = (await reverseGeocodeMapbox(lat, lng)) || findClosestHoLandmark(lat, lng);
+      const pInp = document.getElementById('pickupInput');
+      const dInp = document.getElementById('destInput');
+
+      if (!pInp.value.trim()) {
+        pInp.value = placeName;
+        _pickupVal = placeName;
+        _pickupCoords = [lat, lng];
+        HO_COORDINATES[placeName] = [lat, lng];
+        const clearBtn = document.getElementById('pickupClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+        showToast(`Pickup set to ${placeName}`);
+      } else if (!dInp.value.trim()) {
+        dInp.value = placeName;
+        _destVal = placeName;
+        _destCoords = [lat, lng];
+        HO_COORDINATES[placeName] = [lat, lng];
+        const clearBtn = document.getElementById('destClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+        showToast(`Destination set to ${placeName}`);
+      } else {
+        dInp.value = placeName;
+        _destVal = placeName;
+        _destCoords = [lat, lng];
+        HO_COORDINATES[placeName] = [lat, lng];
+        const clearBtn = document.getElementById('destClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+        showToast(`Updated destination to ${placeName}`);
+      }
+
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = _pickupVal;
+      if (dSel) dSel.value = _destVal;
+
+      onLocationChange();
+    }
+
+    async function initModalMapbox() {
       const container = document.getElementById('modalMapboxMap');
       if (!container) return;
 
-      if (_modalLeafletMap) {
-        setTimeout(() => {
-          if (_modalLeafletMap) {
-            _modalLeafletMap.invalidateSize();
-            if (_modalLeafletRouteLine) {
-              _modalLeafletMap.fitBounds(_modalLeafletRouteLine.getBounds(), { padding: [22, 22] });
+      if (!_modalMapboxToken) {
+        await getOrFetchMapboxToken();
+      }
+      const validToken = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+      _modalMapboxToken = validToken;
+
+      // 1. Primary: Native Mapbox GL JS interactive vector map
+      if (typeof mapboxgl !== 'undefined' && validToken && validToken.startsWith('pk.')) {
+        if (_modalMapbox) {
+          setTimeout(() => {
+            try {
+              _modalMapbox.resize();
+              if (_pickupVal && _destVal) updateModalMapboxRoute(_pickupVal, _destVal);
+            } catch (_) {}
+          }, 120);
+          return;
+        }
+
+        try {
+          mapboxgl.accessToken = validToken;
+          container.innerHTML = '';
+          _modalMapbox = new mapboxgl.Map({
+            container: 'modalMapboxMap',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [0.4688, 6.6012], // Ho Central [lng, lat]
+            zoom: 13.5,
+            attributionControl: false
+          });
+
+          _modalMapbox.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-left');
+
+          _modalMapbox.on('load', () => {
+            if (_pickupVal && _destVal) {
+              updateModalMapboxRoute(_pickupVal, _destVal);
             }
-          }
-        }, 120);
-        return;
+          });
+
+          _modalMapbox.on('click', (e) => {
+            handleMapClickSelection(e.lngLat.lat, e.lngLat.lng);
+          });
+
+          window._modalMapbox = _modalMapbox;
+          return;
+        } catch (err) {
+          console.warn('[Mapbox GL init error, falling back to Leaflet]', err);
+        }
       }
 
-      container.innerHTML = '';
-
+      // 2. Fallback: Leaflet
       if (typeof L !== 'undefined') {
+        if (_modalLeafletMap) {
+          setTimeout(() => {
+            if (_modalLeafletMap) {
+              _modalLeafletMap.invalidateSize();
+              if (_modalLeafletRouteLine) {
+                _modalLeafletMap.fitBounds(_modalLeafletRouteLine.getBounds(), { padding: [22, 22] });
+              }
+            }
+          }, 120);
+          return;
+        }
+
+        container.innerHTML = '';
         _modalLeafletMap = L.map('modalMapboxMap', {
           zoomControl: false,
           attributionControl: false,
@@ -9014,24 +9577,13 @@
           touchZoom: true
         }).setView([6.6110, 0.4710], 14);
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
-        }).addTo(_modalLeafletMap);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(_modalLeafletMap);
 
         _modalLeafletMap.on('click', (e) => {
           handleMapClickSelection(e.latlng.lat, e.latlng.lng);
         });
 
         window._modalLeafletMap = _modalLeafletMap;
-
-        setTimeout(() => {
-          if (_modalLeafletMap) {
-            _modalLeafletMap.invalidateSize();
-            const p = (document.getElementById('pickupSelect')?.value || '').trim();
-            const d = (document.getElementById('destSelect')?.value || '').trim();
-            if (p && d) updateModalMapboxRoute(p, d);
-          }
-        }, 200);
       }
     }
 
@@ -9391,11 +9943,21 @@
     let _pickupVal = '';
     let _destVal = '';
 
-    function onLocationChange() {
-      const pickup = (document.getElementById('pickupSelect')?.value || '').trim();
-      const dest   = (document.getElementById('destSelect')?.value || '').trim();
+    function onLocationChange(isTyping) {
+      const pInp = document.getElementById('pickupInput');
+      const dInp = document.getElementById('destInput');
+      const pickup = (pInp?.value || _pickupVal || document.getElementById('pickupSelect')?.value || '').trim();
+      const dest   = (dInp?.value || _destVal || document.getElementById('destSelect')?.value || '').trim();
       const nextBtn = document.getElementById('step1NextBtn');
       const previewBar = document.getElementById('routePreviewBar');
+
+      const pSel = document.getElementById('pickupSelect');
+      const dSel = document.getElementById('destSelect');
+      if (pSel) pSel.value = pickup;
+      if (dSel) dSel.value = dest;
+
+      _pickupVal = pickup;
+      _destVal = dest;
 
       if (!pickup || !dest) {
         if (nextBtn) { nextBtn.disabled = true; nextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Choose Ride'; }
@@ -9403,38 +9965,39 @@
         _campusFare = null;
         return;
       }
-      if (pickup === dest) {
+      if (pickup.toLowerCase() === dest.toLowerCase()) {
         if (nextBtn) { nextBtn.disabled = true; nextBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Same location'; }
         if (previewBar) previewBar.style.display = 'none';
         _campusFare = null;
         return;
       }
 
-      _campusFare = getCampusFare(pickup, dest);
-      _pickupVal = pickup;
-      _destVal = dest;
+      _campusFare = getCampusFare(pickup, dest) || DEFAULT_CAMPUS_FARE;
 
       // Update Mapbox live route in modal
       updateModalMapboxRoute(pickup, dest);
 
       // Show preview bar with In/Out details
-      if (previewBar && _routeDetails) {
+      if (previewBar) {
         previewBar.style.display = 'flex';
         const lbl = document.getElementById('routePreviewLabel');
         const fareEl = document.getElementById('routePreviewFare');
         const zonePill = document.getElementById('routeZonePill');
         const aloneEl = document.getElementById('routePreviewAlone');
 
+        const aloneFare = (_routeDetails?.alone_fare ? _routeDetails.alone_fare : (_campusFare * (_aloneMultiplier || 3.0))).toFixed(2);
         if (lbl) lbl.textContent = `${pickup} → ${dest}`;
         if (fareEl) fareEl.textContent = `₵${_campusFare.toFixed(2)}`;
-        if (aloneEl) aloneEl.textContent = `Shared: ₵${_campusFare.toFixed(2)} · Alone: ₵${_routeDetails.alone_fare.toFixed(2)}`;
+        if (aloneEl) aloneEl.textContent = `Shared: ₵${_campusFare.toFixed(2)} · Alone: ₵${aloneFare}`;
         if (zonePill) {
-          zonePill.className = `zone-indicator-pill ${_routeDetails.zone_type}`;
-          zonePill.textContent = _routeDetails.label;
+          const zoneType = _routeDetails?.zone_type || 'out';
+          const zoneLbl = _routeDetails?.label || (zoneType === 'in' ? 'In-Campus Route' : 'Out-Campus / Town');
+          zonePill.className = `zone-indicator-pill ${zoneType}`;
+          zonePill.textContent = zoneLbl;
         }
       }
 
-      // Preview dynamic route on live map and auto-fit bounds (not centered to static point)
+      // Preview dynamic route on live map and auto-fit bounds
       if (typeof previewRouteOnPassengerMap === 'function') {
         previewRouteOnPassengerMap(pickup, dest);
       }
@@ -9450,7 +10013,10 @@
     let _pinAdjustLng = 0.4688;
 
     function goToRideChoice() {
-      if (!_campusFare || !_pickupVal || !_destVal) return;
+      if (!_campusFare) {
+        _campusFare = DEFAULT_CAMPUS_FARE;
+      }
+      if (!_pickupVal || !_destVal) return;
 
       const sharedFare = _campusFare.toFixed(2);
       const aloneFare  = (_routeDetails?.alone_fare ? _routeDetails.alone_fare.toFixed(2) : (_campusFare * (_aloneMultiplier || 1.8)).toFixed(2));
@@ -9495,10 +10061,7 @@
       if (step2) step2.style.display = 'block';
       if (step3) step3.style.display = 'none';
 
-      // Initialize or resize route map in Step 2 directly above Choose Your Ride
-      if (!_modalMapbox && !_modalLeafletMap) {
-        initModalMapbox();
-      }
+      // Keep map visible & resized in Step 2 directly above Choose Your Ride
       setTimeout(() => {
         if (_modalMapbox) {
           try { _modalMapbox.resize(); } catch(e) {}
@@ -9509,7 +10072,7 @@
         if (typeof updateModalMapboxRoute === 'function') {
           updateModalMapboxRoute(_pickupVal, _destVal);
         }
-      }, 120);
+      }, 100);
     }
 
     function backToStep1() {
@@ -9519,6 +10082,10 @@
       if (step2) step2.style.display = 'none';
       if (step3) step3.style.display = 'none';
       if (step1) step1.style.display = 'block';
+      setTimeout(() => {
+        if (_modalMapbox) { try { _modalMapbox.resize(); } catch(e) {} }
+        if (_modalLeafletMap) { try { _modalLeafletMap.invalidateSize(); } catch(e) {} }
+      }, 100);
     }
 
     function selectRideType(type) {
