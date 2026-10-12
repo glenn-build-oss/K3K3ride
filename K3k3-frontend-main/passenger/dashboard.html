@@ -9114,6 +9114,32 @@
       }
     }
 
+    function renderSuggestions(box, inpId, suggId, suggestions, query) {
+      if (!box) return;
+      if (!suggestions || !suggestions.length) {
+        box.innerHTML = `
+          <div class="custom-place-item" onclick="selectPlace('${inpId}', '${suggId}', '${query.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+            <div class="place-sugg-icon custom"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="place-sugg-text">
+              <div class="place-sugg-name">Use "${query.replace(/"/g, '&quot;')}"</div>
+              <div class="place-sugg-area">Custom location in Ho</div>
+            </div>
+          </div>
+        `;
+      } else {
+        box.innerHTML = suggestions.slice(0, 7).map(s => `
+          <div class="place-suggestion-item" onclick="selectPlace('${inpId}', '${suggId}', '${s.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', ${s.lat}, ${s.lng})">
+            <div class="place-sugg-icon"><i class="fas ${s.icon}"></i></div>
+            <div class="place-sugg-text">
+              <div class="place-sugg-name">${hlMatch(s.name, query)}</div>
+              <div class="place-sugg-area">${s.area}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+      box.classList.add('show');
+    }
+
     async function fetchLocationSuggestions(type, query) {
       const inpId = type === 'pickup' ? 'pickupInput' : 'destInput';
       const suggId = type === 'pickup' ? 'pickupSuggestions' : 'destSuggestions';
@@ -9125,13 +9151,9 @@
         return;
       }
 
-      if (!_modalMapboxToken) {
-        await getOrFetchMapboxToken();
-      }
-      const token = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
       let suggestions = [];
 
-      // 1. Local landmarks for instant response
+      // 1. Local landmarks for instant response (Zero network delay)
       const qLower = query.toLowerCase();
       const localMatches = (window.HO_PLACES || []).filter(p => {
         return p.name.toLowerCase().includes(qLower) ||
@@ -9148,7 +9170,16 @@
 
       suggestions.push(...localMatches);
 
-      // 2. Dynamic Mapbox Places Geocoding API
+      // Render local matches immediately so the user/UI never lags
+      renderSuggestions(box, inpId, suggId, suggestions, query);
+
+      // 2. Fetch Mapbox Token dynamically in background if not ready
+      if (!_modalMapboxToken) {
+        await getOrFetchMapboxToken();
+      }
+      const token = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+
+      // 3. Dynamic Mapbox Places Geocoding API
       if (token && token.startsWith('pk.') && query.length >= 2) {
         try {
           const proximity = '0.4688,6.6012'; // Ho Central
@@ -9160,6 +9191,7 @@
           if (res.ok) {
             const data = await res.json();
             if (data.features && Array.isArray(data.features)) {
+              let addedNew = false;
               data.features.forEach(f => {
                 const name = f.text || f.place_name.split(',')[0];
                 const area = f.place_name || 'Ho, Volta Region';
@@ -9173,37 +9205,16 @@
                     lng,
                     source: 'mapbox'
                   });
+                  addedNew = true;
                 }
               });
+              if (addedNew) {
+                renderSuggestions(box, inpId, suggId, suggestions, query);
+              }
             }
           }
         } catch (_) {}
       }
-
-      if (!suggestions.length) {
-        box.innerHTML = `
-          <div class="custom-place-item" onclick="selectPlace('${inpId}', '${suggId}', '${query.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
-            <div class="place-sugg-icon custom"><i class="fas fa-map-marker-alt"></i></div>
-            <div class="place-sugg-text">
-              <div class="place-sugg-name">Use "${query.replace(/"/g, '&quot;')}"</div>
-              <div class="place-sugg-area">Custom location in Ho</div>
-            </div>
-          </div>
-        `;
-        box.classList.add('show');
-        return;
-      }
-
-      box.innerHTML = suggestions.slice(0, 7).map(s => `
-        <div class="place-suggestion-item" onclick="selectPlace('${inpId}', '${suggId}', '${s.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', ${s.lat}, ${s.lng})">
-          <div class="place-sugg-icon"><i class="fas ${s.icon}"></i></div>
-          <div class="place-sugg-text">
-            <div class="place-sugg-name">${hlMatch(s.name, query)}</div>
-            <div class="place-sugg-area">${s.area}</div>
-          </div>
-        </div>
-      `).join('');
-      box.classList.add('show');
     }
 
     function hlMatch(text, q) {
@@ -9370,26 +9381,29 @@
     let ALONE_MULTIPLIER = 3.0; // Ride alone = shared fare × 3
     let _aloneMultiplier = 3.0;
     let _modalMapboxToken = window.MAPBOX_PUBLIC_TOKEN || '';
+    let _mapboxTokenPromise = null;
 
     // Dynamic Mapbox public token resolver from /api/pricing
-    async function getOrFetchMapboxToken() {
-      if (_modalMapboxToken && _modalMapboxToken.startsWith('pk.')) return _modalMapboxToken;
+    function getOrFetchMapboxToken() {
+      if (_modalMapboxToken && _modalMapboxToken.startsWith('pk.')) return Promise.resolve(_modalMapboxToken);
       if (window.MAPBOX_PUBLIC_TOKEN && typeof window.MAPBOX_PUBLIC_TOKEN === 'string' && window.MAPBOX_PUBLIC_TOKEN.startsWith('pk.')) {
         _modalMapboxToken = window.MAPBOX_PUBLIC_TOKEN.trim();
-        return _modalMapboxToken;
+        return Promise.resolve(_modalMapboxToken);
       }
-      try {
-        const res = await fetch(`${API}/pricing`, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
+      if (_mapboxTokenPromise) return _mapboxTokenPromise;
+      _mapboxTokenPromise = fetch(`${API}/pricing`, { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
           if (data && data.settings && data.settings.mapbox_public_token) {
             _modalMapboxToken = String(data.settings.mapbox_public_token).trim();
-            return _modalMapboxToken;
           }
-        }
-      } catch (_) {}
-      return _modalMapboxToken || '';
+          return _modalMapboxToken || '';
+        })
+        .catch(() => _modalMapboxToken || '');
+      return _mapboxTokenPromise;
     }
+    // Prefetch token immediately on script startup
+    try { getOrFetchMapboxToken(); } catch (_) {}
     let _modalMapbox = null;
     let _modalPickupMarker = null;
     let _modalDestMarker = null;
