@@ -3019,18 +3019,18 @@
     }
     .modal-mapbox-wrap {
       width: 100%;
-      height: 135px;
+      height: clamp(230px, 44vh, 390px);
       border-radius: var(--r-lg, 16px);
       overflow: hidden;
       border: 1.5px solid var(--border);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       position: relative;
-      background: #f1f5f9;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      background: #0f172a;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
       transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .modal-mapbox-wrap.expanded {
-      height: 265px !important;
+      height: clamp(340px, 66vh, 600px) !important;
     }
     #modalMapboxMap {
       width: 100%;
@@ -3038,15 +3038,15 @@
     }
     .modal-mapbox-badge {
       position: absolute;
-      bottom: 8px;
-      left: 8px;
+      bottom: 10px;
+      left: 10px;
       z-index: 500;
       background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 8px;
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 800;
       color: #FFD60A;
       border: 1px solid rgba(255, 214, 10, 0.3);
@@ -3058,21 +3058,21 @@
     }
     .modal-map-resize-btn {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 10px;
+      right: 10px;
       z-index: 500;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(0, 0, 0, 0.12);
       border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 0.72rem;
+      padding: 5px 12px;
+      font-size: 0.74rem;
       font-weight: 800;
       color: #0f172a;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -3083,6 +3083,99 @@
       transform: scale(1.04);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
       border-color: #00D775;
+    }
+
+    /* ─── Step 1 Header Row ─── */
+    .step1-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 2px;
+    }
+    .modal-close-icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
+    .modal-close-icon-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--yellow);
+      transform: scale(1.05);
+    }
+
+    /* ─── Step 2 Top Navigation Header (Close & Back) ─── */
+    .step2-nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .step2-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .step2-back-btn:hover {
+      background: var(--yellow);
+      color: #0f172a;
+      border-color: var(--yellow);
+      transform: translateX(-2px);
+    }
+    .step2-nav-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      letter-spacing: -0.2px;
+    }
+    .step2-nav-title i {
+      color: var(--yellow);
+    }
+    .step2-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
+    .step2-close-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--yellow);
+      transform: scale(1.05);
     }
     .zone-indicator-pill {
       display: inline-flex;
@@ -6971,21 +7064,17 @@
     <div class="modal-sheet">
       <div class="modal-handle"></div>
 
-      <!-- Interactive Mapbox Map View (Prominently requested and rendered!) -->
-      <div class="modal-mapbox-wrap" id="modalMapboxContainer">
-        <div id="modalMapboxMap"></div>
-        <div class="modal-mapbox-badge">
-          <i class="fas fa-route"></i> <span id="modalRouteSummaryBadge">Interactive Map • Ho</span>
-        </div>
-        <button type="button" class="modal-map-resize-btn" id="modalMapResizeBtn" onclick="toggleModalMapSize(event)" title="Resize map view">
-          <i class="fas fa-expand-alt" id="modalMapResizeIcon"></i> <span id="modalMapResizeLabel">Expand</span>
-        </button>
-      </div>
-
       <!-- STEP 1: Pick locations (Bolt / Uber / Yango Style) -->
       <div id="bookStep1">
-        <div class="modal-title" style="margin-bottom:2px"><i class="fas fa-motorcycle"></i> Where are you going?</div>
-        <div style="font-size:.75rem;color:var(--muted);margin:0 0 12px;text-align:center">Type any pickup &amp; drop-off in Ho or tap on the map</div>
+        <div class="step1-header-row">
+          <div class="modal-title" style="margin-bottom:0">
+            <i class="fas fa-motorcycle"></i> Where are you going?
+          </div>
+          <button type="button" class="modal-close-icon-btn" onclick="closeBookModal()" aria-label="Close modal" title="Close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);margin:4px 0 14px">Type any pickup &amp; drop-off in Ho or use GPS</div>
 
         <!-- Recent Trips with Clock Icon (Returning Passengers Only) -->
         <div class="recent-trips-box" id="recentTripsBox" style="display:none">
@@ -7085,11 +7174,31 @@
         </div>
       </div>
 
-      <!-- STEP 2: Choose ride type -->
+      <!-- STEP 2: Choose ride type with full screen map (Bolt / Uber / Yango Style) -->
       <div id="bookStep2" style="display:none">
-        <button class="campus-back-btn" onclick="backToStep1()"><i class="fas fa-arrow-left"></i> Back to locations</button>
+        <!-- Top Navigation Bar (Close & Back) -->
+        <div class="step2-nav-header">
+          <button type="button" class="step2-back-btn" onclick="backToStep1()" title="Back to locations">
+            <i class="fas fa-arrow-left"></i> <span>Back</span>
+          </button>
+          <div class="step2-nav-title">
+            <i class="fas fa-motorcycle"></i> Choose Ride
+          </div>
+          <button type="button" class="step2-close-btn" onclick="closeBookModal()" title="Close booking" aria-label="Close booking">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-        <div class="modal-title" style="margin-bottom:4px">Choose Your Ride</div>
+        <!-- Interactive Mapbox Map View (Filling the screen on Step 2 with full route polyline) -->
+        <div class="modal-mapbox-wrap step2-map-wrap" id="modalMapboxContainer">
+          <div id="modalMapboxMap"></div>
+          <div class="modal-mapbox-badge">
+            <i class="fas fa-route"></i> <span id="modalRouteSummaryBadge">Interactive Route • Ho</span>
+          </div>
+          <button type="button" class="modal-map-resize-btn" id="modalMapResizeBtn" onclick="toggleModalMapSize(event)" title="Resize map view">
+            <i class="fas fa-expand-alt" id="modalMapResizeIcon"></i> <span id="modalMapResizeLabel">Expand</span>
+          </button>
+        </div>
 
         <!-- Route summary strip -->
         <div class="campus-route-strip">
@@ -7100,12 +7209,12 @@
 
         <!-- Scrollable ride option cards with stable keke images (Bolt Style) -->
         <div class="ride-options-scroll-box">
-          <!-- K3K3 SHARED -->
+          <!-- K3K3 SHARED (Shared Ride) -->
           <div class="ride-choice-card-v2 selected" id="card-shared-v2" onclick="selectRideType('shared')">
             <div class="ride-info-left">
               <div class="ride-title-row">
                 <span class="ride-title-text">K3K3 Shared</span>
-                <span class="ride-badge-tag shared">Best Value</span>
+                <span class="ride-badge-tag shared">Shared Ride</span>
               </div>
               <div class="ride-meta-row">
                 <span><i class="fas fa-user-group"></i> 1–3 passengers</span>
@@ -7121,12 +7230,12 @@
             </div>
           </div>
 
-          <!-- K3K3 ALONE -->
+          <!-- K3K3 ALONE (Private Ride) -->
           <div class="ride-choice-card-v2" id="card-alone-v2" onclick="selectRideType('alone')">
             <div class="ride-info-left">
               <div class="ride-title-row">
                 <span class="ride-title-text">K3K3 Alone</span>
-                <span class="ride-badge-tag alone">Private</span>
+                <span class="ride-badge-tag alone">Private Ride</span>
               </div>
               <div class="ride-meta-row">
                 <span><i class="fas fa-user"></i> Sole passenger</span>
@@ -7170,7 +7279,9 @@
         <button class="book-btn" style="width:100%;margin-top:12px" id="selectKekeBtn" onclick="goToStep3PinAdjust()">
           <i class="fas fa-motorcycle"></i> <span id="selectKekeBtnLabel">Select K3K3</span>
         </button>
-        <button class="btn-cancel" style="width:100%;margin-top:8px;text-align:center" onclick="closeBookModal()">Cancel</button>
+        <button class="btn-cancel" style="width:100%;margin-top:8px;text-align:center" onclick="backToStep1()">
+          <i class="fas fa-arrow-left"></i> Change Locations
+        </button>
       </div>
 
       <!-- STEP 3: Pickup Pin Adjustment Screen (Half-Screen Map) -->
@@ -8815,9 +8926,6 @@
       if (step2) step2.style.display = 'none';
       if (step3) step3.style.display = 'none';
 
-      // Request and initialize Mapbox interactive map immediately
-      initModalMapbox();
-
       // Past trips with clock icon: ONLY shown if returning passenger has history
       const recentTrips = getRecentTrips();
       const recentBox = document.getElementById('recentTripsBox');
@@ -10075,7 +10183,12 @@
       if (step2) step2.style.display = 'block';
       if (step3) step3.style.display = 'none';
 
-      // Keep map visible & resized in Step 2 directly above Choose Your Ride
+      // Initialize map on Step 2 if not initialized yet
+      if (!_modalMapbox && !_modalLeafletMap) {
+        initModalMapbox();
+      }
+
+      // Fill screen and auto-fit route bounds on Step 2
       setTimeout(() => {
         if (_modalMapbox) {
           try { _modalMapbox.resize(); } catch(e) {}
@@ -10086,7 +10199,7 @@
         if (typeof updateModalMapboxRoute === 'function') {
           updateModalMapboxRoute(_pickupVal, _destVal);
         }
-      }, 100);
+      }, 120);
     }
 
     function backToStep1() {
@@ -10096,10 +10209,6 @@
       if (step2) step2.style.display = 'none';
       if (step3) step3.style.display = 'none';
       if (step1) step1.style.display = 'block';
-      setTimeout(() => {
-        if (_modalMapbox) { try { _modalMapbox.resize(); } catch(e) {} }
-        if (_modalLeafletMap) { try { _modalLeafletMap.invalidateSize(); } catch(e) {} }
-      }, 100);
     }
 
     function selectRideType(type) {
@@ -10110,7 +10219,7 @@
       if (cAlone)  cAlone.classList.toggle('selected',  type === 'alone');
 
       const selectLbl = document.getElementById('selectKekeBtnLabel') || document.getElementById('confirmRideBtnLabel');
-      if (selectLbl) selectLbl.textContent = type === 'alone' ? 'Select K3K3 Alone' : 'Select K3K3 Shared';
+      if (selectLbl) selectLbl.textContent = type === 'alone' ? 'Select K3K3 Alone (Private)' : 'Select K3K3 Shared';
     }
 
     function togglePaymentDropdown() {
