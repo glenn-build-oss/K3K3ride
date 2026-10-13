@@ -910,7 +910,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   </div>
 
   <div class="apps-toolbar" style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
-    <div class="apps-search-wrap" style="position:relative;flex:1;min-width:260px">
+    <div class="apps-search-wrap" style="position:relative;flex:1;min-width:240px">
       <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none"></i>
       <input type="text" id="appSearchInput" placeholder="Search applications by name, phone, plate, ID, city..." 
              oninput="handleAppSearch(this.value)"
@@ -920,6 +920,17 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         <i class="fas fa-times-circle"></i>
       </button>
     </div>
+    <select id="appRegionFilter" onchange="handleAppRegionFilter(this.value)"
+            style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-full);padding:9px 14px;color:var(--white);font-size:.84rem;outline:none;cursor:pointer">
+      <option value="all">All Regions (Ghana)</option>
+      <option value="volta">Volta Region (Active)</option>
+      <option value="accra">Greater Accra</option>
+      <option value="ashanti">Ashanti</option>
+      <option value="eastern">Eastern Region</option>
+      <option value="central">Central Region</option>
+      <option value="western">Western Region</option>
+      <option value="northern">Northern Region</option>
+    </select>
     <div class="filter-tabs" style="margin-bottom:0">
       <div class="ftab active" onclick="filterApps('all',this)">All</div>
       <div class="ftab" onclick="filterApps('pending_review',this)">Pending</div>
@@ -3472,11 +3483,17 @@ const APP_CSS=`
 /* ── Applications ── */
 let curAppFilter='all';
 let appSearchQuery='';
+let appRegionFilter='all';
 
 function handleAppSearch(val){
   appSearchQuery=(val||'').trim().toLowerCase();
   const clearBtn=document.getElementById('appSearchClear');
   if(clearBtn) clearBtn.style.display=appSearchQuery?'inline-block':'none';
+  renderFilteredApps();
+}
+
+function handleAppRegionFilter(val){
+  appRegionFilter=(val||'all').trim().toLowerCase();
   renderFilteredApps();
 }
 
@@ -3529,6 +3546,14 @@ function renderFilteredApps(){
     data=allApps.filter(a=>a.status==='pending_review'||a.status==='pending'||a.status==='under_review');
   } else if(curAppFilter!=='all') {
     data=allApps.filter(a=>a.status===curAppFilter);
+  }
+
+  if(appRegionFilter && appRegionFilter !== 'all'){
+    data=data.filter(a=>{
+      const reg=(a.operating_region||'').toLowerCase();
+      const city=(a.operating_city||a.city||'').toLowerCase();
+      return reg.includes(appRegionFilter) || city.includes(appRegionFilter);
+    });
   }
 
   if(appSearchQuery){
@@ -3612,7 +3637,7 @@ function renderAppCard(a){
     <div class="app-head-info">
       <div class="app-name">${a.first_name||a.fname||'—'} ${a.last_name||a.lname||''}</div>
       <div class="app-ref">${a.app_ref||('APP-'+String(a.id).substring(0,8).toUpperCase())} · ${a.email||a.phone||'—'}</div>
-      <div style="margin-top:4px"><span class="app-status-badge ${a.status}">${statusLabel}</span>${a.admin_notes?`<span class="app-notes"><i class="fas fa-comment"></i> ${a.admin_notes}</span>`:''}</div>
+      <div style="margin-top:4px"><span class="app-status-badge ${a.status}">${statusLabel}</span>${a.operating_region ? `<span class="app-status-badge" style="background:rgba(255,214,10,0.12);color:var(--yellow);border:1px solid rgba(255,214,10,0.25);margin-left:6px"><i class="fas fa-map-location-dot"></i> ${escapeHtml(a.operating_region)}${a.operating_city ? ` • ${escapeHtml(a.operating_city)}` : ''}</span>` : ''}${a.admin_notes?`<span class="app-notes"><i class="fas fa-comment"></i> ${a.admin_notes}</span>`:''}</div>
     </div>
     <div style="text-align:right">
       <div style="font-size:.72rem;color:var(--muted)">${a.submitted_at?new Date(a.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>

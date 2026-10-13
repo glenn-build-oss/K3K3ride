@@ -19,6 +19,7 @@ const {
 } = require('../services/supabase.service');
 const dispatchService = require('../services/dispatch.service');
 const moolreService = require('../services/moolre.service');
+const serviceAreaService = require('../services/service_area.service');
 
 // In-memory pending trips cache to guarantee instant delivery even if DB has foreign-key or network latency
 const _inMemoryPendingTrips = new Map();
@@ -39,20 +40,70 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * Validate whether coordinates fall inside the active Ho, Volta Region service area.
- * Bounding Box: 6.45° N to 6.78° N | 0.30° E to 0.65° E, or <= 35km from Ho center (6.6012, 0.4688).
+ * GET /api/trips/service-areas
+ * Return all 16 regions of Ghana and their active operational cities
  */
-function isInsideHoVoltaServiceZone(lat, lng) {
-  const latitude = parseFloat(lat);
-  const longitude = parseFloat(lng);
-  if (isNaN(latitude) || isNaN(longitude)) return true; // Allow named campus stops without explicit GPS
+router.get('/service-areas', (req, res) => {
+  try {
+    const regions = serviceAreaService.getAllRegions();
+    const activeAreas = serviceAreaService.getActiveServiceAreas();
+    res.json({
+      success: true,
+      country: 'Ghana',
+      total_regions: regions.length,
+      regions,
+      active_areas: activeAreas
+    });
+  } catch (error) {
+    console.error('[Trips] Error fetching service areas:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch service areas' });
+  }
+});
 
-  const inBoundingBox = (latitude >= 6.45 && latitude <= 6.78 && longitude >= 0.30 && longitude <= 0.65);
-  const dLat = (latitude - 6.6012) * 111;
-  const dLng = (longitude - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
-  const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
-  return inBoundingBox || distKm <= 35.0;
-}
+/**
+ * POST /api/trips/check-service-area
+ * Evaluate whether a given location name or coordinates fall inside an active operational area
+ */
+router.post('/check-service-area', (req, res) => {
+  try {
+    const { location, lat, lng } = req.body;
+    const result = serviceAreaService.evaluateLocation(location, lat, lng);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error('[Trips] Error checking service area:', error);
+    res.status(500).json({ success: false, error: 'Failed to evaluate service area' });
+  }
+});
+
+/**
+ * POST /api/trips/launch-interest
+ * Collect waitlist notification subscriptions from passengers in inactive regions (Accra, Kumasi, etc.)
+ */
+router.post('/launch-interest', (req, res) => {
+  try {
+    const { contact, email, phone, region_id, region_name, city_id, city_name, pickup_location } = req.body;
+    const subscriber = contact || email || phone;
+    if (!subscriber) {
+      return res.status(400).json({ success: false, error: 'Please provide an email or phone number.' });
+    }
+    const entry = serviceAreaService.saveLaunchInterest({
+      contact: subscriber,
+      region_id,
+      region_name,
+      city_id,
+      city_name,
+      pickup_location
+    });
+    res.json({
+      success: true,
+      message: `You're on the list! We'll notify you as soon as K3K3 launches in ${city_name || region_name || 'your area'}.`,
+      data: entry
+    });
+  } catch (error) {
+    console.error('[Trips] Error saving launch interest:', error);
+    res.status(500).json({ success: false, error: 'Failed to record launch notification request' });
+  }
+});
 
 /**
  * POST /api/trips/
@@ -82,12 +133,15 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Geofence check: Ensure pickup is inside Ho, Volta Region
-    if (pickup_lat && pickup_lng && !isInsideHoVoltaServiceZone(pickup_lat, pickup_lng)) {
+    // Dynamic Service Area check: Check whether pickup is in an activated Ghana operational area
+    const areaEval = serviceAreaService.evaluateLocation(pickup_label, pickup_lat, pickup_lng);
+    if (!areaEval.allowed) {
       return res.status(400).json({
         success: false,
-        code: 'OUT_OF_SERVICE_ZONE',
-        error: 'K3K3ride is not available in your location yet. We currently operate exclusively in Ho, Volta Region, Ghana.'
+        code: 'SERVICE_AREA_INACTIVE',
+        region: areaEval.region_name,
+        city: areaEval.city_name,
+        error: areaEval.message
       });
     }
 

@@ -766,12 +766,42 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="nationality">Nationality <span class="req">*</span></label>
-              <input type="text" id="nationality" name="nationality" placeholder="e.g. Ghanaian">
+              <label for="operatingRegion"><i class="fas fa-map-location-dot" style="color:var(--k3k3-yellow);margin-right:4px"></i> Region you want to operate in <span class="req">*</span></label>
+              <select id="operatingRegion" name="operatingRegion">
+                <option value="Volta Region" selected>Volta Region (Active)</option>
+                <option value="Greater Accra">Greater Accra (Coming Soon)</option>
+                <option value="Ashanti">Ashanti (Coming Soon)</option>
+                <option value="Eastern Region">Eastern Region (Coming Soon)</option>
+                <option value="Central Region">Central Region (Coming Soon)</option>
+                <option value="Western Region">Western Region (Coming Soon)</option>
+                <option value="Western North">Western North (Coming Soon)</option>
+                <option value="Bono Region">Bono Region (Coming Soon)</option>
+                <option value="Bono East">Bono East (Coming Soon)</option>
+                <option value="Ahafo Region">Ahafo Region (Coming Soon)</option>
+                <option value="Northern Region">Northern Region (Coming Soon)</option>
+                <option value="Savannah Region">Savannah Region (Coming Soon)</option>
+                <option value="North East">North East (Coming Soon)</option>
+                <option value="Upper East">Upper East (Coming Soon)</option>
+                <option value="Upper West">Upper West (Coming Soon)</option>
+                <option value="Oti Region">Oti Region (Coming Soon)</option>
+              </select>
+              <span class="field-hint">Select the Ghana region where you will operate.</span>
             </div>
             <div class="form-group">
-              <label for="city">City / Town <span class="req">*</span></label>
-              <input type="text" id="city" name="city" placeholder="e.g. Accra">
+              <label for="operatingCity"><i class="fas fa-city" style="color:var(--k3k3-yellow);margin-right:4px"></i> Town or city <span class="req">*</span></label>
+              <input type="text" id="operatingCity" name="operatingCity" value="Ho" placeholder="e.g. Ho, Hohoe, Accra, Kumasi">
+              <span class="field-hint">Operating town or campus area (e.g. Ho, HTU, UHAS).</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nationality">Nationality <span class="req">*</span></label>
+              <input type="text" id="nationality" name="nationality" placeholder="e.g. Ghanaian" value="Ghanaian">
+            </div>
+            <div class="form-group">
+              <label for="city">Residential City / Town <span class="req">*</span></label>
+              <input type="text" id="city" name="city" placeholder="e.g. Ho">
             </div>
           </div>
 

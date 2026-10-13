@@ -1348,6 +1348,10 @@ class RiderApplicationForm {
 
             <p><strong>Nationality:</strong> ${this.formData.nationality}</p>
 
+            <p><strong>Operating Region:</strong> ${this.formData.operatingRegion || 'Volta Region'}</p>
+
+            <p><strong>Town/City of Operation:</strong> ${this.formData.operatingCity || 'Ho'}</p>
+
             <p><strong>Address:</strong> ${this.formData.address}</p>
 
             ${this.formData.about ? `<p><strong>About:</strong> ${this.formData.about}</p>` : ''}
@@ -1498,6 +1502,8 @@ class RiderApplicationForm {
             nationality:                this.formData.nationality            || null,
             address:                    this.formData.address                || null,
             city:                       this.formData.city                   || null,
+            operating_region:           this.formData.operatingRegion        || 'Volta Region',
+            operating_city:             this.formData.operatingCity          || 'Ho',
             about:                      this.formData.about                  || null,
             license_number:             this.formData.licenseNumber          || null,
             license_expiry:             this.formData.licenseExpiry          || null,

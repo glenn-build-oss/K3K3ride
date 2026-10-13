@@ -3937,16 +3937,28 @@
       align-items: center;
       gap: 10px;
       justify-content: center;
-      padding: 10px 14px;
-      background: rgba(255, 214, 10, 0.08);
+      padding: 12px 16px;
+      background: #FFD60A;
       border-radius: 12px;
-      font-size: 0.82rem;
-      color: var(--yellow);
-      font-weight: 600;
-      border: 1px solid rgba(255, 214, 10, 0.22);
+      font-size: 0.84rem;
+      color: #000000 !important;
+      font-weight: 700;
+      border: 1.5px solid rgba(0, 0, 0, 0.15);
       margin-bottom: 14px;
       text-align: left;
       line-height: 1.4;
+      box-shadow: 0 4px 14px rgba(255, 214, 10, 0.28);
+    }
+
+    .no-riders-info-pill i {
+      color: #000000 !important;
+      font-size: 0.98rem;
+      flex-shrink: 0;
+    }
+
+    .no-riders-info-pill span {
+      color: #000000 !important;
+      font-weight: 700;
     }
 
     .rider-search-actions {
@@ -3999,7 +4011,7 @@
       color: var(--text, #ffffff);
     }
 
-    /* ─── Toast ─── */
+    /* ─── Professional Dark Glass Toast ─── */
     #toast-container {
       position: fixed;
       bottom: 24px;
@@ -4007,53 +4019,222 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      z-index: 9999;
-      max-width: 340px;
+      z-index: 10050;
+      max-width: 380px;
       pointer-events: none;
     }
 
     .toast-notif {
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 14px 18px;
-      border-radius: var(--r);
-      background: var(--black);
-      color: var(--white);
-      font-size: .875rem;
-      box-shadow: var(--sh-lg);
-      animation: toastIn .3s var(--ease);
-      min-width: 260px;
-      pointer-events: all;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 18px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.94);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-left: 4px solid var(--yellow);
+      color: #ffffff;
+      font-size: .88rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.45;
+      box-shadow: 0 16px 38px -4px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: toastIn .32s cubic-bezier(0.16, 1, 0.3, 1) both;
+      min-width: 270px;
+      max-width: 100%;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: opacity .26s ease, transform .26s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes toastIn {
       from {
         opacity: 0;
-        transform: translateX(20px)
+        transform: translateY(16px) scale(0.96);
       }
-
       to {
         opacity: 1;
-        transform: translateX(0)
+        transform: translateY(0) scale(1);
       }
     }
 
     .toast-notif.success {
-      background: linear-gradient(135deg, #059669, #10B981)
+      border-left-color: #10B981;
+      background: rgba(15, 23, 42, 0.94);
+    }
+    .toast-notif.success i {
+      color: #10B981;
     }
 
     .toast-notif.error {
-      background: linear-gradient(135deg, #DC2626, #EF4444)
+      border-left-color: #EF4444;
+      background: rgba(15, 23, 42, 0.94);
+    }
+    .toast-notif.error i {
+      color: #EF4444;
     }
 
     .toast-notif.info {
-      background: linear-gradient(135deg, #1d4ed8, #3B82F6)
+      border-left-color: #38BDF8;
+      background: rgba(15, 23, 42, 0.94);
+    }
+    .toast-notif.info i {
+      color: #38BDF8;
+    }
+
+    .toast-notif.warning {
+      border-left-color: #F59E0B;
+      background: rgba(15, 23, 42, 0.94);
+    }
+    .toast-notif.warning i {
+      color: #F59E0B;
     }
 
     .toast-notif i {
-      margin-top: 1px;
-      flex-shrink: 0
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+
+    /* ─── Inactive Service Area Screen (Ghana Multi-Region) ─── */
+    .inactive-region-box {
+      text-align: center;
+      padding: 10px 4px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .inactive-badge-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255, 214, 10, 0.15);
+      border: 1.5px solid rgba(255, 214, 10, 0.35);
+      color: #FFD60A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.65rem;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(255, 214, 10, 0.2);
+    }
+
+    .inactive-title {
+      font-size: 1.32rem;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+
+    .inactive-sub {
+      font-size: 0.88rem;
+      color: var(--text-2);
+      line-height: 1.5;
+      margin-bottom: 14px;
+      max-width: 340px;
+    }
+
+    .inactive-region-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--yellow);
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .inactive-waitlist-card {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .waitlist-card-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .waitlist-input-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    .waitlist-input-wrap input {
+      flex: 1;
+      height: 44px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.86rem;
+      padding: 0 12px;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .waitlist-input-wrap input:focus {
+      border-color: var(--yellow);
+    }
+
+    .waitlist-submit-btn {
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: var(--yellow);
+      color: #000000;
+      border: none;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      transition: all .18s;
+    }
+
+    .waitlist-submit-btn:hover {
+      background: #e6c200;
+      transform: translateY(-1px);
+    }
+
+    .waitlist-success-msg {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      color: #10B981;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inactive-actions {
+      width: 100%;
+      margin-top: 4px;
     }
 
     /* =====================================================
@@ -4578,41 +4759,69 @@
         gap: 12px
       }
 
-      /* ── Modal → bottom sheet on mobile ── */
+      /* ── Modal → Screen-Filling Bottom Sheet on Mobile (Bolt & Uber style) ── */
       .modal-backdrop {
         align-items: flex-end;
-        padding-bottom: calc(var(--nav-h) + 12px);
+        padding: 0;
+        justify-content: stretch;
       }
 
       .modal-sheet {
-        border-radius: 24px;
-        padding: 16px 16px 20px;
-        width: 100%;
-        max-width: min(418px, calc(100vw - 16px));
-        margin: 0 auto;
-        max-height: calc(85vh - var(--nav-h));
+        border-radius: 24px 24px 0 0;
+        padding: 18px 18px calc(24px + env(safe-area-inset-bottom, 16px));
+        width: 100vw;
+        max-width: 100vw;
+        margin: 0;
+        height: 94dvh;
+        max-height: 94dvh;
+        border-bottom: none;
+        border-left: none;
+        border-right: none;
+        box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.65);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      #bookStep1, #bookStep2, #bookStep3, #bookStepInactive {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .ride-options-scroll-box {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+      }
+
+      .modal-mapbox-wrap.step2-map-wrap {
+        height: clamp(220px, 34vh, 320px);
+        flex-shrink: 0;
       }
 
       .modal-handle {
         display: block;
-        width: 36px;
-        height: 4px;
-        background: var(--border);
+        width: 42px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.22);
         border-radius: 99px;
-        margin: 0 auto 20px;
+        margin: 0 auto 16px;
+        flex-shrink: 0;
       }
 
       .modal-title {
-        font-size: 1.15rem;
-        margin-bottom: 18px
+        font-size: 1.18rem;
+        margin-bottom: 14px;
       }
 
-      /* ── Toast ── */
+      /* ── Toast on Mobile ── */
       #toast-container {
-        bottom: calc(var(--nav-h) + 12px);
-        right: 12px;
-        left: 12px;
-        max-width: none
+        bottom: calc(var(--nav-h) + 16px);
+        right: 14px;
+        left: 14px;
+        max-width: none;
       }
 
       /* ── Notifications grid ── */
@@ -7334,6 +7543,49 @@
         </div>
       </div>
 
+      <!-- STEP 4 / INACTIVE REGION: Coming Soon Screen (Accra, Kumasi, and expansion areas) -->
+      <div id="bookStepInactive" style="display:none">
+        <div class="inactive-region-box">
+          <div class="inactive-badge-icon">
+            <i class="fas fa-location-dot"></i>
+          </div>
+          <div class="inactive-title">We're coming to your region!</div>
+          <div class="inactive-sub" id="inactiveRegionSub">
+            K3K3ride isn't available in your area yet. We're working to bring affordable rides to your region soon.
+          </div>
+
+          <div class="inactive-region-pill" id="inactiveDetectedPill">
+            <i class="fas fa-map-pin"></i> <span id="inactiveDetectedRegionName">Greater Accra</span>
+          </div>
+
+          <!-- Launch interest waitlist card -->
+          <div class="inactive-waitlist-card">
+            <div class="waitlist-card-title">
+              <i class="fas fa-bell" style="color:var(--yellow)"></i> Get notified when we launch in your area
+            </div>
+            <div class="waitlist-input-wrap">
+              <input type="text" id="waitlistContactInput" placeholder="Enter your phone or email" autocomplete="off">
+              <button type="button" class="waitlist-submit-btn" id="waitlistSubmitBtn" onclick="submitLaunchInterest()">
+                <span>Notify Me</span> <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            <div class="waitlist-success-msg" id="waitlistSuccessMsg" style="display:none">
+              <i class="fas fa-circle-check"></i> <span>Thank you! We'll notify you as soon as K3K3 launches in your area.</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="inactive-actions">
+            <button type="button" class="book-btn" onclick="backToStep1FromInactive()" style="width:100%">
+              <i class="fas fa-arrow-left"></i> Change Location (Try Ho)
+            </button>
+            <button type="button" class="btn-cancel" onclick="closeBookModal()" style="width:100%;margin-top:8px">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -8922,9 +9174,11 @@
       const step1 = document.getElementById('bookStep1');
       const step2 = document.getElementById('bookStep2');
       const step3 = document.getElementById('bookStep3');
+      const stepInactive = document.getElementById('bookStepInactive');
       if (step1) step1.style.display = 'block';
       if (step2) step2.style.display = 'none';
       if (step3) step3.style.display = 'none';
+      if (stepInactive) stepInactive.style.display = 'none';
 
       // Past trips with clock icon: ONLY shown if returning passenger has history
       const recentTrips = getRecentTrips();
@@ -10139,6 +10393,13 @@
         _campusFare = DEFAULT_CAMPUS_FARE;
       }
       if (!_pickupVal || !_destVal) return;
+
+      // Check Ghana service area activation (Active: Ho, Volta Region. Inactive: Accra, Kumasi, etc.)
+      const serviceAreaCheck = evaluateServiceAreaClient(_pickupVal, _pickupCoords);
+      if (!serviceAreaCheck.allowed) {
+        showInactiveServiceArea(serviceAreaCheck);
+        return;
+      }
 
       const sharedFare = _campusFare.toFixed(2);
       const aloneFare  = (_routeDetails?.alone_fare ? _routeDetails.alone_fare.toFixed(2) : (_campusFare * (_aloneMultiplier || 1.8)).toFixed(2));
@@ -12562,15 +12823,168 @@
     }
 
     /* ══════════════════════════════════════════
-       Toast
+       Toast (Professional Dark Glass & 3.5s Standard Timing)
     ══════════════════════════════════════════ */
     function showToast(msg, type = 'info') {
       const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
+      const container = document.getElementById('toast-container');
+      if (!container) return;
       const el = document.createElement('div');
       el.className = `toast-notif ${type}`;
       el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
-      document.getElementById('toast-container').appendChild(el);
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; setTimeout(() => el.remove(), 300); }, 4000);
+      
+      let timer = null;
+      const dismiss = () => {
+        if (timer) clearTimeout(timer);
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-8px) scale(0.96)';
+        setTimeout(() => el.remove(), 260);
+      };
+
+      el.addEventListener('click', dismiss);
+      container.appendChild(el);
+      timer = setTimeout(dismiss, 3500); // Calibrated professional 3.5s standard
+    }
+
+    /* ══════════════════════════════════════════
+       Ghana 16-Region Service Area Client Logic
+    ══════════════════════════════════════════ */
+    let _activeServiceAreasCache = null;
+
+    async function fetchServiceAreasRegistry() {
+      try {
+        const res = await fetch('/api/trips/service-areas');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success) {
+            _activeServiceAreasCache = data;
+          }
+        }
+      } catch (_) {}
+    }
+    fetchServiceAreasRegistry();
+
+    function evaluateServiceAreaClient(locationName, coords) {
+      const query = (locationName || '').toLowerCase().trim();
+      const lat = coords?.lat || null;
+      const lng = coords?.lng || null;
+
+      // Inactive Ghana regions check
+      const inactiveKeywords = [
+        { key: 'accra', reg: 'Greater Accra', city: 'Accra' },
+        { key: 'tema', reg: 'Greater Accra', city: 'Tema' },
+        { key: 'kumasi', reg: 'Ashanti Region', city: 'Kumasi' },
+        { key: 'obuasi', reg: 'Ashanti Region', city: 'Obuasi' },
+        { key: 'tamale', reg: 'Northern Region', city: 'Tamale' },
+        { key: 'takoradi', reg: 'Western Region', city: 'Sekondi-Takoradi' },
+        { key: 'cape coast', reg: 'Central Region', city: 'Cape Coast' },
+        { key: 'koforidua', reg: 'Eastern Region', city: 'Koforidua' },
+        { key: 'sunyani', reg: 'Bono Region', city: 'Sunyani' },
+        { key: 'techiman', reg: 'Bono East', city: 'Techiman' },
+        { key: 'wa', reg: 'Upper West', city: 'Wa' },
+        { key: 'bolgatanga', reg: 'Upper East', city: 'Bolgatanga' },
+        { key: 'dambai', reg: 'Oti Region', city: 'Dambai' }
+      ];
+
+      for (const item of inactiveKeywords) {
+        if (query.includes(item.key)) {
+          return {
+            allowed: false,
+            region_name: item.reg,
+            city_name: item.city,
+            message: `K3K3ride isn't available in ${item.city} yet. We're working to bring affordable rides to your region soon.`
+          };
+        }
+      }
+
+      // If coordinates are explicitly far outside Ho (Volta Region) bounds
+      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        const inHoBounds = (lat >= 6.45 && lat <= 6.78 && lng >= 0.30 && lng <= 0.65);
+        const dLat = (lat - 6.6012) * 111;
+        const dLng = (lng - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
+        const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+        if (!inHoBounds && distKm > 35.0) {
+          return {
+            allowed: false,
+            region_name: 'Out of Operating Zone',
+            city_name: 'Selected Area',
+            message: `K3K3ride isn't available in this location yet. We currently operate exclusively in Ho, Volta Region.`
+          };
+        }
+      }
+
+      // Default: Active operating area (Ho, Volta Region)
+      return { allowed: true, region_name: 'Volta Region', city_name: 'Ho' };
+    }
+
+    function showInactiveServiceArea(areaData) {
+      const step1 = document.getElementById('bookStep1');
+      const step2 = document.getElementById('bookStep2');
+      const step3 = document.getElementById('bookStep3');
+      const stepInactive = document.getElementById('bookStepInactive');
+      if (step1) step1.style.display = 'none';
+      if (step2) step2.style.display = 'none';
+      if (step3) step3.style.display = 'none';
+      if (stepInactive) stepInactive.style.display = 'flex';
+
+      const pillEl = document.getElementById('inactiveDetectedRegionName');
+      if (pillEl) pillEl.textContent = `${areaData.city_name || ''} (${areaData.region_name || 'Ghana'})`.trim();
+      const subEl = document.getElementById('inactiveRegionSub');
+      if (subEl) subEl.textContent = areaData.message || `K3K3ride isn't available in your area yet. We're working to bring affordable rides to your region soon.`;
+
+      const successMsg = document.getElementById('waitlistSuccessMsg');
+      if (successMsg) successMsg.style.display = 'none';
+      const input = document.getElementById('waitlistContactInput');
+      if (input) {
+        input.value = (typeof currentUser !== 'undefined' && currentUser?.phone) ? currentUser.phone : '';
+      }
+    }
+
+    function backToStep1FromInactive() {
+      const stepInactive = document.getElementById('bookStepInactive');
+      const step1 = document.getElementById('bookStep1');
+      if (stepInactive) stepInactive.style.display = 'none';
+      if (step1) step1.style.display = 'block';
+    }
+
+    async function submitLaunchInterest() {
+      const input = document.getElementById('waitlistContactInput');
+      const btn = document.getElementById('waitlistSubmitBtn');
+      const successMsg = document.getElementById('waitlistSuccessMsg');
+      const contactVal = input ? input.value.trim() : '';
+
+      if (!contactVal) {
+        showToast('Please enter your phone or email to get notified', 'warning');
+        return;
+      }
+
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch('/api/trips/launch-interest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contact: contactVal,
+            pickup_location: _pickupVal,
+            region_name: document.getElementById('inactiveDetectedRegionName')?.textContent || 'Ghana'
+          })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          if (successMsg) {
+            successMsg.style.display = 'flex';
+            const span = successMsg.querySelector('span');
+            if (span) span.textContent = data.message || `Thank you! We'll notify you as soon as K3K3 launches in your area.`;
+          }
+          showToast('Launch notification registered!', 'success');
+        } else {
+          showToast(data?.error || 'Failed to register launch alert', 'error');
+        }
+      } catch (err) {
+        showToast('Could not submit notification. Please try again.', 'error');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     }
 
     /* ══════════════════════════════════════════

@@ -1687,6 +1687,105 @@ router.post('/roles/check-access', (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════════════════════════════════════
+// SERVICE AREA & REGIONAL EXPANSION MANAGEMENT (GHANA 16 REGIONS)
+// ══════════════════════════════════════════════════════════════════════════════
+
+const serviceAreaService = require('../services/service_area.service');
+
+// Get all 16 regions with city status and launch interest count
+router.get('/service-areas', (req, res) => {
+  try {
+    const regions = serviceAreaService.getAllRegions();
+    const interests = serviceAreaService.getLaunchInterests();
+    const activeAreas = serviceAreaService.getActiveServiceAreas();
+
+    // Map waitlist counts to regions
+    const regionsWithStats = regions.map(reg => {
+      const waitlistCount = interests.filter(i => i.region_id === reg.id || (i.region_name && i.region_name.toLowerCase().includes(reg.id))).length;
+      return {
+        ...reg,
+        waitlist_subscribers: waitlistCount
+      };
+    });
+
+    res.json({
+      success: true,
+      country: 'Ghana',
+      total_regions: regions.length,
+      regions: regionsWithStats,
+      active_areas: activeAreas,
+      total_waitlist_subscribers: interests.length
+    });
+  } catch (err) {
+    console.error('[Admin] Error fetching service areas:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Toggle region or city active status
+router.post('/service-areas/toggle', (req, res) => {
+  try {
+    const { region_id, city_id, active } = req.body;
+    if (!region_id) {
+      return res.status(400).json({ success: false, error: 'region_id is required' });
+    }
+    const result = serviceAreaService.toggleAreaStatus(region_id, city_id, active);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.json({
+      success: true,
+      message: `Service area status updated successfully for ${city_id || region_id}`,
+      ...result
+    });
+  } catch (err) {
+    console.error('[Admin] Error toggling service area:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Update regional base pricing
+router.post('/service-areas/pricing', (req, res) => {
+  try {
+    const { region_id, base_fare_shared, base_fare_alone, per_km_rate } = req.body;
+    if (!region_id) {
+      return res.status(400).json({ success: false, error: 'region_id is required' });
+    }
+    const result = serviceAreaService.updateRegionPricing(region_id, {
+      base_fare_shared,
+      base_fare_alone,
+      per_km_rate
+    });
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.json({
+      success: true,
+      message: `Pricing updated for region ${region_id}`,
+      ...result
+    });
+  } catch (err) {
+    console.error('[Admin] Error updating region pricing:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get passenger waitlist launch notifications
+router.get('/launch-interests', (req, res) => {
+  try {
+    const interests = serviceAreaService.getLaunchInterests();
+    res.json({
+      success: true,
+      count: interests.length,
+      interests
+    });
+  } catch (err) {
+    console.error('[Admin] Error fetching launch interests:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
 
 

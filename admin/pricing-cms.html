@@ -588,6 +588,9 @@
         <button class="cms-tab-btn" onclick="switchTab('simulator')">
           <i class="fas fa-compass"></i> Live Mapbox Route Simulator
         </button>
+        <button class="cms-tab-btn" onclick="switchTab('service-areas')">
+          <i class="fas fa-map-location-dot"></i> Service Areas &amp; Regional Expansion <span class="tab-badge" id="badgeServiceAreas">16</span>
+        </button>
       </nav>
 
       <!-- ════ TAB 1: LOCATIONS & STOPS ════ -->
@@ -774,6 +777,40 @@
         <div id="simMapContainer"></div>
       </section>
 
+      <!-- ════ TAB 5: SERVICE AREAS & REGIONAL EXPANSION (GHANA 16 REGIONS) ════ -->
+      <section id="tab-service-areas" class="card-panel" style="display:none">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title"><i class="fas fa-map-location-dot" style="color:var(--yellow)"></i> Ghana Service Areas &amp; Regional Expansion</div>
+            <div class="panel-desc">Manage all 16 regions of Ghana. Activate live ride bookings for operational areas (e.g. Ho) or toggle expansion markets into waitlist &amp; pre-launch demand capture.</div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn-action" onclick="loadServiceAreasData()">
+              <i class="fas fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="serviceAreasTable">
+            <thead>
+              <tr>
+                <th>Region</th>
+                <th>Code</th>
+                <th>Status</th>
+                <th>Active Cities / Towns</th>
+                <th>Base Fare (Shared / Alone)</th>
+                <th>Waitlist Demand</th>
+                <th style="text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="serviceAreasBody">
+              <tr><td colspan="7" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Loading regions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -924,18 +961,102 @@
     // ── Tab Switching ──
     function switchTab(tab) {
       currentTab = tab;
+      const allTabs = ['locations', 'routes', 'settings', 'simulator', 'service-areas'];
       document.querySelectorAll('.cms-tab-btn').forEach((btn, idx) => {
-        const tabs = ['locations', 'routes', 'settings', 'simulator'];
-        btn.classList.toggle('active', tabs[idx] === tab);
+        btn.classList.toggle('active', allTabs[idx] === tab);
       });
 
-      ['locations', 'routes', 'settings', 'simulator'].forEach(t => {
+      allTabs.forEach(t => {
         const el = document.getElementById(`tab-${t}`);
         if (el) el.style.display = (t === tab) ? 'block' : 'none';
       });
 
       if (tab === 'simulator') {
         setTimeout(initSimulatorMap, 150);
+      } else if (tab === 'service-areas') {
+        loadServiceAreasData();
+      }
+    }
+
+    // ── Ghana Service Areas Management ──
+    let serviceAreasList = [];
+
+    async function loadServiceAreasData() {
+      const tbody = document.getElementById('serviceAreasBody');
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Loading regions...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/service-areas`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        serviceAreasList = data.regions || [];
+        renderServiceAreasTable(serviceAreasList);
+        const badge = document.getElementById('badgeServiceAreas');
+        if (badge) badge.textContent = serviceAreasList.length;
+      } catch (err) {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--danger)">Failed to load service areas: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderServiceAreasTable(regions) {
+      const tbody = document.getElementById('serviceAreasBody');
+      if (!tbody) return;
+
+      if (!regions || regions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No service areas found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = regions.map(reg => {
+        const isActive = Boolean(reg.active);
+        const activeCities = (reg.cities || []).filter(c => c.active).map(c => c.name).join(', ') || (isActive ? 'All Towns' : 'None');
+        const statusBadge = isActive
+          ? `<span class="badge" style="background:rgba(16,185,129,0.15);color:#10B981;border:1px solid rgba(16,185,129,0.3)"><i class="fas fa-circle-check"></i> Active • Operating</span>`
+          : `<span class="badge" style="background:rgba(148,163,184,0.12);color:#94A3B8;border:1px solid rgba(148,163,184,0.25)"><i class="fas fa-clock"></i> Coming Soon</span>`;
+
+        const waitlistCount = reg.waitlist_subscribers || 0;
+        const waitlistBadge = waitlistCount > 0
+          ? `<span style="font-weight:800;color:var(--yellow)"><i class="fas fa-bell"></i> ${waitlistCount} subscribers</span>`
+          : `<span style="color:var(--muted)">0</span>`;
+
+        return `
+          <tr>
+            <td style="font-weight:700;color:var(--white)">
+              <i class="fas fa-map-pin" style="color:${isActive ? '#10B981' : 'var(--muted)'};margin-right:8px"></i>
+              ${reg.name}
+            </td>
+            <td><code style="color:var(--muted-2);font-weight:700">${reg.code || 'GH'}</code></td>
+            <td>${statusBadge}</td>
+            <td style="font-size:0.86rem;color:var(--text)">${activeCities}</td>
+            <td style="font-weight:700;color:var(--yellow)">GH₵ ${(reg.base_fare_shared || 3).toFixed(2)} / GH₵ ${(reg.base_fare_alone || 6).toFixed(2)}</td>
+            <td>${waitlistBadge}</td>
+            <td style="text-align:right">
+              <button class="btn-action ${isActive ? 'btn-danger' : 'btn-yellow'}" style="padding:6px 12px;font-size:0.78rem" onclick="toggleRegionActive('${reg.id}', ${isActive})">
+                <i class="fas ${isActive ? 'fa-pause' : 'fa-play'}"></i> ${isActive ? 'Deactivate' : 'Activate'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function toggleRegionActive(regionId, currentStatus) {
+      const nextStatus = !currentStatus;
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/service-areas/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ region_id: regionId, active: nextStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Region ${regionId} ${nextStatus ? 'activated for live bookings' : 'set to Coming Soon waitlist'}!`, 'success');
+          loadServiceAreasData();
+        } else {
+          showToast(data.error || 'Failed to update region status', 'error');
+        }
+      } catch (err) {
+        showToast('Error updating region: ' + err.message, 'error');
       }
     }
 
