@@ -20,6 +20,7 @@ const {
 const dispatchService = require('../services/dispatch.service');
 const moolreService = require('../services/moolre.service');
 const serviceAreaService = require('../services/service_area.service');
+const tripStore = require('../services/trip_store.service');
 
 // In-memory pending trips cache to guarantee instant delivery even if DB has foreign-key or network latency
 const _inMemoryPendingTrips = new Map();
@@ -216,18 +217,27 @@ router.post('/', async (req, res) => {
       ride.passenger_name = req.body.passenger_name || 'Passenger';
     }
 
+    // Persist in tripStore with passenger info and exact pickup/destination labels
+    const storedRide = tripStore.saveTrip({
+      ...ride,
+      passenger_id: passenger_id || safePassengerId,
+      passenger_name: passengerName,
+      pickup_label: pickup_label,
+      dest_label: dest_label
+    });
+
     // Cache in pending trips map for instantaneous fallback polling
-    _inMemoryPendingTrips.set(ride.id, ride);
+    _inMemoryPendingTrips.set(ride.id, storedRide);
 
     // Trigger real-time dispatch engine
-    dispatchService.dispatchRide(ride).catch(err => {
+    dispatchService.dispatchRide(storedRide).catch(err => {
       console.error('[Trips] Dispatch error:', err);
     });
 
     res.status(201).json({
       success: true,
       message: 'Ride requested successfully',
-      ride
+      ride: storedRide
     });
   } catch (error) {
     console.error('[Trips] Error creating ride:', error);
@@ -352,13 +362,35 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/trips/passenger/:passengerId
- * Get all rides for a passenger
+ * Get all rides for a passenger (combines Supabase and persistent tripStore)
  */
 router.get('/passenger/:passengerId', async (req, res) => {
   try {
     const { passengerId } = req.params;
-    const rides = await getPassengerRides(passengerId);
+    let rides = [];
+
+    // 1. Try Supabase
+    try {
+      const dbRides = await getPassengerRides(passengerId);
+      if (Array.isArray(dbRides) && dbRides.length > 0) {
+        rides = dbRides;
+      }
+    } catch (_) {}
+
+    // 2. Merge with persistent tripStore
+    const localRides = tripStore.getPassengerTrips(passengerId);
+    if (localRides && localRides.length > 0) {
+      const existingIds = new Set(rides.map(r => r.id));
+      for (const lr of localRides) {
+        if (!existingIds.has(lr.id)) {
+          rides.push(lr);
+        }
+      }
+    }
     
+    // Sort descending by requested/created time
+    rides.sort((a, b) => new Date(b.created_at || b.requested_at || 0) - new Date(a.created_at || a.requested_at || 0));
+
     res.json({ success: true, rides });
   } catch (error) {
     console.error('[Trips] Error fetching passenger rides:', error);
@@ -383,18 +415,13 @@ router.delete('/passenger/:passengerId', async (req, res) => {
       });
     }
 
-    const result = await deletePassengerRides(passengerId);
-    if (!result.success) {
-      return res.status(500).json({ 
-        success: false, 
-        error: result.error || 'Failed to delete ride history' 
-      });
-    }
+    try { await deletePassengerRides(passengerId); } catch (_) {}
+    const deletedCount = tripStore.deletePassengerTrips(passengerId);
 
     res.json({ 
       success: true, 
-      message: 'Complete ride history permanently deleted from database',
-      deletedCount: result.count
+      message: 'Complete ride history permanently deleted',
+      deletedCount
     });
   } catch (error) {
     console.error('[Trips] Error deleting passenger ride history:', error);

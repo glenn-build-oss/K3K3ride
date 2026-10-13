@@ -4030,17 +4030,17 @@
       gap: 12px;
       padding: 13px 18px;
       border-radius: 14px;
-      background: rgba(15, 23, 42, 0.94);
-      -webkit-backdrop-filter: blur(14px);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 15, 29, 0.78);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      backdrop-filter: blur(20px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-left: 4px solid var(--yellow);
       color: #ffffff;
       font-size: .88rem;
       font-weight: 600;
       letter-spacing: -0.01em;
       line-height: 1.45;
-      box-shadow: 0 16px 38px -4px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 42px -6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
       animation: toastIn .32s cubic-bezier(0.16, 1, 0.3, 1) both;
       min-width: 270px;
       max-width: 100%;
@@ -4062,7 +4062,7 @@
 
     .toast-notif.success {
       border-left-color: #10B981;
-      background: rgba(15, 23, 42, 0.94);
+      background: rgba(8, 26, 20, 0.82);
     }
     .toast-notif.success i {
       color: #10B981;
@@ -4070,7 +4070,7 @@
 
     .toast-notif.error {
       border-left-color: #EF4444;
-      background: rgba(15, 23, 42, 0.94);
+      background: rgba(30, 10, 16, 0.84);
     }
     .toast-notif.error i {
       color: #EF4444;
@@ -4078,7 +4078,7 @@
 
     .toast-notif.info {
       border-left-color: #38BDF8;
-      background: rgba(15, 23, 42, 0.94);
+      background: rgba(10, 22, 38, 0.82);
     }
     .toast-notif.info i {
       color: #38BDF8;
@@ -4086,7 +4086,7 @@
 
     .toast-notif.warning {
       border-left-color: #F59E0B;
-      background: rgba(15, 23, 42, 0.94);
+      background: rgba(30, 20, 8, 0.84);
     }
     .toast-notif.warning i {
       color: #F59E0B;
@@ -4799,6 +4799,18 @@
       .modal-mapbox-wrap.step2-map-wrap {
         height: clamp(220px, 34vh, 320px);
         flex-shrink: 0;
+      }
+
+      .pin-adjust-map-frame {
+        height: clamp(180px, 28vh, 240px);
+        min-height: 170px;
+        flex-shrink: 0;
+      }
+
+      .pin-adjust-card-bottom {
+        padding: 14px;
+        margin-top: 8px;
+        padding-bottom: calc(20px + env(safe-area-inset-bottom));
       }
 
       .modal-handle {
@@ -5959,20 +5971,28 @@
     ══════════════════════════════════════════════════════════════════ */
     #bookStep3 {
       display: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: 85vh;
+      padding-bottom: calc(28px + env(safe-area-inset-bottom));
     }
     .pin-adjust-container {
       position: relative;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     .pin-adjust-map-frame {
       width: 100%;
-      height: 46vh;
-      min-height: 250px;
+      height: clamp(220px, 36vh, 320px);
+      min-height: 200px;
       border-radius: 18px;
       overflow: hidden;
       position: relative;
       background: #11141d;
       box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      flex-shrink: 0;
     }
     #pinAdjustLiveMap {
       width: 100%;
@@ -6884,7 +6904,7 @@
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggleTripHistory" checked
-                onchange="saveSetting('privacyHistory',this.checked)">
+                onchange="saveSetting('privacyTripHistory',this.checked)">
               <div class="toggle-track"></div>
             </label>
           </div>
@@ -8872,13 +8892,27 @@
           const headers = { 'Content-Type': 'application/json' };
           const token = getAuthToken();
           if (token) headers['Authorization'] = `Bearer ${token}`;
-          let res = await fetch(`${API}/users/${userId}/change-password`, {
-            method: 'POST', headers, body: JSON.stringify({ current_password: cur, new_password: nw })
+          let res = await fetch(`${API}/auth/passenger/change-password`, {
+            method: 'POST', headers, body: JSON.stringify({ userId, current_password: cur, new_password: nw })
           });
-          if (!res.ok) res = await fetch(`${API}/users/${userId}`, {
-            method: 'PATCH', headers, body: JSON.stringify({ password: nw })
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {
+            res = await fetch(`${API}/users/${userId}/change-password`, {
+              method: 'POST', headers, body: JSON.stringify({ current_password: cur, new_password: nw, userId })
+            });
+          }
+          if (res.ok) {
+            ['pwdCurrent', 'pwdNew', 'pwdConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            const bar = document.getElementById('pwdBar'); if (bar) bar.style.width = '0';
+            const hint = document.getElementById('pwdHint'); if (hint) hint.textContent = '';
+            showToast('Password updated successfully ✓ Security email sent to your inbox.', 'success');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Update Password'; }
+            return;
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            showToast(errData.error || 'Failed to update password. Check your current password.', 'error');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Update Password'; }
+            return;
+          }
         } catch (err) {
           showToast('Could not update password. Check your connection.', 'error');
           if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Update Password'; }
@@ -8896,15 +8930,15 @@
     /* ══════════════════════════════════════════
        Settings
     ══════════════════════════════════════════ */
-    function loadSettings() {
-      const savedLang = sessionStorage.getItem('k3k3_lang') || 'en';
+    async function loadSettings() {
+      const savedLang = sessionStorage.getItem('k3k3_lang') || localStorage.getItem('k3k3_lang') || 'en';
       currentLang = savedLang;
       selectedLang = savedLang;
       document.querySelectorAll('.lang-option').forEach(el => {
         el.classList.toggle('selected', el.dataset.lang === savedLang);
       });
       const getBool = k => {
-        const v = sessionStorage.getItem('k3k3_' + k);
+        const v = sessionStorage.getItem('k3k3_' + k) ?? localStorage.getItem('k3k3_' + k);
         return v === null ? true : v === 'true';
       };
       setToggle('toggleRideUpdates', getBool('notifRideUpdates'));
@@ -8912,16 +8946,86 @@
       setToggle('togglePromotions', getBool('notifPromotions'));
       setToggle('toggleLocation', getBool('privacyLocation'));
       setToggle('toggleTripHistory', getBool('privacyTripHistory'));
+
+      const userId = getUserId();
+      if (userId) {
+        try {
+          const res = await fetch(`${API}/auth/passenger/settings/${userId}`);
+          if (res.ok) {
+            const data = await res.json();
+            const s = data.settings || data;
+            if (s) {
+              if (s.language) {
+                currentLang = s.language;
+                selectedLang = s.language;
+                sessionStorage.setItem('k3k3_lang', s.language);
+                localStorage.setItem('k3k3_lang', s.language);
+                document.querySelectorAll('.lang-option').forEach(el => {
+                  el.classList.toggle('selected', el.dataset.lang === s.language);
+                });
+              }
+              if (s.notif_ride_updates !== undefined) {
+                setToggle('toggleRideUpdates', s.notif_ride_updates);
+                sessionStorage.setItem('k3k3_notifRideUpdates', s.notif_ride_updates);
+                localStorage.setItem('k3k3_notifRideUpdates', s.notif_ride_updates);
+              }
+              if (s.notif_driver_alerts !== undefined) {
+                setToggle('toggleDriverAlerts', s.notif_driver_alerts);
+                sessionStorage.setItem('k3k3_notifDriverAlerts', s.notif_driver_alerts);
+                localStorage.setItem('k3k3_notifDriverAlerts', s.notif_driver_alerts);
+              }
+              if (s.notif_promotions !== undefined) {
+                setToggle('togglePromotions', s.notif_promotions);
+                sessionStorage.setItem('k3k3_notifPromotions', s.notif_promotions);
+                localStorage.setItem('k3k3_notifPromotions', s.notif_promotions);
+              }
+              if (s.privacy_location !== undefined) {
+                setToggle('toggleLocation', s.privacy_location);
+                sessionStorage.setItem('k3k3_privacyLocation', s.privacy_location);
+                localStorage.setItem('k3k3_privacyLocation', s.privacy_location);
+              }
+              if (s.privacy_trip_history !== undefined) {
+                setToggle('toggleTripHistory', s.privacy_trip_history);
+                sessionStorage.setItem('k3k3_privacyTripHistory', s.privacy_trip_history);
+                localStorage.setItem('k3k3_privacyTripHistory', s.privacy_trip_history);
+              }
+            }
+          }
+        } catch (_) {}
+      }
     }
     function setToggle(id, val) { const el = document.getElementById(id); if (el) el.checked = val; }
 
-    function saveSetting(key, value) {
+    async function saveSetting(key, value) {
       sessionStorage.setItem('k3k3_' + key, value);
-      if (key === 'privacyLocation' && value === true) requestLocationPermission();
-      if (key === 'privacyTripHistory' && value === false) {
-        const el = document.getElementById('completedRides');
-        if (el) el.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
-      } else if (key === 'privacyTripHistory' && value === true) { renderTrips(); }
+      localStorage.setItem('k3k3_' + key, value);
+
+      const userId = getUserId();
+      if (userId) {
+        try {
+          fetch(`${API}/auth/passenger/settings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, [key]: value })
+          }).catch(() => {});
+        } catch (_) {}
+      }
+
+      if (key === 'privacyLocation') {
+        if (value === false) {
+          stopLiveGpsWatcher();
+        } else {
+          startLiveGpsWatcher();
+        }
+      }
+      if (key === 'privacyTripHistory') {
+        if (value === false) {
+          const el = document.getElementById('completedRides');
+          if (el) el.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><p>Trip history is disabled in your privacy settings.</p></div>';
+        } else {
+          renderTrips();
+        }
+      }
       if (key === 'notifRideUpdates' || key === 'notifDriverAlerts') renderNotifications();
       showToast('Setting saved', 'success');
     }
@@ -8936,6 +9040,18 @@
     function applyLanguage(showFeedback = true) {
       currentLang = selectedLang || currentLang;
       sessionStorage.setItem('k3k3_lang', currentLang);
+      localStorage.setItem('k3k3_lang', currentLang);
+
+      const userId = getUserId();
+      if (userId) {
+        try {
+          fetch(`${API}/auth/passenger/settings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, language: currentLang })
+          }).catch(() => {});
+        } catch (_) {}
+      }
 
       const htmlEl = document.getElementById('htmlRoot');
       if (htmlEl) htmlEl.lang = currentLang;
@@ -9104,6 +9220,8 @@
     ══════════════════════════════════════════ */
     function recordPastTrip(pickup, dest) {
       if (!pickup || !dest) return;
+      const privOff = (sessionStorage.getItem('k3k3_privacyTripHistory') === 'false') || (localStorage.getItem('k3k3_privacyTripHistory') === 'false');
+      if (privOff) return;
       try {
         let past = JSON.parse(localStorage.getItem('k3k3_past_trips') || '[]');
         past = past.filter(t => !(t.pickup === pickup && t.dest === dest));
@@ -9114,6 +9232,8 @@
     }
 
     function getRecentTrips() {
+      const privOff = (sessionStorage.getItem('k3k3_privacyTripHistory') === 'false') || (localStorage.getItem('k3k3_privacyTripHistory') === 'false');
+      if (privOff) return [];
       try {
         return JSON.parse(localStorage.getItem('k3k3_past_trips') || '[]');
       } catch (_) {
@@ -10581,16 +10701,18 @@
         maxZoom: 19
       }).addTo(pinAdjustMap);
 
-      // On pan/drag completion, update pickup coordinates and search input
-      pinAdjustMap.on('moveend', () => {
+      // On pan/drag completion, reverse geocode coordinates and update search input
+      pinAdjustMap.on('moveend', async () => {
         const center = pinAdjustMap.getCenter();
         _pinAdjustLat = center.lat;
         _pinAdjustLng = center.lng;
-        const nearest = findClosestHoLandmark(center.lat, center.lng);
+        _pickupCoords = [center.lat, center.lng];
+        const resolved = await resolvePassengerAddress(center.lat, center.lng);
         const searchInput = document.getElementById('pinSearchInput');
-        if (searchInput && nearest) {
-          searchInput.value = nearest;
-          _pickupVal = nearest;
+        if (searchInput && resolved) {
+          searchInput.value = resolved;
+          _pickupVal = resolved;
+          HO_COORDINATES[resolved] = [center.lat, center.lng];
         }
       });
 
@@ -10608,10 +10730,13 @@
       if (!val) return;
       const trimmed = val.trim();
       _pickupVal = trimmed;
+      const searchInput = document.getElementById('pinSearchInput');
+      if (searchInput) searchInput.value = trimmed;
       const coord = getHoCoordinate(trimmed);
       if (coord && pinAdjustMap) {
         _pinAdjustLat = coord[0];
         _pinAdjustLng = coord[1];
+        _pickupCoords = [coord[0], coord[1]];
         pinAdjustMap.setView(coord, 16);
       }
     }
@@ -10719,6 +10844,45 @@
       modal.style.display = 'flex';
     }
 
+    async function resolvePassengerAddress(lat, lng) {
+      // 1. Mapbox reverse geocode
+      try {
+        if (!_modalMapboxToken) await getOrFetchMapboxToken();
+        const token = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+        if (token && token.startsWith('pk.')) {
+          const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}&country=GH&types=poi,address,neighborhood,locality,place`;
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 3500);
+          const res = await fetch(url, { signal: ctrl.signal });
+          clearTimeout(tId);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.features && data.features.length > 0) {
+              return data.features[0].text || data.features[0].place_name.split(',')[0];
+            }
+          }
+        }
+      } catch (_) {}
+
+      // 2. OpenStreetMap Nominatim reverse geocode
+      try {
+        const ctrl = new AbortController();
+        const tId = setTimeout(() => ctrl.abort(), 3000);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, { signal: ctrl.signal });
+        clearTimeout(tId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.display_name) {
+            const parts = data.display_name.split(',');
+            return parts.slice(0, 2).join(', ').trim();
+          }
+        }
+      } catch (_) {}
+
+      // 3. Fallback to closest Ho landmark
+      return findClosestHoLandmark(lat, lng);
+    }
+
     function requestUserLiveLocation() {
       const btn = document.querySelector('#enableLocationModal .btn-location-allow');
       if (btn) {
@@ -10732,51 +10896,72 @@
         return;
       }
 
+      const onLocationSuccess = async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        sessionStorage.setItem('k3k3_lat', lat);
+        sessionStorage.setItem('k3k3_lng', lng);
+        localStorage.setItem('k3k3_lat', lat);
+        localStorage.setItem('k3k3_lng', lng);
+        sessionStorage.setItem('k3k3_loc_granted', '1');
+
+        // Resolve real street or landmark address
+        const resolvedName = await resolvePassengerAddress(lat, lng);
+        _pickupVal = resolvedName;
+        _pickupCoords = [lat, lng];
+        HO_COORDINATES[resolvedName] = [lat, lng];
+
+        const pSel = document.getElementById('pickupSelect');
+        const pInp = document.getElementById('pickupInput');
+        if (pSel) pSel.value = resolvedName;
+        if (pInp) pInp.value = resolvedName;
+        const clearBtn = document.getElementById('pickupClearBtn');
+        if (clearBtn) clearBtn.style.display = 'flex';
+        if (typeof onLocationChange === 'function') onLocationChange();
+
+        // Broadcast to nearby riders via Socket if privacy setting allows
+        const shareLoc = (sessionStorage.getItem('k3k3_privacyLocation') !== 'false') && (localStorage.getItem('k3k3_privacyLocation') !== 'false');
+        if (shareLoc && passengerSocket && passengerSocket.connected) {
+          passengerSocket.emit('passenger:location', {
+            passengerId: getUserId(),
+            lat: lat,
+            lng: lng,
+            landmark: resolvedName
+          });
+        }
+
+        // Center map if initialized
+        if (passengerMap && passengerUserMarker) {
+          passengerUserMarker.setLatLng([lat, lng]);
+          passengerMap.setView([lat, lng], 15);
+        }
+
+        if (shareLoc) startLiveGpsWatcher();
+        dismissLocationPrompt();
+        showToast(`Location detected: Pickup set to ${resolvedName}!`, 'success');
+      };
+
+      // Two-stage Geolocation: High accuracy first, then standard/cellular fallback
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          sessionStorage.setItem('k3k3_lat', lat);
-          sessionStorage.setItem('k3k3_lng', lng);
-          sessionStorage.setItem('k3k3_loc_granted', '1');
-
-          // Snap to closest Ho landmark
-          const closest = findClosestHoLandmark(lat, lng);
-          const pSel = document.getElementById('pickupSelect');
-          const pInp = document.getElementById('pickupInput');
-          if (pSel) pSel.value = closest;
-          if (pInp) pInp.value = closest;
-          if (typeof onLocationChange === 'function') onLocationChange();
-
-          // Broadcast to nearby riders via Socket so riders see passenger on the app!
-          if (passengerSocket && passengerSocket.connected) {
-            passengerSocket.emit('passenger:location', {
-              passengerId: getUserId(),
-              lat: lat,
-              lng: lng,
-              landmark: closest
-            });
-          }
-
-          // Center map if initialized
-          if (passengerMap && passengerUserMarker) {
-            passengerUserMarker.setLatLng([lat, lng]);
-            passengerMap.setView([lat, lng], 15);
-          }
-
-          startLiveGpsWatcher();
-          dismissLocationPrompt();
-          showToast(`Location detected: Pickup set to ${closest}!`, 'success');
+        onLocationSuccess,
+        (errHigh) => {
+          console.warn('[Geolocation Stage 1 High-Accuracy notice]', errHigh.message);
+          navigator.geolocation.getCurrentPosition(
+            onLocationSuccess,
+            (errLow) => {
+              console.warn('[Geolocation Stage 2 Low-Accuracy notice]', errLow.message);
+              const fallbackLat = parseFloat(sessionStorage.getItem('k3k3_lat') || localStorage.getItem('k3k3_lat') || '6.6012');
+              const fallbackLng = parseFloat(sessionStorage.getItem('k3k3_lng') || localStorage.getItem('k3k3_lng') || '0.4688');
+              sessionStorage.setItem('k3k3_lat', fallbackLat);
+              sessionStorage.setItem('k3k3_lng', fallbackLng);
+              sessionStorage.setItem('k3k3_loc_granted', '1');
+              dismissLocationPrompt();
+              showToast('Location permission unavailable. You can easily choose any pickup location in Ho.', 'info');
+            },
+            { enableHighAccuracy: false, timeout: 9000, maximumAge: 120000 }
+          );
         },
-        (err) => {
-          console.warn('[Geolocation Error]', err.message);
-          sessionStorage.setItem('k3k3_lat', '6.6012');
-          sessionStorage.setItem('k3k3_lng', '0.4688');
-          sessionStorage.setItem('k3k3_loc_granted', '1');
-          dismissLocationPrompt();
-          showToast('Location permission unavailable. You can easily choose any pickup location in Ho.', 'info');
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
       );
     }
 
@@ -10801,6 +10986,8 @@
 
     let _liveWatcherId = null;
     function startLiveGpsWatcher() {
+      const shareLoc = (sessionStorage.getItem('k3k3_privacyLocation') !== 'false') && (localStorage.getItem('k3k3_privacyLocation') !== 'false');
+      if (!shareLoc) return;
       if (_liveWatcherId || !navigator.geolocation) return;
       try {
         _liveWatcherId = navigator.geolocation.watchPosition(
@@ -10811,17 +10998,27 @@
             sessionStorage.setItem('k3k3_lng', lng);
             if (passengerUserMarker) passengerUserMarker.setLatLng([lat, lng]);
             if (passengerSocket && passengerSocket.connected) {
-              passengerSocket.emit('passenger:location', {
-                passengerId: getUserId(),
-                lat,
-                lng
-              });
+              const currentShare = (sessionStorage.getItem('k3k3_privacyLocation') !== 'false') && (localStorage.getItem('k3k3_privacyLocation') !== 'false');
+              if (currentShare) {
+                passengerSocket.emit('passenger:location', {
+                  passengerId: getUserId(),
+                  lat,
+                  lng
+                });
+              }
             }
           },
           () => {},
-          { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+          { enableHighAccuracy: false, maximumAge: 30000, timeout: 15000 }
         );
       } catch(_) {}
+    }
+
+    function stopLiveGpsWatcher() {
+      if (_liveWatcherId && navigator.geolocation) {
+        navigator.geolocation.clearWatch(_liveWatcherId);
+        _liveWatcherId = null;
+      }
     }
 
     function shareRideLocation() {
@@ -11967,9 +12164,9 @@
     });
 
     async function confirmRide() {
-      if (!_rideType || !_campusFare || !paymentMethod) return;
-
-      const pickup = _pickupVal;
+      const pinSearchEl = document.getElementById('pinSearchInput');
+      const pickup = (pinSearchEl && pinSearchEl.value.trim()) ? pinSearchEl.value.trim() : _pickupVal;
+      _pickupVal = pickup;
       const dest   = _destVal;
       const fare   = _rideType === 'alone' ? (_campusFare * (_aloneMultiplier || 1.8)) : _campusFare;
 
@@ -12562,7 +12759,7 @@
     }
 
     async function renderTrips() {
-      const privOff = sessionStorage.getItem('k3k3_privacyTripHistory') === 'false';
+      const privOff = (sessionStorage.getItem('k3k3_privacyTripHistory') === 'false') || (localStorage.getItem('k3k3_privacyTripHistory') === 'false');
       const cEl = document.getElementById('completedRides');
       const xEl = document.getElementById('cancelledRides');
       if (privOff) {
@@ -12823,27 +13020,80 @@
     }
 
     /* ══════════════════════════════════════════
-       Toast (Professional Dark Glass & 3.5s Standard Timing)
+       Toast (Clear Crystal Glass, Audio Chime, Haptics & Calibrated Timing)
     ══════════════════════════════════════════ */
+    function playNotificationChime(type = 'info') {
+      try {
+        const notifsOn = (sessionStorage.getItem('k3k3_notifRideUpdates') !== 'false') && (localStorage.getItem('k3k3_notifRideUpdates') !== 'false');
+        if (!notifsOn && type !== 'error') return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now); // D5
+          osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.12); // A5
+        } else if (type === 'error') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320.00, now);
+          osc.frequency.exponentialRampToValueAtTime(220.00, now + 0.14);
+        } else if (type === 'warning' || type === 'warn') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440.00, now);
+          osc.frequency.exponentialRampToValueAtTime(493.88, now + 0.12);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+        }
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } catch (_) {}
+
+      try {
+        if (navigator.vibrate) {
+          if (type === 'error') navigator.vibrate([70, 40, 70]);
+          else navigator.vibrate([35, 20, 35]);
+        }
+      } catch (_) {}
+    }
+
     function showToast(msg, type = 'info') {
-      const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
+      const normType = type === 'warn' ? 'warning' : type;
+      playNotificationChime(normType);
+
+      const icons = {
+        success: 'fa-circle-check',
+        error: 'fa-circle-exclamation',
+        info: 'fa-circle-info',
+        warning: 'fa-triangle-exclamation'
+      };
       const container = document.getElementById('toast-container');
       if (!container) return;
       const el = document.createElement('div');
-      el.className = `toast-notif ${type}`;
-      el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
+      el.className = `toast-notif ${normType}`;
+      el.setAttribute('role', 'alert');
+      el.innerHTML = `<i class="fas ${icons[normType] || icons.info}"></i><span>${msg}</span>`;
       
       let timer = null;
       const dismiss = () => {
         if (timer) clearTimeout(timer);
         el.style.opacity = '0';
-        el.style.transform = 'translateY(-8px) scale(0.96)';
+        el.style.transform = 'translateY(-10px) scale(0.96)';
         setTimeout(() => el.remove(), 260);
       };
 
       el.addEventListener('click', dismiss);
       container.appendChild(el);
-      timer = setTimeout(dismiss, 3500); // Calibrated professional 3.5s standard
+      const duration = (normType === 'error' || normType === 'warning') ? 4500 : 3500;
+      timer = setTimeout(dismiss, duration);
     }
 
     /* ══════════════════════════════════════════

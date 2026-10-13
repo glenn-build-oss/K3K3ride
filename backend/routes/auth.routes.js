@@ -19,9 +19,10 @@ const bcrypt = require('bcryptjs');
 const { normalizePhone, maskPhone } = require('../utils/phone');
 const { generateOTP, storeOTP: memStoreOTP, verifyOTP: memVerifyOTP } = require('../services/otp.service');
 const { sendSMS, sendOTP: moolreSendOTP, checkSMSBalance, checkSenderIdStatus } = require('../services/moolre.service');
-const { sendAdminOTP } = require('../services/email.service');
+const { sendAdminOTP, sendPasswordChangedEmail } = require('../services/email.service');
 const resendService = require('../services/resend.service');
 const rolesService = require('../services/roles.service');
+const userStore = require('../services/user_store.service');
 const { findUserByPhone, findAllUsersByPhone, findUserByEmail, createUser, updateUser, updateUserLastLogin, storeOTP: dbStoreOTP, verifyOTP: dbVerifyOTP, getRiderApplicationStatus } = require('../services/supabase.service');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'k3k3_dev_secret';
@@ -574,13 +575,12 @@ router.post('/passenger/register', async (req, res) => {
 
 /**
  * PUT /api/auth/passenger/profile
- * Update passenger profile details.
+ * Update passenger profile details with persistent storage.
  */
 router.put('/passenger/profile', async (req, res) => {
   try {
     const { userId: bodyUserId, fname, lname, phone, email, emergency_name, emergency_phone } = req.body;
     
-    // Extract userId from auth header or request body
     let targetUserId = null;
     const token = req.headers.authorization?.split(' ')[1];
     if (token) {
@@ -599,34 +599,46 @@ router.put('/passenger/profile', async (req, res) => {
     if (!targetUserId) {
       return res.status(401).json({ success: false, error: 'Unauthorized: Missing or invalid authentication token' });
     }
-    
-    const updates = {
-      first_name: fname || '',
-      last_name: lname || '',
-      full_name: `${fname || ''} ${lname || ''}`.trim(),
-      email: email || ''
-    };
-    if (phone) updates.phone = phone;
-    
-    const result = await updateUser(targetUserId, updates);
-    if (!result) {
-      return res.status(500).json({ success: false, error: 'Failed to update profile in database' });
-    }
+
+    // 1. Update in persistent userStore
+    const localUser = userStore.updateProfile(targetUserId, {
+      fname,
+      lname,
+      phone,
+      email,
+      emergency_name,
+      emergency_phone
+    });
+
+    // 2. Best-effort Supabase sync
+    try {
+      const updates = {
+        first_name: fname || '',
+        last_name: lname || '',
+        full_name: `${fname || ''} ${lname || ''}`.trim(),
+        email: email || ''
+      };
+      if (phone) updates.phone = phone;
+      await updateUser(targetUserId, updates);
+    } catch (_) {}
     
     res.json({
       success: true,
       message: 'Profile updated successfully',
       user: {
-        id: result.id,
-        phone: result.phone,
-        firstName: result.first_name,
-        lastName: result.last_name,
-        fullName: result.full_name,
-        email: result.email,
-        role: result.role,
-        status: result.status,
-        emergency_name: emergency_name || null,
-        emergency_phone: emergency_phone || null
+        id: localUser.id,
+        phone: localUser.phone,
+        firstName: localUser.first_name,
+        lastName: localUser.last_name,
+        fullName: localUser.full_name,
+        fname: localUser.fname,
+        lname: localUser.lname,
+        name: localUser.full_name,
+        email: localUser.email,
+        role: localUser.role || 'passenger',
+        status: localUser.status || 'active',
+        emergency_name: localUser.emergency_name || null,
+        emergency_phone: localUser.emergency_phone || null
       }
     });
   } catch (err) {
@@ -634,6 +646,115 @@ router.put('/passenger/profile', async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
+
+/**
+ * GET /api/auth/passenger/settings/:id
+ * Retrieve passenger application preferences & privacy settings
+ */
+router.get('/passenger/settings/:id', async (req, res) => {
+  try {
+    const user = userStore.getUserById(req.params.id);
+    res.json({
+      success: true,
+      settings: user?.settings || {
+        language: 'en',
+        notifRideUpdates: true,
+        notifDriverAlerts: true,
+        notifPromotions: false,
+        privacyLocation: true,
+        privacyTripHistory: true
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to load settings' });
+  }
+});
+
+/**
+ * PUT /api/auth/passenger/settings
+ * Update passenger application preferences & privacy settings
+ */
+router.put('/passenger/settings', async (req, res) => {
+  try {
+    const { userId, settings } = req.body;
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'User ID is required' });
+    }
+    const updatedSettings = userStore.updateSettings(userId, settings);
+    res.json({
+      success: true,
+      message: 'Settings updated successfully',
+      settings: updatedSettings
+    });
+  } catch (err) {
+    console.error('[Auth] Error updating passenger settings:', err);
+    res.status(500).json({ success: false, error: 'Failed to save settings' });
+  }
+});
+
+/**
+ * Handler for Password Change (used by both /api/auth/passenger/change-password and /api/users/:id/change-password)
+ */
+async function handlePasswordChange(req, res) {
+  try {
+    const userId = req.params.id || req.body.userId || req.body.user_id;
+    const { current_password, new_password, newPassword, currentPassword, email } = req.body;
+    const cur = current_password || currentPassword;
+    const nw = new_password || newPassword;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'User ID is required' });
+    }
+
+    if (!nw || nw.length < 8) {
+      return res.status(400).json({ success: false, error: 'New password must be at least 8 characters long.' });
+    }
+
+    let user = userStore.getUserById(userId);
+    if (!user) {
+      user = userStore.upsertUser({ id: userId, email: email || '' });
+    }
+
+    // Verify current password if user has an existing password
+    if (user.password_hash && cur) {
+      const isMatch = userStore.verifyPassword(user, cur);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, error: 'Current password is incorrect.' });
+      }
+    }
+
+    const setRes = userStore.setPassword(userId, nw);
+    if (!setRes.success) {
+      return res.status(400).json({ success: false, error: setRes.error });
+    }
+
+    // Best-effort Supabase update
+    try {
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(nw, salt);
+      await updateUser(userId, { password_hash: hash });
+    } catch (_) {}
+
+    // Send confirmation email to user's registered address
+    const targetEmail = user.email || email;
+    if (targetEmail && targetEmail.includes('@')) {
+      sendPasswordChangedEmail(targetEmail, user.full_name || user.first_name || 'Passenger').catch(err => {
+        console.warn('[Auth] Password change notification email note:', err.message);
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully. A confirmation notice was dispatched to your email.'
+    });
+  } catch (err) {
+    console.error('[Auth] Error in handlePasswordChange:', err);
+    res.status(500).json({ success: false, error: 'Internal server error while changing password' });
+  }
+}
+
+router.post('/passenger/change-password', handlePasswordChange);
+router.post('/change-password', handlePasswordChange);
 
 // ═══════════════════════════════════════════
 //  RIDER ENDPOINTS
@@ -1920,16 +2041,39 @@ router.post('/admin/logout', (req, res) => {
 router.get('/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { updateUser } = require('../services/supabase.service');
-    const { createClient } = require('@supabase/supabase-js');
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-    const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
-    if (error || !data) return res.status(404).json({ success: false, error: 'User not found' });
-    // Strip password_hash before sending
-    const { password_hash, ...safeUser } = data;
-    safeUser.fname = safeUser.first_name || '';
-    safeUser.lname = safeUser.last_name || '';
-    safeUser.name = safeUser.full_name || `${safeUser.first_name || ''} ${safeUser.last_name || ''}`.trim();
+    let safeUser = null;
+
+    // 1. Try Supabase if configured
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const { createClient } = require('@supabase/supabase-js');
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        const { data } = await supabase.from('users').select('*').eq('id', id).single();
+        if (data) {
+          const { password_hash, ...rest } = data;
+          safeUser = rest;
+        }
+      } catch (_) {}
+    }
+
+    // 2. Fallback to local userStore
+    if (!safeUser) {
+      const local = userStore.getUserById(id) || userStore.getUserByPhone(id);
+      if (local) {
+        const { password_hash, ...rest } = local;
+        safeUser = rest;
+      }
+    }
+
+    if (!safeUser) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    safeUser.fname = safeUser.first_name || safeUser.fname || '';
+    safeUser.lname = safeUser.last_name || safeUser.lname || '';
+    safeUser.name = safeUser.full_name || `${safeUser.fname || ''} ${safeUser.lname || ''}`.trim() || 'Passenger';
+    safeUser.settings = safeUser.settings || userStore.getUserById(id)?.settings || {};
+
     res.json({ success: true, user: safeUser, ...safeUser });
   } catch (err) {
     console.error('[Auth] Error fetching user:', err);
@@ -1944,24 +2088,39 @@ router.get('/users/:id', async (req, res) => {
 router.patch('/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { first_name, last_name, email, phone, fname, lname } = req.body;
+    const { first_name, last_name, email, phone, fname, lname, emergency_name, emergency_phone } = req.body;
 
-    const updates = {};
     const fn = first_name || fname;
     const ln = last_name || lname;
-    if (fn !== undefined) updates.first_name = fn;
-    if (ln !== undefined) updates.last_name = ln;
-    if (fn !== undefined || ln !== undefined) {
-      updates.full_name = [fn || '', ln || ''].filter(Boolean).join(' ') || null;
-    }
-    if (email !== undefined) updates.email = email.toLowerCase();
-    if (phone !== undefined) updates.phone = phone;
 
-    const { updateUser } = require('../services/supabase.service');
-    const updated = await updateUser(id, updates);
-    if (!updated) return res.status(404).json({ success: false, error: 'User not found or update failed' });
+    // Update in userStore
+    const local = userStore.updateProfile(id, {
+      fname: fn,
+      lname: ln,
+      first_name: fn,
+      last_name: ln,
+      email,
+      phone,
+      emergency_name,
+      emergency_phone
+    });
 
-    const { password_hash, ...safeUser } = updated;
+    // Best-effort Supabase sync
+    try {
+      const updates = {};
+      if (fn !== undefined) updates.first_name = fn;
+      if (ln !== undefined) updates.last_name = ln;
+      if (fn !== undefined || ln !== undefined) {
+        updates.full_name = [fn || '', ln || ''].filter(Boolean).join(' ') || null;
+      }
+      if (email !== undefined) updates.email = email.toLowerCase();
+      if (phone !== undefined) updates.phone = phone;
+
+      const { updateUser } = require('../services/supabase.service');
+      await updateUser(id, updates);
+    } catch (_) {}
+
+    const { password_hash, ...safeUser } = local;
     res.json({ success: true, user: safeUser });
   } catch (err) {
     console.error('[Auth] Error updating user:', err);

@@ -1,5 +1,27 @@
 [
   {
+    "id": "log_1791859375184_7w2k5",
+    "email": "admin@k3k3.com",
+    "name": "Super Admin",
+    "role": "admin",
+    "action": "LOGIN",
+    "ip": "::1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "details": "2FA OTP verified login",
+    "timestamp": "2026-10-13T02:42:55.184Z"
+  },
+  {
+    "id": "log_1791859336026_ngutu",
+    "email": "support@k3k3.com",
+    "name": "Akua Ofori Ataa Apeakorang",
+    "role": "support",
+    "action": "LOGOUT",
+    "ip": "::1",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+    "details": "Staff member signed out",
+    "timestamp": "2026-10-13T02:42:16.026Z"
+  },
+  {
     "id": "log_1790883070028_v01iu",
     "email": "support@k3k3.com",
     "name": "Akua Ofori Ataa Apeakorang",

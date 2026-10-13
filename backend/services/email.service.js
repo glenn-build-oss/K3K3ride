@@ -103,8 +103,63 @@ async function sendAdminOTP(email, otpCode) {
   return sendEmail(email, subject, htmlContent, textContent);
 }
 
+/**
+ * Send password changed security notification to user's registered email
+ */
+async function sendPasswordChangedEmail(email, userName = 'Passenger') {
+  const subject = 'Security Alert: Your K3K3 Password Has Been Changed';
+  const timestamp = new Date().toUTCString();
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; border: 1px solid #e2e8f0;">
+      <div style="background: #0f172a; padding: 24px; text-align: center; border-bottom: 3px solid #FFD60A;">
+        <h1 style="color: #FFD60A; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">K3K3ride</h1>
+        <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 13px;">Security & Account Protection</p>
+      </div>
+      <div style="padding: 28px 24px; color: #1e293b;">
+        <h2 style="font-size: 18px; color: #0f172a; margin-top: 0;">Password Successfully Updated</h2>
+        <p style="font-size: 14px; line-height: 1.6; color: #475569;">Hello <strong>${userName}</strong>,</p>
+        <p style="font-size: 14px; line-height: 1.6; color: #475569;">
+          This email confirms that the password for your K3K3ride passenger account was recently updated on <strong>${timestamp}</strong>.
+        </p>
+        <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 6px; margin: 20px 0; font-size: 13px; color: #334155;">
+          <strong>Didn't make this change?</strong><br>
+          If you did not authorize this password update, please contact K3K3 security support immediately at support@k3k3ride.com to secure your account.
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 28px; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+          This is an automated security notice. K3K3 will never ask for your password via email or phone.
+        </p>
+      </div>
+    </div>
+  `;
+  const textContent = `Hello ${userName}, this confirms that your K3K3 account password was updated on ${timestamp}. If you did not make this change, contact support@k3k3ride.com immediately.`;
+
+  // Always log to outbox file for audit verification
+  try {
+    const outboxPath = path.join(__dirname, '..', 'data', 'email_outbox.json');
+    let outbox = [];
+    if (fs.existsSync(outboxPath)) {
+      try { outbox = JSON.parse(fs.readFileSync(outboxPath, 'utf8')); } catch (_) {}
+    }
+    outbox.unshift({
+      id: 'eml_' + require('crypto').randomBytes(6).toString('hex'),
+      to: email,
+      subject,
+      type: 'PASSWORD_CHANGED',
+      user_name: userName,
+      timestamp,
+      sent_at: new Date().toISOString()
+    });
+    fs.writeFileSync(outboxPath, JSON.stringify(outbox.slice(0, 100), null, 2), 'utf8');
+  } catch (err) {
+    console.warn('[Email] Outbox log notice:', err.message);
+  }
+
+  return sendEmail(email, subject, htmlContent, textContent);
+}
+
 module.exports = {
   sendEmail,
   sendAdminOTP,
+  sendPasswordChangedEmail,
   initTransporter
 };

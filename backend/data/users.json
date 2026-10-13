@@ -1,0 +1,23 @@
+[
+  {
+    "settings": {
+      "language": "en",
+      "notifRideUpdates": true,
+      "notifDriverAlerts": true,
+      "notifPromotions": false,
+      "privacyLocation": true,
+      "privacyTripHistory": true
+    },
+    "created_at": "2026-10-13T04:00:03.459Z",
+    "updated_at": "2026-10-13T04:00:03.478Z",
+    "id": "user123",
+    "first_name": "Kofi",
+    "last_name": "Mensah",
+    "full_name": "Kofi Mensah",
+    "fname": "Kofi",
+    "lname": "Mensah",
+    "name": "Kofi Mensah",
+    "phone": "0244111222",
+    "email": "kofi@example.com"
+  }
+]
