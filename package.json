@@ -15,5 +15,8 @@
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^9.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0"
   }
 }

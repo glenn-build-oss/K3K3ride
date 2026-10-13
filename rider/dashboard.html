@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>K3K3 — Rider Dashboard</title>
   <meta name="description" content="K3K3 Rider Dashboard. Accept passenger requests and manage your trips.">
   <link rel="icon" type="image/png" href="../assets/k3k3.png">
@@ -3523,12 +3525,23 @@ function connectWS() {
   if (typeof io !== 'undefined') {
     if (wsConn && wsConn.connected) return;
     try {
-      wsConn = io(API_BASE, {
+      const socketTarget = window.K3K3_SOCKET_URL || localStorage.getItem('k3k3_socket_url') || API_BASE;
+      wsConn = io(socketTarget, {
         path: '/socket.io',
         transports: ['websocket', 'polling'],
         reconnection: true,
-        reconnectionAttempts: 25,
-        reconnectionDelay: 1500
+        reconnectionAttempts: 2,
+        reconnectionDelay: 1500,
+        timeout: 5000
+      });
+
+      let _riderSocketWarned = false;
+      wsConn.on('connect_error', () => {
+        if (!_riderSocketWarned) {
+          console.info('[Rider Socket] WebSocket endpoint unavailable on current host. Utilizing HTTP polling dispatch.');
+          _riderSocketWarned = true;
+        }
+        wsConn.disconnect(); // prevent endless 404 retries in console
       });
 
       wsConn.on('connect', () => {

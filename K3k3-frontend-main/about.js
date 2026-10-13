@@ -62,11 +62,15 @@ function addHapticFeedback() {
 // =============================================
 let deferredPrompt = null;
 
-// Clear old service workers that might be blocking
+// Safely check and update active service workers without unhandled rejections
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(r => r.update());
-  });
+    regs.forEach(r => {
+      if (r && typeof r.update === 'function') {
+        r.update().catch(() => {});
+      }
+    });
+  }).catch(() => {});
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -90,17 +94,16 @@ document.addEventListener('DOMContentLoaded', function() {
   initTouchFeedback();
   addHapticFeedback();
   
-  // Register service worker
+  // Register service worker safely
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
+    navigator.serviceWorker.register('/sw.js')
       .then(reg => {
         console.log('[PWA] ✅ Service Worker registered');
-        // Force update check
-        reg.update();
-        
-
+        if (reg && typeof reg.update === 'function') {
+          reg.update().catch(() => {});
+        }
       })
-      .catch(err => console.error('[PWA] ❌ SW failed:', err));
+      .catch(err => console.warn('[PWA] Service Worker registration info:', err.message));
   }
 
   });

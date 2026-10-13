@@ -4540,12 +4540,23 @@ function initAdminSocket(){
   if(adminSocket && adminSocket.connected) return;
 
   try {
-    adminSocket = io(API_BASE, {
+    const socketTarget = window.K3K3_SOCKET_URL || localStorage.getItem('k3k3_socket_url') || API_BASE;
+    adminSocket = io(socketTarget, {
       path: '/socket.io',
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 25,
-      reconnectionDelay: 1500
+      reconnectionAttempts: 2,
+      reconnectionDelay: 1500,
+      timeout: 5000
+    });
+
+    let _adminSocketWarned = false;
+    adminSocket.on('connect_error', () => {
+      if (!_adminSocketWarned) {
+        console.info('[Admin Socket] WebSocket endpoint unavailable on current host. Utilizing HTTP polling.');
+        _adminSocketWarned = true;
+      }
+      adminSocket.disconnect();
     });
 
     adminSocket.on('connect', () => {

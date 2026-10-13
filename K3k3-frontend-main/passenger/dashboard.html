@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Passenger Dashboard — K3K3</title>
   <meta name="description" content="Your K3K3 passenger dashboard. Book rides, track trips, manage your account.">
   <link rel="icon" type="image/png" href="../assets/k3k3.png">
@@ -9363,12 +9365,19 @@
       // Auto-populate pickup with user's current GPS location if known!
       const currentLat = sessionStorage.getItem('k3k3_lat');
       const currentLng = sessionStorage.getItem('k3k3_lng');
+      const savedPickupName = sessionStorage.getItem('k3k3_pickup_name');
       if (currentLat && currentLng) {
-        const nearest = findClosestHoLandmark(parseFloat(currentLat), parseFloat(currentLng));
+        const cLat = parseFloat(currentLat);
+        const cLng = parseFloat(currentLng);
+        let nearest = savedPickupName || _pickupVal;
+        if (!nearest) {
+          nearest = findClosestHoLandmark(cLat, cLng);
+        }
         if (pInp) {
           pInp.value = nearest;
           _pickupVal = nearest;
-          _pickupCoords = [parseFloat(currentLat), parseFloat(currentLng)];
+          _pickupCoords = [cLat, cLng];
+          HO_COORDINATES[nearest] = [cLat, cLng];
           if (pClear) pClear.style.display = 'flex';
         }
       }
@@ -9411,7 +9420,7 @@
 
 
     /* ══════════════════════════════════════════
-       Place Autocomplete — Ho / Volta Region
+       Place Autocomplete — Ho & Ghana Landmarks
     ══════════════════════════════════════════ */
     const HO_PLACES = [
       { name: 'Ho Technical University (HSTU)', area: 'Sokode Estates, Ho', icon: 'fa-graduation-cap', lat: 6.6276, lng: 0.4735, tags: ['htu', 'hstu', 'ho technical', 'technical university', 'sokode university', 'hstu ho'] },
@@ -9453,6 +9462,16 @@
       { name: 'Tsito', area: 'Volta Region', icon: 'fa-map-marker-alt', lat: 6.5700, lng: 0.4400, tags: ['tsito'] },
       { name: 'Ho Tarso Hotel', area: 'Ho, Volta Region', icon: 'fa-hotel', lat: 6.6010, lng: 0.4678, tags: ['tarso hotel', 'hotel tarso'] },
       { name: 'Chances Hotel Ho', area: 'Ho, Volta Region', icon: 'fa-hotel', lat: 6.6008, lng: 0.4672, tags: ['chances', 'chances hotel'] },
+      // Accra & National Expansion Landmarks
+      { name: 'University of Professional Studies, Accra (UPSA)', area: 'Madina / Legon, Greater Accra', icon: 'fa-graduation-cap', lat: 5.6548, lng: -0.1704, tags: ['upsa', 'upsa accra', 'professional studies', 'madina', 'upsa campus', 'upsa gate'] },
+      { name: 'UPSA Hostel / Main Gate', area: 'Madina / UPSA, Greater Accra', icon: 'fa-university', lat: 5.6552, lng: -0.1698, tags: ['upsa gate', 'upsa main gate', 'upsa hostel', 'upsa legon'] },
+      { name: 'University of Ghana (Legon)', area: 'Legon, Greater Accra', icon: 'fa-graduation-cap', lat: 5.6508, lng: -0.1869, tags: ['legon', 'ug', 'university of ghana', 'legon campus'] },
+      { name: 'Legon Hall / Main Gate', area: 'Legon, Greater Accra', icon: 'fa-university', lat: 5.6480, lng: -0.1840, tags: ['legon gate', 'ug gate'] },
+      { name: 'Madina Market / Zongo Junction', area: 'Madina, Greater Accra', icon: 'fa-store', lat: 5.6660, lng: -0.1650, tags: ['madina', 'madina market', 'zongo junction'] },
+      { name: 'Accra Mall', area: 'Tetteh Quarshie, Greater Accra', icon: 'fa-shopping-cart', lat: 5.6225, lng: -0.1770, tags: ['accra mall', 'tetteh quarshie', 'mall'] },
+      { name: 'Kotoka International Airport (ACC)', area: 'Airport Residential, Accra', icon: 'fa-plane-departure', lat: 5.6052, lng: -0.1718, tags: ['airport', 'kia', 'kotoka'] },
+      { name: 'East Legon / American House', area: 'East Legon, Greater Accra', icon: 'fa-building', lat: 5.6400, lng: -0.1500, tags: ['east legon', 'american house'] },
+      { name: 'KNUST Campus', area: 'Kumasi, Ashanti Region', icon: 'fa-graduation-cap', lat: 6.6745, lng: -1.5716, tags: ['knust', 'kumasi university', 'tech campus'] }
     ];
     window.HO_PLACES = HO_PLACES; // expose for booking functions
 
@@ -9557,13 +9576,14 @@
     async function useCurrentLocationForPickup() {
       const pInp = document.getElementById('pickupInput');
       const clearBtn = document.getElementById('pickupClearBtn');
-      showToast('Detecting your GPS location in Ho…', 'info');
+      showToast('Detecting your GPS location…', 'info');
 
       const applyCoords = async (lat, lng) => {
         _pickupCoords = [lat, lng];
         sessionStorage.setItem('k3k3_lat', String(lat));
         sessionStorage.setItem('k3k3_lng', String(lng));
         const placeName = (await reverseGeocodeMapbox(lat, lng)) || findClosestHoLandmark(lat, lng);
+        sessionStorage.setItem('k3k3_pickup_name', placeName);
         if (pInp) pInp.value = placeName;
         _pickupVal = placeName;
         HO_COORDINATES[placeName] = [lat, lng];
@@ -9581,18 +9601,25 @@
         navigator.geolocation.getCurrentPosition(
           pos => applyCoords(pos.coords.latitude, pos.coords.longitude),
           err => {
-            const cachedLat = sessionStorage.getItem('k3k3_lat');
-            const cachedLng = sessionStorage.getItem('k3k3_lng');
-            if (cachedLat && cachedLng) {
-              applyCoords(parseFloat(cachedLat), parseFloat(cachedLng));
-            } else {
-              applyCoords(6.6012, 0.4688);
-            }
+            // Mobile fallback to cellular/Wi-Fi low accuracy
+            navigator.geolocation.getCurrentPosition(
+              posLow => applyCoords(posLow.coords.latitude, posLow.coords.longitude),
+              errLow => {
+                const cachedLat = sessionStorage.getItem('k3k3_lat');
+                const cachedLng = sessionStorage.getItem('k3k3_lng');
+                if (cachedLat && cachedLng) {
+                  applyCoords(parseFloat(cachedLat), parseFloat(cachedLng));
+                } else {
+                  showToast('Unable to detect GPS. Please enter your pickup spot above.', 'info');
+                }
+              },
+              { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
+            );
           },
-          { enableHighAccuracy: true, timeout: 8000 }
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
         );
       } else {
-        applyCoords(6.6012, 0.4688);
+        showToast('Geolocation is not supported by your device.', 'warn');
       }
     }
 
@@ -9604,7 +9631,7 @@
             <div class="place-sugg-icon custom"><i class="fas fa-map-marker-alt"></i></div>
             <div class="place-sugg-text">
               <div class="place-sugg-name">Use "${query.replace(/"/g, '&quot;')}"</div>
-              <div class="place-sugg-area">Custom location in Ho</div>
+              <div class="place-sugg-area">Selected location</div>
             </div>
           </div>
         `;
@@ -9652,8 +9679,25 @@
 
       suggestions.push(...localMatches);
 
-      // Render local matches immediately so the user/UI never lags
+      // Render local matches immediately so UI never lags
       renderSuggestions(box, inpId, suggId, suggestions, query);
+
+      // Calculate proximity dynamically: if searching drop-off, bias around pickup coordinates;
+      // if searching pickup, bias around current GPS position!
+      let proxLng = 0.4688;
+      let proxLat = 6.6012;
+      if (_pickupCoords && Array.isArray(_pickupCoords) && _pickupCoords.length >= 2) {
+        proxLat = _pickupCoords[0];
+        proxLng = _pickupCoords[1];
+      } else {
+        const cLat = parseFloat(sessionStorage.getItem('k3k3_lat'));
+        const cLng = parseFloat(sessionStorage.getItem('k3k3_lng'));
+        if (!isNaN(cLat) && !isNaN(cLng)) {
+          proxLat = cLat;
+          proxLng = cLng;
+        }
+      }
+      const proximity = `${proxLng},${proxLat}`;
 
       // 2. Fetch Mapbox Token dynamically in background if not ready
       if (!_modalMapboxToken) {
@@ -9661,10 +9705,9 @@
       }
       const token = (_modalMapboxToken || window.MAPBOX_PUBLIC_TOKEN || '').trim();
 
-      // 3. Dynamic Mapbox Places Geocoding API
+      // 3. Dynamic Mapbox Places Geocoding API with location-aware proximity
       if (token && token.startsWith('pk.') && query.length >= 2) {
         try {
-          const proximity = '0.4688,6.6012'; // Ho Central
           const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&country=GH&proximity=${proximity}&types=poi,address,neighborhood,locality,place&limit=6`;
           const ctrl = new AbortController();
           const tId = setTimeout(() => ctrl.abort(), 3500);
@@ -9676,8 +9719,8 @@
               let addedNew = false;
               data.features.forEach(f => {
                 const name = f.text || f.place_name.split(',')[0];
-                const area = f.place_name || 'Ho, Volta Region';
-                const [lng, lat] = f.center || [0.4688, 6.6012];
+                const area = f.place_name || 'Ghana';
+                const [lng, lat] = f.center || [proxLng, proxLat];
                 if (!suggestions.some(s => s.name.toLowerCase() === name.toLowerCase())) {
                   suggestions.push({
                     name,
@@ -9691,6 +9734,47 @@
                 }
               });
               if (addedNew) {
+                renderSuggestions(box, inpId, suggId, suggestions, query);
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      // 4. OpenStreetMap Nominatim search fallback (covers entire Ghana including UPSA, Accra, etc.)
+      if (query.length >= 2 && suggestions.length < 5) {
+        try {
+          const viewbox = `${proxLng - 0.5},${proxLat + 0.5},${proxLng + 0.5},${proxLat - 0.5}`;
+          const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=gh&q=${encodeURIComponent(query)}&limit=6&viewbox=${viewbox}&bounded=0`;
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 3500);
+          const res = await fetch(nomUrl, {
+            signal: ctrl.signal,
+            headers: { 'Accept': 'application/json' }
+          });
+          clearTimeout(tId);
+          if (res.ok) {
+            const items = await res.json();
+            if (Array.isArray(items) && items.length > 0) {
+              let addedNom = false;
+              items.forEach(item => {
+                const name = item.display_name.split(',')[0].trim();
+                const area = item.display_name.split(',').slice(1, 3).join(', ').trim() || 'Ghana';
+                const itemLat = parseFloat(item.lat);
+                const itemLng = parseFloat(item.lon);
+                if (!suggestions.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+                  suggestions.push({
+                    name,
+                    area,
+                    icon: 'fa-location-dot',
+                    lat: itemLat,
+                    lng: itemLng,
+                    source: 'nominatim'
+                  });
+                  addedNom = true;
+                }
+              });
+              if (addedNom) {
                 renderSuggestions(box, inpId, suggId, suggestions, query);
               }
             }
@@ -9837,7 +9921,21 @@
       'Lokoe': [6.5890, 0.4580],
       'Mirage': [6.6025, 0.4670],
       'Chances Hotel Ho': [6.6008, 0.4672],
-      'Ho Tarso Hotel': [6.6010, 0.4678]
+      'Ho Tarso Hotel': [6.6010, 0.4678],
+      // Ghana & Accra Landmarks
+      'University of Professional Studies, Accra (UPSA)': [5.6548, -0.1704],
+      'UPSA': [5.6548, -0.1704],
+      'UPSA Hostel / Main Gate': [5.6552, -0.1698],
+      'University of Ghana (Legon)': [5.6508, -0.1869],
+      'Legon': [5.6508, -0.1869],
+      'Legon Hall / Main Gate': [5.6480, -0.1840],
+      'Madina Market / Zongo Junction': [5.6660, -0.1650],
+      'Madina': [5.6660, -0.1650],
+      'Accra Mall': [5.6225, -0.1770],
+      'Kotoka International Airport (ACC)': [5.6052, -0.1718],
+      'Airport Residential': [5.6052, -0.1718],
+      'East Legon / American House': [5.6400, -0.1500],
+      'KNUST Campus': [6.6745, -1.5716]
     };
     window.HO_COORDINATES = HO_COORDINATES;
 
@@ -9956,6 +10054,24 @@
           }
         } catch (_) {}
       }
+
+      // Nominatim reverse geocode fallback
+      try {
+        const ctrl = new AbortController();
+        const tId = setTimeout(() => ctrl.abort(), 3000);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+          signal: ctrl.signal,
+          headers: { 'Accept': 'application/json' }
+        });
+        clearTimeout(tId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.display_name) {
+            return data.display_name.split(',').slice(0, 2).join(', ').trim();
+          }
+        }
+      } catch (_) {}
+
       return findClosestHoLandmark(lat, lng);
     }
 
@@ -10105,10 +10221,37 @@
     }
 
     function findClosestHoLandmark(lat, lng) {
+      if (!lat || !lng || isNaN(lat) || isNaN(lng)) return 'Ho Central Market';
+      // Distance from Ho Central (lat: 6.6012, lng: 0.4688)
+      const dLatHo = (lat - 6.6012) * 111;
+      const dLngHo = (lng - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
+      const distFromHo = Math.sqrt(dLatHo * dLatHo + dLngHo * dLngHo);
+
+      // If user is outside Ho (e.g. Accra, Kumasi, UPSA, etc.)
+      if (distFromHo > 35) {
+        let closestOutside = null;
+        let minDistOutside = Infinity;
+        for (const [name, coords] of Object.entries(HO_COORDINATES)) {
+          const dL = (coords[0] - lat) * 111;
+          const dG = (coords[1] - lng) * 111 * Math.cos(lat * Math.PI / 180);
+          const d = Math.sqrt(dL * dL + dG * dG);
+          if (d < minDistOutside) {
+            minDistOutside = d;
+            closestOutside = name;
+          }
+        }
+        // If within 8km of a recognized regional landmark (e.g. UPSA in Accra), return that landmark!
+        if (closestOutside && minDistOutside <= 8.0) {
+          return closestOutside;
+        }
+        // Otherwise return GPS coordinates label — NEVER claim an Accra user is in UHAS or Ho!
+        return `Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      }
+
       let closest = 'Ho Central Market';
       let minDist = Infinity;
-
       for (const [name, coords] of Object.entries(HO_COORDINATES)) {
+        if (coords[0] < 6.4 || coords[0] > 6.8 || coords[1] < 0.2 || coords[1] > 0.7) continue;
         const dLat = coords[0] - lat;
         const dLng = coords[1] - lng;
         const dist = dLat * dLat + dLng * dLng;
@@ -10907,6 +11050,7 @@
 
         // Resolve real street or landmark address
         const resolvedName = await resolvePassengerAddress(lat, lng);
+        sessionStorage.setItem('k3k3_pickup_name', resolvedName);
         _pickupVal = resolvedName;
         _pickupCoords = [lat, lng];
         HO_COORDINATES[resolvedName] = [lat, lng];
@@ -10941,27 +11085,31 @@
         showToast(`Location detected: Pickup set to ${resolvedName}!`, 'success');
       };
 
-      // Two-stage Geolocation: High accuracy first, then standard/cellular fallback
+      // Resilient Mobile & Desktop Geolocation
+      // Mobile devices need adequate timeout for OS permission dialog & GNSS satellite lock.
       navigator.geolocation.getCurrentPosition(
         onLocationSuccess,
         (errHigh) => {
           console.warn('[Geolocation Stage 1 High-Accuracy notice]', errHigh.message);
+          if (errHigh.code === 1 /* PERMISSION_DENIED */) {
+            sessionStorage.setItem('k3k3_loc_granted', '0');
+            dismissLocationPrompt();
+            showToast('Location permission was denied. You can search or select your pickup location manually.', 'info');
+            return;
+          }
+          // Mobile fallback: cellular/Wi-Fi positioning (enableHighAccuracy: false)
           navigator.geolocation.getCurrentPosition(
             onLocationSuccess,
             (errLow) => {
               console.warn('[Geolocation Stage 2 Low-Accuracy notice]', errLow.message);
-              const fallbackLat = parseFloat(sessionStorage.getItem('k3k3_lat') || localStorage.getItem('k3k3_lat') || '6.6012');
-              const fallbackLng = parseFloat(sessionStorage.getItem('k3k3_lng') || localStorage.getItem('k3k3_lng') || '0.4688');
-              sessionStorage.setItem('k3k3_lat', fallbackLat);
-              sessionStorage.setItem('k3k3_lng', fallbackLng);
-              sessionStorage.setItem('k3k3_loc_granted', '1');
+              sessionStorage.setItem('k3k3_loc_granted', '0');
               dismissLocationPrompt();
-              showToast('Location permission unavailable. You can easily choose any pickup location in Ho.', 'info');
+              showToast('Location signal was weak. You can easily search and select your pickup spot above.', 'info');
             },
-            { enableHighAccuracy: false, timeout: 9000, maximumAge: 120000 }
+            { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
           );
         },
-        { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
       );
     }
 
@@ -11063,12 +11211,23 @@
       if (passengerSocket && passengerSocket.connected) return;
 
       try {
-        passengerSocket = io(API_BASE, {
+        const socketTarget = window.K3K3_SOCKET_URL || localStorage.getItem('k3k3_socket_url') || API_BASE;
+        passengerSocket = io(socketTarget, {
           path: '/socket.io',
           transports: ['websocket', 'polling'],
           reconnection: true,
-          reconnectionAttempts: 20,
-          reconnectionDelay: 1500
+          reconnectionAttempts: 2,
+          reconnectionDelay: 1500,
+          timeout: 5000
+        });
+
+        let _passengerSocketWarned = false;
+        passengerSocket.on('connect_error', () => {
+          if (!_passengerSocketWarned) {
+            console.info('[Passenger Socket] Realtime server unavailable on this host. Gracefully utilizing HTTP polling dispatch.');
+            _passengerSocketWarned = true;
+          }
+          passengerSocket.disconnect(); // cease continuous 404 attempts
         });
 
         passengerSocket.on('connect', () => {
