@@ -5201,7 +5201,7 @@
     .location-card-topbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       margin-bottom: 10px;
     }
     .loc-brand-badge {
@@ -6295,7 +6295,7 @@
       <div class="home-hero">
         <div class="hero-inner">
           <div class="hero-left">
-            <div class="hero-greeting" id="heroGreeting">GOOD DAY</div>
+            <div class="hero-greeting" id="heroGreeting">HELLO</div>
             <h1 class="hero-title">
               Book your ride,<br><span id="heroName">there</span>!
             </h1>
@@ -6819,20 +6819,20 @@
           <i class="fas fa-arrow-left"></i>
         </button>
         <div class="page-header-info">
-          <h2>Settings</h2>
-          <p>App preferences and language</p>
+          <h2 data-i18n="settings">Settings</h2>
+          <p data-i18n="settings_sub">App preferences and language</p>
         </div>
       </div>
       <div class="settings-layout">
         <!-- Language -->
         <div class="settings-block">
           <div class="settings-block-header"><i class="fas fa-globe"></i>
-            <h3>Language</h3>
+            <h3 data-i18n="language">Language</h3>
           </div>
           <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:12px">
             <div class="settings-row-info">
-              <div class="settings-row-label">Preferred Language</div>
-              <div class="settings-row-desc">Changes apply to the entire app</div>
+              <div class="settings-row-label" data-i18n="preferred_lang">Preferred Language</div>
+              <div class="settings-row-desc" data-i18n="lang_desc">Changes apply to the entire app</div>
             </div>
             <div class="lang-options">
               <div class="lang-option selected" data-lang="en" onclick="selectLang(this)">🇬🇧 English</div>
@@ -6840,7 +6840,7 @@
               <div class="lang-option" data-lang="ewe" onclick="selectLang(this)">🇬🇭 Ewe</div>
               <div class="lang-option" data-lang="twi" onclick="selectLang(this)">🇬🇭 Twi</div>
             </div>
-            <button onclick="applyLanguage()"
+            <button onclick="applyLanguage()" data-i18n="apply_lang"
               style="padding:10px 22px;background:var(--yellow);color:var(--black);border:none;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,214,10,.3)">
               <i class="fas fa-check"></i> Apply Changes
             </button>
@@ -6849,12 +6849,12 @@
         <!-- Notifications -->
         <div class="settings-block">
           <div class="settings-block-header"><i class="fas fa-bell"></i>
-            <h3>Notification Preferences</h3>
+            <h3 data-i18n="notif_prefs">Notification Preferences</h3>
           </div>
           <div class="settings-row">
             <div class="settings-row-info">
-              <div class="settings-row-label">Ride updates</div>
-              <div class="settings-row-desc">Booking confirmations and ride status</div>
+              <div class="settings-row-label" data-i18n="ride_updates">Ride updates</div>
+              <div class="settings-row-desc" data-i18n="booking_conf">Booking confirmations and ride status</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggleRideUpdates" checked
@@ -6864,8 +6864,8 @@
           </div>
           <div class="settings-row">
             <div class="settings-row-info">
-              <div class="settings-row-label">Driver arrival alerts</div>
-              <div class="settings-row-desc">Get notified when your driver is close</div>
+              <div class="settings-row-label" data-i18n="driver_alerts">Driver arrival alerts</div>
+              <div class="settings-row-desc" data-i18n="driver_alerts_sub">Get notified when your driver is close</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggleDriverAlerts" checked
@@ -6875,8 +6875,8 @@
           </div>
           <div class="settings-row">
             <div class="settings-row-info">
-              <div class="settings-row-label">Promotions &amp; offers</div>
-              <div class="settings-row-desc">Special deals and discount codes</div>
+              <div class="settings-row-label" data-i18n="promotions">Promotions &amp; offers</div>
+              <div class="settings-row-desc" data-i18n="promotions_sub">Special deals and discount codes</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="togglePromotions" onchange="saveSetting('notifPromotions',this.checked)">
@@ -6887,12 +6887,12 @@
         <!-- Privacy -->
         <div class="settings-block">
           <div class="settings-block-header"><i class="fas fa-shield-halved"></i>
-            <h3>Privacy Settings</h3>
+            <h3 data-i18n="privacy">Privacy Settings</h3>
           </div>
           <div class="settings-row">
             <div class="settings-row-info">
-              <div class="settings-row-label">Share location with driver</div>
-              <div class="settings-row-desc">Required for accurate pickup</div>
+              <div class="settings-row-label" data-i18n="share_loc">Share location with driver</div>
+              <div class="settings-row-desc" data-i18n="share_loc_sub">Required for accurate pickup</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggleLocation" checked onchange="saveSetting('privacyLocation',this.checked)">
@@ -6901,8 +6901,8 @@
           </div>
           <div class="settings-row">
             <div class="settings-row-info">
-              <div class="settings-row-label">Save trip history</div>
-              <div class="settings-row-desc">Keep a record of your past rides</div>
+              <div class="settings-row-label" data-i18n="trip_history">Save trip history</div>
+              <div class="settings-row-desc" data-i18n="trip_history_sub">Keep a record of your past rides</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggleTripHistory" checked
@@ -6914,15 +6914,15 @@
         <!-- Password -->
         <div class="settings-block">
           <div class="settings-block-header"><i class="fas fa-lock"></i>
-            <h3>Change Password</h3>
+            <h3 data-i18n="update_password">Change Password</h3>
           </div>
           <div style="padding:18px">
             <div class="form-field">
-              <label class="form-label" for="pwdCurrent">Current Password</label>
+              <label class="form-label" for="pwdCurrent" data-i18n="current_password">Current Password</label>
               <input type="password" class="form-input" id="pwdCurrent" placeholder="Enter current password">
             </div>
             <div class="form-field">
-              <label class="form-label" for="pwdNew">New Password</label>
+              <label class="form-label" for="pwdNew" data-i18n="new_password">New Password</label>
               <input type="password" class="form-input" id="pwdNew" placeholder="At least 8 characters"
                 oninput="checkPwdStrength(this.value)">
               <div class="pwd-strength">
@@ -6931,10 +6931,10 @@
               <div class="form-hint" id="pwdHint"></div>
             </div>
             <div class="form-field">
-              <label class="form-label" for="pwdConfirm">Confirm Password</label>
+              <label class="form-label" for="pwdConfirm" data-i18n="confirm_password">Confirm Password</label>
               <input type="password" class="form-input" id="pwdConfirm" placeholder="Repeat new password">
             </div>
-            <button class="form-save-btn" onclick="changePassword()">
+            <button class="form-save-btn" onclick="changePassword()" data-i18n="update_password">
               <i class="fas fa-key"></i> Update Password
             </button>
           </div>
@@ -7331,7 +7331,7 @@
               <input type="text"
                      id="pickupInput"
                      class="route-text-input"
-                     placeholder="Enter pickup spot in Ho (or use GPS)"
+                     placeholder="Enter pickup spot in Ghana (or use GPS)"
                      autocomplete="off"
                      spellcheck="false"
                      oninput="handleLocationInput('pickup')"
@@ -7367,7 +7367,7 @@
               <input type="text"
                      id="destInput"
                      class="route-text-input"
-                     placeholder="Where to? Type any destination in Ho"
+                     placeholder="Where to? Type any destination in Ghana"
                      autocomplete="off"
                      spellcheck="false"
                      oninput="handleLocationInput('dest')"
@@ -7939,11 +7939,6 @@
   <div class="location-prompt-modal-backdrop" id="enableLocationModal" style="display:none" onclick="if(event.target===this)dismissLocationPrompt()">
     <div class="location-prompt-card">
       <div class="location-card-topbar">
-        <div class="loc-brand-badge">
-          <i class="fas fa-motorcycle"></i>
-          <span>K3K3 Transit</span>
-          <span style="opacity:0.6;font-size:0.7rem">• Ho Region</span>
-        </div>
         <button type="button" class="loc-close-btn" onclick="dismissLocationPrompt()" aria-label="Dismiss">
           <i class="fas fa-times"></i>
         </button>
@@ -7989,6 +7984,18 @@
         <button class="btn-location-dismiss" id="btnLocationDismiss" type="button" onclick="dismissLocationPrompt()">
           <i class="fas fa-map-pin"></i> Set Pickup Location Manually
         </button>
+      </div>
+
+      <div class="location-quick-pickups" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);text-align:left">
+        <div style="font-size:0.73rem;color:#94A3B8;margin-bottom:7px;font-weight:600;display:flex;align-items:center;gap:5px">
+          <i class="fas fa-compass" style="color:#FFD60A;font-size:0.8rem"></i> Or pick a popular Ho pickup spot:
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button type="button" onclick="selectHoPickupDirect('Ho Central Market')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">📍 Central Market</button>
+          <button type="button" onclick="selectHoPickupDirect('HSTU Main Gate')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🏛️ HTU Gate</button>
+          <button type="button" onclick="selectHoPickupDirect('Ho Teaching Hospital')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🏥 Trafalgar</button>
+          <button type="button" onclick="selectHoPickupDirect('UHAS Campus')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🎓 UHAS</button>
+        </div>
       </div>
 
       <div class="location-prompt-footer">
@@ -8248,9 +8255,9 @@
         nav_support: 'Support', nav_settings: 'Settings',
         nav_apply: 'Apply as Rider', nav_logout: 'Logout',
         /* Home */
-        hero_greeting_morning: 'GOOD MORNING',
-        hero_greeting_afternoon: 'GOOD AFTERNOON',
-        hero_greeting_evening: 'GOOD EVENING',
+        hero_greeting_morning: 'HELLO',
+        hero_greeting_afternoon: 'HELLO',
+        hero_greeting_evening: 'HELLO',
         hero_subtitle: 'Fast, safe & affordable keke rides.',
         search_placeholder: 'Where to?',
         book_ride: 'Book your Ride',
@@ -8271,6 +8278,9 @@
         emergency_name: 'Contact Name', emergency_phone: 'Contact Phone',
         /* Settings */
         settings: 'Settings',
+        settings_sub: 'App preferences and language',
+        preferred_lang: 'Preferred Language',
+        lang_desc: 'Changes apply to the entire app',
         language: 'Preferred Language', apply_lang: 'Apply Changes',
         notif_prefs: 'Notification Preferences',
         ride_updates: 'Ride updates', booking_conf: 'Booking confirmations and ride status',
@@ -8531,7 +8541,7 @@
       const h = new Date().getHours();
       const key = h < 12 ? 'hero_greeting_morning' : h < 17 ? 'hero_greeting_afternoon' : 'hero_greeting_evening';
       const el = document.getElementById('heroGreeting');
-      if (el) el.textContent = t(key);
+      if (el) el.textContent = t(key) || 'HELLO';
     }
 
     /* ══════════════════════════════════════════
@@ -8939,15 +8949,15 @@
       document.querySelectorAll('.lang-option').forEach(el => {
         el.classList.toggle('selected', el.dataset.lang === savedLang);
       });
-      const getBool = k => {
+      const getBool = (k, defVal = true) => {
         const v = sessionStorage.getItem('k3k3_' + k) ?? localStorage.getItem('k3k3_' + k);
-        return v === null ? true : v === 'true';
+        return v === null ? defVal : v === 'true';
       };
-      setToggle('toggleRideUpdates', getBool('notifRideUpdates'));
-      setToggle('toggleDriverAlerts', getBool('notifDriverAlerts'));
-      setToggle('togglePromotions', getBool('notifPromotions'));
-      setToggle('toggleLocation', getBool('privacyLocation'));
-      setToggle('toggleTripHistory', getBool('privacyTripHistory'));
+      setToggle('toggleRideUpdates', getBool('notifRideUpdates', true));
+      setToggle('toggleDriverAlerts', getBool('notifDriverAlerts', true));
+      setToggle('togglePromotions', getBool('notifPromotions', false));
+      setToggle('toggleLocation', getBool('privacyLocation', true));
+      setToggle('toggleTripHistory', getBool('privacyTripHistory', true));
 
       const userId = getUserId();
       if (userId) {
@@ -8966,41 +8976,32 @@
                   el.classList.toggle('selected', el.dataset.lang === s.language);
                 });
               }
-              if (s.notif_ride_updates !== undefined) {
-                setToggle('toggleRideUpdates', s.notif_ride_updates);
-                sessionStorage.setItem('k3k3_notifRideUpdates', s.notif_ride_updates);
-                localStorage.setItem('k3k3_notifRideUpdates', s.notif_ride_updates);
-              }
-              if (s.notif_driver_alerts !== undefined) {
-                setToggle('toggleDriverAlerts', s.notif_driver_alerts);
-                sessionStorage.setItem('k3k3_notifDriverAlerts', s.notif_driver_alerts);
-                localStorage.setItem('k3k3_notifDriverAlerts', s.notif_driver_alerts);
-              }
-              if (s.notif_promotions !== undefined) {
-                setToggle('togglePromotions', s.notif_promotions);
-                sessionStorage.setItem('k3k3_notifPromotions', s.notif_promotions);
-                localStorage.setItem('k3k3_notifPromotions', s.notif_promotions);
-              }
-              if (s.privacy_location !== undefined) {
-                setToggle('toggleLocation', s.privacy_location);
-                sessionStorage.setItem('k3k3_privacyLocation', s.privacy_location);
-                localStorage.setItem('k3k3_privacyLocation', s.privacy_location);
-              }
-              if (s.privacy_trip_history !== undefined) {
-                setToggle('toggleTripHistory', s.privacy_trip_history);
-                sessionStorage.setItem('k3k3_privacyTripHistory', s.privacy_trip_history);
-                localStorage.setItem('k3k3_privacyTripHistory', s.privacy_trip_history);
-              }
+              const applyVal = (key, toggleId, defVal) => {
+                const camel = key;
+                const snake = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+                const val = s[camel] !== undefined ? s[camel] : (s[snake] !== undefined ? s[snake] : defVal);
+                if (val !== undefined) {
+                  const b = val === true || val === 'true';
+                  setToggle(toggleId, b);
+                  sessionStorage.setItem('k3k3_' + key, String(b));
+                  localStorage.setItem('k3k3_' + key, String(b));
+                }
+              };
+              applyVal('notifRideUpdates', 'toggleRideUpdates', true);
+              applyVal('notifDriverAlerts', 'toggleDriverAlerts', true);
+              applyVal('notifPromotions', 'togglePromotions', false);
+              applyVal('privacyLocation', 'toggleLocation', true);
+              applyVal('privacyTripHistory', 'toggleTripHistory', true);
             }
           }
         } catch (_) {}
       }
     }
-    function setToggle(id, val) { const el = document.getElementById(id); if (el) el.checked = val; }
+    function setToggle(id, val) { const el = document.getElementById(id); if (el) el.checked = Boolean(val); }
 
     async function saveSetting(key, value) {
-      sessionStorage.setItem('k3k3_' + key, value);
-      localStorage.setItem('k3k3_' + key, value);
+      sessionStorage.setItem('k3k3_' + key, String(value));
+      localStorage.setItem('k3k3_' + key, String(value));
 
       const userId = getUserId();
       if (userId) {
@@ -9008,7 +9009,7 @@
           fetch(`${API}/auth/passenger/settings`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, [key]: value })
+            body: JSON.stringify({ userId, settings: { [key]: value }, [key]: value })
           }).catch(() => {});
         } catch (_) {}
       }
@@ -9029,7 +9030,7 @@
         }
       }
       if (key === 'notifRideUpdates' || key === 'notifDriverAlerts') renderNotifications();
-      showToast('Setting saved', 'success');
+      showToast('Setting saved ✓', 'success');
     }
 
     /* ─── Language ─── */
@@ -9050,7 +9051,7 @@
           fetch(`${API}/auth/passenger/settings`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, language: currentLang })
+            body: JSON.stringify({ userId, settings: { language: currentLang }, language: currentLang })
           }).catch(() => {});
         } catch (_) {}
       }
@@ -9422,7 +9423,8 @@
     /* ══════════════════════════════════════════
        Place Autocomplete — Ho & Ghana Landmarks
     ══════════════════════════════════════════ */
-    const HO_PLACES = [
+    const GHANA_PLACES = [
+      // ══════ HO & VOLTA REGION ══════
       { name: 'Ho Technical University (HSTU)', area: 'Sokode Estates, Ho', icon: 'fa-graduation-cap', lat: 6.6276, lng: 0.4735, tags: ['htu', 'hstu', 'ho technical', 'technical university', 'sokode university', 'hstu ho'] },
       { name: 'HSTU Main Gate', area: 'Sokode, Ho', icon: 'fa-university', lat: 6.6280, lng: 0.4730, tags: ['hstu gate', 'technical gate', 'main gate sokode', 'htu gate', 'technical main'] },
       { name: 'HSTU Engineering Block', area: 'Ho Technical University, Sokode', icon: 'fa-cogs', lat: 6.6275, lng: 0.4738, tags: ['engineering hstu', 'hstu engineering', 'technical engineering block'] },
@@ -9432,48 +9434,103 @@
       { name: 'Sokode Estates', area: 'Sokode, Ho', icon: 'fa-home', lat: 6.6258, lng: 0.4710, tags: ['sokode estates', 'estates sokode', 'sokode residential'] },
       { name: 'Sokode Market', area: 'Sokode, Ho', icon: 'fa-shopping-basket', lat: 6.6260, lng: 0.4715, tags: ['sokode market', 'market sokode'] },
       { name: 'Ho Central Market', area: 'Ho Central, Ho', icon: 'fa-store', lat: 6.6018, lng: 0.4685, tags: ['market', 'ho market', 'central market', 'main market'] },
-      { name: 'Ho Bus Terminal', area: 'Ho Central, Ho', icon: 'fa-bus', lat: 6.6010, lng: 0.4670, tags: ['bus', 'terminal', 'bus terminal', 'ho bus', 'transport terminal'] },
+      { name: 'Ho Bus Terminal', area: 'Ho Central, Ho', icon: 'fa-bus', lat: 6.6010, lng: 0.4670, tags: ['bus', 'terminal', 'bus terminal', 'ho bus', 'transport terminal', 'station'] },
       { name: 'Ho Town Centre', area: 'Ho, Volta Region', icon: 'fa-city', lat: 6.6005, lng: 0.4680, tags: ['town centre', 'ho central', 'town center', 'ho town'] },
       { name: 'Ho Post Office', area: 'Ho Central, Ho', icon: 'fa-envelope', lat: 6.6012, lng: 0.4688, tags: ['post office', 'ho post', 'post'] },
       { name: 'Ho Police Station', area: 'Ho Central, Ho', icon: 'fa-shield-alt', lat: 6.6020, lng: 0.4692, tags: ['police', 'police station', 'ho police'] },
-      { name: 'Ho Teaching Hospital', area: 'Ho, Volta Region', icon: 'fa-hospital', lat: 6.6050, lng: 0.4700, tags: ['teaching hospital', 'ho hospital', 'hospital teaching'] },
+      { name: 'Ho Teaching Hospital (Trafalgar)', area: 'Ho, Volta Region', icon: 'fa-hospital', lat: 6.6050, lng: 0.4700, tags: ['teaching hospital', 'ho hospital', 'hospital teaching', 'trafalgar'] },
       { name: 'Volta Regional Hospital', area: 'Ho, Volta Region', icon: 'fa-clinic-medical', lat: 6.6055, lng: 0.4705, tags: ['regional hospital', 'volta hospital', 'regional volta hospital'] },
       { name: 'Ho Municipal Hospital', area: 'Ho, Volta Region', icon: 'fa-hospital-alt', lat: 6.6048, lng: 0.4698, tags: ['municipal hospital', 'ho municipal', 'clinic municipal'] },
       { name: 'Ho Polytechnic', area: 'Ho, Volta Region', icon: 'fa-graduation-cap', lat: 6.6080, lng: 0.4650, tags: ['polytechnic', 'ho poly', 'polytechnic ho'] },
-      { name: 'University of Health & Allied Sciences (UHAS)', area: 'Ho, Volta Region', icon: 'fa-university', lat: 6.6090, lng: 0.4660, tags: ['uhas', 'health allied sciences', 'university ho'] },
+      { name: 'University of Health & Allied Sciences (UHAS)', area: 'Ho, Volta Region', icon: 'fa-university', lat: 6.6090, lng: 0.4660, tags: ['uhas', 'health allied sciences', 'university ho', 'uhas campus', 'cedi auditorium'] },
+      { name: 'Cedi Auditorium (UHAS)', area: 'UHAS Main Campus, Ho', icon: 'fa-landmark', lat: 6.6090, lng: 0.4660, tags: ['cedi auditorium', 'uhas hall', 'auditorium'] },
       { name: 'Ho Senior High School (Ho SHS)', area: 'Ho, Volta Region', icon: 'fa-school', lat: 6.6035, lng: 0.4710, tags: ['ho shs', 'senior high', 'shs', 'high school', 'hoshs'] },
       { name: 'Mawuli School', area: 'Ho, Volta Region', icon: 'fa-school', lat: 6.6030, lng: 0.4705, tags: ['mawuli', 'mawuli school', 'secondary mawuli'] },
       { name: 'Volta Regional Coordinating Council', area: 'Ho, Volta Region', icon: 'fa-landmark', lat: 6.6025, lng: 0.4695, tags: ['regional council', 'volta council', 'government ho'] },
       { name: 'Ho Municipal Assembly', area: 'Ho, Volta Region', icon: 'fa-building', lat: 6.6022, lng: 0.4690, tags: ['municipal assembly', 'assembly ho', 'district assembly'] },
-      { name: 'DVLA Ho', area: 'Ho, Volta Region', icon: 'fa-car', lat: 6.6040, lng: 0.4720, tags: ['dvla', 'vehicle licensing', 'dvla ho'] },
-      { name: 'GCB Bank Ho', area: 'Ho Central, Ho', icon: 'fa-university', lat: 6.6015, lng: 0.4683, tags: ['gcb', 'gcb bank', 'bank ho'] },
-      { name: 'Ecobank Ho', area: 'Ho Central, Ho', icon: 'fa-credit-card', lat: 6.6017, lng: 0.4687, tags: ['ecobank', 'eco bank', 'ecobank ho'] },
-      { name: 'Fidelity Bank Ho', area: 'Ho Central, Ho', icon: 'fa-piggy-bank', lat: 6.6016, lng: 0.4685, tags: ['fidelity', 'fidelity bank', 'fidelity ho'] },
       { name: 'Ho Jubilee Park', area: 'Ho, Volta Region', icon: 'fa-tree', lat: 6.6000, lng: 0.4660, tags: ['jubilee park', 'park ho', 'jubilee'] },
-      { name: 'Ho Cultural Centre', area: 'Ho, Volta Region', icon: 'fa-theater-masks', lat: 6.6008, lng: 0.4675, tags: ['cultural centre', 'cultural center', 'culture ho'] },
-      { name: 'Dome Area', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.6100, lng: 0.4720, tags: ['dome', 'dome ho', 'dome area'] },
-      { name: 'Kpehe', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.5980, lng: 0.4640, tags: ['kpehe', 'kpehe ho'] },
+      { name: 'Ho Sports Stadium', area: 'Ho, Volta Region', icon: 'fa-futbol', lat: 6.6040, lng: 0.4665, tags: ['stadium', 'ho stadium', 'sports'] },
+      { name: 'Dome Area', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.6100, lng: 0.4720, tags: ['dome', 'dome ho'] },
+      { name: 'Kpehe', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.5980, lng: 0.4640, tags: ['kpehe'] },
       { name: 'Bankoe', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.6130, lng: 0.4760, tags: ['bankoe'] },
       { name: 'Ahoe', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.6070, lng: 0.4730, tags: ['ahoe'] },
-      { name: 'Shiakobu', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.5950, lng: 0.4620, tags: ['shiakobu'] },
       { name: 'Fiave', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.6150, lng: 0.4780, tags: ['fiave'] },
       { name: 'Agorve', area: 'Ho, Volta Region', icon: 'fa-map-pin', lat: 6.6120, lng: 0.4750, tags: ['agorve'] },
-      { name: 'Adaklu', area: 'Near Ho, Volta Region', icon: 'fa-mountain', lat: 6.5800, lng: 0.4500, tags: ['adaklu'] },
-      { name: 'Tsito', area: 'Volta Region', icon: 'fa-map-marker-alt', lat: 6.5700, lng: 0.4400, tags: ['tsito'] },
-      { name: 'Ho Tarso Hotel', area: 'Ho, Volta Region', icon: 'fa-hotel', lat: 6.6010, lng: 0.4678, tags: ['tarso hotel', 'hotel tarso'] },
-      { name: 'Chances Hotel Ho', area: 'Ho, Volta Region', icon: 'fa-hotel', lat: 6.6008, lng: 0.4672, tags: ['chances', 'chances hotel'] },
-      // Accra & National Expansion Landmarks
+      { name: 'Hohoe Central Market', area: 'Hohoe, Volta Region', icon: 'fa-store', lat: 7.1510, lng: 0.4730, tags: ['hohoe', 'hohoe market', 'volta north'] },
+      { name: 'Aflao Border', area: 'Aflao, Volta Region', icon: 'fa-passport', lat: 6.1190, lng: 1.1900, tags: ['aflao', 'togo border', 'customs aflao'] },
+      { name: 'Keta Beach / Fort Prinzenstein', area: 'Keta, Volta Region', icon: 'fa-water', lat: 5.9220, lng: 0.9930, tags: ['keta', 'keta lagoon', 'fort prinzenstein'] },
+      { name: 'Sogakope Bridge / Resort', area: 'Sogakope, South Tongu', icon: 'fa-bridge', lat: 6.0020, lng: 0.5980, tags: ['sogakope', 'lower volta', 'sogakope bridge', 'holy trinity'] },
+
+      // ══════ GREATER ACCRA REGION ══════
+      { name: 'Accra Mall', area: 'Tetteh Quarshie, Greater Accra', icon: 'fa-shopping-cart', lat: 5.6225, lng: -0.1770, tags: ['accra mall', 'tetteh quarshie', 'mall', 'spintex', 'accra'] },
+      { name: 'Kotoka International Airport (ACC)', area: 'Airport Residential, Accra', icon: 'fa-plane-departure', lat: 5.6052, lng: -0.1718, tags: ['airport', 'kia', 'kotoka', 'terminal 3', 'airport city', 'accra airport'] },
+      { name: 'Kwame Nkrumah Circle / Interchange', area: 'Circle, Central Accra', icon: 'fa-road', lat: 5.5600, lng: -0.2100, tags: ['circle', 'kwame nkrumah circle', 'circle interchange', 'kaneshie'] },
+      { name: 'Makola Market / Accra Central', area: 'Central Business District, Accra', icon: 'fa-store', lat: 5.5480, lng: -0.2070, tags: ['makola', 'accra central', 'cbd', 'rawlings park', 'accra market'] },
+      { name: 'Osu / Oxford Street', area: 'Osu, Greater Accra', icon: 'fa-utensils', lat: 5.5560, lng: -0.1830, tags: ['osu', 'oxford street', 'danquah circle'] },
+      { name: 'University of Ghana (Legon)', area: 'Legon, Greater Accra', icon: 'fa-graduation-cap', lat: 5.6508, lng: -0.1869, tags: ['legon', 'ug', 'university of ghana', 'legon campus'] },
+      { name: 'Legon Hall / Main Gate', area: 'Legon, Greater Accra', icon: 'fa-university', lat: 5.6480, lng: -0.1840, tags: ['legon gate', 'ug gate', 'main gate legon'] },
       { name: 'University of Professional Studies, Accra (UPSA)', area: 'Madina / Legon, Greater Accra', icon: 'fa-graduation-cap', lat: 5.6548, lng: -0.1704, tags: ['upsa', 'upsa accra', 'professional studies', 'madina', 'upsa campus', 'upsa gate'] },
       { name: 'UPSA Hostel / Main Gate', area: 'Madina / UPSA, Greater Accra', icon: 'fa-university', lat: 5.6552, lng: -0.1698, tags: ['upsa gate', 'upsa main gate', 'upsa hostel', 'upsa legon'] },
-      { name: 'University of Ghana (Legon)', area: 'Legon, Greater Accra', icon: 'fa-graduation-cap', lat: 5.6508, lng: -0.1869, tags: ['legon', 'ug', 'university of ghana', 'legon campus'] },
-      { name: 'Legon Hall / Main Gate', area: 'Legon, Greater Accra', icon: 'fa-university', lat: 5.6480, lng: -0.1840, tags: ['legon gate', 'ug gate'] },
+      { name: 'East Legon / American House', area: 'East Legon, Greater Accra', icon: 'fa-building', lat: 5.6400, lng: -0.1500, tags: ['east legon', 'american house', 'a&c mall', 'anc mall'] },
       { name: 'Madina Market / Zongo Junction', area: 'Madina, Greater Accra', icon: 'fa-store', lat: 5.6660, lng: -0.1650, tags: ['madina', 'madina market', 'zongo junction'] },
-      { name: 'Accra Mall', area: 'Tetteh Quarshie, Greater Accra', icon: 'fa-shopping-cart', lat: 5.6225, lng: -0.1770, tags: ['accra mall', 'tetteh quarshie', 'mall'] },
-      { name: 'Kotoka International Airport (ACC)', area: 'Airport Residential, Accra', icon: 'fa-plane-departure', lat: 5.6052, lng: -0.1718, tags: ['airport', 'kia', 'kotoka'] },
-      { name: 'East Legon / American House', area: 'East Legon, Greater Accra', icon: 'fa-building', lat: 5.6400, lng: -0.1500, tags: ['east legon', 'american house'] },
-      { name: 'KNUST Campus', area: 'Kumasi, Ashanti Region', icon: 'fa-graduation-cap', lat: 6.6745, lng: -1.5716, tags: ['knust', 'kumasi university', 'tech campus'] }
+      { name: 'Kaneshie Market Complex', area: 'Kaneshie, Accra', icon: 'fa-store', lat: 5.5650, lng: -0.2330, tags: ['kaneshie', 'kaneshie market', 'first light'] },
+      { name: 'Lapaz / Abrantie Spot', area: 'Lapaz, Greater Accra', icon: 'fa-road', lat: 5.6020, lng: -0.2450, tags: ['lapaz', 'abrantie', 'nii boi town'] },
+      { name: 'Achimota Mall', area: 'Dome / St. Johns, Greater Accra', icon: 'fa-shopping-cart', lat: 5.6350, lng: -0.2280, tags: ['achimota mall', 'achimota', 'st johns', 'dome'] },
+      { name: 'West Hills Mall', area: 'Weija / Kasoa Road, Accra', icon: 'fa-shopping-bag', lat: 5.5520, lng: -0.3620, tags: ['west hills', 'weija', 'west hills mall'] },
+      { name: 'Tema Community 1 / Central Market', area: 'Tema, Greater Accra', icon: 'fa-anchor', lat: 5.6690, lng: -0.0160, tags: ['tema', 'community 1', 'tema market', 'harbour'] },
+      { name: 'Tema Community 25 Mall', area: 'Tema Community 25, Greater Accra', icon: 'fa-shopping-cart', lat: 5.7280, lng: 0.0520, tags: ['tema c25', 'community 25 mall'] },
+      { name: 'Spintex Road / Manet Junction', area: 'Spintex, Greater Accra', icon: 'fa-road', lat: 5.6280, lng: -0.1250, tags: ['spintex', 'manet', 'baatsona'] },
+      { name: 'Dansoman / Control Market', area: 'Dansoman Estates, Accra', icon: 'fa-home', lat: 5.5450, lng: -0.2600, tags: ['dansoman', 'control', 'keep fit'] },
+      { name: 'Korle Bu Teaching Hospital', area: 'Korle Bu, Accra', icon: 'fa-hospital', lat: 5.5380, lng: -0.2280, tags: ['korle bu', 'kbth', 'teaching hospital accra'] },
+      { name: 'Ridge Hospital (Greater Accra Regional)', area: 'Ridge, Accra', icon: 'fa-hospital-alt', lat: 5.5630, lng: -0.1980, tags: ['ridge hospital', 'regional hospital accra', 'ridge'] },
+      { name: 'Cantonments / US Embassy', area: 'Cantonments, Accra', icon: 'fa-landmark', lat: 5.5780, lng: -0.1750, tags: ['cantonments', 'us embassy', 'embassy'] },
+      { name: 'Labadi Pleasure Beach', area: 'La, Accra', icon: 'fa-umbrella-beach', lat: 5.5600, lng: -0.1470, tags: ['labadi beach', 'la pleasure', 'trade fair'] },
+      { name: 'Pokuase Interchange', area: 'Pokuase / ACP, Greater Accra', icon: 'fa-road', lat: 5.6780, lng: -0.2850, tags: ['pokuase', 'pokuase interchange', 'acp'] },
+      { name: 'Adenta Barrier', area: 'Adenta, Greater Accra', icon: 'fa-road', lat: 5.7120, lng: -0.1600, tags: ['adenta', 'adenta barrier', 'housing down'] },
+
+      // ══════ ASHANTI REGION (KUMASI) ══════
+      { name: 'Kejetia Market (New Kejetia)', area: 'Central Kumasi, Ashanti', icon: 'fa-store', lat: 6.6970, lng: -1.6240, tags: ['kejetia', 'kejetia market', 'kumasi market', 'kumasi central'] },
+      { name: 'Adum Central Business District', area: 'Adum, Kumasi', icon: 'fa-building', lat: 6.6920, lng: -1.6220, tags: ['adum', 'adum kumasi', 'commercial adum'] },
+      { name: 'KNUST Campus', area: 'Kumasi, Ashanti Region', icon: 'fa-graduation-cap', lat: 6.6745, lng: -1.5716, tags: ['knust', 'kumasi university', 'tech campus', 'tech junction', 'ayeduase'] },
+      { name: 'Kumasi City Mall', area: 'Asokwa, Kumasi', icon: 'fa-shopping-cart', lat: 6.6720, lng: -1.6070, tags: ['kumasi mall', 'city mall kumasi', 'asokwa mall'] },
+      { name: 'Komfo Anokye Teaching Hospital (KATH)', area: 'Bantama, Kumasi', icon: 'fa-hospital', lat: 6.6980, lng: -1.6310, tags: ['kath', 'komfo anokye', 'bantama hospital', 'kumasi hospital'] },
+      { name: 'Kumasi Airport (Prempeh I International)', area: 'Airport Roundabout, Kumasi', icon: 'fa-plane-departure', lat: 6.7140, lng: -1.5900, tags: ['kumasi airport', 'prempeh airport', 'domestic airport'] },
+      { name: 'Ahodwo Roundabout', area: 'Ahodwo, Kumasi', icon: 'fa-circle-notch', lat: 6.6690, lng: -1.6200, tags: ['ahodwo', 'ahodwo roundabout', 'nhyiaeso'] },
+      { name: 'Sofoline Interchange / Terminal', area: 'Sofoline, Kumasi', icon: 'fa-road', lat: 6.6990, lng: -1.6500, tags: ['sofoline', 'sofoline terminal', 'tanoso'] },
+      { name: 'Suame Roundabout', area: 'Suame, Kumasi', icon: 'fa-tools', lat: 6.7180, lng: -1.6300, tags: ['suame', 'suame roundabout', 'suame magazine'] },
+      { name: 'Asafo VIP Bus Terminal', area: 'Asafo, Kumasi', icon: 'fa-bus', lat: 6.6890, lng: -1.6150, tags: ['asafo', 'vip station kumasi', 'bus station kumasi'] },
+
+      // ══════ CENTRAL REGION ══════
+      { name: 'University of Cape Coast (UCC)', area: 'Cape Coast, Central Region', icon: 'fa-graduation-cap', lat: 5.1150, lng: -1.2850, tags: ['ucc', 'cape coast university', 'ucc campus', 'science ucc'] },
+      { name: 'Cape Coast Castle / Heritage', area: 'Cape Coast Town, Central Region', icon: 'fa-monument', lat: 5.1030, lng: -1.2410, tags: ['cape coast castle', 'castle', 'tourist cape coast'] },
+      { name: 'Kotokuraba Market', area: 'Cape Coast Central, Central Region', icon: 'fa-store', lat: 5.1110, lng: -1.2480, tags: ['kotokuraba', 'kotokuraba market', 'market cape coast'] },
+      { name: 'Kasoa New Market', area: 'Kasoa, Central Region', icon: 'fa-store', lat: 5.5340, lng: -0.4200, tags: ['kasoa', 'kasoa market', 'toll booth kasoa'] },
+      { name: 'University of Education, Winneba (UEW)', area: 'Winneba, Central Region', icon: 'fa-university', lat: 5.3520, lng: -0.6270, tags: ['uew', 'winneba university', 'education campus'] },
+
+      // ══════ WESTERN REGION ══════
+      { name: 'Takoradi Market Circle', area: 'Market Circle, Sekondi-Takoradi', icon: 'fa-circle', lat: 4.8930, lng: -1.7550, tags: ['takoradi', 'market circle', 'tadi', 'oil city'] },
+      { name: 'Takoradi Mall', area: 'Habour Road, Takoradi', icon: 'fa-shopping-cart', lat: 4.9010, lng: -1.7480, tags: ['takoradi mall', 'mall tadi'] },
+      { name: 'Effia-Nkwanta Regional Hospital', area: 'Sekondi-Takoradi, Western Region', icon: 'fa-hospital', lat: 4.9220, lng: -1.7250, tags: ['effia nkwanta', 'hospital takoradi'] },
+      { name: 'University of Mines and Technology (UMaT)', area: 'Tarkwa, Western Region', icon: 'fa-gem', lat: 5.3020, lng: -1.9960, tags: ['umat', 'tarkwa university', 'mines tech'] },
+
+      // ══════ EASTERN REGION ══════
+      { name: 'Koforidua Central Market / Jackson Park', area: 'Koforidua Central, Eastern Region', icon: 'fa-store', lat: 6.0940, lng: -0.2600, tags: ['koforidua', 'kof city', 'jackson park', 'koforidua market'] },
+      { name: 'Koforidua Technical University (KTU)', area: 'Koforidua, Eastern Region', icon: 'fa-university', lat: 6.1050, lng: -0.2720, tags: ['ktu', 'koforidua poly', 'koforidua technical'] },
+      { name: 'Eastern Regional Hospital', area: 'Koforidua, Eastern Region', icon: 'fa-hospital', lat: 6.0910, lng: -0.2550, tags: ['eastern regional hospital', 'koforidua hospital'] },
+      { name: 'Akosombo Dam / Volta Hotel', area: 'Akosombo, Eastern Region', icon: 'fa-water', lat: 6.2980, lng: 0.0550, tags: ['akosombo', 'akosombo dam', 'volta hotel'] },
+
+      // ══════ NORTHERN & UPPER REGIONS ══════
+      { name: 'Tamale Central Market / Aboabo', area: 'Tamale Central, Northern Region', icon: 'fa-store', lat: 9.4070, lng: -0.8390, tags: ['tamale', 'tamale market', 'aboabo market', 'tamale central'] },
+      { name: 'Tamale International Airport', area: 'Airport Road, Tamale', icon: 'fa-plane-departure', lat: 9.5570, lng: -0.8630, tags: ['tamale airport', 'northern airport'] },
+      { name: 'University for Development Studies (UDS)', area: 'Tamale Campus, Northern Region', icon: 'fa-graduation-cap', lat: 9.4000, lng: -0.8800, tags: ['uds', 'uds tamale', 'development studies'] },
+
+      // ══════ BONO & BONO EAST ══════
+      { name: 'Sunyani Central / Market', area: 'Sunyani, Bono Region', icon: 'fa-city', lat: 7.3400, lng: -2.3270, tags: ['sunyani', 'sunyani market', 'bono capital'] },
+      { name: 'Techiman Central Market', area: 'Techiman, Bono East', icon: 'fa-store', lat: 7.5850, lng: -1.9380, tags: ['techiman', 'techiman market', 'commercial hub bono'] }
     ];
-    window.HO_PLACES = HO_PLACES; // expose for booking functions
+    const HO_PLACES = GHANA_PLACES;
+    window.GHANA_PLACES = GHANA_PLACES;
+    window.HO_PLACES = HO_PLACES;
 
     let _searchDebounceTimer = null;
     let _pickupCoords = null;
@@ -9578,49 +9635,75 @@
       const clearBtn = document.getElementById('pickupClearBtn');
       showToast('Detecting your GPS location…', 'info');
 
-      const applyCoords = async (lat, lng) => {
-        _pickupCoords = [lat, lng];
-        sessionStorage.setItem('k3k3_lat', String(lat));
-        sessionStorage.setItem('k3k3_lng', String(lng));
-        const placeName = (await reverseGeocodeMapbox(lat, lng)) || findClosestHoLandmark(lat, lng);
-        sessionStorage.setItem('k3k3_pickup_name', placeName);
-        if (pInp) pInp.value = placeName;
-        _pickupVal = placeName;
-        HO_COORDINATES[placeName] = [lat, lng];
-        if (clearBtn) clearBtn.style.display = 'flex';
-        showToast(`Pickup set to ${placeName}`, 'success');
+      const applyCoords = async (lat, lng, isRefinement = false) => {
+        const placeName = (await reverseGeocodeMapbox(lat, lng)) || (await resolvePassengerAddress(lat, lng)) || findClosestHoLandmark(lat, lng);
+        applyPickupLocation(placeName, lat, lng);
         if (_modalMapbox) {
           _modalMapbox.flyTo({ center: [lng, lat], zoom: 15 });
         } else if (_modalLeafletMap) {
           _modalLeafletMap.setView([lat, lng], 15);
         }
-        onLocationChange();
+        if (!isRefinement) {
+          showToast(`Pickup set to ${placeName}!`, 'success');
+        }
       };
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => applyCoords(pos.coords.latitude, pos.coords.longitude),
-          err => {
-            // Mobile fallback to cellular/Wi-Fi low accuracy
-            navigator.geolocation.getCurrentPosition(
-              posLow => applyCoords(posLow.coords.latitude, posLow.coords.longitude),
-              errLow => {
-                const cachedLat = sessionStorage.getItem('k3k3_lat');
-                const cachedLng = sessionStorage.getItem('k3k3_lng');
-                if (cachedLat && cachedLng) {
-                  applyCoords(parseFloat(cachedLat), parseFloat(cachedLng));
-                } else {
-                  showToast('Unable to detect GPS. Please enter your pickup spot above.', 'info');
-                }
-              },
-              { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
-            );
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
-        );
-      } else {
-        showToast('Geolocation is not supported by your device.', 'warn');
+      const fallbackPickup = async () => {
+        // Try quick IP geolocation
+        let resolvedByIp = false;
+        try {
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 2500);
+          const ipRes = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: ctrl.signal });
+          clearTimeout(tId);
+          if (ipRes.ok) {
+            const ipData = await ipRes.json();
+            const ipLat = parseFloat(ipData.latitude);
+            const ipLng = parseFloat(ipData.longitude);
+            if (!isNaN(ipLat) && !isNaN(ipLng)) {
+              await applyCoords(ipLat, ipLng);
+              resolvedByIp = true;
+            }
+          }
+        } catch (_) {}
+
+        if (!resolvedByIp) {
+          const cachedLat = sessionStorage.getItem('k3k3_lat') || localStorage.getItem('k3k3_lat');
+          const cachedLng = sessionStorage.getItem('k3k3_lng') || localStorage.getItem('k3k3_lng');
+          const savedName = localStorage.getItem('k3k3_pickup_name') || sessionStorage.getItem('k3k3_pickup_name');
+          if (cachedLat && cachedLng) {
+            await applyCoords(parseFloat(cachedLat), parseFloat(cachedLng));
+          } else {
+            const fallbackName = (savedName && HO_COORDINATES[savedName]) ? savedName : 'Ho Central Market';
+            const fallbackCoords = HO_COORDINATES[fallbackName] || [6.6018, 0.4685];
+            applyPickupLocation(fallbackName, fallbackCoords[0], fallbackCoords[1]);
+            showToast(`Pickup set to ${fallbackName}! Tap to adjust spot anytime.`, 'info');
+          }
+        }
+      };
+
+      if (!navigator.geolocation) {
+        await fallbackPickup();
+        return;
       }
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          applyCoords(pos.coords.latitude, pos.coords.longitude, false);
+          // Optional background refinement
+          try {
+            navigator.geolocation.getCurrentPosition(
+              pRef => applyCoords(pRef.coords.latitude, pRef.coords.longitude, true),
+              () => {},
+              { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            );
+          } catch (_) {}
+        },
+        err => {
+          fallbackPickup();
+        },
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
+      );
     }
 
     function renderSuggestions(box, inpId, suggId, suggestions, query) {
@@ -9708,7 +9791,7 @@
       // 3. Dynamic Mapbox Places Geocoding API with location-aware proximity
       if (token && token.startsWith('pk.') && query.length >= 2) {
         try {
-          const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&country=GH&proximity=${proximity}&types=poi,address,neighborhood,locality,place&limit=6`;
+          const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&country=GH&proximity=${proximity}&types=poi,address,neighborhood,locality,place,district&limit=7`;
           const ctrl = new AbortController();
           const tId = setTimeout(() => ctrl.abort(), 3500);
           const res = await fetch(url, { signal: ctrl.signal });
@@ -9741,11 +9824,10 @@
         } catch (_) {}
       }
 
-      // 4. OpenStreetMap Nominatim search fallback (covers entire Ghana including UPSA, Accra, etc.)
-      if (query.length >= 2 && suggestions.length < 5) {
+      // 4. OpenStreetMap Nominatim search fallback (covers entire Ghana: Accra, Kumasi, Cape Coast, Takoradi, Tamale, etc.)
+      if (query.length >= 2 && suggestions.length < 7) {
         try {
-          const viewbox = `${proxLng - 0.5},${proxLat + 0.5},${proxLng + 0.5},${proxLat - 0.5}`;
-          const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=gh&q=${encodeURIComponent(query)}&limit=6&viewbox=${viewbox}&bounded=0`;
+          const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=gh&q=${encodeURIComponent(query)}&limit=8&addressdetails=1`;
           const ctrl = new AbortController();
           const tId = setTimeout(() => ctrl.abort(), 3500);
           const res = await fetch(nomUrl, {
@@ -9922,7 +10004,8 @@
       'Mirage': [6.6025, 0.4670],
       'Chances Hotel Ho': [6.6008, 0.4672],
       'Ho Tarso Hotel': [6.6010, 0.4678],
-      // Ghana & Accra Landmarks
+      // ══════ GHANA NATIONWIDE LANDMARKS & CITIES ══════
+      // Greater Accra
       'University of Professional Studies, Accra (UPSA)': [5.6548, -0.1704],
       'UPSA': [5.6548, -0.1704],
       'UPSA Hostel / Main Gate': [5.6552, -0.1698],
@@ -9935,7 +10018,128 @@
       'Kotoka International Airport (ACC)': [5.6052, -0.1718],
       'Airport Residential': [5.6052, -0.1718],
       'East Legon / American House': [5.6400, -0.1500],
-      'KNUST Campus': [6.6745, -1.5716]
+      'Kwame Nkrumah Circle / Interchange': [5.5600, -0.2100],
+      'Kwame Nkrumah Circle': [5.5600, -0.2100],
+      'Circle': [5.5600, -0.2100],
+      'Makola Market / Accra Central': [5.5480, -0.2070],
+      'Makola Market': [5.5480, -0.2070],
+      'Accra Central': [5.5480, -0.2070],
+      'Accra': [5.5600, -0.2050],
+      'Osu / Oxford Street': [5.5560, -0.1830],
+      'Osu': [5.5560, -0.1830],
+      'Kaneshie Market Complex': [5.5650, -0.2330],
+      'Kaneshie': [5.5650, -0.2330],
+      'Lapaz / Abrantie Spot': [5.6020, -0.2450],
+      'Lapaz': [5.6020, -0.2450],
+      'Achimota Mall': [5.6350, -0.2280],
+      'Achimota': [5.6350, -0.2280],
+      'West Hills Mall': [5.5520, -0.3620],
+      'Tema Community 1 / Central Market': [5.6690, -0.0160],
+      'Tema Community 1': [5.6690, -0.0160],
+      'Tema Community 25 Mall': [5.7280, 0.0520],
+      'Tema': [5.6690, -0.0160],
+      'Spintex Road / Manet Junction': [5.6280, -0.1250],
+      'Spintex': [5.6280, -0.1250],
+      'Dansoman / Control Market': [5.5450, -0.2600],
+      'Dansoman': [5.5450, -0.2600],
+      'Korle Bu Teaching Hospital': [5.5380, -0.2280],
+      'Korle Bu': [5.5380, -0.2280],
+      'Ridge Hospital (Greater Accra Regional)': [5.5630, -0.1980],
+      'Ridge Hospital': [5.5630, -0.1980],
+      'Cantonments / US Embassy': [5.5780, -0.1750],
+      'Cantonments': [5.5780, -0.1750],
+      'Labadi Pleasure Beach': [5.5600, -0.1470],
+      'Labadi Beach': [5.5600, -0.1470],
+      'Pokuase Interchange': [5.6780, -0.2850],
+      'Adenta Barrier': [5.7120, -0.1600],
+      'Adenta': [5.7120, -0.1600],
+
+      // Ashanti Region (Kumasi)
+      'KNUST Campus': [6.6745, -1.5716],
+      'KNUST': [6.6745, -1.5716],
+      'Kejetia Market (New Kejetia)': [6.6970, -1.6240],
+      'Kejetia Market': [6.6970, -1.6240],
+      'Kejetia': [6.6970, -1.6240],
+      'Adum Central Business District': [6.6920, -1.6220],
+      'Adum': [6.6920, -1.6220],
+      'Kumasi': [6.6920, -1.6220],
+      'Kumasi City Mall': [6.6720, -1.6070],
+      'Komfo Anokye Teaching Hospital (KATH)': [6.6980, -1.6310],
+      'Komfo Anokye': [6.6980, -1.6310],
+      'KATH': [6.6980, -1.6310],
+      'Kumasi Airport (Prempeh I International)': [6.7140, -1.5900],
+      'Kumasi Airport': [6.7140, -1.5900],
+      'Ahodwo Roundabout': [6.6690, -1.6200],
+      'Ahodwo': [6.6690, -1.6200],
+      'Sofoline Interchange / Terminal': [6.6990, -1.6500],
+      'Sofoline': [6.6990, -1.6500],
+      'Suame Roundabout': [6.7180, -1.6300],
+      'Suame': [6.7180, -1.6300],
+      'Asafo VIP Bus Terminal': [6.6890, -1.6150],
+      'Asafo': [6.6890, -1.6150],
+
+      // Central Region
+      'University of Cape Coast (UCC)': [5.1150, -1.2850],
+      'UCC': [5.1150, -1.2850],
+      'Cape Coast Castle / Heritage': [5.1030, -1.2410],
+      'Cape Coast Castle': [5.1030, -1.2410],
+      'Kotokuraba Market': [5.1110, -1.2480],
+      'Kotokuraba': [5.1110, -1.2480],
+      'Cape Coast': [5.1110, -1.2480],
+      'Kasoa New Market': [5.5340, -0.4200],
+      'Kasoa': [5.5340, -0.4200],
+      'University of Education, Winneba (UEW)': [5.3520, -0.6270],
+      'UEW': [5.3520, -0.6270],
+      'Winneba': [5.3520, -0.6270],
+
+      // Western Region
+      'Takoradi Market Circle': [4.8930, -1.7550],
+      'Market Circle': [4.8930, -1.7550],
+      'Takoradi Mall': [4.9010, -1.7480],
+      'Takoradi': [4.8930, -1.7550],
+      'Sekondi-Takoradi': [4.8930, -1.7550],
+      'Effia-Nkwanta Regional Hospital': [4.9220, -1.7250],
+      'University of Mines and Technology (UMaT)': [5.3020, -1.9960],
+      'UMaT': [5.3020, -1.9960],
+      'Tarkwa': [5.3020, -1.9960],
+
+      // Eastern Region
+      'Koforidua Central Market / Jackson Park': [6.0940, -0.2600],
+      'Koforidua Central Market': [6.0940, -0.2600],
+      'Koforidua': [6.0940, -0.2600],
+      'Koforidua Technical University (KTU)': [6.1050, -0.2720],
+      'KTU': [6.1050, -0.2720],
+      'Eastern Regional Hospital': [6.0910, -0.2550],
+      'Akosombo Dam / Volta Hotel': [6.2980, 0.0550],
+      'Akosombo': [6.2980, 0.0550],
+
+      // Northern & Upper Regions
+      'Tamale Central Market / Aboabo': [9.4070, -0.8390],
+      'Tamale Central Market': [9.4070, -0.8390],
+      'Tamale': [9.4070, -0.8390],
+      'Tamale International Airport': [9.5570, -0.8630],
+      'University for Development Studies (UDS)': [9.4000, -0.8800],
+      'UDS': [9.4000, -0.8800],
+      'Bolgatanga Central': [10.7856, -0.8514],
+      'Bolgatanga': [10.7856, -0.8514],
+      'Wa Central': [10.0607, -2.5099],
+      'Wa': [10.0607, -2.5099],
+
+      // Bono & Bono East
+      'Sunyani Central / Market': [7.3400, -2.3270],
+      'Sunyani': [7.3400, -2.3270],
+      'Techiman Central Market': [7.5850, -1.9380],
+      'Techiman': [7.5850, -1.9380],
+
+      // Volta Region (beyond Ho)
+      'Hohoe Central Market': [7.1510, 0.4730],
+      'Hohoe': [7.1510, 0.4730],
+      'Aflao Border': [6.1190, 1.1900],
+      'Aflao': [6.1190, 1.1900],
+      'Keta Beach / Fort Prinzenstein': [5.9220, 0.9930],
+      'Keta': [5.9220, 0.9930],
+      'Sogakope Bridge / Resort': [6.0020, 0.5980],
+      'Sogakope': [6.0020, 0.5980]
     };
     window.HO_COORDINATES = HO_COORDINATES;
 
@@ -9949,6 +10153,20 @@
       for (const [k, v] of Object.entries(HO_COORDINATES)) {
         if (k.toLowerCase() === lower || lower.includes(k.toLowerCase()) || k.toLowerCase().includes(lower)) {
           return v;
+        }
+      }
+      // Check in GHANA_PLACES
+      if (window.GHANA_PLACES && Array.isArray(window.GHANA_PLACES)) {
+        const found = window.GHANA_PLACES.find(p => {
+          const pLow = p.name.toLowerCase();
+          return pLow === lower ||
+                 lower.includes(pLow) ||
+                 pLow.includes(lower) ||
+                 (p.tags && p.tags.some(t => t === lower || lower.includes(t) || t.includes(lower)));
+        });
+        if (found && typeof found.lat === 'number' && typeof found.lng === 'number') {
+          HO_COORDINATES[clean] = [found.lat, found.lng];
+          return [found.lat, found.lng];
         }
       }
       return [6.6012, 0.4688]; // Default to Ho Central
@@ -11026,90 +11244,134 @@
       return findClosestHoLandmark(lat, lng);
     }
 
-    function requestUserLiveLocation() {
+    function applyPickupLocation(name, lat, lng) {
+      if (!name || isNaN(lat) || isNaN(lng)) return;
+      sessionStorage.setItem('k3k3_lat', String(lat));
+      sessionStorage.setItem('k3k3_lng', String(lng));
+      localStorage.setItem('k3k3_lat', String(lat));
+      localStorage.setItem('k3k3_lng', String(lng));
+      sessionStorage.setItem('k3k3_pickup_name', name);
+      localStorage.setItem('k3k3_pickup_name', name);
+      sessionStorage.setItem('k3k3_loc_granted', '1');
+
+      _pickupVal = name;
+      _pickupCoords = [lat, lng];
+      HO_COORDINATES[name] = [lat, lng];
+
+      const pSel = document.getElementById('pickupSelect');
+      const pInp = document.getElementById('pickupInput');
+      if (pSel) pSel.value = name;
+      if (pInp) pInp.value = name;
+      const clearBtn = document.getElementById('pickupClearBtn');
+      if (clearBtn) clearBtn.style.display = 'flex';
+      if (typeof onLocationChange === 'function') onLocationChange();
+
+      // Broadcast to nearby riders via Socket if privacy setting allows
+      const shareLoc = (sessionStorage.getItem('k3k3_privacyLocation') !== 'false') && (localStorage.getItem('k3k3_privacyLocation') !== 'false');
+      if (shareLoc && passengerSocket && passengerSocket.connected) {
+        passengerSocket.emit('passenger:location', {
+          passengerId: getUserId(),
+          lat: lat,
+          lng: lng,
+          landmark: name
+        });
+      }
+
+      // Center map & marker if initialized
+      if (passengerMap && passengerUserMarker) {
+        passengerUserMarker.setLatLng([lat, lng]);
+        passengerMap.setView([lat, lng], 15);
+      }
+    }
+
+    function selectHoPickupDirect(landmarkName) {
+      const coords = HO_COORDINATES[landmarkName] || [6.6018, 0.4685];
+      applyPickupLocation(landmarkName, coords[0], coords[1]);
+      dismissLocationPrompt();
+      showToast(`Pickup set to ${landmarkName}!`, 'success');
+    }
+
+    async function requestUserLiveLocation() {
       const btn = document.querySelector('#enableLocationModal .btn-location-allow');
       if (btn) {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting your location...';
         btn.disabled = true;
       }
 
-      if (!navigator.geolocation) {
-        showToast('Geolocation is not supported by your browser.', 'warn');
+      const onLocationSuccess = async (pos, isRefinement = false) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const resolvedName = await resolvePassengerAddress(lat, lng);
+        applyPickupLocation(resolvedName, lat, lng);
+
+        const shareLoc = (sessionStorage.getItem('k3k3_privacyLocation') !== 'false') && (localStorage.getItem('k3k3_privacyLocation') !== 'false');
+        if (shareLoc) startLiveGpsWatcher();
+
         dismissLocationPrompt();
+        if (!isRefinement) {
+          showToast(`Location detected: Pickup set to ${resolvedName}!`, 'success');
+        }
+      };
+
+      const fallbackToHoPickup = async (reasonMsg) => {
+        // Try quick IP geolocation lookup before falling back to default Ho hub
+        let resolvedByIp = false;
+        try {
+          const ctrl = new AbortController();
+          const tId = setTimeout(() => ctrl.abort(), 2500);
+          const ipRes = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: ctrl.signal });
+          clearTimeout(tId);
+          if (ipRes.ok) {
+            const ipData = await ipRes.json();
+            const ipLat = parseFloat(ipData.latitude);
+            const ipLng = parseFloat(ipData.longitude);
+            if (!isNaN(ipLat) && !isNaN(ipLng)) {
+              const name = await resolvePassengerAddress(ipLat, ipLng);
+              applyPickupLocation(name, ipLat, ipLng);
+              dismissLocationPrompt();
+              showToast(`Pickup set to ${name}! Tap to adjust spot anytime.`, 'info');
+              resolvedByIp = true;
+            }
+          }
+        } catch (_) {}
+
+        if (!resolvedByIp) {
+          // Smart Ho default: restore saved pickup or default to central Ho hub
+          const savedPickup = localStorage.getItem('k3k3_pickup_name') || sessionStorage.getItem('k3k3_pickup_name');
+          const fallbackName = (savedPickup && HO_COORDINATES[savedPickup]) ? savedPickup : 'Ho Central Market';
+          const fallbackCoords = HO_COORDINATES[fallbackName] || [6.6018, 0.4685];
+          applyPickupLocation(fallbackName, fallbackCoords[0], fallbackCoords[1]);
+          dismissLocationPrompt();
+          showToast(`Pickup set to ${fallbackName}! Tap to adjust spot anytime.`, 'info');
+        }
+      };
+
+      // Check if geolocation is available and if origin is secure
+      if (!navigator.geolocation) {
+        await fallbackToHoPickup('Device location service unavailable');
         return;
       }
 
-      const onLocationSuccess = async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        sessionStorage.setItem('k3k3_lat', lat);
-        sessionStorage.setItem('k3k3_lng', lng);
-        localStorage.setItem('k3k3_lat', lat);
-        localStorage.setItem('k3k3_lng', lng);
-        sessionStorage.setItem('k3k3_loc_granted', '1');
-
-        // Resolve real street or landmark address
-        const resolvedName = await resolvePassengerAddress(lat, lng);
-        sessionStorage.setItem('k3k3_pickup_name', resolvedName);
-        _pickupVal = resolvedName;
-        _pickupCoords = [lat, lng];
-        HO_COORDINATES[resolvedName] = [lat, lng];
-
-        const pSel = document.getElementById('pickupSelect');
-        const pInp = document.getElementById('pickupInput');
-        if (pSel) pSel.value = resolvedName;
-        if (pInp) pInp.value = resolvedName;
-        const clearBtn = document.getElementById('pickupClearBtn');
-        if (clearBtn) clearBtn.style.display = 'flex';
-        if (typeof onLocationChange === 'function') onLocationChange();
-
-        // Broadcast to nearby riders via Socket if privacy setting allows
-        const shareLoc = (sessionStorage.getItem('k3k3_privacyLocation') !== 'false') && (localStorage.getItem('k3k3_privacyLocation') !== 'false');
-        if (shareLoc && passengerSocket && passengerSocket.connected) {
-          passengerSocket.emit('passenger:location', {
-            passengerId: getUserId(),
-            lat: lat,
-            lng: lng,
-            landmark: resolvedName
-          });
-        }
-
-        // Center map if initialized
-        if (passengerMap && passengerUserMarker) {
-          passengerUserMarker.setLatLng([lat, lng]);
-          passengerMap.setView([lat, lng], 15);
-        }
-
-        if (shareLoc) startLiveGpsWatcher();
-        dismissLocationPrompt();
-        showToast(`Location detected: Pickup set to ${resolvedName}!`, 'success');
-      };
-
-      // Resilient Mobile & Desktop Geolocation
-      // Mobile devices need adequate timeout for OS permission dialog & GNSS satellite lock.
+      // Fast multi-tiered geolocation request:
+      // Stage 1: Quick mobile fix (uses cached cellular / Wi-Fi / GPS position immediately)
       navigator.geolocation.getCurrentPosition(
-        onLocationSuccess,
-        (errHigh) => {
-          console.warn('[Geolocation Stage 1 High-Accuracy notice]', errHigh.message);
-          if (errHigh.code === 1 /* PERMISSION_DENIED */) {
-            sessionStorage.setItem('k3k3_loc_granted', '0');
-            dismissLocationPrompt();
-            showToast('Location permission was denied. You can search or select your pickup location manually.', 'info');
-            return;
-          }
-          // Mobile fallback: cellular/Wi-Fi positioning (enableHighAccuracy: false)
-          navigator.geolocation.getCurrentPosition(
-            onLocationSuccess,
-            (errLow) => {
-              console.warn('[Geolocation Stage 2 Low-Accuracy notice]', errLow.message);
-              sessionStorage.setItem('k3k3_loc_granted', '0');
-              dismissLocationPrompt();
-              showToast('Location signal was weak. You can easily search and select your pickup spot above.', 'info');
-            },
-            { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 }
-          );
+        (pos) => {
+          onLocationSuccess(pos, false);
+          // Optional background refinement if high-accuracy improves it
+          try {
+            navigator.geolocation.getCurrentPosition(
+              (pRef) => onLocationSuccess(pRef, true),
+              () => {},
+              { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+            );
+          } catch (_) {}
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+        (err) => {
+          console.warn('[Geolocation Stage 1 notice]', err ? (err.message || err.code) : 'Notice');
+          // If permission denied or position unavailable, invoke resilient Ho fallback
+          fallbackToHoPickup(err.code === 1 ? 'Permission denied' : 'Signal unavailable');
+        },
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
       );
     }
 

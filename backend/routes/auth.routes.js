@@ -680,7 +680,9 @@ router.put('/passenger/settings', async (req, res) => {
     if (!userId) {
       return res.status(400).json({ success: false, error: 'User ID is required' });
     }
-    const updatedSettings = userStore.updateSettings(userId, settings);
+    // Handle both nested { settings: {...} } and direct top-level fields ({ notifRideUpdates: true, ... })
+    const settingsPayload = settings || (({ userId: _u, ...rest }) => rest)(req.body);
+    const updatedSettings = userStore.updateSettings(userId, settingsPayload);
     res.json({
       success: true,
       message: 'Settings updated successfully',

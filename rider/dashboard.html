@@ -2096,7 +2096,7 @@
   <div id="sec-home">
     <div class="hero">
       <div>
-        <div class="hero-greeting" id="heroGreet">Good morning</div>
+        <div class="hero-greeting" id="heroGreet">Hello</div>
         <div class="hero-name">Welcome back, <span id="heroName">Rider</span></div>
         <div class="hero-sub">Go online to start receiving passenger requests.</div>
       </div>
@@ -3357,8 +3357,7 @@ function el(id) { return document.getElementById(id); }
 function setEl(id, val) { const e = el(id); if (e) e.textContent = val; }
 
 function setGreeting() {
-  const h = new Date().getHours();
-  setEl('heroGreet', h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening');
+  setEl('heroGreet', 'Hello');
 }
 
 /* ════════════════════════════════════════
