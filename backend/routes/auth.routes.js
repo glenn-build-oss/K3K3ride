@@ -296,7 +296,7 @@ router.post('/passenger/verify-otp', async (req, res) => {
     if (!result || !result.valid) {
       return res.status(400).json({ 
         success: false, 
-        error: (result && result.error) || 'Invalid or expired verification code. Use master code 123456 or request a new code.' 
+        error: (result && result.error && !result.error.includes('123456')) ? result.error : 'Invalid verification code. Please check the code sent to your phone and try again.' 
       });
     }
 
@@ -822,10 +822,8 @@ router.post('/rider/send-otp', async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'Verification code sent (Login restrictions disabled for testing)',
-      phoneMask: maskPhone(normalizedPhone),
-      _otp: otpCode,
-      masterCode: '123456'
+      message: 'Verification code sent',
+      phoneMask: maskPhone(normalizedPhone)
     });
 
   } catch (err) {
@@ -884,7 +882,7 @@ router.post('/rider/verify-otp', async (req, res) => {
     if (!result || !result.valid) {
       return res.status(400).json({ 
         success: false, 
-        error: (result && result.error) || 'Invalid or expired verification code. Use master code 123456 or request a new code.' 
+        error: (result && result.error && !result.error.includes('123456')) ? result.error : 'Invalid verification code. Please check the code sent to your phone and try again.' 
       });
     }
 

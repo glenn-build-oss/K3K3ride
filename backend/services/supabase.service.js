@@ -349,7 +349,7 @@ async function verifyOTP(phone, code) {
 
   return { 
     valid: false, 
-    error: 'Invalid or expired verification code. Use master code 123456 or request a new code.' 
+    error: 'Invalid verification code. Please check the code sent to your phone and try again.' 
   };
 }
 
@@ -1830,6 +1830,59 @@ module.exports = {
   getUserNotifications,
   markNotificationAsRead,
 
+  // Admin Settings operations
+  getAdminSetting,
+  setAdminSetting,
+
   // Health check
   healthCheck
 };
+
+/**
+ * Admin Settings operations (persistent settings in Supabase)
+ */
+async function getAdminSetting(key) {
+  try {
+    const db = requireSupabase();
+    const { data, error } = await db
+      .from('admin_settings')
+      .select('*')
+      .eq('key', key)
+      .maybeSingle();
+    if (error) {
+      console.warn(`[Supabase] Warning fetching admin_setting "${key}":`, error.message);
+      return null;
+    }
+    return data || null;
+  } catch (err) {
+    console.warn(`[Supabase] getAdminSetting fallback for "${key}":`, err.message);
+    return null;
+  }
+}
+
+async function setAdminSetting(key, value, description = '') {
+  try {
+    const db = requireSupabase();
+    const stringVal = typeof value === 'string' ? value : JSON.stringify(value);
+    const payload = {
+      key,
+      value: stringVal,
+      description: description || `Admin configuration for ${key}`,
+      updated_at: new Date().toISOString()
+    };
+    const { data, error } = await db
+      .from('admin_settings')
+      .upsert(payload, { onConflict: 'key' })
+      .select()
+      .maybeSingle();
+    if (error) {
+      console.error(`[Supabase] Error saving admin_setting "${key}":`, error.message);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    console.error(`[Supabase] setAdminSetting error for "${key}":`, err.message);
+    return null;
+  }
+}
+

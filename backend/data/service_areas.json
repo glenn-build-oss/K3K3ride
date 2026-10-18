@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-12T23:25:00Z",
+  "updated_at": "2026-10-18T23:19:10.368Z",
   "country": "Ghana",
   "default_currency": "GHS",
   "regions": [
@@ -8,50 +8,99 @@
       "name": "Volta Region",
       "code": "VR",
       "active": true,
-      "base_fare_shared": 3.00,
-      "base_fare_alone": 6.00,
-      "per_km_rate": 1.20,
+      "base_fare_shared": 3,
+      "base_fare_alone": 6,
+      "per_km_rate": 1.2,
       "cities": [
         {
           "id": "ho",
           "name": "Ho",
           "active": true,
           "is_operational": true,
-          "aliases": ["ho", "uhas", "sokode", "kpodzi", "bankoe", "ahoe", "dome", "poly", "heve", "civic centre", "ho main market", "asogli", "toko", "trafalgar", "mirage", "lokoe", "mawuli", "fiave"],
-          "center": { "lat": 6.6012, "lng": 0.4688 },
-          "bounds": { "min_lat": 6.45, "max_lat": 6.78, "min_lng": 0.30, "max_lng": 0.65 }
+          "aliases": [
+            "ho",
+            "uhas",
+            "sokode",
+            "kpodzi",
+            "bankoe",
+            "ahoe",
+            "dome",
+            "poly",
+            "heve",
+            "civic centre",
+            "ho main market",
+            "asogli",
+            "toko",
+            "trafalgar",
+            "mirage",
+            "lokoe",
+            "mawuli",
+            "fiave"
+          ],
+          "center": {
+            "lat": 6.6012,
+            "lng": 0.4688
+          },
+          "bounds": {
+            "min_lat": 6.45,
+            "max_lat": 6.78,
+            "min_lng": 0.3,
+            "max_lng": 0.65
+          }
         },
         {
           "id": "hohoe",
           "name": "Hohoe",
           "active": false,
           "is_operational": false,
-          "aliases": ["hohoe"],
-          "center": { "lat": 7.1519, "lng": 0.4736 }
+          "aliases": [
+            "hohoe"
+          ],
+          "center": {
+            "lat": 7.1519,
+            "lng": 0.4736
+          }
         },
         {
           "id": "kpando",
           "name": "Kpando",
           "active": false,
           "is_operational": false,
-          "aliases": ["kpando"],
-          "center": { "lat": 6.9954, "lng": 0.2931 }
+          "aliases": [
+            "kpando"
+          ],
+          "center": {
+            "lat": 6.9954,
+            "lng": 0.2931
+          }
         },
         {
           "id": "aflao",
           "name": "Aflao",
           "active": false,
           "is_operational": false,
-          "aliases": ["aflao", "ketu"],
-          "center": { "lat": 6.1197, "lng": 1.1906 }
+          "aliases": [
+            "aflao",
+            "ketu"
+          ],
+          "center": {
+            "lat": 6.1197,
+            "lng": 1.1906
+          }
         },
         {
           "id": "keta",
           "name": "Keta",
           "active": false,
           "is_operational": false,
-          "aliases": ["keta", "anloga"],
-          "center": { "lat": 5.9223, "lng": 0.9879 }
+          "aliases": [
+            "keta",
+            "anloga"
+          ],
+          "center": {
+            "lat": 5.9223,
+            "lng": 0.9879
+          }
         }
       ]
     },
@@ -59,26 +108,69 @@
       "id": "greater_accra",
       "name": "Greater Accra",
       "code": "GAR",
-      "active": false,
-      "base_fare_shared": 5.00,
-      "base_fare_alone": 12.00,
-      "per_km_rate": 2.20,
+      "active": true,
+      "base_fare_shared": 5,
+      "base_fare_alone": 12,
+      "per_km_rate": 2.2,
       "cities": [
         {
           "id": "accra",
           "name": "Accra",
-          "active": false,
-          "is_operational": false,
-          "aliases": ["accra", "osu", "legon", "circle", "airport", "madina", "east legon", "spintex", "dansoman", "kaneshie", "tema", "ashaiman", "cantonments", "labone", "adabraka", "achimota"],
-          "center": { "lat": 5.6037, "lng": -0.1870 }
+          "active": true,
+          "is_operational": true,
+          "aliases": [
+            "accra",
+            "osu",
+            "legon",
+            "circle",
+            "airport",
+            "madina",
+            "east legon",
+            "spintex",
+            "dansoman",
+            "kaneshie",
+            "tema",
+            "ashaiman",
+            "cantonments",
+            "labone",
+            "adabraka",
+            "achimota",
+            "upsa",
+            "upsa accra",
+            "makola",
+            "kotoka",
+            "korle bu",
+            "pokuase",
+            "adenta",
+            "weija",
+            "west hills"
+          ],
+          "bounds": {
+            "min_lat": 5.45,
+            "max_lat": 5.8,
+            "min_lng": -0.45,
+            "max_lng": 0.15
+          },
+          "center": {
+            "lat": 5.6037,
+            "lng": -0.187
+          }
         },
         {
           "id": "tema",
           "name": "Tema",
-          "active": false,
-          "is_operational": false,
-          "aliases": ["tema", "community 1", "community 25", "ashaiman"],
-          "center": { "lat": 5.6698, "lng": -0.0166 }
+          "active": true,
+          "is_operational": true,
+          "aliases": [
+            "tema",
+            "community 1",
+            "community 25",
+            "ashaiman"
+          ],
+          "center": {
+            "lat": 5.6698,
+            "lng": -0.0166
+          }
         }
       ]
     },
@@ -87,25 +179,43 @@
       "name": "Ashanti",
       "code": "AR",
       "active": false,
-      "base_fare_shared": 4.50,
-      "base_fare_alone": 10.00,
-      "per_km_rate": 1.80,
+      "base_fare_shared": 4.5,
+      "base_fare_alone": 10,
+      "per_km_rate": 1.8,
       "cities": [
         {
           "id": "kumasi",
           "name": "Kumasi",
           "active": false,
           "is_operational": false,
-          "aliases": ["kumasi", "knust", "adum", "bantama", "ayeduase", "kejetia", "asokwa", "tafo", "tanoso"],
-          "center": { "lat": 6.6885, "lng": -1.6244 }
+          "aliases": [
+            "kumasi",
+            "knust",
+            "adum",
+            "bantama",
+            "ayeduase",
+            "kejetia",
+            "asokwa",
+            "tafo",
+            "tanoso"
+          ],
+          "center": {
+            "lat": 6.6885,
+            "lng": -1.6244
+          }
         },
         {
           "id": "obuasi",
           "name": "Obuasi",
           "active": false,
           "is_operational": false,
-          "aliases": ["obuasi"],
-          "center": { "lat": 6.2022, "lng": -1.6738 }
+          "aliases": [
+            "obuasi"
+          ],
+          "center": {
+            "lat": 6.2022,
+            "lng": -1.6738
+          }
         }
       ]
     },
@@ -114,25 +224,37 @@
       "name": "Eastern Region",
       "code": "ER",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "koforidua",
           "name": "Koforidua",
           "active": false,
           "is_operational": false,
-          "aliases": ["koforidua", "ktue", "ansapatu"],
-          "center": { "lat": 6.0945, "lng": -0.2591 }
+          "aliases": [
+            "koforidua",
+            "ktue",
+            "ansapatu"
+          ],
+          "center": {
+            "lat": 6.0945,
+            "lng": -0.2591
+          }
         },
         {
           "id": "nkawkaw",
           "name": "Nkawkaw",
           "active": false,
           "is_operational": false,
-          "aliases": ["nkawkaw"],
-          "center": { "lat": 6.5511, "lng": -0.7674 }
+          "aliases": [
+            "nkawkaw"
+          ],
+          "center": {
+            "lat": 6.5511,
+            "lng": -0.7674
+          }
         }
       ]
     },
@@ -141,33 +263,52 @@
       "name": "Central Region",
       "code": "CR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "cape_coast",
           "name": "Cape Coast",
           "active": false,
           "is_operational": false,
-          "aliases": ["cape coast", "ucc", "elmina"],
-          "center": { "lat": 5.1054, "lng": -1.2466 }
+          "aliases": [
+            "cape coast",
+            "ucc",
+            "elmina"
+          ],
+          "center": {
+            "lat": 5.1054,
+            "lng": -1.2466
+          }
         },
         {
           "id": "winneba",
           "name": "Winneba",
           "active": false,
           "is_operational": false,
-          "aliases": ["winneba", "uew"],
-          "center": { "lat": 5.3529, "lng": -0.6277 }
+          "aliases": [
+            "winneba",
+            "uew"
+          ],
+          "center": {
+            "lat": 5.3529,
+            "lng": -0.6277
+          }
         },
         {
           "id": "kasoa",
           "name": "Kasoa",
           "active": false,
           "is_operational": false,
-          "aliases": ["kasoa", "budumburam"],
-          "center": { "lat": 5.5342, "lng": -0.4244 }
+          "aliases": [
+            "kasoa",
+            "budumburam"
+          ],
+          "center": {
+            "lat": 5.5342,
+            "lng": -0.4244
+          }
         }
       ]
     },
@@ -176,25 +317,38 @@
       "name": "Western Region",
       "code": "WR",
       "active": false,
-      "base_fare_shared": 4.00,
-      "base_fare_alone": 9.00,
-      "per_km_rate": 1.70,
+      "base_fare_shared": 4,
+      "base_fare_alone": 9,
+      "per_km_rate": 1.7,
       "cities": [
         {
           "id": "takoradi",
           "name": "Sekondi-Takoradi",
           "active": false,
           "is_operational": false,
-          "aliases": ["takoradi", "sekondi", "market circle"],
-          "center": { "lat": 4.8874, "lng": -1.7547 }
+          "aliases": [
+            "takoradi",
+            "sekondi",
+            "market circle"
+          ],
+          "center": {
+            "lat": 4.8874,
+            "lng": -1.7547
+          }
         },
         {
           "id": "tarkwa",
           "name": "Tarkwa",
           "active": false,
           "is_operational": false,
-          "aliases": ["tarkwa", "umat"],
-          "center": { "lat": 5.3018, "lng": -1.9846 }
+          "aliases": [
+            "tarkwa",
+            "umat"
+          ],
+          "center": {
+            "lat": 5.3018,
+            "lng": -1.9846
+          }
         }
       ]
     },
@@ -203,17 +357,23 @@
       "name": "Western North",
       "code": "WNR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "sefwi_wiawso",
           "name": "Sefwi Wiawso",
           "active": false,
           "is_operational": false,
-          "aliases": ["sefwi wiawso", "wiawso"],
-          "center": { "lat": 6.2084, "lng": -2.4845 }
+          "aliases": [
+            "sefwi wiawso",
+            "wiawso"
+          ],
+          "center": {
+            "lat": 6.2084,
+            "lng": -2.4845
+          }
         }
       ]
     },
@@ -222,17 +382,23 @@
       "name": "Bono Region",
       "code": "BR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "sunyani",
           "name": "Sunyani",
           "active": false,
           "is_operational": false,
-          "aliases": ["sunyani", "uenr"],
-          "center": { "lat": 7.3399, "lng": -2.3268 }
+          "aliases": [
+            "sunyani",
+            "uenr"
+          ],
+          "center": {
+            "lat": 7.3399,
+            "lng": -2.3268
+          }
         }
       ]
     },
@@ -241,17 +407,22 @@
       "name": "Bono East",
       "code": "BER",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "techiman",
           "name": "Techiman",
           "active": false,
           "is_operational": false,
-          "aliases": ["techiman"],
-          "center": { "lat": 7.5833, "lng": -1.9333 }
+          "aliases": [
+            "techiman"
+          ],
+          "center": {
+            "lat": 7.5833,
+            "lng": -1.9333
+          }
         }
       ]
     },
@@ -260,17 +431,23 @@
       "name": "Ahafo Region",
       "code": "AHR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "goaso",
           "name": "Goaso",
           "active": false,
           "is_operational": false,
-          "aliases": ["goaso", "kenyasi"],
-          "center": { "lat": 6.8044, "lng": -2.5186 }
+          "aliases": [
+            "goaso",
+            "kenyasi"
+          ],
+          "center": {
+            "lat": 6.8044,
+            "lng": -2.5186
+          }
         }
       ]
     },
@@ -279,17 +456,24 @@
       "name": "Northern Region",
       "code": "NR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "tamale",
           "name": "Tamale",
           "active": false,
           "is_operational": false,
-          "aliases": ["tamale", "uds", "nyankpala"],
-          "center": { "lat": 9.4008, "lng": -0.8393 }
+          "aliases": [
+            "tamale",
+            "uds",
+            "nyankpala"
+          ],
+          "center": {
+            "lat": 9.4008,
+            "lng": -0.8393
+          }
         }
       ]
     },
@@ -298,17 +482,23 @@
       "name": "Savannah Region",
       "code": "SR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "damongo",
           "name": "Damongo",
           "active": false,
           "is_operational": false,
-          "aliases": ["damongo", "bole"],
-          "center": { "lat": 9.0833, "lng": -1.8167 }
+          "aliases": [
+            "damongo",
+            "bole"
+          ],
+          "center": {
+            "lat": 9.0833,
+            "lng": -1.8167
+          }
         }
       ]
     },
@@ -317,17 +507,23 @@
       "name": "North East",
       "code": "NER",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "nalerigu",
           "name": "Nalerigu",
           "active": false,
           "is_operational": false,
-          "aliases": ["nalerigu", "walewale"],
-          "center": { "lat": 10.5333, "lng": -0.3667 }
+          "aliases": [
+            "nalerigu",
+            "walewale"
+          ],
+          "center": {
+            "lat": 10.5333,
+            "lng": -0.3667
+          }
         }
       ]
     },
@@ -336,17 +532,24 @@
       "name": "Upper East",
       "code": "UER",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "bolgatanga",
           "name": "Bolgatanga",
           "active": false,
           "is_operational": false,
-          "aliases": ["bolgatanga", "navrongo", "bawku"],
-          "center": { "lat": 10.7856, "lng": -0.8514 }
+          "aliases": [
+            "bolgatanga",
+            "navrongo",
+            "bawku"
+          ],
+          "center": {
+            "lat": 10.7856,
+            "lng": -0.8514
+          }
         }
       ]
     },
@@ -355,17 +558,23 @@
       "name": "Upper West",
       "code": "UWR",
       "active": false,
-      "base_fare_shared": 3.50,
-      "base_fare_alone": 8.00,
-      "per_km_rate": 1.50,
+      "base_fare_shared": 3.5,
+      "base_fare_alone": 8,
+      "per_km_rate": 1.5,
       "cities": [
         {
           "id": "wa",
           "name": "Wa",
           "active": false,
           "is_operational": false,
-          "aliases": ["wa", "lawra"],
-          "center": { "lat": 10.0600, "lng": -2.5099 }
+          "aliases": [
+            "wa",
+            "lawra"
+          ],
+          "center": {
+            "lat": 10.06,
+            "lng": -2.5099
+          }
         }
       ]
     },
@@ -374,17 +583,24 @@
       "name": "Oti Region",
       "code": "OR",
       "active": false,
-      "base_fare_shared": 3.00,
-      "base_fare_alone": 6.50,
-      "per_km_rate": 1.20,
+      "base_fare_shared": 3,
+      "base_fare_alone": 6.5,
+      "per_km_rate": 1.2,
       "cities": [
         {
           "id": "dambai",
           "name": "Dambai",
           "active": false,
           "is_operational": false,
-          "aliases": ["dambai", "nkwanta", "jasikan"],
-          "center": { "lat": 8.0667, "lng": 0.1833 }
+          "aliases": [
+            "dambai",
+            "nkwanta",
+            "jasikan"
+          ],
+          "center": {
+            "lat": 8.0667,
+            "lng": 0.1833
+          }
         }
       ]
     }

@@ -38,6 +38,10 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
+  <!-- Leaflet Fallback (Zero-token interactive street map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
     :root {
       --bg: #0c0d10;
@@ -941,12 +945,17 @@
       ? 'http://localhost:8810'
       : '';
 
+    window.MAPBOX_PUBLIC_TOKEN = window.MAPBOX_PUBLIC_TOKEN || '';
+
     let cmsData = { locations: [], routes: [], settings: {} };
     let currentTab = 'locations';
     let locZoneFilter = 'all';
     let routeZoneFilter = 'all';
     let simMap = null;
     let simMarkers = [];
+    let simLeafletMap = null;
+    let simLeafletMarkers = [];
+    let simLeafletPolyline = null;
 
     // ── Toast Utility ──
     function showToast(msg, type = 'success') {
@@ -983,18 +992,44 @@
 
     async function loadServiceAreasData() {
       const tbody = document.getElementById('serviceAreasBody');
-      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Loading regions...</td></tr>`;
+
+      // 1. Immediate optimistic render from local storage cache
+      try {
+        const cached = localStorage.getItem('k3k3_service_areas_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && Array.isArray(parsed.regions) && parsed.regions.length) {
+            serviceAreasList = parsed.regions;
+            renderServiceAreasTable(serviceAreasList);
+            const badge = document.getElementById('badgeServiceAreas');
+            if (badge) badge.textContent = serviceAreasList.length;
+          }
+        }
+      } catch (_) {}
+
+      if (!serviceAreasList.length && tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i> Loading regions...</td></tr>`;
+      }
 
       try {
-        const res = await fetch(`${API_BASE}/api/admin/service-areas`, { cache: 'no-store' });
+        const adminToken = localStorage.getItem('k3k3_admin_token') || '';
+        const res = await fetch(`${API_BASE}/api/admin/service-areas`, {
+          cache: 'no-store',
+          headers: adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {}
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         serviceAreasList = data.regions || [];
+        try {
+          localStorage.setItem('k3k3_service_areas_cache', JSON.stringify({ regions: serviceAreasList, success: true }));
+        } catch (_) {}
         renderServiceAreasTable(serviceAreasList);
         const badge = document.getElementById('badgeServiceAreas');
         if (badge) badge.textContent = serviceAreasList.length;
       } catch (err) {
-        if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--danger)">Failed to load service areas: ${err.message}</td></tr>`;
+        if (!serviceAreasList.length && tbody) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--danger)">Failed to load service areas: ${err.message}</td></tr>`;
+        }
       }
     }
 
@@ -1042,10 +1077,28 @@
 
     async function toggleRegionActive(regionId, currentStatus) {
       const nextStatus = !currentStatus;
+      const adminToken = localStorage.getItem('k3k3_admin_token') || '';
+
+      // Optimistic instant UI update
+      const target = serviceAreasList.find(r => r.id === regionId);
+      if (target) {
+        target.active = nextStatus;
+        if (Array.isArray(target.cities)) {
+          target.cities.forEach(c => { c.active = nextStatus; c.is_operational = nextStatus; });
+        }
+        try {
+          localStorage.setItem('k3k3_service_areas_cache', JSON.stringify({ regions: serviceAreasList, success: true }));
+        } catch (_) {}
+        renderServiceAreasTable(serviceAreasList);
+      }
+
       try {
         const res = await fetch(`${API_BASE}/api/admin/service-areas/toggle`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {})
+          },
           body: JSON.stringify({ region_id: regionId, active: nextStatus })
         });
         const data = await res.json();
@@ -1053,6 +1106,14 @@
           showToast(`Region ${regionId} ${nextStatus ? 'activated for live bookings' : 'set to Coming Soon waitlist'}!`, 'success');
           loadServiceAreasData();
         } else {
+          // Revert optimistic update
+          if (target) {
+            target.active = currentStatus;
+            if (Array.isArray(target.cities)) {
+              target.cities.forEach(c => { c.active = currentStatus; c.is_operational = currentStatus; });
+            }
+            renderServiceAreasTable(serviceAreasList);
+          }
           showToast(data.error || 'Failed to update region status', 'error');
         }
       } catch (err) {
@@ -1505,30 +1566,66 @@
       };
     }
 
-    // ── Live Simulator & Mapbox Rendering ──
+    // ── Live Simulator & Mapbox / Leaflet Rendering ──
     function initSimulatorMap() {
       const container = document.getElementById('simMapContainer');
-      if (!container || simMap) return;
+      if (!container) return;
+      if (simMap || simLeafletMap) {
+        if (simMap) { try { simMap.resize(); } catch(_) {} }
+        if (simLeafletMap) { try { simLeafletMap.invalidateSize(); } catch(_) {} }
+        runSimulator();
+        return;
+      }
 
       const token = (cmsData.settings?.mapbox_public_token || window.MAPBOX_PUBLIC_TOKEN || '').trim();
-      mapboxgl.accessToken = token;
 
-      try {
-        simMap = new mapboxgl.Map({
-          container: 'simMapContainer',
-          style: 'mapbox://styles/mapbox/dark-v11',
-          center: [0.4688, 6.6012],
-          zoom: 12.5
-        });
+      // 1. Primary: Native Mapbox GL JS if valid token is provided
+      if (typeof mapboxgl !== 'undefined' && token && token.startsWith('pk.')) {
+        try {
+          mapboxgl.accessToken = token;
+          container.innerHTML = '';
+          simMap = new mapboxgl.Map({
+            container: 'simMapContainer',
+            style: 'mapbox://styles/mapbox/dark-v11',
+            center: [0.4688, 6.6012],
+            zoom: 12.5
+          });
 
-        simMap.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
-        simMap.on('load', () => {
-          runSimulator();
-        });
-      } catch (err) {
-        console.error('Failed to init Mapbox in simulator:', err);
-        container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted)">Mapbox preview unavailable: ${err.message}</div>`;
+          simMap.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right');
+          simMap.on('load', () => {
+            runSimulator();
+          });
+          return;
+        } catch (err) {
+          console.warn('[Simulator Mapbox init warning, falling back to Leaflet OSM]:', err.message);
+          simMap = null;
+        }
       }
+
+      // 2. Zero-Token Leaflet Fallback (always works seamlessly with street tiles)
+      if (typeof L !== 'undefined') {
+        try {
+          container.innerHTML = '';
+          simLeafletMap = L.map('simMapContainer', {
+            zoomControl: true,
+            attributionControl: false
+          }).setView([6.6012, 0.4688], 13);
+
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+          }).addTo(simLeafletMap);
+
+          setTimeout(() => {
+            if (simLeafletMap) simLeafletMap.invalidateSize();
+            runSimulator();
+          }, 150);
+          return;
+        } catch (lErr) {
+          console.warn('[Simulator Leaflet init error]:', lErr.message);
+        }
+      }
+
+      container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted)">Map preview available. Enter a Mapbox token in Settings for 3D vector map.</div>`;
     }
 
     function runSimulator() {
@@ -1549,8 +1646,10 @@
       document.getElementById('simAloneFare').textContent = `₵${res.alone_fare.toFixed(2)}`;
       document.getElementById('simMechanism').textContent = res.is_override ? `Custom Pair Matrix Override (ID: ${res.route_id || 'Override'})` : `Standard ${res.zone_type === 'in' ? 'In-Campus' : 'Out-Campus'} Base Policy`;
 
-      // Update Mapbox Map if active
-      if (simMap && fromLoc && toLoc) {
+      if (!fromLoc || !toLoc) return;
+
+      // ── Option A: Update Mapbox Map if active ──
+      if (simMap) {
         simMarkers.forEach(m => m.remove());
         simMarkers = [];
 
@@ -1576,7 +1675,6 @@
         const dMarker = new mapboxgl.Marker(dEl).setLngLat([toLoc.lng, toLoc.lat]).addTo(simMap);
         simMarkers.push(dMarker);
 
-        // Fetch turn-by-turn road curves (following street contours like Bolt)
         const token = (cmsData.settings?.mapbox_public_token || window.MAPBOX_PUBLIC_TOKEN || '').trim();
         fetchRoadRoutingPolyline(fromLoc.lng, fromLoc.lat, toLoc.lng, toLoc.lat, token).then(routeData => {
           const roadCoordinates = (routeData.coordinates && routeData.coordinates.length > 0)
@@ -1596,7 +1694,6 @@
           } else {
             simMap.addSource('simRoute', { type: 'geojson', data: geojson });
 
-            // Layer 1: Dark outer road casing (Bolt style)
             simMap.addLayer({
               id: 'simRouteCasing',
               type: 'line',
@@ -1609,7 +1706,6 @@
               }
             });
 
-            // Layer 2: Glowing neon-gold primary road line
             simMap.addLayer({
               id: 'simRouteLayer',
               type: 'line',
@@ -1623,10 +1719,52 @@
             });
           }
 
-          // Fit Bounds to cover all road turns and bends
           const bounds = new mapboxgl.LngLatBounds();
           roadCoordinates.forEach(c => bounds.extend(c));
           simMap.fitBounds(bounds, { padding: 60, maxZoom: 15.5, duration: 700 });
+        });
+      }
+
+      // ── Option B: Update Leaflet Map if active ──
+      if (simLeafletMap && typeof L !== 'undefined') {
+        simLeafletMarkers.forEach(m => m.remove());
+        simLeafletMarkers = [];
+        if (simLeafletPolyline) {
+          simLeafletPolyline.remove();
+          simLeafletPolyline = null;
+        }
+
+        const pIcon = L.divIcon({
+          className: 'leaflet-sim-pmarker',
+          html: '<div style="width:16px;height:16px;border-radius:50%;background:#10B981;border:3px solid #fff;box-shadow:0 0 10px rgba(16,185,129,0.85)"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+        const dIcon = L.divIcon({
+          className: 'leaflet-sim-dmarker',
+          html: '<div style="width:16px;height:16px;border-radius:50%;background:#FFD60A;border:3px solid #fff;box-shadow:0 0 10px rgba(255,214,10,0.85)"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+
+        const pMarker = L.marker([fromLoc.lat, fromLoc.lng], { icon: pIcon }).addTo(simLeafletMap);
+        const dMarker = L.marker([toLoc.lat, toLoc.lng], { icon: dIcon }).addTo(simLeafletMap);
+        simLeafletMarkers.push(pMarker, dMarker);
+
+        const token = (cmsData.settings?.mapbox_public_token || window.MAPBOX_PUBLIC_TOKEN || '').trim();
+        fetchRoadRoutingPolyline(fromLoc.lng, fromLoc.lat, toLoc.lng, toLoc.lat, token).then(routeData => {
+          const latLngs = (routeData.coordinates && routeData.coordinates.length > 0)
+            ? routeData.coordinates.map(c => [c[1], c[0]])
+            : [[fromLoc.lat, fromLoc.lng], [toLoc.lat, toLoc.lng]];
+
+          simLeafletPolyline = L.polyline(latLngs, {
+            color: '#FFD60A',
+            weight: 5,
+            opacity: 0.95,
+            lineJoin: 'round'
+          }).addTo(simLeafletMap);
+
+          simLeafletMap.fitBounds(simLeafletPolyline.getBounds(), { padding: [40, 40] });
         });
       }
     }

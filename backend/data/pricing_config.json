@@ -383,6 +383,18 @@
       "icon": "fa-home",
       "is_active": true,
       "is_popular": true
+    },
+    {
+      "id": "loc_8f690bb5",
+      "name": "Test HTU Science Lab 1792365578606 Updated",
+      "zone_type": "out",
+      "category": "Campuses & Hostels",
+      "lat": 6.6279,
+      "lng": 0.4739,
+      "address": "HTU Campus, Sokode",
+      "icon": "fa-graduation-cap",
+      "is_active": true,
+      "is_popular": true
     }
   ],
   "routes": [
@@ -564,7 +576,7 @@
     "mapbox_public_token": "",
     "currency_symbol": "₵",
     "currency_code": "GHS",
-    "updated_at": "2026-09-24T17:13:42.368Z"
+    "updated_at": "2026-10-18T23:19:38.625Z"
   },
   "version": "1.0.0"
 }

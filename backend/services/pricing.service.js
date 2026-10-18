@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const supabaseService = require('./supabase.service');
 
 const uuidv4 = () => crypto.randomUUID();
 
@@ -92,6 +93,8 @@ const DEFAULT_ROUTE_FARES = [
   { id: 'rf_21', from: 'HSTU Main Gate',    to: 'Ho Central Market',               fare: 4.00, zone_type: 'out', notes: 'HTU Gate to Ho Central Market' }
 ];
 
+const FALLBACK_MAPBOX_TOKEN = (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN || '').trim();
+
 // ─── Default Global Pricing Settings ───
 const DEFAULT_SETTINGS = {
   in_campus_base_fare: 3.00,
@@ -99,13 +102,54 @@ const DEFAULT_SETTINGS = {
   alone_multiplier: 3.0,
   minimum_fare: 3.00,
   per_km_rate: 1.80,
-  mapbox_public_token: process.env.MAPBOX_PUBLIC_TOKEN || '',
+  mapbox_public_token: (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN || '').trim(),
   currency_symbol: '₵',
   currency_code: 'GHS',
   updated_at: new Date().toISOString()
 };
 
 let _cache = null;
+
+async function syncPricingFromSupabase() {
+  try {
+    const remote = await supabaseService.getAdminSetting('pricing_config');
+    if (remote && remote.value) {
+      const parsed = typeof remote.value === 'string' ? JSON.parse(remote.value) : remote.value;
+      if (parsed && Array.isArray(parsed.locations) && parsed.settings) {
+        _cache = parsed;
+        if (!_cache.settings.mapbox_public_token || !_cache.settings.mapbox_public_token.startsWith('pk.')) {
+          _cache.settings.mapbox_public_token = (process.env.MAPBOX_PUBLIC_TOKEN || FALLBACK_MAPBOX_TOKEN).trim();
+        }
+        try {
+          fs.writeFileSync(CONFIG_FILE, JSON.stringify(_cache, null, 2), 'utf8');
+        } catch (_) {}
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn('[PricingService] syncPricingFromSupabase warning:', err.message);
+  }
+  return false;
+}
+
+async function syncPricingToSupabase(cfg) {
+  try {
+    await supabaseService.setAdminSetting(
+      'pricing_config',
+      cfg,
+      'Global pricing configuration, locations, route matrix and Mapbox token'
+    );
+    return true;
+  } catch (err) {
+    console.warn('[PricingService] syncPricingToSupabase warning:', err.message);
+    return false;
+  }
+}
+
+// Trigger initial sync in background
+setTimeout(() => {
+  syncPricingFromSupabase().catch(() => {});
+}, 50);
 
 /**
  * Load configuration from disk or initialize with defaults
@@ -121,8 +165,8 @@ function loadConfig() {
       if (!_cache.locations || !Array.isArray(_cache.locations)) _cache.locations = DEFAULT_LOCATIONS;
       if (!_cache.routes || !Array.isArray(_cache.routes)) _cache.routes = DEFAULT_ROUTE_FARES;
       if (!_cache.settings || typeof _cache.settings !== 'object') _cache.settings = DEFAULT_SETTINGS;
-      if (!_cache.settings.mapbox_public_token && (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN)) {
-        _cache.settings.mapbox_public_token = (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN).trim();
+      if (!_cache.settings.mapbox_public_token || !_cache.settings.mapbox_public_token.startsWith('pk.')) {
+        _cache.settings.mapbox_public_token = (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN || FALLBACK_MAPBOX_TOKEN).trim();
       }
       return _cache;
     }
@@ -142,19 +186,36 @@ function loadConfig() {
 }
 
 /**
- * Persist config to disk
+ * Persist config to disk and Supabase
  */
 function saveConfig(cfg) {
   try {
+    if (!cfg.settings) cfg.settings = { ...DEFAULT_SETTINGS };
     cfg.settings.updated_at = new Date().toISOString();
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf8');
+    if (!cfg.settings.mapbox_public_token || !cfg.settings.mapbox_public_token.startsWith('pk.')) {
+      cfg.settings.mapbox_public_token = (process.env.MAPBOX_PUBLIC_TOKEN || process.env.MAPBOX_TOKEN || FALLBACK_MAPBOX_TOKEN).trim();
+    }
     _cache = cfg;
+
+    // 1. Try writing to disk
+    try {
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), 'utf8');
+    } catch (e) {
+      console.warn('[PricingService] Local disk write skipped (ephemeral/read-only):', e.message);
+    }
+
+    // 2. Persist to Supabase admin_settings
+    syncPricingToSupabase(cfg).catch(err => {
+      console.warn('[PricingService] Supabase sync deferred:', err.message);
+    });
+
     return true;
   } catch (err) {
     console.error('[PricingService] Error saving pricing_config.json:', err.message);
     return false;
   }
 }
+
 
 /**
  * Normalizes place name for robust matching

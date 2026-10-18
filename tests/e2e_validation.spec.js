@@ -112,4 +112,111 @@ test.describe('K3K3 PWA, Socket, and Regional Search Validation', () => {
     expect(firstSuggestionText.toLowerCase()).toContain('upsa');
   });
 
+  test('passenger service area evaluation allows Accra when activated and handles inactive zones correctly', async ({ page }) => {
+    const dashPath = 'file:///' + path.resolve(__dirname, '../passenger/dashboard.html').replace(/\\/g, '/');
+    await page.goto(dashPath);
+
+    const results = await page.evaluate(() => {
+      // 1. Simulate Greater Accra being ACTIVE in cache
+      window._activeServiceAreasCache = {
+        success: true,
+        regions: [
+          { id: 'volta', active: true, cities: [{ id: 'ho', active: true }] },
+          { id: 'greater_accra', active: true, cities: [{ id: 'accra', active: true }, { id: 'tema', active: true }] },
+          { id: 'ashanti', active: false, cities: [{ id: 'kumasi', active: false }] }
+        ]
+      };
+
+      // Test active Accra
+      const accraEvalActive = evaluateServiceAreaClient('Accra Mall', [5.6225, -0.1770]);
+      const upsaEvalActive = evaluateServiceAreaClient('University of Professional Studies, Accra (UPSA)', [5.6548, -0.1704]);
+      const accraGeofenceActive = isInsideHoVoltaServiceZone(5.6548, -0.1704);
+
+      // Test active Ho
+      const hoEvalActive = evaluateServiceAreaClient('Ho Central Market', [6.6012, 0.4688]);
+      const hoGeofenceActive = isInsideHoVoltaServiceZone(6.6012, 0.4688);
+
+      // Test inactive region (Kumasi)
+      const kumasiEval = evaluateServiceAreaClient('KNUST Campus, Kumasi', [6.6885, -1.6244]);
+
+      // 2. Now simulate Greater Accra being INACTIVE
+      window._activeServiceAreasCache = {
+        success: true,
+        regions: [
+          { id: 'volta', active: true, cities: [{ id: 'ho', active: true }] },
+          { id: 'greater_accra', active: false, cities: [{ id: 'accra', active: false }] }
+        ]
+      };
+      const accraEvalInactive = evaluateServiceAreaClient('Accra Mall', [5.6225, -0.1770]);
+
+      return {
+        accraEvalActive,
+        upsaEvalActive,
+        accraGeofenceActive,
+        hoEvalActive,
+        hoGeofenceActive,
+        kumasiEval,
+        accraEvalInactive
+      };
+    });
+
+    // When Accra is active, it must be allowed!
+    expect(results.accraEvalActive.allowed).toBe(true);
+    expect(results.accraEvalActive.status).toBe('ACTIVE');
+    expect(results.upsaEvalActive.allowed).toBe(true);
+    expect(results.accraGeofenceActive).toBe(true);
+
+    // Ho is always allowed
+    expect(results.hoEvalActive.allowed).toBe(true);
+    expect(results.hoGeofenceActive).toBe(true);
+
+    // Inactive Kumasi must be blocked
+    expect(results.kumasiEval.allowed).toBe(false);
+    expect(results.kumasiEval.status).toBe('COMING_SOON');
+
+    // When Accra is deactivated, it must be blocked
+    expect(results.accraEvalInactive.allowed).toBe(false);
+    expect(results.accraEvalInactive.status).toBe('COMING_SOON');
+  });
+
+  test('admin/pricing-cms.html initializes simulator map cleanly without throwing Mapbox errors', async ({ page }) => {
+    const cmsPath = 'file:///' + path.resolve(__dirname, '../admin/pricing-cms.html').replace(/\\/g, '/');
+
+    // Listen for console error
+    const pageErrors = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') pageErrors.push(msg.text());
+    });
+    page.on('pageerror', err => pageErrors.push(err.message));
+
+    // Fake admin login token so RBAC guard allows opening pricing-cms.html
+    await page.addInitScript(() => {
+      localStorage.setItem('k3k3_admin_token', 'test_admin_token');
+      localStorage.setItem('current_admin', JSON.stringify({
+        id: 'admin_1',
+        name: 'Super Admin',
+        role: 'admin',
+        allowedPages: ['pricing-cms.html']
+      }));
+    });
+
+    await page.goto(cmsPath);
+
+    // Switch to simulator tab and initialize simulator map
+    const simResult = await page.evaluate(async () => {
+      switchTab('simulator');
+      initSimulatorMap();
+      return {
+        hasSimMap: Boolean(window.simMap || window.simLeafletMap),
+        hasContainer: Boolean(document.getElementById('simMapContainer'))
+      };
+    });
+
+    expect(simResult.hasContainer).toBe(true);
+    // Ensure no unhandled access token crash occurred
+    const hasMapboxTokenError = pageErrors.some(e => e.includes('An API access token is required to use Mapbox GL'));
+    expect(hasMapboxTokenError).toBe(false);
+  });
+
 });
+

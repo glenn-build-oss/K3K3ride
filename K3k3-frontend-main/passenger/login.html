@@ -1129,9 +1129,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedPhone = localStorage.getItem('k3k3_passenger_phone');
-            if (savedPhone && document.getElementById('phoneInput')) {
-                document.getElementById('phoneInput').value = savedPhone;
+            // Keep phone input empty on portal load so previous accounts are never exposed
+            const phoneInputEl = document.getElementById('phoneInput');
+            if (phoneInputEl) {
+                phoneInputEl.value = '';
             }
 
             ['phoneInput', 'signupPhone'].forEach(id => {
@@ -1257,7 +1258,10 @@
                         window.location.href = 'dashboard.html';
                     }, 900);
                 } else {
-                    showToast(data.error || 'Invalid code.', 'error');
+                    const errMsg = (data && data.error && !data.error.includes('123456') && !data.error.toLowerCase().includes('master'))
+                        ? data.error
+                        : 'Invalid verification code. Please check the code sent to your phone and try again.';
+                    showToast(errMsg, 'error');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Continue';
                 }

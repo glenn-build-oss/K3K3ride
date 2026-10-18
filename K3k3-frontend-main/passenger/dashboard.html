@@ -7305,12 +7305,15 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <div style="font-size:.78rem;color:var(--muted);margin:4px 0 14px">Type any pickup &amp; drop-off in Ho or use GPS</div>
+        <div style="font-size:.78rem;color:var(--muted);margin:4px 0 14px">Type any pickup &amp; drop-off in your area or use GPS</div>
 
         <!-- Recent Trips with Clock Icon (Returning Passengers Only) -->
         <div class="recent-trips-box" id="recentTripsBox" style="display:none">
-          <div class="recent-trips-hdr">
-            <i class="fas fa-clock"></i> Recent Trips
+          <div class="recent-trips-hdr" style="display:flex;align-items:center;justify-content:space-between">
+            <span><i class="fas fa-clock"></i> Recent Trips</span>
+            <button type="button" onclick="clearRecentTrips(event)" title="Clear recent trips history" style="background:none;border:none;color:var(--muted);font-size:0.75rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+              <i class="fas fa-trash-can"></i> Clear
+            </button>
           </div>
           <div id="recentTripsList"></div>
         </div>
@@ -7909,25 +7912,18 @@
 
   <!-- Geofencing Out of Service Area Notice Modal -->
   <div class="rider-profile-modal-backdrop" id="serviceAreaNoticeModal" style="display:none">
-    <div class="rider-profile-modal-box" style="max-width:440px">
-      <div style="padding:22px;text-align:center">
-        <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,214,10,0.15);border:2px solid var(--yellow);color:var(--yellow);display:inline-flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:14px">
-          <i class="fas fa-map-location-dot"></i>
+    <div class="rider-profile-modal-box" style="max-width:420px">
+      <div style="padding:24px 20px;text-align:center">
+        <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,214,10,0.14);border:2px solid var(--yellow);color:var(--yellow);display:inline-flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:14px">
+          <i class="fas fa-location-dot"></i>
         </div>
-        <h3 style="font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:8px">K3K3ride Service Area</h3>
-        <p style="font-size:.86rem;color:var(--text-2);line-height:1.45;margin-bottom:16px">
-          We noticed your current location is outside our service area. 
-          <strong style="color:var(--yellow);display:block;margin-top:4px">K3K3ride currently operates exclusively in Ho, Volta Region (Ghana).</strong>
-        </p>
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:20px;line-height:1.4">
-          Pickups are available at Ho campuses (HTU, UHAS, Sokode), healthcare centres (Trafalgar, Municipal), and central stations. You can explore Ho stations to preview fares or plan a trip!
+        <h3 style="font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:8px">Outside Service Area</h3>
+        <p id="serviceAreaNoticeMsg" style="font-size:.88rem;color:var(--text-2);line-height:1.5;margin-bottom:18px">
+          K3K3ride is not available in your location yet. We are actively expanding across Ghana and working to bring fast, affordable rides to your region soon.
         </p>
         <div style="display:flex;flex-direction:column;gap:10px">
-          <button type="button" onclick="exploreHoStations()" style="width:100%;height:46px;background:var(--yellow);color:var(--black);border:none;border-radius:var(--r);font-weight:800;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-            <i class="fas fa-compass"></i> Explore Ho Stations & Fares
-          </button>
-          <button type="button" onclick="closeServiceAreaNotice()" style="width:100%;height:40px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--r);font-weight:600;font-size:.82rem;cursor:pointer">
-            Dismiss
+          <button type="button" onclick="closeServiceAreaNotice()" style="width:100%;height:44px;background:var(--yellow);color:var(--black);border:none;border-radius:var(--r);font-weight:800;font-size:.88rem;cursor:pointer">
+            Got It
           </button>
         </div>
       </div>
@@ -7950,7 +7946,7 @@
 
       <h3 class="location-prompt-title">Enable Live Location</h3>
       <p class="location-prompt-desc">
-        Quickly connect with nearby drivers and get accurate pickups in Ho.
+        Quickly connect with nearby drivers and get accurate pickups at your spot.
       </p>
 
       <div class="location-benefit-list">
@@ -7958,7 +7954,7 @@
           <div class="loc-benefit-icon"><i class="fas fa-map-pin"></i></div>
           <div class="loc-benefit-text">
             <strong>Instant Pickup</strong>
-            <span>Auto-detects nearest Ho landmark</span>
+            <span>Auto-detects your nearest landmark</span>
           </div>
         </div>
         <div class="loc-benefit-item">
@@ -7978,24 +7974,9 @@
       </div>
 
       <div class="location-prompt-actions">
-        <button class="btn-location-allow" id="btnLocationAllow" type="button" onclick="requestUserLiveLocation()">
+        <button class="btn-location-allow" id="btnLocationAllow" type="button" onclick="requestUserLiveLocation()" style="width:100%">
           <i class="fas fa-location-arrow"></i> Allow Location Access
         </button>
-        <button class="btn-location-dismiss" id="btnLocationDismiss" type="button" onclick="dismissLocationPrompt()">
-          <i class="fas fa-map-pin"></i> Set Pickup Location Manually
-        </button>
-      </div>
-
-      <div class="location-quick-pickups" style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);text-align:left">
-        <div style="font-size:0.73rem;color:#94A3B8;margin-bottom:7px;font-weight:600;display:flex;align-items:center;gap:5px">
-          <i class="fas fa-compass" style="color:#FFD60A;font-size:0.8rem"></i> Or pick a popular Ho pickup spot:
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          <button type="button" onclick="selectHoPickupDirect('Ho Central Market')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">📍 Central Market</button>
-          <button type="button" onclick="selectHoPickupDirect('HSTU Main Gate')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🏛️ HTU Gate</button>
-          <button type="button" onclick="selectHoPickupDirect('Ho Teaching Hospital')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🏥 Trafalgar</button>
-          <button type="button" onclick="selectHoPickupDirect('UHAS Campus')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F1F5F9;padding:5px 9px;border-radius:14px;font-size:0.73rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🎓 UHAS</button>
-        </div>
       </div>
 
       <div class="location-prompt-footer">
@@ -9286,6 +9267,24 @@
       } catch (e) { /* silently fail */ }
     }
 
+    function clearRecentTrips(e) {
+      if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+      }
+      try {
+        localStorage.removeItem('k3k3_past_trips');
+        sessionStorage.removeItem('k3k3_past_trips');
+        localStorage.removeItem('k3k3_recent_trips');
+        sessionStorage.removeItem('k3k3_recent_trips');
+      } catch (_) {}
+      const recentBox = document.getElementById('recentTripsBox');
+      if (recentBox) recentBox.style.display = 'none';
+      const recentList = document.getElementById('recentTripsList');
+      if (recentList) recentList.innerHTML = '';
+      if (typeof showToast === 'function') showToast('Recent trips cleared', 'info');
+    }
+
     /* ══════════════════════════════════════════
        Book Ride Modal
     ══════════════════════════════════════════ */
@@ -9303,20 +9302,20 @@
       if (step3) step3.style.display = 'none';
       if (stepInactive) stepInactive.style.display = 'none';
 
-      // Past trips with clock icon: ONLY shown if returning passenger has history
+      // Past trips with clock icon: ONLY shown if returning passenger has history (max 2 to avoid clutter)
       const recentTrips = getRecentTrips();
       const recentBox = document.getElementById('recentTripsBox');
       const recentList = document.getElementById('recentTripsList');
       if (recentTrips && recentTrips.length > 0 && recentBox && recentList) {
-        recentList.innerHTML = recentTrips.slice(0, 3).map(t => {
+        recentList.innerHTML = recentTrips.slice(0, 2).map(t => {
           const safeP = (t.pickup || '').replace(/'/g, "\\'");
           const safeD = (t.dest || '').replace(/'/g, "\\'");
           return `
             <div class="recent-trip-item" onclick="quickSelectPastTrip('${safeP}', '${safeD}')">
               <div class="recent-trip-icon"><i class="fas fa-clock"></i></div>
               <div class="recent-trip-text">
-                <div class="recent-trip-dest">${t.dest || 'Campus'}</div>
-                <div class="recent-trip-from"><i class="fas fa-location-dot" style="font-size:0.65rem;color:#10B981"></i> From ${t.pickup || 'Ho'}</div>
+                <div class="recent-trip-dest">${t.dest || 'Destination'}</div>
+                <div class="recent-trip-from"><i class="fas fa-location-dot" style="font-size:0.65rem;color:#10B981"></i> From ${t.pickup || 'Pickup'}</div>
               </div>
               <div class="recent-trip-arrow"><i class="fas fa-chevron-right"></i></div>
             </div>
@@ -9324,7 +9323,7 @@
         }).join('');
         recentBox.style.display = 'block';
       } else if (recentBox) {
-        // First-time rider: completely hidden! Only "Where are you going?" and clean inputs appear
+        // First-time rider or cleared: completely hidden!
         recentBox.style.display = 'none';
       }
 
@@ -9695,14 +9694,14 @@
             navigator.geolocation.getCurrentPosition(
               pRef => applyCoords(pRef.coords.latitude, pRef.coords.longitude, true),
               () => {},
-              { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+              { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
             );
           } catch (_) {}
         },
         err => {
           fallbackPickup();
         },
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
       );
     }
 
@@ -9745,31 +9744,11 @@
 
       let suggestions = [];
 
-      // 1. Local landmarks for instant response (Zero network delay)
-      const qLower = query.toLowerCase();
-      const localMatches = (window.HO_PLACES || []).filter(p => {
-        return p.name.toLowerCase().includes(qLower) ||
-               p.area.toLowerCase().includes(qLower) ||
-               (p.tags && p.tags.some(t => t.includes(qLower)));
-      }).slice(0, 5).map(p => ({
-        name: p.name,
-        area: p.area,
-        icon: p.icon || 'fa-map-pin',
-        lat: p.lat,
-        lng: p.lng,
-        source: 'local'
-      }));
-
-      suggestions.push(...localMatches);
-
-      // Render local matches immediately so UI never lags
-      renderSuggestions(box, inpId, suggId, suggestions, query);
-
       // Calculate proximity dynamically: if searching drop-off, bias around pickup coordinates;
       // if searching pickup, bias around current GPS position!
       let proxLng = 0.4688;
       let proxLat = 6.6012;
-      if (_pickupCoords && Array.isArray(_pickupCoords) && _pickupCoords.length >= 2) {
+      if (type === 'dest' && _pickupCoords && Array.isArray(_pickupCoords) && _pickupCoords.length >= 2) {
         proxLat = _pickupCoords[0];
         proxLng = _pickupCoords[1];
       } else {
@@ -9781,6 +9760,32 @@
         }
       }
       const proximity = `${proxLng},${proxLat}`;
+
+      // 1. Local landmarks for instant response, dynamically sorted by proximity to passenger's current region / position
+      const qLower = query.toLowerCase();
+      const localMatches = (window.HO_PLACES || []).filter(p => {
+        return p.name.toLowerCase().includes(qLower) ||
+               p.area.toLowerCase().includes(qLower) ||
+               (p.tags && p.tags.some(t => t.includes(qLower)));
+      }).map(p => {
+        const dLat = (p.lat - proxLat) * 111;
+        const dLng = (p.lng - proxLng) * 111 * Math.cos(proxLat * Math.PI / 180);
+        const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+        return {
+          name: p.name,
+          area: p.area,
+          icon: p.icon || 'fa-map-pin',
+          lat: p.lat,
+          lng: p.lng,
+          distKm,
+          source: 'local'
+        };
+      }).sort((a, b) => a.distKm - b.distKm).slice(0, 5);
+
+      suggestions.push(...localMatches);
+
+      // Render local matches immediately so UI never lags
+      renderSuggestions(box, inpId, suggId, suggestions, query);
 
       // 2. Fetch Mapbox Token dynamically in background if not ready
       if (!_modalMapboxToken) {
@@ -10168,6 +10173,12 @@
           HO_COORDINATES[clean] = [found.lat, found.lng];
           return [found.lat, found.lng];
         }
+      }
+      // If user has active GPS coordinates in session, bias to their GPS spot instead of blindly forcing Ho Central
+      const userLat = parseFloat(sessionStorage.getItem('k3k3_lat'));
+      const userLng = parseFloat(sessionStorage.getItem('k3k3_lng'));
+      if (!isNaN(userLat) && !isNaN(userLng)) {
+        return [userLat, userLng];
       }
       return [6.6012, 0.4688]; // Default to Ho Central
     }
@@ -11284,12 +11295,7 @@
       }
     }
 
-    function selectHoPickupDirect(landmarkName) {
-      const coords = HO_COORDINATES[landmarkName] || [6.6018, 0.4685];
-      applyPickupLocation(landmarkName, coords[0], coords[1]);
-      dismissLocationPrompt();
-      showToast(`Pickup set to ${landmarkName}!`, 'success');
-    }
+
 
     async function requestUserLiveLocation() {
       const btn = document.querySelector('#enableLocationModal .btn-location-allow');
@@ -11362,16 +11368,16 @@
             navigator.geolocation.getCurrentPosition(
               (pRef) => onLocationSuccess(pRef, true),
               () => {},
-              { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+              { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
             );
           } catch (_) {}
         },
         (err) => {
-          console.warn('[Geolocation Stage 1 notice]', err ? (err.message || err.code) : 'Notice');
-          // If permission denied or position unavailable, invoke resilient Ho fallback
+          console.warn('[Geolocation notice]', err ? (err.message || err.code) : 'Notice');
+          // If permission denied or position unavailable, invoke resilient pickup resolution
           fallbackToHoPickup(err.code === 1 ? 'Permission denied' : 'Signal unavailable');
         },
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 300000 }
+        { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
       );
     }
 
@@ -11476,7 +11482,7 @@
         const socketTarget = window.K3K3_SOCKET_URL || localStorage.getItem('k3k3_socket_url') || API_BASE;
         passengerSocket = io(socketTarget, {
           path: '/socket.io',
-          transports: ['websocket', 'polling'],
+          transports: ['polling', 'websocket'],
           reconnection: true,
           reconnectionAttempts: 2,
           reconnectionDelay: 1500,
@@ -12040,16 +12046,22 @@
       closeShareRideModal();
     }
 
-    /* ─── Ho, Volta Region Service Zone Geofence ─── */
-    function isInsideHoVoltaServiceZone(lat, lng) {
+    /* ─── Active Operating Service Zones Geofence ─── */
+    function isInsideHoVoltaServiceZone(lat, lng, locationName = '') {
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
-      if (isNaN(latitude) || isNaN(longitude)) return true; // Named pickup stations pass
-      const inBoundingBox = (latitude >= 6.45 && latitude <= 6.78 && longitude >= 0.30 && longitude <= 0.65);
-      const dLat = (latitude - 6.6012) * 111;
-      const dLng = (longitude - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
-      const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
-      return inBoundingBox || distKm <= 35;
+      const name = (locationName || _pickupVal || '').trim();
+
+      // Dynamically evaluate against all activated Ghana service areas (Ho, Greater Accra, etc.)
+      if (!isNaN(latitude) && !isNaN(longitude)) {
+        const check = evaluateServiceAreaClient(name, [latitude, longitude]);
+        return Boolean(check && check.allowed);
+      }
+      if (name) {
+        const check = evaluateServiceAreaClient(name, null);
+        return Boolean(check && check.allowed);
+      }
+      return true;
     }
 
     function checkUserLocationServiceZone(lat, lng) {
@@ -12070,12 +12082,6 @@
 
     function exploreHoStations() {
       closeServiceAreaNotice();
-      openBookModal();
-      const pInput = document.getElementById('pickupInput');
-      const pSel = document.getElementById('pickupSelect');
-      if (pInput) pInput.value = 'Ho Central Market';
-      if (pSel) pSel.value = 'Ho Central Market';
-      showToast('Pickup set to Ho Central Market. Select your destination in Ho!', 'info');
     }
 
     function viewLiveTripTracking() {
@@ -12591,16 +12597,16 @@
       const dest   = _destVal;
       const fare   = _rideType === 'alone' ? (_campusFare * (_aloneMultiplier || 1.8)) : _campusFare;
 
-      // Geofence pre-flight check: Ensure pickup location is inside Ho / Volta Region
+      // Geofence pre-flight check: Ensure pickup location is inside an activated Ghana service region
       const pCoord = (_pinAdjustLat && _pinAdjustLng) ? [_pinAdjustLat, _pinAdjustLng] : (getHoCoordinate(pickup) || [
         parseFloat(sessionStorage.getItem('k3k3_lat') || '6.6012'),
         parseFloat(sessionStorage.getItem('k3k3_lng') || '0.4688')
       ]);
 
-      if (!isInsideHoVoltaServiceZone(pCoord[0], pCoord[1])) {
+      if (!isInsideHoVoltaServiceZone(pCoord[0], pCoord[1], pickup)) {
         closeBookModal();
-        showServiceAreaNotice(pCoord[0], pCoord[1]);
-        showToast("K3K3ride isn't available in this location yet. We currently serve Ho & Volta Region!", "warn");
+        const areaEval = evaluateServiceAreaClient(pickup, pCoord);
+        showInactiveServiceArea(areaEval);
         return;
       }
 
@@ -13522,13 +13528,29 @@
     ══════════════════════════════════════════ */
     let _activeServiceAreasCache = null;
 
+    try {
+      const savedAreas = localStorage.getItem('k3k3_service_areas_cache');
+      if (savedAreas) {
+        const parsed = JSON.parse(savedAreas);
+        if (parsed && Array.isArray(parsed.regions)) {
+          _activeServiceAreasCache = parsed;
+          if (typeof window !== 'undefined') window._activeServiceAreasCache = parsed;
+        }
+      }
+    } catch (_) {}
+
     async function fetchServiceAreasRegistry() {
       try {
-        const res = await fetch('/api/trips/service-areas');
+        const base = (typeof API_BASE !== 'undefined' && API_BASE) ? API_BASE : '';
+        const res = await fetch(`${base}/api/trips/service-areas?_t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          if (data && data.success) {
+          if (data && data.success && Array.isArray(data.regions)) {
             _activeServiceAreasCache = data;
+            if (typeof window !== 'undefined') window._activeServiceAreasCache = data;
+            try {
+              localStorage.setItem('k3k3_service_areas_cache', JSON.stringify(data));
+            } catch (_) {}
           }
         }
       } catch (_) {}
@@ -13537,55 +13559,255 @@
 
     function evaluateServiceAreaClient(locationName, coords) {
       const query = (locationName || '').toLowerCase().trim();
-      const lat = coords?.lat || null;
-      const lng = coords?.lng || null;
+      const lat = coords ? (Array.isArray(coords) ? parseFloat(coords[0]) : (coords.lat !== undefined ? parseFloat(coords.lat) : null)) : null;
+      const lng = coords ? (Array.isArray(coords) ? parseFloat(coords[1]) : (coords.lng !== undefined ? parseFloat(coords.lng) : null)) : null;
+      const hasCoords = (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng));
 
-      // Inactive Ghana regions check
-      const inactiveKeywords = [
-        { key: 'accra', reg: 'Greater Accra', city: 'Accra' },
-        { key: 'tema', reg: 'Greater Accra', city: 'Tema' },
-        { key: 'kumasi', reg: 'Ashanti Region', city: 'Kumasi' },
-        { key: 'obuasi', reg: 'Ashanti Region', city: 'Obuasi' },
-        { key: 'tamale', reg: 'Northern Region', city: 'Tamale' },
-        { key: 'takoradi', reg: 'Western Region', city: 'Sekondi-Takoradi' },
-        { key: 'cape coast', reg: 'Central Region', city: 'Cape Coast' },
-        { key: 'koforidua', reg: 'Eastern Region', city: 'Koforidua' },
-        { key: 'sunyani', reg: 'Bono Region', city: 'Sunyani' },
-        { key: 'techiman', reg: 'Bono East', city: 'Techiman' },
-        { key: 'wa', reg: 'Upper West', city: 'Wa' },
-        { key: 'bolgatanga', reg: 'Upper East', city: 'Bolgatanga' },
-        { key: 'dambai', reg: 'Oti Region', city: 'Dambai' }
+      // Ghana 16 Administrative Regions Directory with coordinates and bounds
+      const REGIONAL_AREAS = [
+        {
+          id: 'greater_accra',
+          name: 'Greater Accra',
+          code: 'GAR',
+          cities: [
+            {
+              id: 'accra',
+              name: 'Accra',
+              center: { lat: 5.6037, lng: -0.1870 },
+              bounds: { min_lat: 5.45, max_lat: 5.80, min_lng: -0.45, max_lng: 0.15 },
+              aliases: ['accra', 'osu', 'legon', 'circle', 'airport', 'madina', 'east legon', 'spintex', 'dansoman', 'kaneshie', 'cantonments', 'labone', 'adabraka', 'achimota', 'upsa', 'makola', 'korle bu', 'pokuase', 'adenta', 'weija', 'west hills']
+            },
+            {
+              id: 'tema',
+              name: 'Tema',
+              center: { lat: 5.6698, lng: -0.0166 },
+              bounds: { min_lat: 5.55, max_lat: 5.80, min_lng: -0.10, max_lng: 0.15 },
+              aliases: ['tema', 'community 1', 'community 25', 'ashaiman']
+            }
+          ]
+        },
+        {
+          id: 'volta',
+          name: 'Volta Region',
+          code: 'VR',
+          cities: [
+            {
+              id: 'ho',
+              name: 'Ho',
+              center: { lat: 6.6012, lng: 0.4688 },
+              bounds: { min_lat: 6.45, max_lat: 6.78, min_lng: 0.30, max_lng: 0.65 },
+              aliases: ['ho', 'uhas', 'sokode', 'kpodzi', 'bankoe', 'ahoe', 'dome', 'poly', 'heve', 'civic centre', 'ho main market', 'asogli', 'toko', 'trafalgar', 'mirage', 'lokoe', 'mawuli', 'fiave']
+            },
+            {
+              id: 'hohoe',
+              name: 'Hohoe',
+              center: { lat: 7.1519, lng: 0.4736 },
+              aliases: ['hohoe']
+            }
+          ]
+        },
+        {
+          id: 'ashanti',
+          name: 'Ashanti Region',
+          code: 'AR',
+          cities: [
+            {
+              id: 'kumasi',
+              name: 'Kumasi',
+              center: { lat: 6.6885, lng: -1.6244 },
+              bounds: { min_lat: 6.50, max_lat: 6.85, min_lng: -1.80, max_lng: -1.45 },
+              aliases: ['kumasi', 'knust', 'adum', 'bantama', 'ayeduase', 'kejetia', 'asokwa', 'tafo', 'tanoso']
+            }
+          ]
+        },
+        {
+          id: 'northern',
+          name: 'Northern Region',
+          code: 'NR',
+          cities: [{ id: 'tamale', name: 'Tamale', center: { lat: 9.4008, lng: -0.8393 }, aliases: ['tamale'] }]
+        },
+        {
+          id: 'western',
+          name: 'Western Region',
+          code: 'WR',
+          cities: [{ id: 'takoradi', name: 'Sekondi-Takoradi', center: { lat: 4.9016, lng: -1.7831 }, aliases: ['takoradi', 'sekondi'] }]
+        },
+        {
+          id: 'central',
+          name: 'Central Region',
+          code: 'CR',
+          cities: [{ id: 'cape_coast', name: 'Cape Coast', center: { lat: 5.1054, lng: -1.2466 }, aliases: ['cape coast', 'ucc'] }]
+        },
+        {
+          id: 'eastern',
+          name: 'Eastern Region',
+          code: 'ER',
+          cities: [{ id: 'koforidua', name: 'Koforidua', center: { lat: 6.0945, lng: -0.2608 }, aliases: ['koforidua'] }]
+        },
+        {
+          id: 'bono',
+          name: 'Bono Region',
+          code: 'BR',
+          cities: [{ id: 'sunyani', name: 'Sunyani', center: { lat: 7.3399, lng: -2.3268 }, aliases: ['sunyani'] }]
+        },
+        {
+          id: 'bono_east',
+          name: 'Bono East',
+          code: 'BER',
+          cities: [{ id: 'techiman', name: 'Techiman', center: { lat: 7.5833, lng: -1.9333 }, aliases: ['techiman'] }]
+        },
+        {
+          id: 'ahafo',
+          name: 'Ahafo Region',
+          code: 'AHR',
+          cities: [{ id: 'goaso', name: 'Goaso', center: { lat: 6.8000, lng: -2.5167 }, aliases: ['goaso'] }]
+        },
+        {
+          id: 'savannah',
+          name: 'Savannah Region',
+          code: 'SR',
+          cities: [{ id: 'damongo', name: 'Damongo', center: { lat: 9.0833, lng: -1.8167 }, aliases: ['damongo'] }]
+        },
+        {
+          id: 'north_east',
+          name: 'North East Region',
+          code: 'NER',
+          cities: [{ id: 'nalerigu', name: 'Nalerigu', center: { lat: 10.5333, lng: -0.3667 }, aliases: ['nalerigu'] }]
+        },
+        {
+          id: 'upper_east',
+          name: 'Upper East',
+          code: 'UER',
+          cities: [{ id: 'bolgatanga', name: 'Bolgatanga', center: { lat: 10.7856, lng: -0.8514 }, aliases: ['bolgatanga', 'bolga'] }]
+        },
+        {
+          id: 'upper_west',
+          name: 'Upper West',
+          code: 'UWR',
+          cities: [{ id: 'wa', name: 'Wa', center: { lat: 10.0607, lng: -2.5099 }, aliases: ['wa'] }]
+        },
+        {
+          id: 'oti',
+          name: 'Oti Region',
+          code: 'OR',
+          cities: [{ id: 'dambai', name: 'Dambai', center: { lat: 8.0667, lng: 0.1833 }, aliases: ['dambai'] }]
+        },
+        {
+          id: 'western_north',
+          name: 'Western North',
+          code: 'WNR',
+          cities: [{ id: 'sefwiawiawso', name: 'Sefwi Wiawso', center: { lat: 6.2000, lng: -2.4833 }, aliases: ['wiawso'] }]
+        }
       ];
 
-      for (const item of inactiveKeywords) {
-        if (query.includes(item.key)) {
-          return {
-            allowed: false,
-            region_name: item.reg,
-            city_name: item.city,
-            message: `K3K3ride isn't available in ${item.city} yet. We're working to bring affordable rides to your region soon.`
-          };
+      // Merge dynamic regions status from cache with instant localStorage fallback
+      let cachedLocal = null;
+      try {
+        const raw = localStorage.getItem('k3k3_service_areas_cache');
+        if (raw) cachedLocal = JSON.parse(raw);
+      } catch (_) {}
+      const activeCache = (typeof window !== 'undefined' && window._activeServiceAreasCache && Array.isArray(window._activeServiceAreasCache.regions))
+        ? window._activeServiceAreasCache
+        : (_activeServiceAreasCache || cachedLocal);
+      const serverRegions = activeCache?.regions || [];
+      const isRegionActive = (regId) => {
+        const found = serverRegions.find(r => r.id === regId);
+        if (found) return Boolean(found.active);
+        // Volta default active, others inactive until activated
+        return regId === 'volta';
+      };
+
+      const isCityActive = (regId, cityId) => {
+        const foundReg = serverRegions.find(r => r.id === regId);
+        if (foundReg) {
+          if (!foundReg.active) return false;
+          if (Array.isArray(foundReg.cities)) {
+            const foundCity = foundReg.cities.find(c => c.id === cityId);
+            if (foundCity) return Boolean(foundCity.active !== false);
+          }
+          return true;
+        }
+        return regId === 'volta';
+      };
+
+      // 1. Coordinate Geofence & Proximity Match
+      let matchedRegion = null;
+      let matchedCity = null;
+
+      if (hasCoords) {
+        for (const reg of REGIONAL_AREAS) {
+          for (const city of reg.cities) {
+            if (city.bounds) {
+              const b = city.bounds;
+              if (lat >= b.min_lat && lat <= b.max_lat && lng >= b.min_lng && lng <= b.max_lng) {
+                matchedRegion = reg;
+                matchedCity = city;
+                break;
+              }
+            }
+            if (city.center) {
+              const dLat = (lat - city.center.lat) * 111;
+              const dLng = (lng - city.center.lng) * 111 * Math.cos(city.center.lat * Math.PI / 180);
+              const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+              if (distKm <= 35.0) {
+                matchedRegion = reg;
+                matchedCity = city;
+                break;
+              }
+            }
+          }
+          if (matchedRegion) break;
         }
       }
 
-      // If coordinates are explicitly far outside Ho (Volta Region) bounds
-      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-        const inHoBounds = (lat >= 6.45 && lat <= 6.78 && lng >= 0.30 && lng <= 0.65);
-        const dLat = (lat - 6.6012) * 111;
-        const dLng = (lng - 0.4688) * 111 * Math.cos(6.6012 * Math.PI / 180);
-        const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
-        if (!inHoBounds && distKm > 35.0) {
-          return {
-            allowed: false,
-            region_name: 'Out of Operating Zone',
-            city_name: 'Selected Area',
-            message: `K3K3ride isn't available in this location yet. We currently operate exclusively in Ho, Volta Region.`
-          };
+      // 2. Text Search Match
+      if (!matchedRegion && query) {
+        for (const reg of REGIONAL_AREAS) {
+          if (query.includes(reg.name.toLowerCase()) || query.includes(reg.id.replace('_', ' '))) {
+            matchedRegion = reg;
+            matchedCity = reg.cities[0] || null;
+            break;
+          }
+          for (const city of reg.cities) {
+            if ((city.aliases || []).some(a => query.includes(a))) {
+              matchedRegion = reg;
+              matchedCity = city;
+              break;
+            }
+          }
+          if (matchedRegion) break;
         }
       }
 
-      // Default: Active operating area (Ho, Volta Region)
-      return { allowed: true, region_name: 'Volta Region', city_name: 'Ho' };
+      // 3. Default fallback: Ho (Volta Region)
+      if (!matchedRegion) {
+        matchedRegion = REGIONAL_AREAS.find(r => r.id === 'volta');
+        matchedCity = matchedRegion.cities[0];
+      }
+
+      // 4. Operating Status Evaluation
+      const active = isRegionActive(matchedRegion.id) && isCityActive(matchedRegion.id, matchedCity?.id);
+
+      if (active) {
+        return {
+          allowed: true,
+          region_name: matchedRegion.name,
+          city_name: matchedCity ? matchedCity.name : matchedRegion.name,
+          status: 'ACTIVE'
+        };
+      } else {
+        return {
+          allowed: false,
+          region_name: matchedRegion.name,
+          city_name: matchedCity ? matchedCity.name : matchedRegion.name,
+          status: 'COMING_SOON',
+          message: `K3K3ride isn't available in ${matchedCity ? matchedCity.name : matchedRegion.name} yet. We're working to bring affordable rides to your region soon.`
+        };
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.evaluateServiceAreaClient = evaluateServiceAreaClient;
+      window.isInsideHoVoltaServiceZone = isInsideHoVoltaServiceZone;
     }
 
     function showInactiveServiceArea(areaData) {

@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const supabaseService = require('./supabase.service');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const SERVICE_AREAS_FILE = path.join(DATA_DIR, 'service_areas.json');
@@ -28,6 +29,10 @@ class ServiceAreaService {
   constructor() {
     this.config = this.loadConfig();
     this.launchInterests = this.loadLaunchInterests();
+    // Synchronize from Supabase admin_settings on startup in background
+    this.syncFromSupabase().catch(err => {
+      console.warn('[ServiceAreaService] Initial Supabase sync:', err.message);
+    });
   }
 
   loadConfig() {
@@ -42,16 +47,75 @@ class ServiceAreaService {
     return { regions: [] };
   }
 
+  async syncFromSupabase() {
+    try {
+      const remote = await supabaseService.getAdminSetting('ghana_service_areas');
+      if (remote && remote.value) {
+        const parsed = typeof remote.value === 'string' ? JSON.parse(remote.value) : remote.value;
+        if (parsed && Array.isArray(parsed.regions) && parsed.regions.length > 0) {
+          // Compare timestamps: don't overwrite if local config has a newer updated_at timestamp
+          if (this.config && this.config.updated_at && parsed.updated_at) {
+            if (new Date(this.config.updated_at).getTime() > new Date(parsed.updated_at).getTime()) {
+              return false;
+            }
+          }
+          this.config = parsed;
+          try {
+            fs.writeFileSync(SERVICE_AREAS_FILE, JSON.stringify(this.config, null, 2), 'utf8');
+          } catch (_) {}
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('[ServiceAreaService] syncFromSupabase warning:', err.message);
+    }
+    return false;
+  }
+
+  async syncToSupabase() {
+    if (this._syncPromise) {
+      await this._syncPromise.catch(() => {});
+    }
+    const configSnapshot = JSON.parse(JSON.stringify(this.config));
+    this._syncPromise = (async () => {
+      try {
+        await supabaseService.setAdminSetting(
+          'ghana_service_areas',
+          configSnapshot,
+          'Ghana 16 administrative regions operational status, pricing and geofences'
+        );
+        return true;
+      } catch (err) {
+        console.warn('[ServiceAreaService] syncToSupabase warning:', err.message);
+        return false;
+      }
+    })();
+    return this._syncPromise;
+  }
+
   saveConfig() {
     try {
       this.config.updated_at = new Date().toISOString();
-      fs.writeFileSync(SERVICE_AREAS_FILE, JSON.stringify(this.config, null, 2), 'utf8');
+      // 1. Save to local disk if writable
+      try {
+        fs.writeFileSync(SERVICE_AREAS_FILE, JSON.stringify(this.config, null, 2), 'utf8');
+      } catch (e) {
+        // Ephemeral or read-only filesystem (e.g. Vercel)
+        console.warn('[ServiceAreaService] Disk write skipped (ephemeral/read-only):', e.message);
+      }
+
+      // 2. Persist to Supabase admin_settings table
+      this.syncToSupabase().catch(err => {
+        console.warn('[ServiceAreaService] Background Supabase sync deferred:', err.message);
+      });
+
       return true;
     } catch (err) {
       console.error('[ServiceAreaService] Error saving service_areas.json:', err.message);
       return false;
     }
   }
+
 
   loadLaunchInterests() {
     try {

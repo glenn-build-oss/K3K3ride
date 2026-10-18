@@ -82,7 +82,7 @@ async function runTests() {
   console.log('\n6️⃣ Testing Invalid Code Rejection...');
   const badCheck = await supabaseService.verifyOTP(testPhone, '999999');
   assert.strictEqual(badCheck.valid, false, 'Invalid code must be rejected');
-  assert.ok(badCheck.error.includes('123456'), 'Error message must reference master code 123456');
+  assert.ok(badCheck.error.includes('Invalid verification code'), 'Error message must be professional');
   console.log('   ✅ Invalid code rejected with guidance: "' + badCheck.error + '"');
 
   console.log('\n🎉 ALL OTP AND ROUTE ALIAS TESTS PASSED SUCCESSFULLY!\n');
