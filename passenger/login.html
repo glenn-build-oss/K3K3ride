@@ -1116,6 +1116,11 @@
                             `We sent a 6-digit verification code. Enter it below to log in.`;
                         showToast('Verification code sent!', 'success');
                     }
+                } else if (data.notRegistered || data.code === 'USER_NOT_REGISTERED' || res.status === 404) {
+                    showToast('This phone number is not registered. Please sign up.', 'error');
+                    const signupPhoneEl = document.getElementById('signupPhone');
+                    if (signupPhoneEl) signupPhoneEl.value = cleanPhone;
+                    showSignup();
                 } else {
                     showToast(data.error || 'Failed to send verification code.', 'error');
                 }
@@ -1260,7 +1265,7 @@
                 } else {
                     const errMsg = (data && data.error && !data.error.includes('123456') && !data.error.toLowerCase().includes('master'))
                         ? data.error
-                        : 'Invalid verification code. Please check the code sent to your phone and try again.';
+                        : 'Incorrect verification code. Please check the code and try again.';
                     showToast(errMsg, 'error');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Continue';
@@ -1376,6 +1381,11 @@
                     document.getElementById('phoneStep').style.display = 'none';
                     document.getElementById('verifyStep').classList.add('show');
                     document.getElementById('d1').focus();
+                } else if (data.alreadyRegistered || data.code === 'USER_ALREADY_REGISTERED' || res.status === 409) {
+                    showToast('This phone number is already registered. Please log in.', 'info');
+                    const phoneInputEl = document.getElementById('phoneInput');
+                    if (phoneInputEl) phoneInputEl.value = cleanPhone;
+                    showLogin();
                 } else {
                     showToast(data.error || 'Registration failed.', 'error');
                 }

@@ -278,14 +278,6 @@ async function storeOTP(phone, code, purpose, expiryMinutes = 5) {
 async function verifyOTP(phone, code) {
   const cleanCode = String(code || '').trim();
 
-  // Universal master dev/QA bypass codes
-  if (cleanCode === '123456' || cleanCode === '000000') {
-    console.log(`[Auth] Master dev code ${cleanCode} accepted for ${phone}`);
-    return { 
-      valid: true, 
-      otp: { phone, code: cleanCode, purpose: 'master_dev_code', created_at: new Date().toISOString() } 
-    };
-  }
 
   // Normalize phone variants (+233..., 050..., 233...) so format mismatches never block valid codes
   const rawDigits = String(phone || '').replace(/\D/g, '');
@@ -349,7 +341,7 @@ async function verifyOTP(phone, code) {
 
   return { 
     valid: false, 
-    error: 'Invalid verification code. Please check the code sent to your phone and try again.' 
+    error: 'Incorrect verification code. Please check the code and try again.' 
   };
 }
 

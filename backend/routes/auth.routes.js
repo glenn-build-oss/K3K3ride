@@ -152,6 +152,32 @@ router.post('/passenger/send-otp', async (req, res) => {
       return res.status(400).json({ success: false, error: err.message });
     }
 
+    // Check if phone number is registered in the database for a passenger before sending OTP
+    const existingPassenger = await findUserByPhone(normalizedPhone, 'passenger');
+    let registeredUser = existingPassenger;
+    let registeredEmail = existingPassenger?.email;
+    if (!registeredUser) {
+      const allUsers = await findAllUsersByPhone(normalizedPhone);
+      const matched = allUsers.find(u => u.role === 'passenger') || (allUsers.length > 0 ? allUsers[0] : null);
+      if (matched) {
+        registeredUser = matched;
+        registeredEmail = matched.email;
+      }
+    }
+
+    if (!registeredUser) {
+      return res.status(404).json({
+        success: false,
+        notRegistered: true,
+        code: 'USER_NOT_REGISTERED',
+        error: 'This phone number is not registered. Please sign up to create an account.'
+      });
+    }
+
+    if (!registeredEmail && req.body.email && typeof req.body.email === 'string') {
+      registeredEmail = req.body.email.trim();
+    }
+
     // Generate 6-digit OTP
     const otpCode = generateOTP();
     try {
@@ -162,18 +188,6 @@ router.post('/passenger/send-otp', async (req, res) => {
       await dbStoreOTP(normalizedPhone, otpCode, 'login');
     } catch (storeErr) {
       console.warn('[Auth] Supabase dbStoreOTP warning (in-memory active):', storeErr.message);
-    }
-
-    // Look up user's registered profile to retrieve the email they provided when signing up
-    const existingPassenger = await findUserByPhone(normalizedPhone, 'passenger');
-    let registeredEmail = existingPassenger?.email;
-    if (!registeredEmail) {
-      const allUsers = await findAllUsersByPhone(normalizedPhone);
-      const existingUser = allUsers.find(u => u.role === 'passenger') || allUsers[0];
-      registeredEmail = existingUser?.email;
-    }
-    if (!registeredEmail && req.body.email && typeof req.body.email === 'string') {
-      registeredEmail = req.body.email.trim();
     }
 
     // 1. Attempt delivery via Moolre SMS API first
@@ -269,34 +283,30 @@ router.post('/passenger/verify-otp', async (req, res) => {
       }
     }
 
-    // Verify OTP (with dual-layer DB/Memory fallback and master code support)
+    // Verify OTP (with dual-layer DB/Memory fallback)
     const cleanOtp = String(otp || '').trim();
     let result = { valid: false };
 
-    if (cleanOtp === '123456' || cleanOtp === '000000') {
-      result = { valid: true };
-    } else {
-      try {
-        result = await dbVerifyOTP(normalizedPhone, cleanOtp);
-      } catch (err) {
-        console.warn('[Auth] dbVerifyOTP failed, checking memory:', err.message);
-      }
+    try {
+      result = await dbVerifyOTP(normalizedPhone, cleanOtp);
+    } catch (err) {
+      console.warn('[Auth] dbVerifyOTP failed, checking memory:', err.message);
+    }
 
-      if (!result || !result.valid) {
-        const memRes = memVerifyOTP(normalizedPhone, cleanOtp);
-        if (memRes && memRes.valid) {
-          result = { valid: true };
-        } else if (phone !== normalizedPhone) {
-          const rawMemRes = memVerifyOTP(phone, cleanOtp);
-          if (rawMemRes && rawMemRes.valid) result = { valid: true };
-        }
+    if (!result || !result.valid) {
+      const memRes = memVerifyOTP(normalizedPhone, cleanOtp);
+      if (memRes && memRes.valid) {
+        result = { valid: true };
+      } else if (phone !== normalizedPhone) {
+        const rawMemRes = memVerifyOTP(phone, cleanOtp);
+        if (rawMemRes && rawMemRes.valid) result = { valid: true };
       }
     }
 
     if (!result || !result.valid) {
       return res.status(400).json({ 
         success: false, 
-        error: (result && result.error && !result.error.includes('123456')) ? result.error : 'Invalid verification code. Please check the code sent to your phone and try again.' 
+        error: 'Incorrect verification code. Please check the code sent to your phone and try again.' 
       });
     }
 
@@ -483,6 +493,17 @@ router.post('/passenger/register', async (req, res) => {
       normalizedPhone = normalizePhone(phone);
     } catch (err) {
       return res.status(400).json({ success: false, error: err.message });
+    }
+
+    // Check if phone number is already registered for a passenger
+    const existingPassenger = await findUserByPhone(normalizedPhone, 'passenger');
+    if (existingPassenger) {
+      return res.status(409).json({
+        success: false,
+        alreadyRegistered: true,
+        code: 'USER_ALREADY_REGISTERED',
+        error: 'This phone number is already registered. Please log in.'
+      });
     }
 
     // Pre-create user with name and email (will be finalized on OTP verify)

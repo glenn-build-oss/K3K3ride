@@ -531,10 +531,6 @@
               <button type="submit" class="otp-btn" id="siSendBtn">
                 <i class="fas fa-paper-plane"></i> Send OTP
               </button>
-
-              <button type="button" class="otp-btn" id="devBypassBtn" onclick="quickDevRiderAccess()" style="margin-top:10px;background:#10B981;border-color:#10B981;color:#fff;">
-                <i class="fas fa-bolt"></i> Quick Test Access — Enter Dashboard
-              </button>
             </form>
 
             <p class="terms-note" style="margin-top:14px;">
@@ -817,12 +813,11 @@
         });
         const data = await res.json();
         if (data.success) { showToast('Verification code sent!', 'success'); return true; }
-        // Fallback in case of server message
-        showToast('Dev Mode: Use test code 123456 to continue', 'info');
-        return true;
+        showToast(data.error || 'Failed to send verification code.', 'error');
+        return false;
       } catch(e) {
-        showToast('Dev Mode: Server offline, test code is 123456', 'info');
-        return true;
+        showToast('Unable to reach server. Please try again.', 'error');
+        return false;
       }
     }
 
@@ -838,37 +833,16 @@
         if (data.success) {
           return {
             ok: true,
-            token: data.token || 'dev-token',
-            user: data.user || {
-              id: '68A4171C-0000-4000-8000-000000000001',
-              firstName: 'Glenn',
-              lastName: 'Adjei',
-              phone: phone,
-              status: 'approved'
-            },
-            status: 'approved',
+            token: data.token || '',
+            user: data.user,
+            status: data.user?.status || 'approved',
             isApproved: true
           };
         }
-      } catch(e) {}
-
-      // Test Mode Fallback: Allow 123456 or any 6-digit code to pass immediately
-      if (otp && otp.length === 6) {
-        return {
-          ok: true,
-          token: 'dev-token',
-          user: {
-            id: '68A4171C-0000-4000-8000-000000000001',
-            firstName: 'Glenn',
-            lastName: 'Adjei',
-            phone: phone,
-            status: 'approved'
-          },
-          status: 'approved',
-          isApproved: true
-        };
+        return { ok: false, error: data.error || 'Incorrect verification code. Please check the code and try again.' };
+      } catch(e) {
+        return { ok: false, error: 'Cannot reach server. Please try again.' };
       }
-      return { ok: false, msg: 'Invalid code. Please try again.' };
     }
 
     /* ══════════════════════════════════

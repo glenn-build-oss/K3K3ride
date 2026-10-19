@@ -42,17 +42,17 @@ async function runTests() {
   console.log('   ✅ dashboard.html and admin-dashboard.html correctly permitted for Admin');
   console.log('   ✅ payment-management.html and moolre-overview.html correctly permitted for Finance');
 
-  // Test 3: Master Dev OTP Verification
-  console.log('\n3️⃣ Testing Master Dev OTP Bypass (123456, 000000)...');
+  // Test 3: Bypass Codes (123456, 000000) are Strictly Removed
+  console.log('\n3️⃣ Testing Master Dev OTP Bypass Codes (123456, 000000) are REMOVED...');
   const masterCheck1 = await supabaseService.verifyOTP('+233241234567', '123456');
-  assert.strictEqual(masterCheck1.valid, true, 'Master code 123456 must always be valid');
-  assert.strictEqual(masterCheck1.otp.code, '123456');
+  assert.strictEqual(masterCheck1.valid, false, 'Bypass code 123456 must NOT be accepted');
+  assert.strictEqual(masterCheck1.error, 'Incorrect verification code. Please check the code and try again.');
 
   const masterCheck2 = await supabaseService.verifyOTP('+233241234567', '000000');
-  assert.strictEqual(masterCheck2.valid, true, 'Master code 000000 must always be valid');
+  assert.strictEqual(masterCheck2.valid, false, 'Bypass code 000000 must NOT be accepted');
+  assert.strictEqual(masterCheck2.error, 'Incorrect verification code. Please check the code and try again.');
 
-  console.log('   ✅ Master dev code 123456 verified: valid=true');
-  console.log('   ✅ Master dev code 000000 verified: valid=true');
+  console.log('   ✅ Bypass codes 123456 and 000000 successfully rejected');
 
   // Test 4: In-Memory Dual-Store OTP Generation & Verification
   console.log('\n4️⃣ Testing Dual-Layer In-Memory Storage & Verification...');
@@ -82,7 +82,7 @@ async function runTests() {
   console.log('\n6️⃣ Testing Invalid Code Rejection...');
   const badCheck = await supabaseService.verifyOTP(testPhone, '999999');
   assert.strictEqual(badCheck.valid, false, 'Invalid code must be rejected');
-  assert.ok(badCheck.error.includes('Invalid verification code'), 'Error message must be professional');
+  assert.ok(badCheck.error.includes('Incorrect verification code') || badCheck.error.includes('Invalid verification code'), 'Error message must be professional');
   console.log('   ✅ Invalid code rejected with guidance: "' + badCheck.error + '"');
 
   console.log('\n🎉 ALL OTP AND ROUTE ALIAS TESTS PASSED SUCCESSFULLY!\n');
