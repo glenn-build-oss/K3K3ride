@@ -7602,7 +7602,7 @@
           <!-- Actions -->
           <div class="inactive-actions">
             <button type="button" class="book-btn" onclick="backToStep1FromInactive()" style="width:100%">
-              <i class="fas fa-arrow-left"></i> Change Location (Try Ho)
+              <i class="fas fa-arrow-left"></i> Change Location
             </button>
             <button type="button" class="btn-cancel" onclick="closeBookModal()" style="width:100%;margin-top:8px">
               Close
@@ -7649,7 +7649,7 @@
         </div>
         <div class="no-riders-info-pill">
           <i class="fas fa-info-circle"></i>
-          <span>K3K3 is expanding fast — new riders are active across Ho.</span>
+          <span id="noRidersRegionNotice">K3K3 is expanding fast across Ghana — fleet riders onboarding daily.</span>
         </div>
         <div class="rider-search-actions">
           <button class="rsearch-retry-btn" onclick="retryRiderSearch()">
@@ -9689,19 +9689,12 @@
       navigator.geolocation.getCurrentPosition(
         pos => {
           applyCoords(pos.coords.latitude, pos.coords.longitude, false);
-          // Optional background refinement
-          try {
-            navigator.geolocation.getCurrentPosition(
-              pRef => applyCoords(pRef.coords.latitude, pRef.coords.longitude, true),
-              () => {},
-              { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
-            );
-          } catch (_) {}
         },
         err => {
+          console.warn('[GPS Position notice]', err?.message || err);
           fallbackPickup();
         },
-        { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
       );
     }
 
@@ -10449,6 +10442,18 @@
       }, 320);
     }
 
+    function detectGhanaRegionByCoords(lat, lng) {
+      if (lat >= 5.4 && lat <= 6.0 && lng >= -0.5 && lng <= 0.2) return 'Greater Accra';
+      if (lat >= 6.2 && lat <= 7.2 && lng >= -2.2 && lng <= -1.1) return 'Ashanti (Kumasi)';
+      if (lat >= 6.4 && lat <= 6.8 && lng >= 0.3 && lng <= 0.6) return 'Ho Central';
+      if (lat >= 5.8 && lat <= 7.5 && lng >= -0.1 && lng <= 0.9) return 'Volta Region';
+      if (lat >= 5.7 && lat <= 6.8 && lng >= -1.1 && lng <= 0.0) return 'Eastern Region';
+      if (lat >= 5.0 && lat <= 5.9 && lng >= -2.2 && lng <= -0.5) return 'Central Region';
+      if (lat >= 4.7 && lat <= 5.8 && lng >= -3.2 && lng <= -1.6) return 'Western Region';
+      if (lat >= 9.0 && lat <= 10.5 && lng >= -2.0 && lng <= 0.5) return 'Northern Region';
+      return 'Current Location';
+    }
+
     function findClosestHoLandmark(lat, lng) {
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) return 'Ho Central Market';
       // Distance from Ho Central (lat: 6.6012, lng: 0.4688)
@@ -10457,7 +10462,7 @@
       const distFromHo = Math.sqrt(dLatHo * dLatHo + dLngHo * dLngHo);
 
       // If user is outside Ho (e.g. Accra, Kumasi, UPSA, etc.)
-      if (distFromHo > 35) {
+      if (distFromHo > 18) {
         let closestOutside = null;
         let minDistOutside = Infinity;
         for (const [name, coords] of Object.entries(HO_COORDINATES)) {
@@ -10469,12 +10474,13 @@
             closestOutside = name;
           }
         }
-        // If within 8km of a recognized regional landmark (e.g. UPSA in Accra), return that landmark!
-        if (closestOutside && minDistOutside <= 8.0) {
+        // If within 4km of a recognized landmark (e.g. UPSA in Accra), return that landmark!
+        if (closestOutside && minDistOutside <= 4.0) {
           return closestOutside;
         }
-        // Otherwise return GPS coordinates label — NEVER claim an Accra user is in UHAS or Ho!
-        return `Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        // Otherwise return GPS coordinates with the detected Ghana Region — NEVER claim an Accra user is in Ho!
+        const regionName = detectGhanaRegionByCoords(lat, lng);
+        return `${regionName} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
       }
 
       let closest = 'Ho Central Market';
@@ -11358,26 +11364,17 @@
         return;
       }
 
-      // Fast multi-tiered geolocation request:
-      // Stage 1: Quick mobile fix (uses cached cellular / Wi-Fi / GPS position immediately)
+      // Direct high-accuracy geolocation fix:
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           onLocationSuccess(pos, false);
-          // Optional background refinement if high-accuracy improves it
-          try {
-            navigator.geolocation.getCurrentPosition(
-              (pRef) => onLocationSuccess(pRef, true),
-              () => {},
-              { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
-            );
-          } catch (_) {}
         },
         (err) => {
           console.warn('[Geolocation notice]', err ? (err.message || err.code) : 'Notice');
           // If permission denied or position unavailable, invoke resilient pickup resolution
           fallbackToHoPickup(err.code === 1 ? 'Permission denied' : 'Signal unavailable');
         },
-        { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 }
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
       );
     }
 
@@ -12748,9 +12745,28 @@
       clearTimeout(riderSearchTimer);
       riderSearchTimer = setTimeout(() => {
         if (sub && document.getElementById('searchingState')?.style.display !== 'none') {
-          sub.textContent = 'Waiting for a rider to accept your ride…';
+          sub.textContent = 'Contacting nearby fleet riders…';
         }
       }, 2500);
+
+      // Gracefully transition to No Riders state if no driver accepts within 15 seconds
+      clearTimeout(window._noRiderTimeout);
+      window._noRiderTimeout = setTimeout(() => {
+        const searching = document.getElementById('searchingState');
+        const assigned = document.getElementById('assignedState');
+        const noRiders = document.getElementById('noRidersState');
+        if (searching && searching.style.display !== 'none' && assigned && assigned.style.display === 'none') {
+          searching.style.display = 'none';
+          if (noRiders) {
+            noRiders.style.display = 'block';
+            const notice = document.getElementById('noRidersRegionNotice');
+            if (notice && typeof detectGhanaRegionByCoords === 'function') {
+              const detected = detectGhanaRegionByCoords(parseFloat(sessionStorage.getItem('k3k3_lat') || 6.6), parseFloat(sessionStorage.getItem('k3k3_lng') || 0.46));
+              notice.textContent = `No riders currently active nearby in ${detected}. Please try again shortly.`;
+            }
+          }
+        }
+      }, 15000);
     }
 
     function retryRiderSearch() {

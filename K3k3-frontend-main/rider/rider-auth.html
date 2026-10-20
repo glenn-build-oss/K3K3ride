@@ -776,33 +776,6 @@
     const siIds = ['s1','s2','s3','s4','s5','s6'];
     const suIds = ['u1','u2','u3','u4','u5','u6'];
 
-    /* ── Quick Dev Access ── */
-    function quickDevRiderAccess() {
-      const session = {
-        riderId:      '68A4171C-0000-4000-8000-000000000001',
-        id:           '68A4171C-0000-4000-8000-000000000001',
-        dbRiderId:    '68A4171C-0000-4000-8000-000000000001',
-        phone:        '+233207739636',
-        firstName:    'Glenn',
-        lastName:     'Adjei',
-        email:        'glenn.adjei@k3k3.com',
-        vehicleType:  'TVS King Deluxe',
-        vehicleModel: 'TVS King Deluxe',
-        licensePlate: 'VR 1234-24',
-        station:      'Ho Central',
-        rating:       '4.9',
-        status:       'approved',
-        role:         'rider'
-      };
-      localStorage.setItem('riderSession', JSON.stringify(session));
-      sessionStorage.setItem('riderSession', JSON.stringify(session));
-      localStorage.setItem('k3k3_user_type', 'rider');
-      showToast('Test mode active: Launching Rider Dashboard…', 'success');
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 400);
-    }
-
     /* ── Generic OTP send via K3K3 backend → Moolre SMS ── */
     async function sendOtpToPhone(phone, purpose = 'login') {
       try {
@@ -812,12 +785,11 @@
           body: JSON.stringify({ phone, purpose, isRegister: purpose === 'signup' })
         });
         const data = await res.json();
-        if (data.success) { showToast('Verification code sent!', 'success'); return true; }
-        showToast(data.error || 'Failed to send verification code.', 'error');
-        return false;
+        if (data.success) { showToast('Verification code sent!', 'success'); return { ok: true, data }; }
+        return { ok: false, notRegistered: Boolean(data.notRegistered || res.status === 404 || data.code === 'RIDER_NOT_REGISTERED'), error: data.error };
       } catch(e) {
         showToast('Unable to reach server. Please try again.', 'error');
-        return false;
+        return { ok: false, error: 'Unable to reach server. Please try again.' };
       }
     }
 
@@ -860,12 +832,21 @@
       const btn = document.getElementById('siSendBtn');
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
 
-      await sendOtpToPhone(rawPhone);
+      const result = await sendOtpToPhone(rawPhone, 'login');
 
-      document.getElementById('siPhoneStep').style.display = 'none';
-      document.getElementById('siOtpStep').classList.add('show');
-      document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + rawPhone.replace(/^0/, '') + '. Enter it below to sign in.';
-      initOtpInputs(siIds, verifySiOtp);
+      if (result.ok) {
+        document.getElementById('siPhoneStep').style.display = 'none';
+        document.getElementById('siOtpStep').classList.add('show');
+        document.getElementById('siOtpMsg').textContent = 'We sent a 6-digit code to +233 ' + rawPhone.replace(/^0/, '') + '. Enter it below to sign in.';
+        initOtpInputs(siIds, verifySiOtp);
+      } else if (result.notRegistered) {
+        showToast('This phone number is not registered as a driver. Please create an account.', 'error');
+        const suPhoneEl = document.getElementById('suPhone');
+        if (suPhoneEl) suPhoneEl.value = rawPhone;
+        showSignup();
+      } else {
+        showToast(result.error || 'Failed to send verification code.', 'error');
+      }
 
       btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
     }
@@ -1012,7 +993,14 @@
         });
         const data = await res.json();
         if (!data.success) {
-          showErr('suError', 'suErrorText', data.error || 'This phone number has already been used to register for a rider account. Please sign in instead.');
+          if (data.code === 'PHONE_ALREADY_REGISTERED' || res.status === 409) {
+            showToast('This phone number is already registered. Please sign in.', 'info');
+            const siPhoneEl = document.getElementById('siPhone');
+            if (siPhoneEl) siPhoneEl.value = phone;
+            showSignin();
+          } else {
+            showErr('suError', 'suErrorText', data.error || 'Registration failed. Please try again.');
+          }
           btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
           return;
         }

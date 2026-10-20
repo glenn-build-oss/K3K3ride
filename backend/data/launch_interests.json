@@ -1,5 +1,17 @@
 [
   {
+    "id": "waitlist_cf9b03f9e89d",
+    "contact": "passenger@test.com",
+    "region_id": "GAR",
+    "region_name": "Greater Accra",
+    "city_id": "",
+    "city_name": "Accra",
+    "pickup_requested": "",
+    "created_at": "2026-10-20T10:48:40.807Z",
+    "notified": true,
+    "notified_at": "2026-10-20T10:58:51.812Z"
+  },
+  {
     "id": "waitlist_a516716daa2b",
     "contact": "0249998877",
     "region_id": "",
@@ -7,7 +19,9 @@
     "city_id": "",
     "city_name": "",
     "pickup_requested": "Accra Mall, Tetteh Quarshie",
-    "created_at": "2026-10-13T01:58:35.220Z"
+    "created_at": "2026-10-13T01:58:35.220Z",
+    "notified": true,
+    "notified_at": "2026-10-20T10:58:51.830Z"
   },
   {
     "id": "waitlist_f1deb88c83c1",
@@ -17,7 +31,9 @@
     "city_id": "",
     "city_name": "",
     "pickup_requested": "Accra Mall, Tetteh Quarshie",
-    "created_at": "2026-10-13T01:52:47.933Z"
+    "created_at": "2026-10-13T01:52:47.933Z",
+    "notified": true,
+    "notified_at": "2026-10-20T10:58:51.834Z"
   },
   {
     "id": "waitlist_c6cf55e4629b",
@@ -27,7 +43,9 @@
     "city_id": "",
     "city_name": "",
     "pickup_requested": "Accra Mall, Tetteh Quarshie",
-    "created_at": "2026-10-13T01:49:39.421Z"
+    "created_at": "2026-10-13T01:49:39.421Z",
+    "notified": true,
+    "notified_at": "2026-10-20T10:58:51.842Z"
   },
   {
     "id": "waitlist_abb89e373f3b",
@@ -37,7 +55,9 @@
     "city_id": "",
     "city_name": "",
     "pickup_requested": "Accra Mall",
-    "created_at": "2026-10-13T01:47:42.012Z"
+    "created_at": "2026-10-13T01:47:42.012Z",
+    "notified": true,
+    "notified_at": "2026-10-20T10:58:51.861Z"
   },
   {
     "id": "waitlist_2065de68d71a",
@@ -47,6 +67,8 @@
     "city_id": "",
     "city_name": "Accra",
     "pickup_requested": "",
-    "created_at": "2026-10-13T01:28:22.504Z"
+    "created_at": "2026-10-13T01:28:22.504Z",
+    "notified": true,
+    "notified_at": "2026-10-20T10:58:51.864Z"
   }
 ]

@@ -813,6 +813,18 @@ router.post('/rider/send-otp', async (req, res) => {
           error: 'This phone number has already been used to register for a rider account. Please sign in instead.'
         });
       }
+    } else {
+      // Pre-check: if attempting login, verify number is registered as a driver
+      const existingRider = await findUserByPhone(normalizedPhone, 'rider');
+      const existingApp = await getRiderApplicationStatus(normalizedPhone);
+      if (!existingRider && !existingApp) {
+        return res.status(404).json({
+          success: false,
+          notRegistered: true,
+          code: 'RIDER_NOT_REGISTERED',
+          error: 'This phone number is not registered as a driver. Please sign up to create an account.'
+        });
+      }
     }
 
     const otpCode = generateOTP();

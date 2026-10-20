@@ -289,16 +289,119 @@ function buildStaffActivityEmailHtml({ name, email, department, role, action, ip
 }
 
 /**
- * Sends a staff login/logout audit notification to k3k3ride@gmail.com via Resend.
+ * Sends a staff member login/logout audit notification to the admin alert inbox.
  */
 async function sendStaffActivityNotification({ name, email, department, role, action, ip, userAgent, timestamp }) {
-  const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
-  const isLogin = (action || '').toUpperCase() === 'LOGIN';
-  const actionLabel = isLogin ? 'Sign-in' : 'Sign-out';
-  const subject = `[K3K3 Staff Alert] ${actionLabel}: ${name || email} (${department || role || 'Staff'})`;
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'k3k3ride@gmail.com';
+  const actionLabel = action === 'logout' ? 'Logged Out' : 'Logged In';
+  const subject = `[Staff Audit] ${name || 'Staff Member'} ${actionLabel} - K3K3 Admin Portal`;
   const html = buildStaffActivityEmailHtml({ name, email, department, role, action, ip, userAgent, timestamp });
 
-  return await sendEmail({ to: notifyEmail, subject, html });
+  return await sendEmail({ to: adminEmail, subject, html });
+}
+/**
+ * Builds branded launch announcement email for waitlist subscribers.
+ */
+function buildRegionalLaunchEmailHtml({ regionName, cityNames, baseFareShared, baseFareAlone }) {
+  const sharedFareStr = baseFareShared ? `GH₵ ${Number(baseFareShared).toFixed(2)}` : 'GH₵ 3.00';
+  const aloneFareStr  = baseFareAlone  ? `GH₵ ${Number(baseFareAlone).toFixed(2)}`  : 'GH₵ 6.00';
+  const citiesStr     = cityNames || regionName;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K3K3ride Regional Launch</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0c0d10;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#f1f5f9;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#0c0d10;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#14171f;border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#FFD60A 0%,#E6C000 100%);padding:28px 32px;text-align:center;">
+              <h1 style="margin:0;font-size:28px;font-weight:900;color:#0c0d10;letter-spacing:-0.5px;">K3K3<span style="font-weight:400;">ride</span></h1>
+              <p style="margin:6px 0 0 0;font-size:12px;font-weight:800;color:#332900;text-transform:uppercase;letter-spacing:1.5px;">Ghana Regional Expansion &bull; Live Service</p>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding:36px 32px 28px;">
+              <div style="display:inline-block;padding:5px 12px;border-radius:20px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.35);color:#10b981;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:16px;">
+                🚀 SERVICE NOW ACTIVE
+              </div>
+              <h2 style="margin:0 0 12px;font-size:22px;font-weight:800;color:#ffffff;line-height:1.3;">
+                We're live in ${regionName}!
+              </h2>
+              <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#94a3b8;">
+                You previously requested to be notified when K3K3ride expanded into your region. We are excited to announce that operational ride bookings are officially live in <strong>${citiesStr}</strong>!
+              </p>
+
+              <!-- Launch Pricing & Details Card -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#0c0d10;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;width:40%;">Operating Region</td>
+                  <td style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#ffffff;font-size:13px;font-weight:700;">${regionName}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">Active Hubs</td>
+                  <td style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#38bdf8;font-size:13px;font-weight:600;">${citiesStr}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#64748b;font-size:12px;font-weight:700;">Shared Ride Base</td>
+                  <td style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.05);color:#FFD60A;font-weight:800;font-size:14px;">${sharedFareStr}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;color:#64748b;font-size:12px;font-weight:700;">Ride Alone Base</td>
+                  <td style="padding:14px 18px;color:#10b981;font-weight:800;font-size:14px;">${aloneFareStr}</td>
+                </tr>
+              </table>
+
+              <!-- Call to Action -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center">
+                    <a href="https://k3k3ride.com/passenger/dashboard.html" style="display:inline-block;padding:14px 32px;background:#FFD60A;color:#0c0d10;text-decoration:none;font-size:14px;font-weight:900;border-radius:10px;text-align:center;box-shadow:0 8px 24px rgba(255,214,10,0.35);">
+                      Book Your First Ride &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#64748b;text-align:center;">
+                Questions or support? Reach out directly via WhatsApp to <strong style="color:#ffffff;">+233 50 484 2974</strong> or reply to this email (<a href="mailto:k3k3ride@gmail.com" style="color:#FFD60A;text-decoration:none;">k3k3ride@gmail.com</a>).
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid rgba(255,255,255,0.06);background:#0e1017;padding:20px 32px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#475569;">
+                &copy; ${new Date().getFullYear()} K3K3ride Inc. &bull; Licensed &amp; Operating Across Ghana
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+/**
+ * Sends a regional launch announcement to waitlisted passengers.
+ */
+async function sendRegionalLaunchNotification({ to, regionName, cityNames, baseFareShared, baseFareAlone }) {
+  const subject = `🎉 Good News! K3K3ride is Officially Live in ${regionName}!`;
+  const html = buildRegionalLaunchEmailHtml({ regionName, cityNames, baseFareShared, baseFareAlone });
+
+  return await sendEmail({ to, subject, html });
 }
 
 module.exports = {
@@ -306,6 +409,9 @@ module.exports = {
   sendEmail,
   sendEmailOTP,
   sendStaffActivityNotification,
+  sendRegionalLaunchNotification,
   buildOtpEmailHtml,
-  buildStaffActivityEmailHtml
+  buildStaffActivityEmailHtml,
+  buildRegionalLaunchEmailHtml
 };
+

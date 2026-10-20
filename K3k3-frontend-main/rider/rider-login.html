@@ -523,36 +523,7 @@ function showToast(msg, type='info'){
   setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all .35s ease'; setTimeout(()=>t.remove(),350); }, 3800);
 }
 
-/* ── Quick Dev / Test Bypass ── */
-function quickDevLogin() {
-  const testSession = {
-    riderId:      '68A4171C-0000-4000-8000-000000000001',
-    id:           '68A4171C-0000-4000-8000-000000000001',
-    dbRiderId:    '68A4171C-0000-4000-8000-000000000001',
-    userId:       '68A4171C-0000-4000-8000-000000000001',
-    firstName:    'Glenn',
-    lastName:     'Adjei',
-    email:        'glenn.adjei@k3k3.com',
-    phone:        '+233207739636',
-    vehicleType:  'TVS King Deluxe',
-    vehicleModel: 'TVS King Deluxe',
-    licensePlate: 'VR 1234-24',
-    station:      'Ho Central',
-    rating:       '4.9',
-    loginTime:    new Date().toISOString(),
-    status:       'approved',
-    role:         'rider'
-  };
-  localStorage.setItem('riderSession', JSON.stringify(testSession));
-  sessionStorage.setItem('riderSession', JSON.stringify(testSession));
-  localStorage.setItem('k3k3_user_type', 'rider');
-  showToast('Test mode active: Launching Rider Dashboard…', 'success');
-  setTimeout(() => {
-    window.location.href = 'dashboard.html';
-  }, 400);
-}
-
-/* ── Login form — goes directly to dashboard in test/dev mode ── */
+/* ── Login form with backend validation ── */
 document.getElementById('riderLoginForm').addEventListener('submit', async function(e){
   e.preventDefault();
   hideError();
@@ -565,41 +536,47 @@ document.getElementById('riderLoginForm').addEventListener('submit', async funct
 
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying credentials…';
 
   try {
+    const res = await fetch(`${API_BASE}/api/auth/rider/status?phone=${encodeURIComponent(riderId)}`);
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success && data.status) {
+      const riderSessionData = {
+        riderId:      data.rider?.id || riderId,
+        id:           data.rider?.id || riderId,
+        phone:        data.rider?.phone || riderId,
+        firstName:    data.rider?.firstName || data.rider?.first_name || 'Driver',
+        lastName:     data.rider?.lastName || data.rider?.last_name || '',
+        email:        data.rider?.email || '',
+        status:       data.status,
+        role:         'rider'
+      };
+      localStorage.setItem('riderSession', JSON.stringify(riderSessionData));
+      sessionStorage.setItem('riderSession', JSON.stringify(riderSessionData));
+      localStorage.setItem('k3k3_user_type', 'rider');
+      showToast('Login successful! Entering Rider Dashboard…', 'success');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
+      return;
+    }
+
+    // Check if user has an active rider session matching
     const existingSession = JSON.parse(localStorage.getItem('riderSession') || '{}');
+    if (existingSession.riderId === riderId || existingSession.id === riderId || existingSession.phone === riderId) {
+      showToast('Login successful! Entering Rider Dashboard…', 'success');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
+      return;
+    }
 
-    const riderData = {
-      riderId:      riderId,
-      id:           riderId,
-      dbRiderId:    existingSession.dbRiderId || '68A4171C-0000-4000-8000-000000000001',
-      userId:       existingSession.userId || '68A4171C-0000-4000-8000-000000000001',
-      firstName:    existingSession.firstName || 'Glenn',
-      lastName:     existingSession.lastName || 'Adjei',
-      email:        existingSession.email || 'glenn.adjei@k3k3.com',
-      phone:        existingSession.phone || '+233207739636',
-      vehicleType:  existingSession.vehicleType || 'TVS King Deluxe',
-      vehicleModel: existingSession.vehicleModel || 'TVS King Deluxe',
-      licensePlate: existingSession.licensePlate || 'VR 1234-24',
-      station:      existingSession.station || 'Ho Central',
-      rating:       existingSession.rating || '4.9',
-      loginTime:    new Date().toISOString(),
-      status:       'approved',
-      role:         'rider',
-      isFirstLogin: false
-    };
-
-    localStorage.setItem('riderSession', JSON.stringify(riderData));
-    sessionStorage.setItem('riderSession', JSON.stringify(riderData));
-    localStorage.setItem('k3k3_user_type', 'rider');
-  } catch(err){ console.warn('Storage error:', err); }
-
-  showToast('Login successful! Entering Rider Dashboard…', 'success');
-
-  setTimeout(() => {
-    window.location.href = 'dashboard.html';
-  }, 400);
+    showError('Invalid Rider ID or password. Please verify your credentials or use Phone OTP sign in.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Rider Panel';
+  } catch (err) {
+    showError('Unable to connect to server. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Rider Panel';
+  }
 });
 
 /* ── Clear error on input ── */

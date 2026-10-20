@@ -296,7 +296,9 @@ class ServiceAreaService {
    * Toggle region or city active status
    */
   toggleAreaStatus(regionId, cityId = null, active = true) {
-    const region = (this.config.regions || []).find(r => r.id === regionId);
+    const cleanId = String(regionId || '').trim().toLowerCase();
+    const cleanCode = String(regionId || '').trim().toUpperCase();
+    const region = (this.config.regions || []).find(r => r.id === cleanId || r.code === cleanCode || r.id === regionId);
     if (!region) return { success: false, error: 'Region not found' };
 
     if (cityId) {
@@ -317,7 +319,78 @@ class ServiceAreaService {
     }
 
     this.saveConfig();
+
+    if (active) {
+      setTimeout(() => {
+        this._notifyWaitlistSubscribers(region, cityId).catch(err => {
+          console.warn('[ServiceAreaService] Waitlist notification error:', err.message);
+        });
+      }, 100);
+    }
+
     return { success: true, region };
+  }
+
+  /**
+   * Dispatches launch notifications via email and SMS to waitlisted passengers when a region is activated
+   */
+  async _notifyWaitlistSubscribers(region, cityId = null) {
+    if (!region || !this.launchInterests || !this.launchInterests.length) return;
+
+    let resendService = null;
+    let moolreSendSMS = null;
+    try { resendService = require('./resend.service'); } catch (_) {}
+    try { moolreSendSMS = require('./moolre.service').sendSMS; } catch (_) {}
+
+    const regionName = region.name || 'Your Region';
+    const activeCities = (region.cities || []).filter(c => c.active).map(c => c.name);
+    const cityNames = activeCities.length ? activeCities.join(', ') : regionName;
+
+    let updatedAny = false;
+    for (const item of this.launchInterests) {
+      const matchRegion = (item.region_id && item.region_id === region.id) ||
+                          (item.region_name && item.region_name.toLowerCase().includes(region.name.toLowerCase()));
+      const matchCity = !cityId || (item.city_id && item.city_id === cityId);
+
+      if (matchRegion && matchCity && !item.notified) {
+        const contact = String(item.contact || item.email || item.phone || '').trim();
+        if (!contact) continue;
+
+        if (contact.includes('@') && resendService) {
+          // Send official company email from K3K3
+          resendService.sendRegionalLaunchNotification({
+            to: contact,
+            regionName: region.name,
+            cityNames: cityNames,
+            baseFareShared: region.base_fare_shared,
+            baseFareAlone: region.base_fare_alone
+          }).then(res => {
+            console.log(`[Regional Expansion] Launch email sent to ${contact} for ${region.name}: ${res?.success ? 'Delivered' : (res?.error || 'Simulated')}`);
+          }).catch(err => {
+            console.warn(`[Regional Expansion] Launch email error for ${contact}:`, err.message);
+          });
+        } else if (moolreSendSMS) {
+          // Send SMS via Moolre
+          const cleanPhone = contact.replace(/\D/g, '');
+          if (cleanPhone.length >= 9) {
+            const smsText = `Good news! K3K3ride is officially live in ${region.name}. Shared rides from GH₵${Number(region.base_fare_shared || 3).toFixed(2)}. Open your app to ride! - Team K3K3`;
+            moolreSendSMS(contact, smsText).then(res => {
+              console.log(`[Regional Expansion] Launch SMS sent to ${contact} for ${region.name}: ${res?.success ? 'Delivered' : res?.error}`);
+            }).catch(err => {
+              console.warn(`[Regional Expansion] Launch SMS error for ${contact}:`, err.message);
+            });
+          }
+        }
+
+        item.notified = true;
+        item.notified_at = new Date().toISOString();
+        updatedAny = true;
+      }
+    }
+
+    if (updatedAny) {
+      this.saveLaunchInterests();
+    }
   }
 
   /**

@@ -386,8 +386,8 @@
     },
     {
       "id": "loc_8f690bb5",
-      "name": "Test HTU Science Lab 1792365578606 Updated",
-      "zone_type": "out",
+      "name": "Test HTU Science Lab 1792365578606",
+      "zone_type": "in",
       "category": "Campuses & Hostels",
       "lat": 6.6279,
       "lng": 0.4739,
@@ -576,7 +576,7 @@
     "mapbox_public_token": "",
     "currency_symbol": "₵",
     "currency_code": "GHS",
-    "updated_at": "2026-10-18T23:19:38.625Z"
+    "updated_at": "2026-10-18T23:19:38.609Z"
   },
   "version": "1.0.0"
 }
